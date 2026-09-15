@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drivers Medical — Case status tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+:root{--black:#0b0c0c;--white:#fff;--blue:#1d70b8;--dark-blue:#003078;--green:#00703c;--green-hover:#005a30;--yellow:#ffdd00;--light-yellow:#fff7bf;--light-grey:#f3f2f1;--mid-grey:#b1b4b6;--dark-grey:#505a5f;--red:#d4351c;--purple:#4c2c92;--focus:#ffdd00;--focus-text:#0b0c0c}
+*,*::before,*::after{box-sizing:border-box}
+body{font-family:"GDS Transport","Inter",Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--black);background:var(--white);margin:0;padding:0;line-height:1.5;font-size:19px}
+
+/* --- Header --- */
+.govuk-header{background:var(--blue);color:var(--white);padding:10px 0}
+.govuk-header__container{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:10px}
+.govuk-header__logotype-text{font-size:30px;font-weight:700;color:var(--white);text-decoration:none}
+.govuk-header__logotype-text:hover{text-decoration:underline}
+.govuk-header__signout{margin-left:auto;font-size:19px;font-weight:700;color:var(--white);text-decoration:none;cursor:pointer}
+.govuk-header__signout:hover{text-decoration:underline}
+.govuk-crown{width:36px;height:32px;vertical-align:middle;margin-right:4px}
+.service-nav{border-bottom:1px solid var(--mid-grey);background:var(--white);padding:12px 0}
+.service-nav__wrapper{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.service-nav__name{font-weight:700;font-size:19px;color:var(--black);text-decoration:none}
+.service-nav__links{margin-left:auto;display:flex;gap:20px;align-items:center}
+.service-nav__link{font-size:19px;color:var(--blue);cursor:pointer}
+.service-nav__count{display:inline-block;background:var(--red);color:var(--white);font-size:14px;font-weight:700;border-radius:20px;padding:1px 8px;margin-left:6px}
+.govuk-phase-banner{border-bottom:1px solid var(--mid-grey);padding:10px 0}
+.govuk-phase-banner__wrapper{max-width:960px;margin:0 auto;padding:0 15px;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.govuk-phase-banner__tag{display:inline-block;background:var(--blue);color:var(--white);font-weight:700;font-size:14px;padding:2px 8px;text-transform:uppercase;letter-spacing:1px}
+.phase-actions{margin-left:auto;display:flex;gap:15px;align-items:center}
+.phase-actions a{font-size:16px;cursor:pointer}
+.prototype-warning{background:var(--light-yellow);border:4px solid var(--yellow);padding:15px 20px;margin-bottom:30px;font-size:16px;line-height:1.5}
+.prototype-warning strong{display:block;margin-bottom:4px}
+.govuk-width-container{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-main-wrapper{padding:30px 0 60px}
+
+/* --- Typography --- */
+h1,.govuk-heading-xl{font-size:48px;line-height:1.04;font-weight:700;margin:0 0 30px}
+h2,.govuk-heading-l{font-size:36px;line-height:1.11;font-weight:700;margin:30px 0 20px}
+h3,.govuk-heading-m{font-size:24px;line-height:1.25;font-weight:700;margin:20px 0 15px}
+h4,.govuk-heading-s{font-size:19px;line-height:1.3;font-weight:700;margin:15px 0 10px}
+p,.govuk-body{font-size:19px;margin:0 0 20px}
+.govuk-body-s{font-size:16px}
+.govuk-body-l{font-size:24px;line-height:1.25;margin:0 0 20px}
+.govuk-caption{font-size:24px;color:var(--dark-grey);display:block;margin-bottom:5px}
+a{color:var(--blue)}a:hover{color:var(--dark-blue)}
+a:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--focus-text);text-decoration:none}
+.govuk-back-link{display:inline-block;margin-bottom:15px;font-size:16px;color:var(--black);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.govuk-back-link::before{content:"\25c2 "}
+
+/* --- Buttons --- */
+.govuk-button{display:inline-block;padding:8px 20px;font-size:19px;font-weight:700;color:var(--white);background:var(--green);border:none;border-radius:0;border-bottom:2px solid #002d18;cursor:pointer;text-decoration:none;line-height:1.2;-webkit-appearance:none;font-family:inherit}
+.govuk-button:hover{background:var(--green-hover);color:var(--white)}
+.govuk-button:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-button--start{font-size:24px;padding:12px 30px}
+.govuk-button--start::after{content:" \2192"}
+.govuk-button--secondary{background:var(--light-grey);color:var(--black);border-bottom-color:var(--mid-grey)}
+.govuk-button--secondary:hover{background:#dbdad9;color:var(--black)}
+.govuk-button--warning{background:var(--red);border-bottom-color:#55150b}
+.govuk-button--warning:hover{background:#aa2716}
+.button-row{display:flex;gap:15px;flex-wrap:wrap;margin-top:20px}
+
+/* --- Forms --- */
+.govuk-form-group{margin-bottom:30px}
+.govuk-fieldset__legend{font-weight:700;font-size:19px;margin-bottom:10px;display:block}
+.govuk-fieldset__legend--l{font-size:36px;line-height:1.11;margin-bottom:20px}
+.govuk-fieldset__heading{font-size:inherit;line-height:inherit;font-weight:inherit;margin:0}
+.govuk-radios__item,.govuk-checkboxes__item{display:flex;align-items:flex-start;margin-bottom:15px;gap:12px}
+.govuk-radios__input,.govuk-checkboxes__input{width:44px;height:44px;min-width:44px;margin:0;cursor:pointer;accent-color:var(--black)}
+.govuk-radios__label,.govuk-checkboxes__label{font-size:19px;padding-top:10px;cursor:pointer}
+.govuk-radios__hint{font-size:16px;color:var(--dark-grey);margin-top:2px;display:block}
+.govuk-label{display:block;font-weight:700;margin-bottom:5px}
+.govuk-hint{font-size:16px;color:var(--dark-grey);margin-bottom:10px;display:block}
+.govuk-input{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;max-width:400px}
+.govuk-input:focus{outline:3px solid var(--focus)}
+.govuk-textarea{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;min-height:120px}
+
+/* --- Summary / table --- */
+.govuk-summary-list{border-top:1px solid var(--mid-grey);margin:0 0 30px}
+.govuk-summary-list__row{display:flex;border-bottom:1px solid var(--mid-grey);padding:12px 0;gap:15px}
+.govuk-summary-list__key{flex:0 0 32%;font-weight:700}
+.govuk-summary-list__value{flex:1}
+.govuk-summary-list__actions{flex:0 0 80px;text-align:right}
+@media(max-width:640px){.govuk-summary-list__row{flex-direction:column;gap:4px}.govuk-summary-list__key{flex:auto}.govuk-summary-list__actions{text-align:left}}
+.govuk-table{width:100%;border-collapse:collapse;margin-bottom:30px}
+.govuk-table th{text-align:left;font-weight:700;padding:10px 15px 10px 0;border-bottom:2px solid var(--black)}
+.govuk-table td{padding:10px 15px 10px 0;border-bottom:1px solid var(--mid-grey);vertical-align:top}
+
+/* --- Tags / panels --- */
+.govuk-tag{display:inline-block;font-size:14px;font-weight:700;padding:2px 8px;text-transform:uppercase;letter-spacing:1px;color:var(--white)}
+.govuk-tag--green{background:var(--green)}.govuk-tag--yellow{background:#b58840}.govuk-tag--orange{background:#b84605}.govuk-tag--red{background:var(--red)}.govuk-tag--blue{background:var(--blue)}.govuk-tag--grey{background:var(--dark-grey)}.govuk-tag--purple{background:var(--purple)}
+.govuk-inset-text{border-left:10px solid var(--mid-grey);padding:15px 20px;margin:0 0 30px}
+.govuk-panel{background:var(--green);color:var(--white);padding:35px;text-align:center;margin-bottom:30px}
+.govuk-panel__title{font-size:48px;font-weight:700;margin:0 0 15px}
+.govuk-panel__body{font-size:36px}
+.govuk-warning-text{display:flex;gap:15px;align-items:flex-start;margin-bottom:30px}
+.govuk-warning-text__icon{flex:0 0 35px;height:35px;background:var(--black);color:var(--white);border-radius:50%;text-align:center;font-weight:700;line-height:35px;font-size:24px}
+.govuk-warning-text__text{font-weight:700}
+.govuk-notification-banner{border:5px solid var(--blue);margin-bottom:30px}
+.govuk-notification-banner__header{background:var(--blue);color:var(--white);padding:8px 15px;font-size:19px;font-weight:700}
+.govuk-notification-banner__content{padding:20px 15px;font-size:19px}
+.govuk-notification-banner__content p{margin:0 0 10px}
+.govuk-notification-banner__content p:last-child{margin:0}
+.govuk-notification-banner--success{border-color:var(--green)}
+.govuk-notification-banner--success .govuk-notification-banner__header{background:var(--green)}
+
+/* --- Grid --- */
+.govuk-grid-row{display:flex;flex-wrap:wrap;margin:0 -15px}
+.govuk-grid-column-two-thirds{flex:0 0 66.66%;max-width:66.66%;padding:0 15px}
+.govuk-grid-column-one-third{flex:0 0 33.33%;max-width:33.33%;padding:0 15px}
+.govuk-grid-column-full{flex:0 0 100%;max-width:100%;padding:0 15px}
+@media(max-width:640px){.govuk-grid-column-two-thirds,.govuk-grid-column-one-third{flex:0 0 100%;max-width:100%}}
+
+/* --- Account cards --- */
+.account-card{border:1px solid var(--mid-grey);border-top:5px solid var(--blue);background:var(--white);padding:20px 25px;margin-bottom:30px}
+.account-card h3{margin-top:0}
+.account-card__head{display:flex;align-items:baseline;gap:15px;flex-wrap:wrap}
+.account-card__head h3{flex:1}
+.account-panel{border:1px solid var(--mid-grey);border-top:5px solid var(--blue);background:var(--light-grey);padding:20px;margin-bottom:30px}
+.account-panel h3{margin-top:0}
+.service-btn{display:flex;justify-content:space-between;align-items:center;width:100%;background:var(--green);color:var(--white);font-weight:700;font-size:19px;padding:10px 15px;margin-bottom:10px;text-decoration:none;border:none;border-bottom:2px solid #002d18;cursor:pointer;text-align:left;font-family:inherit}
+.service-btn:hover{background:var(--green-hover);color:var(--white)}
+.service-btn::after{content:"\203a";font-size:24px;line-height:1}
+.detail-list{border:none;margin:0}
+.detail-list__row{display:flex;border-bottom:1px solid var(--mid-grey);padding:12px 0;gap:15px}
+.detail-list__row:last-child{border-bottom:none}
+.detail-list__key{flex:0 0 40%;font-weight:700}
+.detail-list__value{flex:1}
+@media(max-width:640px){.detail-list__row{flex-direction:column;gap:2px}.detail-list__key{flex:auto}}
+
+/* --- Journey hub --- */
+.hub-hero{background:var(--light-grey);border-left:10px solid var(--blue);padding:30px 35px;margin-bottom:40px}
+.hub-hero h1{margin-bottom:15px}
+.hub-hero p:last-child{margin-bottom:0}
+.journey-group{margin-bottom:45px}
+.journey-group__title{border-bottom:2px solid var(--black);padding-bottom:8px;margin-bottom:8px}
+.journey-group__desc{font-size:16px;color:var(--dark-grey);margin-bottom:20px}
+.journey-links{list-style:none;margin:0;padding:0}
+.journey-links li{margin-bottom:22px}
+.journey-links a{font-size:24px;font-weight:700}
+.journey-links p{margin:4px 0 0;font-size:16px;color:var(--dark-grey);max-width:44em}
+
+/* --- Design notes --- */
+.design-note{border:2px dashed var(--purple);background:#f7f4fc;padding:15px 20px;margin:0 0 25px;font-size:16px}
+.design-note strong{display:block;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-size:14px;margin-bottom:6px}
+.design-note p{font-size:16px;margin:0 0 8px}
+.design-note p:last-child{margin:0}
+
+/* --- Dropzone --- */
+.dropzone{border:3px dashed var(--mid-grey);background:var(--light-grey);padding:35px 25px;text-align:center;margin-bottom:20px;cursor:pointer}
+.dropzone.is-over{border-color:var(--green);background:#e8f0e8}
+.dropzone__title{font-weight:700;font-size:19px;margin-bottom:8px}
+.dropzone__hint{font-size:16px;color:var(--dark-grey)}
+.file-list{list-style:none;margin:0 0 20px;padding:0}
+.file-list__item{display:flex;justify-content:space-between;align-items:center;gap:15px;background:var(--light-grey);padding:10px 15px;margin-bottom:10px;font-size:16px}
+.file-list__remove{background:none;border:none;color:var(--red);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:16px}
+
+/* --- Option cards --- */
+.option-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:30px}
+@media(max-width:900px){.option-cards{grid-template-columns:1fr}}
+.option-card{border:2px solid var(--mid-grey);padding:20px;cursor:pointer;background:var(--white);text-align:left;font-family:inherit;font-size:19px}
+.option-card:hover{border-color:var(--black)}
+.option-card h3{margin:8px 0;font-size:19px}
+.option-card p{margin:0;font-size:16px;color:var(--dark-grey)}
+
+/* --- Provider / branch cards --- */
+.choice-list{list-style:none;margin:0 0 30px;padding:0}
+.choice-list__item{border:2px solid var(--mid-grey);padding:18px 20px;margin-bottom:12px;cursor:pointer;background:var(--white);display:flex;gap:15px;align-items:flex-start;width:100%;text-align:left;font-family:inherit;font-size:19px}
+.choice-list__item:hover{border-color:var(--black)}
+.choice-list__body{flex:1}
+.choice-list__body strong{display:block}
+.choice-list__body span{font-size:16px;color:var(--dark-grey)}
+
+/* --- Time slots --- */
+.slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:25px}
+@media(max-width:640px){.slot-grid{grid-template-columns:repeat(2,1fr)}}
+.slot{border:2px solid var(--mid-grey);background:var(--white);padding:10px;font-family:inherit;font-size:19px;cursor:pointer}
+.slot:hover{border-color:var(--black)}
+.slot.is-selected{background:var(--green);color:var(--white);border-color:var(--green)}
+
+/* --- Timeline / task list --- */
+.timeline{list-style:none;margin:0 0 30px;padding:0 0 0 25px;border-left:4px solid var(--mid-grey)}
+.timeline__item{position:relative;padding:0 0 25px 20px}
+.timeline__item::before{content:"";position:absolute;left:-32px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--mid-grey);border:3px solid var(--white)}
+.timeline__item--done::before{background:var(--green)}
+.timeline__item--now::before{background:var(--blue)}
+.timeline__date{font-size:16px;color:var(--dark-grey);display:block}
+.timeline__title{font-weight:700;display:block}
+.task-list{border-top:1px solid var(--mid-grey);margin:0 0 30px;padding:0;list-style:none}
+.task-list__item{display:flex;align-items:center;gap:15px;border-bottom:1px solid var(--mid-grey);padding:15px 0;flex-wrap:wrap}
+.task-list__name{flex:1;min-width:200px}
+.task-list__name strong{display:block}
+.task-list__hint{font-size:16px;color:var(--dark-grey)}
+.message-list{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--mid-grey)}
+.message-list__item{border-bottom:1px solid var(--mid-grey);padding:15px 0}
+.message-list__item--unread{border-left:5px solid var(--blue);padding-left:15px}
+.message-list__meta{font-size:16px;color:var(--dark-grey)}
+
+/* --- Screen index --- */
+.index-group{margin-bottom:30px}
+.index-group h3{margin-bottom:10px}
+.index-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:800px){.index-list{grid-template-columns:1fr}}
+.index-list a{display:block;padding:8px 12px;background:var(--light-grey);text-decoration:none;font-size:16px;border-left:4px solid var(--blue)}
+.index-list a:hover{background:#e4e3e2}
+
+hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margin:30px 0}
+.govuk-footer{background:var(--light-grey);border-top:1px solid var(--mid-grey);padding:30px 0;margin-top:60px}
+.govuk-footer__wrapper{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-footer__meta-item{font-size:16px;color:var(--dark-grey)}
+
+/* ================================================================
+   CASE STATUS TRACKER — components added for this prototype
+   ================================================================ */
+
+/* --- Progress track ---
+   Deliberately not a stepper: no numbers, no percentage, no target
+   date. It says roughly where the case is, because a case can loop
+   back through the same stage more than once. --- */
+.track{display:flex;gap:6px;list-style:none;margin:0 0 35px;padding:0}
+.track__item{flex:1;background:var(--light-grey);border-top:7px solid var(--mid-grey);padding:12px 15px 14px;min-width:0}
+.track__item--done{border-top-color:var(--green)}
+.track__item--current{background:var(--white);border-top-color:var(--blue);box-shadow:inset 0 0 0 2px var(--blue)}
+.track__item--action{background:#fff5ee;border-top-color:#b84605;box-shadow:inset 0 0 0 2px #b84605}
+.track__item--bad.track__item--current{border-top-color:var(--red);box-shadow:inset 0 0 0 2px var(--red);background:#fdf4f2}
+.track__state{display:block;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dark-grey);margin-bottom:3px}
+.track__item--done .track__state{color:var(--green)}
+.track__item--current .track__state{color:var(--blue)}
+.track__item--action .track__state{color:#b84605}
+.track__item--bad.track__item--current .track__state{color:var(--red)}
+.track__label{display:block;font-weight:700;font-size:19px;line-height:1.2}
+.track__sub{display:block;font-size:16px;color:var(--dark-grey);margin-top:4px}
+@media(max-width:800px){.track{flex-direction:column;gap:4px}.track__item{border-top-width:5px}}
+
+/* --- Active state hero --- */
+.state-hero{border:1px solid var(--mid-grey);border-top:8px solid var(--blue);background:var(--white);padding:30px 30px 10px;margin-bottom:30px}
+.state-hero--action{border-top-color:#b84605;background:#fff8f3}
+.state-hero--good{border-top-color:var(--green)}
+.state-hero--bad{border-top-color:var(--red);background:#fdf5f3}
+.state-hero__eyebrow{display:block;font-size:16px;color:var(--dark-grey);margin-bottom:10px}
+.state-hero__title{font-size:36px;line-height:1.11;font-weight:700;margin:0 0 15px}
+.state-hero__lead{font-size:24px;line-height:1.3;margin:0 0 25px;max-width:30em}
+.state-facts{border-top:1px solid var(--mid-grey);margin:0;padding:0}
+.state-facts__row{display:flex;gap:20px;border-bottom:1px solid var(--mid-grey);padding:14px 0}
+.state-facts__key{flex:0 0 34%;font-weight:700;margin:0}
+.state-facts__val{flex:1;margin:0}
+@media(max-width:640px){.state-hero{padding:22px 20px 8px}.state-hero__title{font-size:27px}.state-hero__lead{font-size:19px}.state-facts__row{flex-direction:column;gap:2px}.state-facts__key{flex:auto}}
+
+/* --- Can I drive --- */
+.drive{display:flex;gap:22px;align-items:flex-start;border:1px solid var(--mid-grey);border-left:10px solid var(--green);background:var(--white);padding:22px 25px;margin-bottom:35px}
+.drive--no{border-left-color:var(--red)}
+.drive--depends{border-left-color:#b58840}
+.drive__mark{flex:0 0 46px;height:46px;border-radius:50%;background:var(--green);color:var(--white);font-size:26px;font-weight:700;line-height:46px;text-align:center}
+.drive--no .drive__mark{background:var(--red)}
+.drive--depends .drive__mark{background:#b58840}
+.drive__body{flex:1;min-width:0}
+.drive__answer{font-size:24px;font-weight:700;line-height:1.25;margin:0 0 8px}
+.drive__detail{margin:0}
+@media(max-width:640px){.drive{padding:18px 20px;gap:15px}.drive__answer{font-size:19px}}
+
+/* --- Third party chase --- */
+.chase{background:var(--light-grey);border-left:5px solid var(--dark-grey);padding:15px 20px;margin:0 0 25px;font-size:16px}
+.chase strong{display:block;margin-bottom:4px}
+.chase p{font-size:16px;margin:0}
+
+/* --- Support --- */
+.support{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:35px}
+@media(max-width:800px){.support{grid-template-columns:1fr}}
+.support-card{border:1px solid var(--mid-grey);background:var(--white);padding:20px 25px}
+.support-card h3{margin-top:0}
+.support-card p{font-size:16px;margin:0 0 10px}
+.support-card p:last-child{margin:0}
+.support-card__big{font-size:24px;font-weight:700;display:block;margin-bottom:6px}
+.chat-shell{border:1px solid var(--mid-grey);background:var(--light-grey);height:90px;margin-bottom:12px;position:relative}
+.chat-shell::after{content:"Webchat is not built in this prototype";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--dark-grey);text-align:center;padding:0 15px}
+
+/* --- Prototype state switcher (prototype furniture, not service UI) --- */
+.switcher{border:2px dashed var(--dark-grey);background:var(--white);padding:15px 20px;margin-bottom:30px;display:flex;gap:15px;align-items:center;flex-wrap:wrap}
+.switcher label{font-size:16px;font-weight:700;flex:0 0 auto;margin:0}
+.switcher select{font-family:inherit;font-size:16px;padding:6px 8px;border:2px solid var(--black);background:var(--white);flex:1;min-width:220px}
+.switcher a{font-size:16px;flex:0 0 auto}
+</style>
+</head>
+<body>
+<div id="chrome"></div>
+<div class="govuk-width-container">
+  <main class="govuk-main-wrapper" id="app" role="main"></main>
+</div>
+<footer class="govuk-footer" role="contentinfo">
+  <div class="govuk-footer__wrapper">
+    <p class="govuk-footer__meta-item">Drivers Medical case status tracker &mdash; Fictional, for workshop use only. Not a real DVLA or GOV.UK service. All personal details shown are invented.</p>
+  </div>
+</footer>
+
+<script>
+/* ================================================================
+   DRIVERS MEDICAL — CASE STATUS TRACKER
+   One page answering: where is my case, what happens next, and can
+   I drive. Every state the case can be in is renderable, either
+   from the switcher on the page or from the All screens index.
+   ================================================================ */
+
+/* === FICTIONAL PERSONA — reused from the future state prototype === */
+const person = {
+  title:'MR', name:'SAM TAYLOR MORGAN', dob:'1 August 1986',
+  email:'sam.morgan@example.com', phone:'07700 900123',
+  licenceStatus:'You have a full driving licence',
+  licenceFrom:'17 February 2024', licenceTo:'16 February 2034',
+  licenceNo:'MORGA808016ST9AB'
+};
+const caseRef = 'DM-2026-482910';
+const caseworker = { name:'Ceri Hughes', team:'Medical Casework Team 4 (Neurological)', responseTime:'1 to 2 working days' };
+const condition = { name:'Epilepsy or seizures', short:'epilepsy', lastEvent:'3 March 2026' };
+const gp = { name:'Dr Alison Pryce', practice:'Bryn Awel Surgery' };
+const today = '15 September 2026';
+
+/* === CASE STATE ===
+   state.caseState is the single source of truth. Sub-fields qualify
+   it. Every tag, every track position and every heading on the page
+   is derived from these — nothing about the case is stored twice.
+
+   PROTOTYPE LABELS — NEEDS MAPPING. The seven states below are
+   invented for this prototype. They are not the statuses held in
+   the real case management system and have not been mapped to it.
+   Do not treat any label here as the live vocabulary. */
+const THIRD_PARTY = {
+  gp:'your GP',
+  consultant:'your consultant',
+  independent:'an independent doctor',
+  optician:'your optician'
+};
+const ACTIONS = {
+  evidence:'Send us more medical evidence',
+  d202:'Accept your short-term licence',
+  correction:'Correct something on your application',
+  appointment:'Book an appointment',
+  consent:'Give us your consent'
+};
+const OUTCOMES = {
+  full:'Full licence',
+  short:'Short-term licence',
+  refused:'Application refused',
+  revoked:'Licence revoked'
+};
+
+/* Screens are (caseState + sub-field) pairs. The route carries the
+   screen key; the sub-fields are what the page actually reads. */
+const SCREENS = {
+  'received':                {caseState:'received'},
+  'with-caseworker':         {caseState:'with-caseworker'},
+  'with-dvla-doctor':        {caseState:'with-dvla-doctor'},
+  'third-party-gp':          {caseState:'with-third-party', thirdParty:'gp'},
+  'third-party-consultant':  {caseState:'with-third-party', thirdParty:'consultant'},
+  'third-party-independent': {caseState:'with-third-party', thirdParty:'independent'},
+  'third-party-optician':    {caseState:'with-third-party', thirdParty:'optician'},
+  'action-evidence':         {caseState:'action-needed', actionNeeded:'evidence'},
+  'action-d202':             {caseState:'action-needed', actionNeeded:'d202'},
+  'action-correction':       {caseState:'action-needed', actionNeeded:'correction'},
+  'action-appointment':      {caseState:'action-needed', actionNeeded:'appointment'},
+  'action-consent':          {caseState:'action-needed', actionNeeded:'consent'},
+  'decided-full':            {caseState:'decided', outcome:'full'},
+  'decided-short':           {caseState:'decided', outcome:'short'},
+  'decided-refused':         {caseState:'decided', outcome:'refused'},
+  'decided-revoked':         {caseState:'decided', outcome:'revoked'},
+  'closed':                  {caseState:'closed'}
+};
+
+const SCREEN_GROUPS = [
+  ['Case in progress', ['received','with-caseworker','with-dvla-doctor']],
+  ['Waiting on someone else', ['third-party-gp','third-party-consultant','third-party-independent','third-party-optician']],
+  ['Waiting on you', ['action-evidence','action-d202','action-correction','action-appointment','action-consent']],
+  ['Decided and closed', ['decided-full','decided-short','decided-refused','decided-revoked','closed']]
+];
+
+/* === TIMELINE EVENTS ===
+   Written in chronological order and reversed at render. The same
+   state appears more than once on purpose: a case that goes out for
+   evidence and comes back is with a caseworker twice. */
+const EV = {
+  received:      {date:'7 August 2026',     title:'We received your notification', body:'You told us about '+condition.name.toLowerCase()+'.'},
+  opened:        {date:'8 August 2026',     title:'Your case was opened',          body:'It went to '+caseworker.name+' in '+caseworker.team+'.'},
+  gpSent:        {date:'12 August 2026',    title:'We wrote to your GP',           body:'We asked '+gp.name+' at '+gp.practice+' for a report about your condition.'},
+  gpReplied:     {date:'2 September 2026',  title:'Your GP replied',               body:'We received the report we asked for.'},
+  backToCase:    {date:'4 September 2026',  title:'Back with your caseworker',     body:caseworker.name+' is reading what your GP sent.'},
+  toDoctor:      {date:'8 September 2026',  title:'Sent to a DVLA doctor',         body:'Your caseworker asked one of our doctors to look at the medical evidence.'},
+  gpSent2:       {date:'10 September 2026', title:'We wrote to your GP',           body:'We asked '+gp.name+' at '+gp.practice+' for a report about your condition.'},
+  consSent:      {date:'12 August 2026',    title:'We wrote to your consultant',   body:'We asked the neurology department at Morriston Hospital for your most recent clinic letters.'},
+  consChase1:    {date:'26 August 2026',    title:'We chased your consultant',     body:'We had not heard back, so we sent the request again.'},
+  consChase2:    {date:'9 September 2026',  title:'We chased your consultant again',body:'We sent a third request and asked for a reply within 10 working days.'},
+  indepSent:     {date:'1 September 2026',  title:'We arranged an independent examination', body:'We asked an independent doctor to examine you and report back to us.'},
+  indepSeen:     {date:'11 September 2026', title:'You were examined',             body:'The independent doctor is now writing their report.'},
+  optSent:       {date:'9 September 2026',  title:'We asked for a visual fields test', body:'We asked Bryn Awel Opticians for the results of your visual fields test.'},
+  askEvidence:   {date:'12 September 2026', title:'We asked you for more evidence',body:'Your caseworker needs a recent letter from your consultant.'},
+  askD202:       {date:'12 September 2026', title:'We offered you a short-term licence', body:'We sent you a D202 to sign and return.'},
+  askCorrection: {date:'12 September 2026', title:'We found something missing',    body:'The date of your most recent seizure was not filled in.'},
+  askAppt:       {date:'12 September 2026', title:'We asked you to book an appointment', body:'You need a medical examination before we can decide.'},
+  askConsent:    {date:'12 September 2026', title:'We asked for your consent',     body:'We need your permission before we can write to your consultant.'},
+  decFull:       {date:'15 September 2026', title:'We made a decision',            body:'You can keep your full licence.'},
+  decShort:      {date:'15 September 2026', title:'We made a decision',            body:'We offered you a licence lasting 1 year.'},
+  decRefused:    {date:'15 September 2026', title:'We made a decision',            body:'We could not give you a licence.'},
+  decRevoked:    {date:'15 September 2026', title:'We made a decision',            body:'Your licence has been revoked.'},
+  licenceSent:   {date:'16 September 2026', title:'Your new licence was posted',   body:'It should reach you within 5 working days.'},
+  closedEv:      {date:'22 September 2026', title:'Your case was closed',          body:'There is nothing further for you or for us to do.'}
+};
+const BASE = [EV.received, EV.opened];
+const AFTER_GP = [EV.received, EV.opened, EV.gpSent, EV.gpReplied, EV.backToCase];
+
+/* === SCREEN CONTENT ===
+   Everything the customer reads, per screen. Waits are ranges with a
+   reason attached, never a single date, because DVLA does not know
+   the date. Where the honest answer is that we do not know, it says
+   so rather than inventing a range. */
+const DRIVE = {
+  ok:      {verdict:'yes', answer:'Yes, you can keep driving',
+            detail:'You can carry on driving while we look at your case, as long as your own doctor has not told you to stop. This is because you held a valid licence when you told us about your condition.'},
+  waiting: {verdict:'depends', answer:'It depends on when you last had a seizure',
+            detail:'You must not drive until you have been seizure-free for 12 months. You told us your most recent seizure was '+condition.lastEvent+', so you must not drive before 3 March 2027. If that date is wrong, tell us — it changes the answer.'},
+  refused: {verdict:'no', answer:'No, you must not drive',
+            detail:'Driving without a valid licence is a criminal offence and would invalidate your insurance. You can reapply when you meet the medical standard for driving.'},
+  revoked: {verdict:'no', answer:'No, you must stop driving today',
+            detail:'Driving after your licence has been revoked is a criminal offence and would invalidate your insurance. You must send your licence back to us.'}
+};
+
+const CONTENT = {
+  'received':{
+    title:'We have your notification',
+    lead:'It is in the queue to be opened by a caseworker.',
+    who:'No one yet. Your case is waiting to be picked up.',
+    howLong:'Usually 2 to 3 working days before someone opens it',
+    next:'A caseworker will read what you sent us and decide whether they need anything else. We will tell you either way.',
+    drive:DRIVE.waiting,
+    timeline:[{date:'14 September 2026', title:'We received your notification', body:'You told us about '+condition.name.toLowerCase()+'.'}]
+  },
+  'with-caseworker':{
+    title:'Your case is with a caseworker',
+    lead:caseworker.name+' has your case, and the report we asked your GP for.',
+    who:caseworker.name+', '+caseworker.team,
+    howLong:'Usually 2 to 4 weeks at this point, because your caseworker is reading medical evidence rather than checking a form',
+    next:'If the evidence answers our questions, '+caseworker.name.split(' ')[0]+' will make a decision. If it does not, we will either ask you for more or send it to one of our doctors.',
+    drive:DRIVE.ok,
+    timeline:AFTER_GP
+  },
+  'with-dvla-doctor':{
+    title:'A DVLA doctor is reviewing your case',
+    lead:'Your caseworker asked one of our doctors to look at the medical evidence.',
+    who:'One of our doctors. '+caseworker.name+' still looks after your case.',
+    howLong:'Usually 3 to 6 weeks, because our doctors see the most complex cases first and yours is in the queue',
+    next:'The doctor will advise your caseworker, who will either make a decision or ask for more evidence.',
+    drive:DRIVE.ok,
+    timeline:AFTER_GP.concat([EV.toDoctor])
+  },
+  'third-party-gp':{
+    title:'We are waiting for your GP',
+    lead:'We wrote to '+gp.name+' at '+gp.practice+' for a report about your '+condition.short+'.',
+    who:gp.name+'. Your caseworker cannot move your case on until they reply.',
+    howLong:'Usually 4 to 6 weeks, because GPs have 6 weeks to answer us and often use most of it',
+    next:'When the report arrives it goes straight back to your caseworker. If we hear nothing after 3 weeks we will ask again.',
+    chase:{title:'This request has not been chased yet', body:'Sent 5 days ago. We chase after 3 weeks if we have not heard back.'},
+    drive:DRIVE.ok,
+    timeline:BASE.concat([EV.gpSent2])
+  },
+  'third-party-consultant':{
+    title:'We are still waiting for your consultant',
+    lead:'We have asked three times and have not had a reply.',
+    who:'The neurology department at Morriston Hospital.',
+    howLong:'We cannot give you a useful estimate. We have been waiting 5 weeks and we do not know when they will reply.',
+    next:'If we still hear nothing, your caseworker will either decide on the evidence we already hold or arrange an independent examination. We will tell you before we do either.',
+    chase:{title:'Chased twice', body:'First asked on 12 August 2026. Chased on 26 August and again on 9 September. Contacting them yourself sometimes moves things along faster than we can.'},
+    drive:DRIVE.ok,
+    timeline:[EV.received, EV.opened, EV.consSent, EV.consChase1, EV.consChase2]
+  },
+  'third-party-independent':{
+    title:'An independent doctor is writing their report',
+    lead:'You were examined on 11 September 2026. The doctor is writing up what they found.',
+    who:'The independent doctor who examined you.',
+    howLong:'Usually 2 to 3 weeks after an examination',
+    next:'The report comes to your caseworker, who will make a decision or ask one of our doctors to advise.',
+    drive:DRIVE.ok,
+    timeline:BASE.concat([EV.indepSent, EV.indepSeen])
+  },
+  'third-party-optician':{
+    title:'We are waiting for your visual fields test',
+    lead:'Your caseworker wants to rule out a problem with your field of vision before deciding.',
+    who:'Bryn Awel Opticians.',
+    howLong:'Usually 2 to 4 weeks, depending on how quickly you can be seen',
+    next:'The results come back to your caseworker. The test is free — we pay for it.',
+    chase:{title:'This request has not been chased yet', body:'Sent 6 days ago. We chase after 3 weeks if we have not heard back.'},
+    drive:DRIVE.ok,
+    timeline:BASE.concat([EV.optSent])
+  },
+  'action-evidence':{
+    title:'We need more evidence from you',
+    lead:'Your caseworker needs a recent letter from your consultant before they can decide.',
+    who:'You. Your case is on hold with '+caseworker.name+' until we hear from you.',
+    howLong:'We will look at it within '+caseworker.responseTime+' of it arriving',
+    next:'Once we have the letter your caseworker picks the case straight back up.',
+    due:'By 12 October 2026, which is 28 days from when we asked you.',
+    ifNot:'If we do not hear from you by then, we will decide using only what we already hold. That can mean refusing your application.',
+    cta:'Send your evidence',
+    drive:DRIVE.ok,
+    timeline:AFTER_GP.concat([EV.askEvidence])
+  },
+  'action-d202':{
+    title:'Accept your short-term licence',
+    lead:'We can offer you a licence lasting 1 year. You need to tell us you accept it before we can issue it.',
+    who:'You. Nothing happens on your case until you reply.',
+    howLong:'Your licence is usually posted within 10 working days of you accepting',
+    next:'We post your new licence, and we write to you about 8 weeks before it runs out to start the next review.',
+    due:'By 12 October 2026.',
+    ifNot:'If you do not reply we cannot issue the licence, and we will close your application.',
+    cta:'Accept your licence',
+    drive:DRIVE.ok,
+    timeline:AFTER_GP.concat([EV.askD202])
+  },
+  'action-correction':{
+    title:'Something on your application needs correcting',
+    lead:'You did not give us the date of your most recent seizure. We cannot assess your case without it.',
+    who:'You. Your case is on hold until you tell us.',
+    howLong:'We will pick your case back up within '+caseworker.responseTime,
+    next:'As soon as you give us the date, your caseworker carries on from where they stopped.',
+    due:'As soon as you can. There is no deadline on this one.',
+    ifNot:'Your case stays on hold. We will not close it, but nothing will move until we have the date.',
+    cta:'Add the missing date',
+    drive:DRIVE.waiting,
+    timeline:BASE.concat([EV.askCorrection])
+  },
+  'action-appointment':{
+    title:'You need to book an appointment',
+    lead:'We need you to have a medical examination before we can make a decision. It is free — we pay for it.',
+    who:'You. Your case is on hold until the appointment has happened.',
+    howLong:'Appointments are usually available within 2 to 3 weeks, and the report reaches us 2 weeks after that',
+    next:'The doctor who sees you sends their report to your caseworker.',
+    due:'Book by 12 October 2026.',
+    ifNot:'If you do not book, we will decide on what we already hold, which may mean refusing your application.',
+    cta:'Book your appointment',
+    drive:DRIVE.ok,
+    timeline:BASE.concat([EV.askAppt])
+  },
+  'action-consent':{
+    title:'We need your consent',
+    lead:'We cannot write to your consultant until you give us permission to ask them about your condition.',
+    who:'You. Your case is on hold until you tell us.',
+    howLong:'We write to your consultant within '+caseworker.responseTime+' of getting your consent',
+    next:'We ask your consultant for a report, and your caseworker decides once it arrives.',
+    due:'As soon as you can. There is no deadline on this one.',
+    ifNot:'Your case stays on hold. If you would rather we did not contact your consultant, tell us and we will decide on what we already have.',
+    cta:'Give your consent',
+    drive:DRIVE.ok,
+    timeline:BASE.concat([EV.askConsent])
+  },
+  'decided-full':{
+    title:'You can keep your full licence',
+    lead:'We have finished looking at your case. Your licence is not affected and runs to '+person.licenceTo+'.',
+    who:'No one. Your case is finished.',
+    howLong:'Nothing left to wait for',
+    next:'If your condition changes, or you have another seizure, you must tell us. That is a legal requirement and it starts a new case.',
+    drive:DRIVE.ok,
+    timeline:AFTER_GP.concat([EV.toDoctor, EV.decFull])
+  },
+  'decided-short':{
+    title:'We can offer you a licence for 1 year',
+    lead:'We have decided you can drive, but we want to look at your case again in a year.',
+    who:'No one. Your case is finished until the review.',
+    howLong:'Your new licence is usually posted within 10 working days',
+    next:'Your licence runs to 15 September 2027. We will write to you about 8 weeks before then to start the review. You do not need to do anything now.',
+    drive:DRIVE.ok,
+    timeline:AFTER_GP.concat([EV.toDoctor, EV.decShort, EV.licenceSent])
+  },
+  'decided-refused':{
+    title:'We cannot give you a licence',
+    lead:'The medical evidence does not meet the standard for driving with '+condition.short+'. We know this is not what you were hoping for.',
+    who:'No one. Your case is finished.',
+    howLong:'Nothing left to wait for',
+    next:'You can ask us to look at the decision again, or appeal to a magistrates court within 6 months. You can also reapply once you meet the medical standard.',
+    drive:DRIVE.refused,
+    timeline:AFTER_GP.concat([EV.toDoctor, EV.decRefused])
+  },
+  'decided-revoked':{
+    title:'Your licence has been revoked',
+    lead:'You must stop driving now and send your licence back to us. We know this is not what you were hoping for.',
+    who:'No one. Your case is finished.',
+    howLong:'Nothing left to wait for',
+    next:'Send your licence to DVLA, Swansea, SA99 1AB. You can ask us to look at the decision again, or appeal to a magistrates court within 6 months.',
+    drive:DRIVE.revoked,
+    timeline:AFTER_GP.concat([EV.toDoctor, EV.decRevoked])
+  },
+  'closed':{
+    title:'Your case is closed',
+    lead:'There is nothing further for you or for us to do on this case.',
+    who:'No one. Your case is finished and is not with a team any more.',
+    howLong:'Nothing left to wait for',
+    next:'If your condition changes, or you have another seizure, you must tell us. That is a legal requirement and it starts a new case.',
+    drive:DRIVE.ok,
+    timeline:AFTER_GP.concat([EV.toDoctor, EV.decShort, EV.licenceSent, EV.closedEv])
+  }
+};
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let state = {};
+function resetState(){
+  state = { screen:'with-caseworker', showNotes:state.showNotes||false };
+}
+resetState();
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+const app = () => document.getElementById('app');
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function navigate(h){ if(location.hash===h){ route(); } else { location.hash = h; } }
+function cur(){ return SCREENS[state.screen] || SCREENS['with-caseworker']; }
+function content(){ return CONTENT[state.screen] || CONTENT['with-caseworker']; }
+
+function warn(){
+  return '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>This is a fictional prototype of a Drivers Medical case status tracker. It does not show a real case, it makes no real DVLA licensing decisions, and all personal details shown are invented.</div>';
+}
+/* Design notes are prototype annotations, not part of the service UI. */
+function note(title, body){
+  if(!state.showNotes) return '';
+  return '<div class="design-note"><strong>Design note — '+esc(title)+'</strong>'+body+'</div>';
+}
+function toggleNotes(){ state.showNotes = !state.showNotes; route(); }
+
+/* --- Everything below is derived from caseState and its sub-fields.
+       No summary label is stored anywhere. --- */
+function tag(){
+  const c = cur();
+  switch(c.caseState){
+    case 'received':          return {text:'Received', colour:'blue'};
+    case 'with-caseworker':   return {text:'In review', colour:'blue'};
+    case 'with-dvla-doctor':  return {text:'In review', colour:'blue'};
+    case 'with-third-party':  return {text:'Waiting', colour:'grey'};
+    case 'action-needed':     return {text:'Action needed', colour:'orange'};
+    case 'decided':           return (c.outcome==='refused'||c.outcome==='revoked')
+                                ? {text:'Decided', colour:'red'} : {text:'Decided', colour:'green'};
+    case 'closed':            return {text:'Closed', colour:'grey'};
+  }
+}
+function trackPos(){
+  const c = cur();
+  if(c.caseState==='received') return 0;
+  if(c.caseState==='decided')  return 2;
+  if(c.caseState==='closed')   return 3;
+  return 1;
+}
+function isBad(){ const c=cur(); return c.outcome==='refused'||c.outcome==='revoked'; }
+function inReviewSub(){
+  const c = cur();
+  if(c.caseState==='with-caseworker')  return 'With a caseworker';
+  if(c.caseState==='with-dvla-doctor') return 'With a DVLA doctor';
+  if(c.caseState==='with-third-party') return 'Waiting for '+THIRD_PARTY[c.thirdParty];
+  if(c.caseState==='action-needed')    return 'Waiting for you';
+  return 'Your case is looked at';
+}
+
+/* ================================================================
+   BLOCKS
+   ================================================================ */
+
+/* 1. Progress track. No numbers, no percentage, no target date —
+      a case can come back through In review more than once, so the
+      track says where you are, not how far through you are. */
+function renderTrack(){
+  const pos = trackPos(), c = cur(), action = c.caseState==='action-needed';
+  const stops = [
+    {label:'Received', done:'We have your notification', now:'Waiting to be opened', todo:'Not sent yet'},
+    {label:'In review', done:'Finished', now:inReviewSub(), todo:'Not started yet'},
+    {label:'Decision', done:c.outcome?OUTCOMES[c.outcome]:'Made', now:c.outcome?OUTCOMES[c.outcome]:'Made', todo:'Not made yet'},
+    {label:'Closed', done:'Case closed', now:'Case closed', todo:'Not yet'}
+  ];
+  let html = '<ol class="track">';
+  stops.forEach((s,i)=>{
+    let cls = 'track__item', mark, sub;
+    if(i < pos){ cls += ' track__item--done'; mark='Done'; sub=s.done; }
+    else if(i === pos){
+      cls += ' track__item--current';
+      if(action){ cls += ' track__item--action'; mark='Your turn'; }
+      else if(isBad()){ cls += ' track__item--bad'; mark='Now'; }
+      else { mark='Now'; }
+      sub = s.now;
+    }
+    else { mark='To come'; sub=s.todo; }
+    html += '<li class="'+cls+'"><span class="track__state">'+mark+'</span>'
+      +'<span class="track__label">'+esc(s.label)+'</span>'
+      +'<span class="track__sub">'+esc(sub)+'</span></li>';
+  });
+  return html+'</ol>';
+}
+
+/* 2. Active state. When something is needed from the customer this
+      block leads with that and takes priority over the whole page. */
+function renderHero(){
+  const c = cur(), k = content(), t = tag();
+  let mod = '';
+  if(c.caseState==='action-needed') mod = ' state-hero--action';
+  else if(c.caseState==='decided' && !isBad()) mod = ' state-hero--good';
+  else if(isBad()) mod = ' state-hero--bad';
+
+  let html = '<div class="state-hero'+mod+'">'
+    +'<span class="state-hero__eyebrow"><span class="govuk-tag govuk-tag--'+t.colour+'">'+esc(t.text)+'</span> &nbsp;Last updated '+esc(today)+'</span>'
+    +'<h2 class="state-hero__title">'+esc(k.title)+'</h2>'
+    +'<p class="state-hero__lead">'+esc(k.lead)+'</p>';
+
+  if(k.cta){
+    html += '<p class="govuk-body"><a class="govuk-button" href="#" onclick="stub(event)">'+esc(k.cta)+'</a></p>';
+  }
+
+  html += '<dl class="state-facts">';
+  if(k.due)  html += '<div class="state-facts__row"><dt class="state-facts__key">When we need it by</dt><dd class="state-facts__val">'+esc(k.due)+'</dd></div>';
+  if(k.ifNot)html += '<div class="state-facts__row"><dt class="state-facts__key">If you do not</dt><dd class="state-facts__val">'+esc(k.ifNot)+'</dd></div>';
+  html += '<div class="state-facts__row"><dt class="state-facts__key">Who has your case</dt><dd class="state-facts__val">'+esc(k.who)+'</dd></div>'
+    +'<div class="state-facts__row"><dt class="state-facts__key">How long this usually takes</dt><dd class="state-facts__val">'+esc(k.howLong)+'</dd></div>'
+    +'<div class="state-facts__row"><dt class="state-facts__key">What happens next</dt><dd class="state-facts__val">'+esc(k.next)+'</dd></div>'
+    +'</dl></div>';
+  return html;
+}
+
+/* 3. Can I drive. Never shown as a bare verdict — the sentence that
+      explains it is part of the answer. */
+function renderDrive(){
+  const d = content().drive;
+  const mod = d.verdict==='no' ? ' drive--no' : d.verdict==='depends' ? ' drive--depends' : '';
+  const mark = d.verdict==='no' ? '✕' : d.verdict==='depends' ? '!' : '✓';
+  return '<h2 class="govuk-heading-m">Can I drive?</h2>'
+    +'<div class="drive'+mod+'"><div class="drive__mark" aria-hidden="true">'+mark+'</div>'
+    +'<div class="drive__body"><p class="drive__answer">'+esc(d.answer)+'</p>'
+    +'<p class="drive__detail">'+esc(d.detail)+'</p></div></div>';
+}
+
+/* 4. Timeline, newest first. The same state can appear more than
+      once — a case that goes out for evidence and comes back is with
+      a caseworker twice, and the timeline has to show that. */
+function renderTimeline(){
+  const k = content();
+  const events = k.timeline.slice().reverse();
+  let html = '<h2 class="govuk-heading-m">What has happened so far</h2>';
+  if(k.chase){
+    html += '<div class="chase"><strong>'+esc(k.chase.title)+'</strong><p>'+esc(k.chase.body)+'</p></div>';
+  }
+  html += '<ul class="timeline">';
+  events.forEach((e,i)=>{
+    html += '<li class="timeline__item timeline__item--'+(i===0?'now':'done')+'">'
+      +'<span class="timeline__date">'+esc(e.date)+'</span>'
+      +'<span class="timeline__title">'+esc(e.title)+'</span>'+esc(e.body)+'</li>';
+  });
+  if(events.length===1){
+    html += '<li class="timeline__item"><span class="timeline__date">Nothing else yet</span>'
+      +'<span class="timeline__title">This is everything</span>Your case has only just arrived, so there is nothing else to show. Every time it moves we will add it here.</li>';
+  }
+  return html+'</ul>';
+}
+
+/* 5. Relevant information — condition guidance first, then the
+      personal details the customer may need to quote on the phone. */
+function renderRelevant(){
+  return '<h2 class="govuk-heading-m">Driving with '+esc(condition.short)+'</h2>'
+    +'<p class="govuk-body">These rules apply whatever we decide about your case.</p>'
+    +'<ul class="govuk-body">'
+    +'<li>you must not drive for 12 months after a seizure, whether or not you have told us about it</li>'
+    +'<li>you must tell us about every seizure, even if you have already told your doctor</li>'
+    +'<li>tell us if your medication changes, including if you stop taking it</li>'
+    +'<li>if you drive a lorry or a bus the rules are stricter and the wait is longer</li>'
+    +'</ul>'
+    +'<h2 class="govuk-heading-m">Your details</h2>'
+    +'<dl class="detail-list">'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Case reference</dt><dd class="detail-list__value">'+esc(caseRef)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Name</dt><dd class="detail-list__value">'+esc(person.title+' '+person.name)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Date of birth</dt><dd class="detail-list__value">'+esc(person.dob)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Driving licence number</dt><dd class="detail-list__value">'+esc(person.licenceNo)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Condition you told us about</dt><dd class="detail-list__value">'+esc(condition.name)+'</dd></div>'
+    +'</dl>';
+}
+
+/* 6. Support. Secondary weight — if the page above has worked, the
+      customer should not need this. */
+function renderSupport(){
+  return '<h2 class="govuk-heading-m">If you still need to ask us something</h2>'
+    +'<div class="support">'
+    +'<div class="support-card"><h3 class="govuk-heading-s">Call us</h3>'
+    +'<p><span class="support-card__big">0300 790 6806</span></p>'
+    +'<p>Monday to Friday, 8am to 5pm. Saturday, 8am to 1pm.</p>'
+    +'<p>Have your case reference ready. Waits are usually longest on Monday mornings.</p></div>'
+    +'<div class="support-card"><h3 class="govuk-heading-s">Webchat</h3>'
+    +'<div class="chat-shell"></div>'
+    +'<p>Usually answered within a few minutes during opening hours.</p>'
+    +'<p><a href="#" onclick="stub(event)">Start webchat</a></p></div>'
+    +'</div>';
+}
+
+function stub(e){ e.preventDefault(); alert('Not built in this prototype. This is a shell to show where the entry point sits.'); }
+
+/* ================================================================
+   PAGE
+   ================================================================ */
+const LABELS = {
+  'received':'Received, not yet opened',
+  'with-caseworker':'With a caseworker',
+  'with-dvla-doctor':'With a DVLA doctor',
+  'third-party-gp':'Waiting for your GP',
+  'third-party-consultant':'Waiting for your consultant, chased twice',
+  'third-party-independent':'Waiting for an independent doctor',
+  'third-party-optician':'Waiting for your optician',
+  'action-evidence':'Action needed — send more evidence',
+  'action-d202':'Action needed — accept a short-term licence',
+  'action-correction':'Action needed — correct your application',
+  'action-appointment':'Action needed — book an appointment',
+  'action-consent':'Action needed — give consent',
+  'decided-full':'Decided — full licence',
+  'decided-short':'Decided — short-term licence',
+  'decided-refused':'Decided — refused',
+  'decided-revoked':'Decided — revoked',
+  'closed':'Case closed'
+};
+
+/* Prototype furniture, not service UI. It is here so a state can be
+   changed in front of a room without anyone editing the URL. */
+function renderSwitcher(){
+  let opts = '';
+  SCREEN_GROUPS.forEach(([title,keys])=>{
+    opts += '<optgroup label="'+esc(title)+'">';
+    keys.forEach(k=>{
+      opts += '<option value="'+k+'"'+(k===state.screen?' selected':'')+'>'+esc(LABELS[k])+'</option>';
+    });
+    opts += '</optgroup>';
+  });
+  return '<div class="switcher">'
+    +'<label for="state-switcher">Prototype control — show this case as:</label>'
+    +'<select id="state-switcher" onchange="navigate(\'#/tracker/\'+this.value)">'+opts+'</select>'
+    +'<a href="#/all-screens">All screens</a>'
+    +'</div>';
+}
+
+function renderTracker(){
+  app().innerHTML = warn()
+    + renderSwitcher()
+    + note('Why there is no progress bar',
+        '<p>A flight tracker can show a plane three quarters of the way across because the route is fixed. A medical case is not: it can go out to a GP, come back, and go out again. A stepper would be wrong the first time that happened, and a percentage would be a promise DVLA cannot keep.</p>'
+       +'<p>The track above says roughly where the case sits. The real answer to "when" lives in the block below it, as a range with a reason attached.</p>')
+    +'<span class="govuk-caption">Case '+esc(caseRef)+'</span>'
+    +'<h1 class="govuk-heading-l">Your medical condition case</h1>'
+    + renderTrack()
+    + note('The wait is a range with a reason',
+        '<p>Over half of the calls this service takes are people asking where their case is. A status on its own is what generates that call. The argument this block makes is that a status is only useful bolted to two other things: how long this step usually takes, and what happens next.</p>'
+       +'<p>Where the honest answer is that we do not know — the consultant who has not replied to three letters — it says so. A made-up range that passes would be worse.</p>')
+    + renderHero()
+    + note('Driving comes before the case',
+        '<p>The whiteboard put "can you drive" in a contextual information block below the timeline. It is moved up here because it is the question a customer actually opens this page to answer, and the one they will ring about if the page does not.</p>')
+    + renderDrive()
+    + renderTimeline()
+    + note('Waiting is not the same as nothing happening',
+        '<p>When DVLA is waiting on a third party the timeline shows when the request went out and whether it has been chased. Without that, a customer reading a four-week gap assumes their case has been forgotten. Showing the chase is what makes the wait legible rather than suspicious.</p>')
+    + renderRelevant()
+    + renderSupport();
+}
+
+function renderAllScreens(){
+  let html = warn()+'<a class="govuk-back-link" href="#/tracker/'+esc(state.screen)+'">Back to the tracker</a>'
+    +'<h1 class="govuk-heading-l">All screens</h1>'
+    +'<p class="govuk-body">Every state this case can be in. Each one opens the tracker directly, so a single state can be put on a screen in a workshop without clicking through anything first.</p>';
+  SCREEN_GROUPS.forEach(([title,keys])=>{
+    html += '<div class="index-group"><h3 class="govuk-heading-m">'+esc(title)+'</h3><ul class="index-list">';
+    keys.forEach(k=>{ html += '<li><a href="#/tracker/'+k+'">'+esc(LABELS[k])+'</a></li>'; });
+    html += '</ul></div>';
+  });
+  app().innerHTML = html;
+}
+
+function renderChrome(){
+  let html = '<header class="govuk-header" role="banner"><div class="govuk-header__container">'
+    +'<a href="#/tracker/'+esc(state.screen)+'" class="govuk-header__logotype-text">'
+    +'<svg class="govuk-crown" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 97" fill="white" role="img" aria-label="GOV.UK Crown">'
+    +'<path d="M25 30.2c3.5 1.5 7.7-.2 9.1-3.7 1.5-3.6-.2-7.8-3.9-9.2-3.6-1.4-7.6.3-9.1 3.9-1.4 3.5.3 7.5 3.9 9zM9 39.5c3.6 1.5 7.8-.2 9.2-3.7 1.5-3.6-.2-7.8-3.9-9.1-3.6-1.5-7.6.2-9.1 3.8-1.4 3.5.3 7.5 3.8 9zM4.4 57.2c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.5-1.5-7.6.3-9.1 3.8-1.4 3.5.3 7.6 3.9 9.1zm38.3-21.4c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.6-1.5-7.6.3-9.1 3.8-1.3 3.6.4 7.7 3.9 9.1zm64.4-5.6c-3.6 1.5-7.8-.2-9.1-3.7-1.5-3.6.2-7.8 3.8-9.2 3.6-1.4 7.7.3 9.2 3.9 1.3 3.5-.4 7.5-3.9 9zm15.9 9.3c-3.6 1.5-7.7-.2-9.1-3.7-1.5-3.6.2-7.8 3.7-9.1 3.6-1.5 7.7.2 9.2 3.8 1.5 3.5-.3 7.5-3.8 9zm4.7 17.7c-3.6 1.5-7.8-.2-9.2-3.8-1.5-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.3 3.5-.4 7.6-3.9 9.1zM89.3 35.8c-3.6 1.5-7.8-.2-9.2-3.8-1.4-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.4 3.6-.3 7.7-3.9 9.1zM69.7 17.7l8.9 4.7V9.3l-8.9 2.8c-.2-.3-.5-.6-.9-.9L72.4 0H59.6l3.5 11.2c-.3.3-.6.5-.9.9l-8.8-2.8v13.1l8.8-4.7c.3.3.6.7.9.9l-5 15.4v.1c-.2.8-.4 1.6-.4 2.4 0 4.1 3.1 7.5 7 8.1h.2c.3 0 .7.1 1 .1.4 0 .7 0 1-.1h.2c4-.6 7.1-4 7.1-8.1 0-.8-.1-1.7-.4-2.4V34l-5.1-15.4c.4-.2.7-.6 1-.9zM66 92.8c16.9 0 32.8 1.1 47.1 3.2 4-16.9 8.9-26.7 14-33.5l-9.6-3.4c1 4.9 1.1 7.2 0 10.2-1.5-1.4-3-4.3-4.2-8.7L108.6 76c2.8-2 5-3.2 7.5-3.3-4.4 9.4-10 11.9-13.6 11.2-4.3-.8-6.3-4.6-5.6-7.9 1-4.7 5.7-5.9 8-.5 4.3-8.7-3-11.4-7.6-8.8 7.1-7.2 7.9-13.5 2.1-21.1-8 6.1-8.1 12.3-4.5 20.8-4.7-5.4-12.1-2.5-9.5 6.2 3.4-5.2 7.9-2 7.2 3.1-.6 4.3-6.4 7.8-13.5 7.2-10.3-.9-10.9-8-11.2-13.8 2.5-.5 7.1 1.8 11 7.3L80.2 47c-4.6-5.5-10.3-8-14.1-8s-9.5 2.5-14.1 8l.7-18c3.9-5.5 8.5-7.7 11-7.3-.3 5.8-.9 12.8-11.1 13.8-7.2.6-12.9-2.9-13.5-7.2-.7-5 3.8-8.3 7.1-3.1 2.7-8.7-4.8-11.6-9.4-6.2 3.7-8.5 3.6-14.7-4.6-20.8-5.8 7.6-5 13.9 2.2 21.1-4.7-2.6-11.9.1-7.7 8.8 2.3-5.5 7.1-4.2 8.1.5.7 3.3-1.3 7.1-5.7 7.9-3.5.7-9-1.8-13.5-11.2 2.5.1 4.7 1.3 7.5 3.3l-4.7-15.4c-1.2 4.4-2.7 7.2-4.3 8.7-1.1-3-.9-5.3 0-10.2l-9.5 3.4c5 6.9 9.9 16.7 14 33.5 14.8-2.1 30.8-3.2 47.7-3.2z"/></svg>'
+    +'GOV.UK</a>'
+    +'<a class="govuk-header__signout" href="#" onclick="stub(event)">Sign out</a>'
+    +'</div></header>';
+
+  html += '<div class="service-nav"><div class="service-nav__wrapper">'
+    +'<a class="service-nav__name" href="#" onclick="stub(event)">Driver and vehicles account</a>'
+    +'<div class="service-nav__links">'
+    +'<a class="service-nav__link" href="#" onclick="stub(event)">Messages</a>'
+    +'<a class="service-nav__link" href="#" onclick="stub(event)">Manage your account</a>'
+    +'</div></div></div>';
+
+  html += '<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper">'
+    +'<span class="govuk-phase-banner__tag">Prototype</span>'
+    +'<span>This is not a real service. It is a fictional prototype for internal workshops.</span>'
+    +'<span class="phase-actions">'
+    +'<a href="#" onclick="toggleNotes();return false;">'+(state.showNotes?'Hide':'Show')+' design notes</a>'
+    +'<a href="#/all-screens">All screens</a>'
+    +'</span></div></div>';
+
+  document.getElementById('chrome').innerHTML = html;
+}
+
+/* ================================================================
+   ROUTER
+   ================================================================ */
+function route(){
+  const hash = location.hash || '#/tracker/with-caseworker';
+  const parts = hash.split('/');
+  const base = '#/' + (parts[1] || 'tracker');
+  const arg = parts[2];
+  window.scrollTo(0,0);
+
+  if(base === '#/tracker' && arg && SCREENS[arg]) state.screen = arg;
+  renderChrome();
+
+  switch(base){
+    case '#/all-screens': renderAllScreens(); break;
+    case '#/tracker':     renderTracker(); break;
+    default:              renderTracker(); break;
+  }
+}
+window.addEventListener('hashchange',route);
+window.addEventListener('DOMContentLoaded',route);
+</script>
+</body>
+</html>
