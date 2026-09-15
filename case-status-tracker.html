@@ -213,25 +213,6 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
    CASE STATUS TRACKER — components added for this prototype
    ================================================================ */
 
-/* --- Progress track ---
-   Deliberately not a stepper: no numbers, no percentage, no target
-   date. It says roughly where the case is, because a case can loop
-   back through the same stage more than once. --- */
-.track{display:flex;gap:6px;list-style:none;margin:0 0 35px;padding:0}
-.track__item{flex:1;background:var(--light-grey);border-top:7px solid var(--mid-grey);padding:12px 15px 14px;min-width:0}
-.track__item--done{border-top-color:var(--green)}
-.track__item--current{background:var(--white);border-top-color:var(--blue);box-shadow:inset 0 0 0 2px var(--blue)}
-.track__item--action{background:#fff5ee;border-top-color:#b84605;box-shadow:inset 0 0 0 2px #b84605}
-.track__item--bad.track__item--current{border-top-color:var(--red);box-shadow:inset 0 0 0 2px var(--red);background:#fdf4f2}
-.track__state{display:block;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dark-grey);margin-bottom:3px}
-.track__item--done .track__state{color:var(--green)}
-.track__item--current .track__state{color:var(--blue)}
-.track__item--action .track__state{color:#b84605}
-.track__item--bad.track__item--current .track__state{color:var(--red)}
-.track__label{display:block;font-weight:700;font-size:19px;line-height:1.2}
-.track__sub{display:block;font-size:16px;color:var(--dark-grey);margin-top:4px}
-@media(max-width:800px){.track{flex-direction:column;gap:4px}.track__item{border-top-width:5px}}
-
 /* --- Active state hero --- */
 .state-hero{border:1px solid var(--mid-grey);border-top:8px solid var(--blue);background:var(--white);padding:30px 30px 10px;margin-bottom:30px}
 .state-hero--action{border-top-color:#b84605;background:#fff8f3}
@@ -263,6 +244,15 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .chase strong{display:block;margin-bottom:4px}
 .chase p{font-size:16px;margin:0}
 
+/* --- Prototype control, inside the fictional-prototype banner ---
+   Prototype furniture, not service UI. It lives in the banner that is
+   already flagged as not-a-real-service, so the page below it reads as
+   the service and nothing else. --- */
+.prototype-warning__control{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid rgba(11,12,12,.25)}
+.prototype-warning__control label{font-weight:700;flex:0 0 auto;margin:0}
+.prototype-warning__control select{font-family:inherit;font-size:16px;padding:5px 8px;border:2px solid var(--black);background:var(--white);flex:1;min-width:200px;max-width:380px}
+.prototype-warning__control a{flex:0 0 auto}
+
 /* --- Support --- */
 .support{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:35px}
 @media(max-width:800px){.support{grid-template-columns:1fr}}
@@ -274,11 +264,6 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .chat-shell{border:1px solid var(--mid-grey);background:var(--light-grey);height:90px;margin-bottom:12px;position:relative}
 .chat-shell::after{content:"Webchat is not built in this prototype";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--dark-grey);text-align:center;padding:0 15px}
 
-/* --- Prototype state switcher (prototype furniture, not service UI) --- */
-.switcher{border:2px dashed var(--dark-grey);background:var(--white);padding:15px 20px;margin-bottom:30px;display:flex;gap:15px;align-items:center;flex-wrap:wrap}
-.switcher label{font-size:16px;font-weight:700;flex:0 0 auto;margin:0}
-.switcher select{font-family:inherit;font-size:16px;padding:6px 8px;border:2px solid var(--black);background:var(--white);flex:1;min-width:220px}
-.switcher a{font-size:16px;flex:0 0 auto}
 </style>
 </head>
 <body>
@@ -613,8 +598,26 @@ function navigate(h){ if(location.hash===h){ route(); } else { location.hash = h
 function cur(){ return SCREENS[state.screen] || SCREENS['with-caseworker']; }
 function content(){ return CONTENT[state.screen] || CONTENT['with-caseworker']; }
 
-function warn(){
-  return '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>This is a fictional prototype of a Drivers Medical case status tracker. It does not show a real case, it makes no real DVLA licensing decisions, and all personal details shown are invented.</div>';
+/* The prototype control lives inside this banner on purpose: it is the
+   one part of the page already flagged as not a real service, so the
+   page below it can be read as the service and nothing else. */
+function warn(withControl){
+  let html = '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>'
+    +'This is a fictional prototype of a Drivers Medical case status tracker. It does not show a real case, it makes no real DVLA licensing decisions, and all personal details shown are invented.';
+  if(withControl){
+    let opts = '';
+    SCREEN_GROUPS.forEach(([title,keys])=>{
+      opts += '<optgroup label="'+esc(title)+'">';
+      keys.forEach(k=>{ opts += '<option value="'+k+'"'+(k===state.screen?' selected':'')+'>'+esc(LABELS[k])+'</option>'; });
+      opts += '</optgroup>';
+    });
+    html += '<div class="prototype-warning__control">'
+      +'<label for="state-switcher">Show this case as</label>'
+      +'<select id="state-switcher" onchange="navigate(\'#/tracker/\'+this.value)">'+opts+'</select>'
+      +'<a href="#/all-screens">All screens</a>'
+      +'</div>';
+  }
+  return html+'</div>';
 }
 /* Design notes are prototype annotations, not part of the service UI. */
 function note(title, body){
@@ -638,58 +641,12 @@ function tag(){
     case 'closed':            return {text:'Closed', colour:'grey'};
   }
 }
-function trackPos(){
-  const c = cur();
-  if(c.caseState==='received') return 0;
-  if(c.caseState==='decided')  return 2;
-  if(c.caseState==='closed')   return 3;
-  return 1;
-}
 function isBad(){ const c=cur(); return c.outcome==='refused'||c.outcome==='revoked'; }
-function inReviewSub(){
-  const c = cur();
-  if(c.caseState==='with-caseworker')  return 'With a caseworker';
-  if(c.caseState==='with-dvla-doctor') return 'With a DVLA doctor';
-  if(c.caseState==='with-third-party') return 'Waiting for '+THIRD_PARTY[c.thirdParty];
-  if(c.caseState==='action-needed')    return 'Waiting for you';
-  return 'Your case is looked at';
-}
-
 /* ================================================================
    BLOCKS
    ================================================================ */
 
-/* 1. Progress track. No numbers, no percentage, no target date —
-      a case can come back through In review more than once, so the
-      track says where you are, not how far through you are. */
-function renderTrack(){
-  const pos = trackPos(), c = cur(), action = c.caseState==='action-needed';
-  const stops = [
-    {label:'Received', done:'We have your notification', now:'Waiting to be opened', todo:'Not sent yet'},
-    {label:'In review', done:'Finished', now:inReviewSub(), todo:'Not started yet'},
-    {label:'Decision', done:c.outcome?OUTCOMES[c.outcome]:'Made', now:c.outcome?OUTCOMES[c.outcome]:'Made', todo:'Not made yet'},
-    {label:'Closed', done:'Case closed', now:'Case closed', todo:'Not yet'}
-  ];
-  let html = '<ol class="track">';
-  stops.forEach((s,i)=>{
-    let cls = 'track__item', mark, sub;
-    if(i < pos){ cls += ' track__item--done'; mark='Done'; sub=s.done; }
-    else if(i === pos){
-      cls += ' track__item--current';
-      if(action){ cls += ' track__item--action'; mark='Your turn'; }
-      else if(isBad()){ cls += ' track__item--bad'; mark='Now'; }
-      else { mark='Now'; }
-      sub = s.now;
-    }
-    else { mark='To come'; sub=s.todo; }
-    html += '<li class="'+cls+'"><span class="track__state">'+mark+'</span>'
-      +'<span class="track__label">'+esc(s.label)+'</span>'
-      +'<span class="track__sub">'+esc(sub)+'</span></li>';
-  });
-  return html+'</ol>';
-}
-
-/* 2. Active state. When something is needed from the customer this
+/* 1. Active state. When something is needed from the customer this
       block leads with that and takes priority over the whole page. */
 function renderHero(){
   const c = cur(), k = content(), t = tag();
@@ -717,7 +674,7 @@ function renderHero(){
   return html;
 }
 
-/* 3. Can I drive. Never shown as a bare verdict — the sentence that
+/* 2. Can I drive. Never shown as a bare verdict — the sentence that
       explains it is part of the answer. */
 function renderDrive(){
   const d = content().drive;
@@ -729,7 +686,7 @@ function renderDrive(){
     +'<p class="drive__detail">'+esc(d.detail)+'</p></div></div>';
 }
 
-/* 4. Timeline, newest first. The same state can appear more than
+/* 3. Timeline, newest first. The same state can appear more than
       once — a case that goes out for evidence and comes back is with
       a caseworker twice, and the timeline has to show that. */
 function renderTimeline(){
@@ -752,7 +709,7 @@ function renderTimeline(){
   return html+'</ul>';
 }
 
-/* 5. Relevant information — condition guidance first, then the
+/* 4. Relevant information — condition guidance first, then the
       personal details the customer may need to quote on the phone. */
 function renderRelevant(){
   return '<h2 class="govuk-heading-m">Driving with '+esc(condition.short)+'</h2>'
@@ -773,7 +730,7 @@ function renderRelevant(){
     +'</dl>';
 }
 
-/* 6. Support. Secondary weight — if the page above has worked, the
+/* 5. Support. Secondary weight — if the page above has worked, the
       customer should not need this. */
 function renderSupport(){
   return '<h2 class="govuk-heading-m">If you still need to ask us something</h2>'
@@ -814,33 +771,13 @@ const LABELS = {
   'closed':'Case closed'
 };
 
-/* Prototype furniture, not service UI. It is here so a state can be
-   changed in front of a room without anyone editing the URL. */
-function renderSwitcher(){
-  let opts = '';
-  SCREEN_GROUPS.forEach(([title,keys])=>{
-    opts += '<optgroup label="'+esc(title)+'">';
-    keys.forEach(k=>{
-      opts += '<option value="'+k+'"'+(k===state.screen?' selected':'')+'>'+esc(LABELS[k])+'</option>';
-    });
-    opts += '</optgroup>';
-  });
-  return '<div class="switcher">'
-    +'<label for="state-switcher">Prototype control — show this case as:</label>'
-    +'<select id="state-switcher" onchange="navigate(\'#/tracker/\'+this.value)">'+opts+'</select>'
-    +'<a href="#/all-screens">All screens</a>'
-    +'</div>';
-}
-
 function renderTracker(){
-  app().innerHTML = warn()
-    + renderSwitcher()
-    + note('Why there is no progress bar',
-        '<p>A flight tracker can show a plane three quarters of the way across because the route is fixed. A medical case is not: it can go out to a GP, come back, and go out again. A stepper would be wrong the first time that happened, and a percentage would be a promise DVLA cannot keep.</p>'
-       +'<p>The track above says roughly where the case sits. The real answer to "when" lives in the block below it, as a range with a reason attached.</p>')
+  app().innerHTML = warn(true)
+    + note('Why there is no progress indicator',
+        '<p>A flight tracker can show a plane three quarters of the way across because the route is fixed. A medical case is not: it can go out to a GP, come back, and go out again. Any indicator of progress — a stepper, a bar, a percentage — would be wrong the first time that happened.</p>'
+       +'<p>So the page does not try. It answers where the case is now, and puts the real answer to "when" directly underneath, as a range with a reason attached.</p>')
     +'<span class="govuk-caption">Case '+esc(caseRef)+'</span>'
     +'<h1 class="govuk-heading-l">Your medical condition case</h1>'
-    + renderTrack()
     + note('The wait is a range with a reason',
         '<p>Over half of the calls this service takes are people asking where their case is. A status on its own is what generates that call. The argument this block makes is that a status is only useful bolted to two other things: how long this step usually takes, and what happens next.</p>'
        +'<p>Where the honest answer is that we do not know — the consultant who has not replied to three letters — it says so. A made-up range that passes would be worse.</p>')
