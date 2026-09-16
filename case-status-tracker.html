@@ -239,6 +239,18 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .drive__detail{margin:0}
 @media(max-width:640px){.drive{padding:18px 20px;gap:15px}.drive__answer{font-size:19px}}
 
+/* --- Conditions strand list ---
+   Only ever shown when there is more than one condition. One row per
+   condition, each carrying its own state, because they do not move at
+   the same speed and the mismatch is what generates the call. --- */
+.strands{list-style:none;margin:0 0 35px;padding:0;border-top:1px solid var(--mid-grey)}
+.strand{display:flex;gap:20px;align-items:flex-start;border-bottom:1px solid var(--mid-grey);padding:16px 0}
+.strand__name{flex:0 0 34%;font-weight:700;margin:0}
+.strand__body{flex:1;min-width:0}
+.strand__body p{margin:6px 0 0;font-size:16px}
+.strand--blocking .strand__name::after{content:"This is what is holding up your case";display:block;font-weight:400;font-size:16px;color:var(--dark-grey);margin-top:4px}
+@media(max-width:640px){.strand{flex-direction:column;gap:4px}.strand__name{flex:auto}}
+
 /* --- Third party chase --- */
 .chase{background:var(--light-grey);border-left:5px solid var(--dark-grey);padding:15px 20px;margin:0 0 25px;font-size:16px}
 .chase strong{display:block;margin-bottom:4px}
@@ -294,8 +306,47 @@ const person = {
   licenceNo:'MORGA808016ST9AB'
 };
 const caseRef = 'DM-2026-482910';
-const caseworker = { name:'Ceri Hughes', team:'Medical Casework Team 4 (Neurological)', responseTime:'1 to 2 working days' };
-const condition = { name:'Epilepsy or seizures', short:'epilepsy', lastEvent:'3 March 2026' };
+
+/* Teams, never individuals. Naming the caseworker made the service feel
+   accountable, but it exposes a named member of staff to whatever the
+   customer is feeling about a decision. A team is warm enough to be a
+   who, and carries the same promise that someone owns the case. */
+const team = { name:'the neurological conditions team', responseTime:'1 to 2 working days' };
+
+/* === CONDITIONS ===
+   A driver can tell us about more than one thing at once, and the
+   conditions do not move at the same speed. Each one is a strand with
+   its own evidence and its own third party. There is still only one
+   licensing decision at the end of it. */
+const CONDITIONS = {
+  epilepsy: { name:'Epilepsy or seizures', short:'epilepsy', lastEvent:'3 March 2026' },
+  diabetes: { name:'Diabetes treated with insulin', short:'diabetes' }
+};
+const condition = CONDITIONS.epilepsy;
+
+/* Strand states. 'assessed' exists only at strand level — a condition can
+   be finished while the case is not, and that gap is the whole reason
+   the conditions block exists. */
+const STRAND = {
+  'with-team':   { label:'With the team',      colour:'blue'  },
+  'with-doctor': { label:'With a DVLA doctor', colour:'blue'  },
+  'waiting':     { label:'Waiting',           colour:'grey'  },
+  'action':      { label:'Waiting for you',    colour:'orange'},
+  'assessed':    { label:'Assessed',           colour:'green' },
+  'not-met':     { label:'Not met',            colour:'red'   }
+};
+
+const GUIDANCE = {
+  epilepsy:'<li>you must not drive for 12 months after a seizure, whether or not you have told us about it</li>'
+    +'<li>you must tell us about every seizure, even if you have already told your doctor</li>'
+    +'<li>tell us if your medication changes, including if you stop taking it</li>'
+    +'<li>if you drive a lorry or a bus the rules are stricter and the wait is longer</li>',
+  diabetes:'<li>you must check your blood glucose no more than 2 hours before you drive, and every 2 hours on a long journey</li>'
+    +'<li>you must not drive if you have had more than one severe hypo while awake in the last 12 months</li>'
+    +'<li>tell us if you have a severe hypo, or if you stop being able to feel one coming on</li>'
+    +'<li>keep fast-acting carbohydrate within reach in the vehicle</li>'
+};
+
 const gp = { name:'Dr Alison Pryce', practice:'Bryn Awel Surgery' };
 const today = '15 September 2026';
 
@@ -347,14 +398,21 @@ const SCREENS = {
   'decided-short':           {caseState:'decided', outcome:'short'},
   'decided-refused':         {caseState:'decided', outcome:'refused'},
   'decided-revoked':         {caseState:'decided', outcome:'revoked'},
-  'closed':                  {caseState:'closed'}
+  'closed':                  {caseState:'closed'},
+
+  /* More than one condition. The case state is still one value — it is
+     the state of whichever condition is holding everything up. */
+  'multi-waiting':           {caseState:'with-third-party', thirdParty:'consultant'},
+  'multi-action':            {caseState:'action-needed', actionNeeded:'appointment'},
+  'multi-refused':           {caseState:'decided', outcome:'refused'}
 };
 
 const SCREEN_GROUPS = [
   ['Case in progress', ['received','with-caseworker','with-dvla-doctor']],
   ['Waiting on someone else', ['third-party-gp','third-party-consultant','third-party-independent','third-party-optician']],
   ['Waiting on you', ['action-evidence','action-d202','action-correction','action-appointment','action-consent']],
-  ['Decided and closed', ['decided-full','decided-short','decided-refused','decided-revoked','closed']]
+  ['Decided and closed', ['decided-full','decided-short','decided-refused','decided-revoked','closed']],
+  ['More than one condition', ['multi-waiting','multi-action','multi-refused']]
 ];
 
 /* === TIMELINE EVENTS ===
@@ -363,11 +421,11 @@ const SCREEN_GROUPS = [
    evidence and comes back is with a caseworker twice. */
 const EV = {
   received:      {date:'7 August 2026',     title:'We received your notification', body:'You told us about '+condition.name.toLowerCase()+'.'},
-  opened:        {date:'8 August 2026',     title:'Your case was opened',          body:'It went to '+caseworker.name+' in '+caseworker.team+'.'},
+  opened:        {date:'8 August 2026',     title:'Your case was opened',          body:'It went to '+team.name+'.'},
   gpSent:        {date:'12 August 2026',    title:'We wrote to your GP',           body:'We asked '+gp.name+' at '+gp.practice+' for a report about your condition.'},
   gpReplied:     {date:'2 September 2026',  title:'Your GP replied',               body:'We received the report we asked for.'},
-  backToCase:    {date:'4 September 2026',  title:'Back with your caseworker',     body:caseworker.name+' is reading what your GP sent.'},
-  toDoctor:      {date:'8 September 2026',  title:'Sent to a DVLA doctor',         body:'Your caseworker asked one of our doctors to look at the medical evidence.'},
+  backToCase:    {date:'4 September 2026',  title:'Back with the team',            body:'The team is reading what your GP sent.'},
+  toDoctor:      {date:'8 September 2026',  title:'Sent to a DVLA doctor',         body:'The team asked one of our doctors to look at the medical evidence.'},
   gpSent2:       {date:'10 September 2026', title:'We wrote to your GP',           body:'We asked '+gp.name+' at '+gp.practice+' for a report about your condition.'},
   consSent:      {date:'12 August 2026',    title:'We wrote to your consultant',   body:'We asked the neurology department at Morriston Hospital for your most recent clinic letters.'},
   consChase1:    {date:'26 August 2026',    title:'We chased your consultant',     body:'We had not heard back, so we sent the request again.'},
@@ -375,7 +433,7 @@ const EV = {
   indepSent:     {date:'1 September 2026',  title:'We arranged an independent examination', body:'We asked an independent doctor to examine you and report back to us.'},
   indepSeen:     {date:'11 September 2026', title:'You were examined',             body:'The independent doctor is now writing their report.'},
   optSent:       {date:'9 September 2026',  title:'We asked for a visual fields test', body:'We asked Bryn Awel Opticians for the results of your visual fields test.'},
-  askEvidence:   {date:'12 September 2026', title:'We asked you for more evidence',body:'Your caseworker needs a recent letter from your consultant.'},
+  askEvidence:   {date:'12 September 2026', title:'We asked you for more evidence',body:'The team needs a recent letter from your consultant.'},
   askD202:       {date:'12 September 2026', title:'We offered you a short-term licence', body:'We sent you a D202 to sign and return.'},
   askCorrection: {date:'12 September 2026', title:'We found something missing',    body:'The date of your most recent seizure was not filled in.'},
   askAppt:       {date:'12 September 2026', title:'We asked you to book an appointment', body:'You need a medical examination before we can decide.'},
@@ -387,6 +445,19 @@ const EV = {
   licenceSent:   {date:'16 September 2026', title:'Your new licence was posted',   body:'It should reach you within 5 working days.'},
   closedEv:      {date:'22 September 2026', title:'Your case was closed',          body:'There is nothing further for you or for us to do.'}
 };
+/* Multi-condition events name the condition they belong to, because a
+   timeline that says only "we wrote to your GP" is unreadable once
+   there are two strands running. */
+EV.received2      = {date:'7 August 2026',     title:'We received your notification', body:'You told us about epilepsy or seizures and diabetes treated with insulin.'};
+EV.opened2        = {date:'8 August 2026',     title:'Your case was opened',          body:'It went to '+team.name+'.'};
+EV.gpDiabetes     = {date:'12 August 2026',    title:'Diabetes — we wrote to your GP',body:'We asked '+gp.name+' at '+gp.practice+' for your blood glucose records.'};
+EV.consEpilepsy   = {date:'12 August 2026',    title:'Epilepsy — we wrote to your consultant', body:'We asked the neurology department at Morriston Hospital for your clinic letters.'};
+EV.gpDiabetesBack = {date:'2 September 2026',  title:'Diabetes — your GP replied',    body:'We have everything we need about your diabetes.'};
+EV.epilepsyBack   = {date:'2 September 2026',  title:'Epilepsy — your consultant replied', body:'We have everything we need about your epilepsy.'};
+EV.consChaseEp    = {date:'9 September 2026',  title:'Epilepsy — we chased your consultant', body:'We had not heard back, so we sent the request again.'};
+EV.askEyeTest     = {date:'12 September 2026', title:'Diabetes — we asked you to book an eye test', body:'We need a visual fields test before we can finish looking at your diabetes.'};
+EV.decRefusedEp   = {date:'15 September 2026', title:'We made a decision',            body:'We could not give you a licence, because of your epilepsy.'};
+
 const BASE = [EV.received, EV.opened];
 const AFTER_GP = [EV.received, EV.opened, EV.gpSent, EV.gpReplied, EV.backToCase];
 
@@ -409,7 +480,7 @@ const DRIVE = {
 const CONTENT = {
   'received':{
     title:'We have your notification',
-    lead:'It is in the queue to be opened by a caseworker.',
+    lead:'It is in the queue to be picked up by a caseworker.',
     who:'No one yet. Your case is waiting to be picked up.',
     howLong:'Usually 2 to 3 working days before someone opens it',
     next:'A caseworker will read what you sent us and decide whether they need anything else. We will tell you either way.',
@@ -417,29 +488,29 @@ const CONTENT = {
     timeline:[{date:'14 September 2026', title:'We received your notification', body:'You told us about '+condition.name.toLowerCase()+'.'}]
   },
   'with-caseworker':{
-    title:'Your case is with a caseworker',
-    lead:caseworker.name+' has your case, and the report we asked your GP for.',
-    who:caseworker.name+', '+caseworker.team,
-    howLong:'Usually 2 to 4 weeks at this point, because your caseworker is reading medical evidence rather than checking a form',
-    next:'If the evidence answers our questions, '+caseworker.name.split(' ')[0]+' will make a decision. If it does not, we will either ask you for more or send it to one of our doctors.',
+    title:'Your case is with the team',
+    lead:'Your case is with '+team.name+', along with the report we asked your GP for.',
+    who:'A caseworker in '+team.name,
+    howLong:'Usually 2 to 4 weeks at this point, because the team is reading medical evidence rather than checking a form',
+    next:'If the evidence answers our questions, the team will make a decision. If it does not, we will either ask you for more or send it to one of our doctors.',
     drive:DRIVE.ok,
     timeline:AFTER_GP
   },
   'with-dvla-doctor':{
     title:'A DVLA doctor is reviewing your case',
-    lead:'Your caseworker asked one of our doctors to look at the medical evidence.',
-    who:'One of our doctors. '+caseworker.name+' still looks after your case.',
+    lead:'The team asked one of our doctors to look at the medical evidence.',
+    who:'One of our doctors. The rest of your case stays with '+team.name+'.',
     howLong:'Usually 3 to 6 weeks, because our doctors see the most complex cases first and yours is in the queue',
-    next:'The doctor will advise your caseworker, who will either make a decision or ask for more evidence.',
+    next:'The doctor will advise the team, who will either make a decision or ask for more evidence.',
     drive:DRIVE.ok,
     timeline:AFTER_GP.concat([EV.toDoctor])
   },
   'third-party-gp':{
     title:'We are waiting for your GP',
     lead:'We wrote to '+gp.name+' at '+gp.practice+' for a report about your '+condition.short+'.',
-    who:gp.name+'. Your caseworker cannot move your case on until they reply.',
+    who:gp.name+'. The team cannot move your case on until they reply.',
     howLong:'Usually 4 to 6 weeks, because GPs have 6 weeks to answer us and often use most of it',
-    next:'When the report arrives it goes straight back to your caseworker. If we hear nothing after 3 weeks we will ask again.',
+    next:'When the report arrives it goes straight back to the team. If we hear nothing after 3 weeks we will ask again.',
     chase:{title:'This request has not been chased yet', body:'Sent 5 days ago. We chase after 3 weeks if we have not heard back.'},
     drive:DRIVE.ok,
     timeline:BASE.concat([EV.gpSent2])
@@ -449,7 +520,7 @@ const CONTENT = {
     lead:'We have asked three times and have not had a reply.',
     who:'The neurology department at Morriston Hospital.',
     howLong:'We cannot give you a useful estimate. We have been waiting 5 weeks and we do not know when they will reply.',
-    next:'If we still hear nothing, your caseworker will either decide on the evidence we already hold or arrange an independent examination. We will tell you before we do either.',
+    next:'If we still hear nothing, the team will either decide on the evidence we already hold or arrange an independent examination. We will tell you before we do either.',
     chase:{title:'Chased twice', body:'First asked on 12 August 2026. Chased on 26 August and again on 9 September. Contacting them yourself sometimes moves things along faster than we can.'},
     drive:DRIVE.ok,
     timeline:[EV.received, EV.opened, EV.consSent, EV.consChase1, EV.consChase2]
@@ -459,26 +530,26 @@ const CONTENT = {
     lead:'You were examined on 11 September 2026. The doctor is writing up what they found.',
     who:'The independent doctor who examined you.',
     howLong:'Usually 2 to 3 weeks after an examination',
-    next:'The report comes to your caseworker, who will make a decision or ask one of our doctors to advise.',
+    next:'The report comes to the team, who will make a decision or ask one of our doctors to advise.',
     drive:DRIVE.ok,
     timeline:BASE.concat([EV.indepSent, EV.indepSeen])
   },
   'third-party-optician':{
     title:'We are waiting for your visual fields test',
-    lead:'Your caseworker wants to rule out a problem with your field of vision before deciding.',
+    lead:'The team wants to rule out a problem with your field of vision before deciding.',
     who:'Bryn Awel Opticians.',
     howLong:'Usually 2 to 4 weeks, depending on how quickly you can be seen',
-    next:'The results come back to your caseworker. The test is free — we pay for it.',
+    next:'The results come back to the team. The test is free — we pay for it.',
     chase:{title:'This request has not been chased yet', body:'Sent 6 days ago. We chase after 3 weeks if we have not heard back.'},
     drive:DRIVE.ok,
     timeline:BASE.concat([EV.optSent])
   },
   'action-evidence':{
     title:'We need more evidence from you',
-    lead:'Your caseworker needs a recent letter from your consultant before they can decide.',
-    who:'You. Your case is on hold with '+caseworker.name+' until we hear from you.',
-    howLong:'We will look at it within '+caseworker.responseTime+' of it arriving',
-    next:'Once we have the letter your caseworker picks the case straight back up.',
+    lead:'The team needs a recent letter from your consultant before they can decide.',
+    who:'You. Your case is on hold with '+team.name+' until we hear from you.',
+    howLong:'We will look at it within '+team.responseTime+' of it arriving',
+    next:'Once we have the letter the team picks the case straight back up.',
     due:'By 12 October 2026, which is 28 days from when we asked you.',
     ifNot:'If we do not hear from you by then, we will decide using only what we already hold. That can mean refusing your application.',
     cta:'Send your evidence',
@@ -501,8 +572,8 @@ const CONTENT = {
     title:'Something on your application needs correcting',
     lead:'You did not give us the date of your most recent seizure. We cannot assess your case without it.',
     who:'You. Your case is on hold until you tell us.',
-    howLong:'We will pick your case back up within '+caseworker.responseTime,
-    next:'As soon as you give us the date, your caseworker carries on from where they stopped.',
+    howLong:'We will pick your case back up within '+team.responseTime,
+    next:'As soon as you give us the date, the team carries on from where it stopped.',
     due:'As soon as you can. There is no deadline on this one.',
     ifNot:'Your case stays on hold. We will not close it, but nothing will move until we have the date.',
     cta:'Add the missing date',
@@ -514,7 +585,7 @@ const CONTENT = {
     lead:'We need you to have a medical examination before we can make a decision. It is free — we pay for it.',
     who:'You. Your case is on hold until the appointment has happened.',
     howLong:'Appointments are usually available within 2 to 3 weeks, and the report reaches us 2 weeks after that',
-    next:'The doctor who sees you sends their report to your caseworker.',
+    next:'The doctor who sees you sends their report to the team.',
     due:'Book by 12 October 2026.',
     ifNot:'If you do not book, we will decide on what we already hold, which may mean refusing your application.',
     cta:'Book your appointment',
@@ -525,8 +596,8 @@ const CONTENT = {
     title:'We need your consent',
     lead:'We cannot write to your consultant until you give us permission to ask them about your condition.',
     who:'You. Your case is on hold until you tell us.',
-    howLong:'We write to your consultant within '+caseworker.responseTime+' of getting your consent',
-    next:'We ask your consultant for a report, and your caseworker decides once it arrives.',
+    howLong:'We write to your consultant within '+team.responseTime+' of getting your consent',
+    next:'We ask your consultant for a report, and the team decides once it arrives.',
     due:'As soon as you can. There is no deadline on this one.',
     ifNot:'Your case stays on hold. If you would rather we did not contact your consultant, tell us and we will decide on what we already have.',
     cta:'Give your consent',
@@ -577,6 +648,66 @@ const CONTENT = {
     next:'If your condition changes, or you have another seizure, you must tell us. That is a legal requirement and it starts a new case.',
     drive:DRIVE.ok,
     timeline:AFTER_GP.concat([EV.toDoctor, EV.decShort, EV.licenceSent, EV.closedEv])
+  }
+  ,
+  /* === MORE THAN ONE CONDITION ===
+     One case, one decision, but each condition is gathered separately.
+     The headline always answers for the slowest one, because that is
+     what the customer is actually waiting on. */
+  'multi-waiting':{
+    conditions:['epilepsy','diabetes'],
+    strands:[
+      {cond:'epilepsy', state:'waiting', blocking:true,
+       note:'We asked the neurology department at Morriston Hospital for your clinic letters on 12 August 2026. They have not replied yet.'},
+      {cond:'diabetes', state:'assessed',
+       note:'Your GP sent us everything we needed on 2 September 2026. There is nothing else to do on this one.'}
+    ],
+    title:'One of your conditions is still being looked at',
+    lead:'We have finished looking at your diabetes. We are still waiting to hear about your epilepsy.',
+    who:'The neurology department at Morriston Hospital, for your epilepsy. The rest of your case is with '+team.name+'.',
+    howLong:'Usually 4 to 6 weeks for a consultant to reply. We asked 5 weeks ago.',
+    next:'When your consultant replies, the team looks at both conditions together and makes one decision about your licence. We will not decide on your diabetes on its own.',
+    chase:{title:'Chased once', body:'First asked on 12 August 2026 and chased on 9 September. Contacting them yourself sometimes moves things along faster than we can.'},
+    drive:{verdict:'yes', answer:'Yes, you can keep driving',
+      detail:'This covers both conditions. You can carry on driving while we look at your case, as long as your own doctor has not told you to stop. If either condition meant you had to stop driving now, we would say so here.'},
+    timeline:[EV.received2, EV.opened2, EV.gpDiabetes, EV.consEpilepsy, EV.gpDiabetesBack, EV.consChaseEp]
+  },
+  'multi-action':{
+    conditions:['epilepsy','diabetes'],
+    strands:[
+      {cond:'epilepsy', state:'assessed',
+       note:'Your consultant wrote to us on 2 September 2026 and the team has read it. There is nothing else to do on this one.'},
+      {cond:'diabetes', state:'action', blocking:true,
+       note:'We need an eye test before we can finish looking at your diabetes. Only you can book it.'}
+    ],
+    title:'You need to book an eye test',
+    lead:'We have finished looking at your epilepsy. Before we can decide, we need a visual fields test because of your diabetes. It is free — we pay for it.',
+    who:'You. Your case is on hold with '+team.name+' until the test has happened.',
+    howLong:'Appointments are usually available within 2 to 3 weeks, and the results reach us about a week after that',
+    next:'When the results arrive, the team looks at both conditions together and makes one decision about your licence.',
+    due:'Book by 14 October 2026.',
+    ifNot:'If you do not book, we will decide on what we already hold. Because we would have nothing on your eyesight, that is likely to mean refusing your application.',
+    cta:'Book your eye test',
+    drive:{verdict:'yes', answer:'Yes, you can keep driving',
+      detail:'This covers both conditions. You can carry on driving while we look at your case, as long as your own doctor has not told you to stop, and as long as you are still meeting the blood glucose rules below.'},
+    timeline:[EV.received2, EV.opened2, EV.consEpilepsy, EV.epilepsyBack, EV.askEyeTest]
+  },
+  'multi-refused':{
+    conditions:['epilepsy','diabetes'],
+    strands:[
+      {cond:'epilepsy', state:'not-met', blocking:true,
+       note:'You have had two seizures while awake in the last 12 months. The standard is 12 months clear.'},
+      {cond:'diabetes', state:'assessed',
+       note:'Your diabetes met the standard for driving on its own.'}
+    ],
+    title:'We cannot give you a licence',
+    lead:'This is because of your epilepsy. Your diabetes met the standard on its own, but we have to be satisfied about every condition before we can give you a licence. We know this is not what you were hoping for.',
+    who:'No one. Your case is finished.',
+    howLong:'Nothing left to wait for',
+    next:'You can ask us to look at the decision again, or appeal to a magistrates court within 6 months. If you go 12 months without a seizure you can reapply, and we will not need to look at your diabetes again unless it has changed.',
+    drive:{verdict:'no', answer:'No, you must not drive',
+      detail:'Driving without a valid licence is a criminal offence and would invalidate your insurance. This applies whatever your blood glucose readings are — it is your epilepsy that stops you driving.'},
+    timeline:[EV.received2, EV.opened2, EV.gpDiabetes, EV.consEpilepsy, EV.gpDiabetesBack, EV.epilepsyBack, EV.decRefusedEp]
   }
 };
 
@@ -686,6 +817,26 @@ function renderDrive(){
     +'<p class="drive__detail">'+esc(d.detail)+'</p></div></div>';
 }
 
+/* 2. Your conditions. Absent when there is only one — a single-row
+      breakdown of a single condition is noise. When there is more than
+      one, the case can only be as far along as its slowest condition,
+      and this block is where that is said out loud. */
+function renderConditions(){
+  const k = content();
+  if(!k.strands || k.strands.length < 2) return '';
+  let rows = '';
+  k.strands.forEach(st=>{
+    const meta = STRAND[st.state];
+    rows += '<li class="strand'+(st.blocking?' strand--blocking':'')+'">'
+      +'<p class="strand__name">'+esc(CONDITIONS[st.cond].name)+'</p>'
+      +'<div class="strand__body"><span class="govuk-tag govuk-tag--'+meta.colour+'">'+esc(meta.label)+'</span>'
+      +'<p>'+esc(st.note)+'</p></div></li>';
+  });
+  return '<h2 class="govuk-heading-m">Your conditions</h2>'
+    +'<p class="govuk-body">You told us about more than one condition. We look at each one separately, then make a single decision about your licence.</p>'
+    +'<ul class="strands">'+rows+'</ul>';
+}
+
 /* 3. Timeline, newest first. The same state can appear more than
       once — a case that goes out for evidence and comes back is with
       a caseworker twice, and the timeline has to show that. */
@@ -712,21 +863,24 @@ function renderTimeline(){
 /* 4. Relevant information — condition guidance first, then the
       personal details the customer may need to quote on the phone. */
 function renderRelevant(){
-  return '<h2 class="govuk-heading-m">Driving with '+esc(condition.short)+'</h2>'
-    +'<p class="govuk-body">These rules apply whatever we decide about your case.</p>'
-    +'<ul class="govuk-body">'
-    +'<li>you must not drive for 12 months after a seizure, whether or not you have told us about it</li>'
-    +'<li>you must tell us about every seizure, even if you have already told your doctor</li>'
-    +'<li>tell us if your medication changes, including if you stop taking it</li>'
-    +'<li>if you drive a lorry or a bus the rules are stricter and the wait is longer</li>'
-    +'</ul>'
+  const k = content();
+  const conds = k.conditions || ['epilepsy'];
+  let guidance = '';
+  conds.forEach(c=>{
+    guidance += '<h2 class="govuk-heading-m">Driving with '+esc(CONDITIONS[c].short)+'</h2>'
+      +'<p class="govuk-body">These rules apply whatever we decide about your case.</p>'
+      +'<ul class="govuk-body">'+GUIDANCE[c]+'</ul>';
+  });
+  const label = conds.length > 1 ? 'Conditions you told us about' : 'Condition you told us about';
+  const value = conds.map(c=>CONDITIONS[c].name).join('<br>');
+  return guidance
     +'<h2 class="govuk-heading-m">Your details</h2>'
     +'<dl class="detail-list">'
     +'<div class="detail-list__row"><dt class="detail-list__key">Case reference</dt><dd class="detail-list__value">'+esc(caseRef)+'</dd></div>'
     +'<div class="detail-list__row"><dt class="detail-list__key">Name</dt><dd class="detail-list__value">'+esc(person.title+' '+person.name)+'</dd></div>'
     +'<div class="detail-list__row"><dt class="detail-list__key">Date of birth</dt><dd class="detail-list__value">'+esc(person.dob)+'</dd></div>'
     +'<div class="detail-list__row"><dt class="detail-list__key">Driving licence number</dt><dd class="detail-list__value">'+esc(person.licenceNo)+'</dd></div>'
-    +'<div class="detail-list__row"><dt class="detail-list__key">Condition you told us about</dt><dd class="detail-list__value">'+esc(condition.name)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">'+label+'</dt><dd class="detail-list__value">'+value+'</dd></div>'
     +'</dl>';
 }
 
@@ -753,7 +907,7 @@ function stub(e){ e.preventDefault(); alert('Not built in this prototype. This i
    ================================================================ */
 const LABELS = {
   'received':'Received, not yet opened',
-  'with-caseworker':'With a caseworker',
+  'with-caseworker':'With the team',
   'with-dvla-doctor':'With a DVLA doctor',
   'third-party-gp':'Waiting for your GP',
   'third-party-consultant':'Waiting for your consultant, chased twice',
@@ -768,7 +922,10 @@ const LABELS = {
   'decided-short':'Decided — short-term licence',
   'decided-refused':'Decided — refused',
   'decided-revoked':'Decided — revoked',
-  'closed':'Case closed'
+  'closed':'Case closed',
+  'multi-waiting':'Two conditions — one still waiting',
+  'multi-action':'Two conditions — one needs you',
+  'multi-refused':'Two conditions — refused because of one'
 };
 
 function renderTracker(){
@@ -785,6 +942,10 @@ function renderTracker(){
     + note('Driving comes before the case',
         '<p>The whiteboard put "can you drive" in a contextual information block below the timeline. It is moved up here because it is the question a customer actually opens this page to answer, and the one they will ring about if the page does not.</p>')
     + renderDrive()
+    + note('One case, several conditions',
+        '<p>A driver can tell us about two things at once, and they do not move at the same speed. The evidence for one can be back while the other is still with a consultant.</p>'
+       +'<p>The argument this block makes is that the case is only as far along as its slowest condition, and that saying which one is holding things up is what stops the call. Without it, a customer whose diabetes evidence came back three weeks ago reads the page as DVLA having lost their case.</p>')
+    + renderConditions()
     + renderTimeline()
     + note('Waiting is not the same as nothing happening',
         '<p>When DVLA is waiting on a third party the timeline shows when the request went out and whether it has been chased. Without that, a customer reading a four-week gap assumes their case has been forgotten. Showing the chase is what makes the wait legible rather than suspicious.</p>')
