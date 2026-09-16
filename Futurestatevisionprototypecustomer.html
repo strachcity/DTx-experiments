@@ -227,8 +227,9 @@ const person = {
 };
 
 const caseRef = 'DM-2026-482910';
+/* Teams, never individuals. A named caseworker puts a real member of
+   staff in front of whatever the customer feels about a decision. */
 const caseworker = {
-  name:'Ceri Hughes',
   team:'Medical Casework Team 4 (Neurological)',
   responseTime:'1 to 2 working days'
 };
@@ -893,7 +894,7 @@ function renderStatus(){
     +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Status</dt><dd class="govuk-summary-list__value"><span class="govuk-tag govuk-tag--'+s.tag+'">'+s.label+'</span></dd></div>'
     +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions reported</dt><dd class="govuk-summary-list__value">'+esc(conditionNames())+'</dd></div>'
     +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Expected update</dt><dd class="govuk-summary-list__value">'+(state.stage>=4?'Complete':'Usually within <strong>'+esc(caseworker.responseTime)+'</strong> for cases like yours')+'</dd></div>'
-    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Who is dealing with your case</dt><dd class="govuk-summary-list__value"><strong>'+esc(caseworker.name)+'</strong><br>'+esc(caseworker.team)+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Who is dealing with your case</dt><dd class="govuk-summary-list__value"><strong>'+esc(caseworker.team)+'</strong></dd></div>'
     +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">How we will contact you</dt><dd class="govuk-summary-list__value">'+({email:'Email and account notifications',text:'Text message',post:'Post'}[state.contactPref]||'Email')+'</dd></div>'
     +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can you drive?</dt><dd class="govuk-summary-list__value">'+(state.stage>=5?'Yes, under your medical driving licence.':'Yes, while we consider your case — unless your doctor has told you to stop.')+'</dd></div>'
     +'</dl>'
@@ -1160,7 +1161,7 @@ function renderSecondSeriesConfirm(){
     +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
     + detail
     +'<h2 class="govuk-heading-m">What happens next</h2>'
-    +'<p class="govuk-body">Your case is back with <strong>'+esc(caseworker.name)+'</strong>, '+esc(caseworker.team)+'. For cases like yours we usually make a decision within <strong>'+esc(caseworker.responseTime)+'</strong>.</p>'
+    +'<p class="govuk-body">Your case is back with <strong>'+esc(caseworker.team)+'</strong>. For cases like yours we usually make a decision within <strong>'+esc(caseworker.responseTime)+'</strong>.</p>'
     +'<div class="button-row">'
     +'<a class="govuk-button" href="#/status" style="text-decoration:none;">View your case status</a>'
     +'<a class="govuk-button govuk-button--secondary" href="#/account" style="text-decoration:none;">Return to your account</a>'
@@ -1232,7 +1233,7 @@ function renderOutcome(){
     +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Valid until</dt><dd class="govuk-summary-list__value">7 August 2029</dd></div>'
     +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions considered</dt><dd class="govuk-summary-list__value">'+esc(conditionNames())+'</dd></div>'
     +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Reason</dt><dd class="govuk-summary-list__value">The clinical information we received confirms your condition is well controlled and meets the medical standard for driving.</dd></div>'
-    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Decided by</dt><dd class="govuk-summary-list__value">'+esc(caseworker.name)+', '+esc(caseworker.team)+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Decided by</dt><dd class="govuk-summary-list__value">'+esc(caseworker.team)+'</dd></div>'
     +'</dl>'
     +'<h2 class="govuk-heading-m">What you need to do</h2>'
     +'<p class="govuk-body">Accept your licence online. You do not need to send us anything by post, and you do not need to return your current licence.</p>'
