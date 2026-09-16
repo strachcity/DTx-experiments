@@ -361,6 +361,121 @@ const GUIDANCE = {
     +'<li>keep fast-acting carbohydrate within reach in the vehicle</li>'
 };
 
+/* === LITE MODE ===
+   A second version of the same case, carrying no health data.
+
+   The argument: almost everything this page is for — where the case is,
+   who has it, how long that takes, what happens next, what you must do
+   and by when — contains no medical information at all. The condition
+   name earns its place in one block, the driving rules. So obfuscating
+   costs far less than it looks like it should.
+
+   What Lite removes: the condition names, the clinical rules, the named
+   clinicians and the organisations that imply a speciality, the team
+   name that gives away the condition category, and the personal details
+   that identify the customer. What it keeps: the answer.
+
+   NOT A LEGAL ASSESSMENT. This is a design response to an objection we
+   expect, not advice on UK GDPR Article 9. Whether it goes far enough is
+   for a DPO to say. */
+const REDACTIONS = [
+  /* Whole phrases first, longest first, so a single-word rule never
+     splits a phrase that has a better replacement. */
+  [/epilepsy or seizures and diabetes treated with insulin/gi, 'two conditions'],
+  [/diabetes treated with insulin/gi, 'a second condition'],
+  [/treated with insulin/gi, ''],
+  [/epilepsy or seizures/gi, 'your condition'],
+  [/the neurological conditions team/g, 'the casework team'],
+  [/The neurological conditions team/g, 'The casework team'],
+  [/the neurology department at Morriston Hospital/gi, 'the specialist'],
+  [/your most recent clinic letters/gi, 'the paperwork we needed'],
+  [/clinic letters/gi, 'paperwork'],
+  [/Dr Alison Pryce at Bryn Awel Surgery/g, 'your doctor'],
+  [/Dr Alison Pryce/g, 'Your doctor'],
+  [/Bryn Awel Opticians/g, 'the provider we asked'],
+  [/your visual fields test/g, 'the test we asked for'],
+  [/a visual fields test/g, 'a test we asked for'],
+  [/your blood glucose records/g, 'the records we asked for'],
+  [/a problem with your field of vision/g, 'something we needed to rule out'],
+  [/an independent doctor/g, 'an independent assessor'],
+  [/The independent doctor/g, 'The independent assessor'],
+  [/independent examination/g, 'independent assessment'],
+  [/a DVLA doctor/gi, 'a senior reviewer'],
+  [/One of our doctors/g, 'One of our senior reviewers'],
+  [/one of our doctors/g, 'one of our senior reviewers'],
+  [/our doctors see the most complex cases/g, 'our senior reviewers see the most complex cases'],
+  /* No article in the replacement — the sentence already supplies one,
+     and baking it in produced "The the evidence". */
+  [/medical evidence/gi, 'evidence'],
+  [/a medical examination/g, 'an assessment'],
+  [/your clinic letters/gi, 'the paperwork we needed'],
+  [/a recent letter from your consultant/g, 'a recent letter from the specialist'],
+  [/your consultant/g, 'the specialist'],
+  [/Your consultant/g, 'The specialist'],
+  [/your GP/g, 'your doctor'],
+  [/Your GP/g, 'Your doctor'],
+  [/Epilepsy or seizures/g, 'the first condition you told us about'],
+  [/Diabetes treated with insulin/g, 'the second condition you told us about'],
+  [/Epilepsy — /g, 'First condition — '],
+  [/Diabetes — /g, 'Second condition — '],
+  [/epilepsy or seizures and diabetes treated with insulin/g, 'two conditions'],
+  [/about your epilepsy/g, 'about the first one'],
+  [/about your diabetes/g, 'about the second one'],
+  [/your epilepsy/g, 'the first condition'],
+  [/your diabetes/g, 'the second condition'],
+  [/driving with epilepsy/g, 'driving with this condition'],
+  [/two seizures while awake in the last 12 months\. The standard is 12 months clear\./g,
+   'not met the standard. The letter we sent you explains why.'],
+  [/a seizure/g, 'a relevant event'],
+  [/another seizure/g, 'another event'],
+  [/epilepsy/g, 'the condition'],
+  [/diabetes/g, 'the other condition'],
+  [/medical condition case/g, 'case'],
+  [/your medical case/g, 'your case'],
+
+  /* Catch-alls, deliberately last. The rules above rewrite whole phrases
+     so they read naturally; these exist so that a term can never survive
+     just because of capitalisation or punctuation we did not anticipate.
+     A clumsy sentence is a bug. A leaked diagnosis is a breach. */
+  [/epilepsy or seizures/gi, 'your condition'],
+  [/neurology department at Morriston Hospital/gi, 'specialist'],
+  [/Morriston Hospital/gi, 'the hospital'],
+  [/neurolog[a-z]*/gi, 'specialist'],
+  [/consultants?/gi, 'specialist'],
+  [/seizure-free/gi, 'clear'],
+  [/seizures?/gi, 'event'],
+  [/diabetes/gi, 'the other condition'],
+  [/epilepsy/gi, 'the condition'],
+  [/\bGPs?\b/g, 'doctors'],
+  [/the medical standard for driving/gi, 'the standard for driving'],
+  [/medical standard/gi, 'standard'],
+  [/medical/gi, '']
+];
+function redact(v){
+  if(state.mode !== 'lite' || typeof v !== 'string') return v;
+  let out = v;
+  REDACTIONS.forEach(([re, to]) => { out = out.replace(re, to); });
+  /* Removing a word leaves the space it sat in. Tidy up, so redaction
+     never shows itself as a gap in the sentence. */
+  out = out.replace(/\s{2,}/g, ' ').replace(/\s+([.,])/g, '$1').trim();
+  /* A replacement can start lower case where the original started a
+     sentence. Restore the capital rather than leave redaction visible. */
+  if(/^[A-Z]/.test(v) && /^[a-z]/.test(out)) out = out.charAt(0).toUpperCase() + out.slice(1);
+  return out;
+}
+
+/* Driving stays, because it is the answer people open the page for. The
+   clinical rule behind it does not. Note what that costs: the honest
+   "it depends" can no longer say what it depends on, so it has to send
+   the customer back to the letter. That is the clearest thing in this
+   prototype about what obfuscation actually takes away. */
+const LITE_DRIVE = {
+  answers:{ depends:'It depends on your circumstances' },
+  yes:'You can carry on driving while we look at your case, as long as your own doctor has not told you to stop. This is because you held a valid licence when you told us about your condition.',
+  no:'Driving without a valid licence is a criminal offence and would invalidate your insurance. The letter we sent you explains what happens next.',
+  depends:'The letter we sent you explains what this depends on, and your own doctor can advise you. If you are not sure, do not drive until you have checked.'
+};
+
 /* === ACCESS ===
    No account and no GOV.UK One Login. The code arrives on the DVLA
    letter, and it works for as long as the case does. A medical case can
@@ -746,7 +861,7 @@ const CONTENT = {
 let state = {};
 function resetState(){
   state = { screen:'with-caseworker', showNotes:state.showNotes||false,
-            unlocked:false, attempts:0, authErrors:null };
+            mode:state.mode||'full', unlocked:false, attempts:0, authErrors:null };
 }
 resetState();
 
@@ -757,7 +872,24 @@ const app = () => document.getElementById('app');
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function navigate(h){ if(location.hash===h){ route(); } else { location.hash = h; } }
 function cur(){ return SCREENS[state.screen] || SCREENS['with-caseworker']; }
-function content(){ return CONTENT[state.screen] || CONTENT['with-caseworker']; }
+function content(){
+  const k = CONTENT[state.screen] || CONTENT['with-caseworker'];
+  if(state.mode !== 'lite') return k;
+  /* Redact a copy. The full content is never mutated, so switching back
+     to Full in a workshop always shows the original wording. */
+  const v = Object.assign({}, k);
+  ['title','lead','who','howLong','next','due','ifNot','cta'].forEach(f=>{ if(v[f]) v[f] = redact(v[f]); });
+  if(k.chase) v.chase = { title:redact(k.chase.title), body:redact(k.chase.body) };
+  if(k.drive) v.drive = { verdict:k.drive.verdict,
+    answer:LITE_DRIVE.answers[k.drive.verdict] || redact(k.drive.answer),
+    detail:LITE_DRIVE[k.drive.verdict] };
+  if(k.timeline) v.timeline = k.timeline.map(e=>({ date:e.date, title:redact(e.title), body:redact(e.body) }));
+  if(k.strands) v.strands = k.strands.map((st,i)=>({ cond:st.cond, state:st.state, blocking:st.blocking,
+    label: i===0 ? 'The first condition you told us about' : 'The second condition you told us about',
+    note: redact(st.note) }));
+  return v;
+}
+function setMode(m){ state.mode = m; route(); }
 
 /* The prototype control lives inside this banner on purpose: it is the
    one part of the page already flagged as not a real service, so the
@@ -782,6 +914,14 @@ function warn(withControl, withKeys){
       +'<label for="state-switcher">Show this case as</label>'
       +'<select id="state-switcher" onchange="navigate(\'#/tracker/\'+this.value)">'+opts+'</select>'
       +'<a href="#/all-screens">All screens</a>'
+      +'</div>'
+      +'<div class="prototype-warning__control">'
+      +'<label for="mode-switcher">Version</label>'
+      +'<select id="mode-switcher" onchange="setMode(this.value)">'
+      +'<option value="full"'+(state.mode!=='lite'?' selected':'')+'>Full \u2014 names the condition</option>'
+      +'<option value="lite"'+(state.mode==='lite'?' selected':'')+'>Lite \u2014 no health data</option>'
+      +'</select>'
+      +'<span>Same case, same sign-in. Only what the page holds changes.</span>'
       +'</div>';
   }
   return html+'</div>';
@@ -864,7 +1004,7 @@ function renderConditions(){
   k.strands.forEach(st=>{
     const meta = STRAND[st.state];
     rows += '<li class="strand'+(st.blocking?' strand--blocking':'')+'">'
-      +'<p class="strand__name">'+esc(CONDITIONS[st.cond].name)+'</p>'
+      +'<p class="strand__name">'+esc(st.label || CONDITIONS[st.cond].name)+'</p>'
       +'<div class="strand__body"><span class="govuk-tag govuk-tag--'+meta.colour+'">'+esc(meta.label)+'</span>'
       +'<p>'+esc(st.note)+'</p></div></li>';
   });
@@ -901,6 +1041,20 @@ function renderTimeline(){
 function renderRelevant(){
   const k = content();
   const conds = k.conditions || ['epilepsy'];
+
+  if(state.mode === 'lite'){
+    /* The guidance block is the one place the condition name genuinely
+       earns its keep, so in this version it goes entirely rather than
+       being watered down into something vague. Saying less is honest;
+       saying it vaguely would not be. */
+    return '<h2 class="govuk-heading-m">Your case</h2>'
+      +'<dl class="detail-list">'
+      +'<div class="detail-list__row"><dt class="detail-list__key">Case reference</dt><dd class="detail-list__value">'+esc(caseRef)+'</dd></div>'
+      +'<div class="detail-list__row"><dt class="detail-list__key">Date we received it</dt><dd class="detail-list__value">7 August 2026</dd></div>'
+      +'</dl>'
+      +'<div class="govuk-inset-text"><p style="margin:0;">We do not show your name, your date of birth, your driving licence number or what you told us about on this page. The letter we sent you has those details.</p></div>';
+  }
+
   let guidance = '';
   conds.forEach(c=>{
     guidance += '<h2 class="govuk-heading-m">Driving with '+esc(CONDITIONS[c].short)+'</h2>'
@@ -977,7 +1131,7 @@ function renderStart(){
         '<p>Most of the people who use this are telling DVLA about a condition once, and will not come back for months. An account is a password to forget, a reset journey to build, and a barrier in front of an anxious customer.</p>'
        +'<p>The argument this screen makes is that a code on the letter we already send is enough. It is the same trade GOV.UK makes for checking driving information: two things the person already holds, and nothing new to remember.</p>')
     +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
-    +'<h1 class="govuk-heading-l">Check your medical condition case</h1>'
+    +'<h1 class="govuk-heading-l">'+(state.mode==='lite' ? 'Check your case' : 'Check your medical condition case')+'</h1>'
     +'<p class="auth-lede">See where your case is, what happens next, and whether you can drive.</p>'
     +'<h2 class="govuk-heading-m">What you will need</h2>'
     +'<ul class="auth-list govuk-body">'
@@ -1107,12 +1261,20 @@ function renderNoCode(){
 }
 
 function renderTracker(){
-  app().innerHTML = warn(true)
-    + note('Why there is no progress indicator',
+  const lite = state.mode === 'lite';
+  const introNote = lite
+    ? note('What this version hides, and what it costs',
+        '<p>This is the same case with no health data on the page. Gone: the condition names, the clinical driving rules, the named doctor and the specialist organisations, the team name that gave away the condition category, and your name, date of birth and licence number.</p>'
+       +'<p>What survives is almost everything the page was for \u2014 where the case is, who has it, how long that step usually takes, what happens next, and what you must do by when. That is the finding: the diagnosis was carrying very little of the value.</p>'
+       +'<p>The cost is concentrated in one place. Where the honest answer to "can I drive" is "it depends", this version can no longer say what it depends on, so it sends you back to the letter. Switch between the two versions on that screen to see the size of the trade.</p>')
+    : note('Why there is no progress indicator',
         '<p>A flight tracker can show a plane three quarters of the way across because the route is fixed. A medical case is not: it can go out to a GP, come back, and go out again. Any indicator of progress — a stepper, a bar, a percentage — would be wrong the first time that happened.</p>'
-       +'<p>So the page does not try. It answers where the case is now, and puts the real answer to "when" directly underneath, as a range with a reason attached.</p>')
+       +'<p>So the page does not try. It answers where the case is now, and puts the real answer to "when" directly underneath, as a range with a reason attached.</p>');
+
+  app().innerHTML = warn(true)
+    + introNote
     +'<span class="govuk-caption">Case '+esc(caseRef)+'</span>'
-    +'<h1 class="govuk-heading-l">Your medical condition case</h1>'
+    +'<h1 class="govuk-heading-l">'+(lite ? 'Your case' : 'Your medical condition case')+'</h1>'
     + note('The wait is a range with a reason',
         '<p>Over half of the calls this service takes are people asking where their case is. A status on its own is what generates that call. The argument this block makes is that a status is only useful bolted to two other things: how long this step usually takes, and what happens next.</p>'
        +'<p>Where the honest answer is that we do not know — the consultant who has not replied to three letters — it says so. A made-up range that passes would be worse.</p>')
