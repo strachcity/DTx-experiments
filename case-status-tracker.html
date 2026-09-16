@@ -239,6 +239,20 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .drive__detail{margin:0}
 @media(max-width:640px){.drive{padding:18px 20px;gap:15px}.drive__answer{font-size:19px}}
 
+/* --- Sign in / errors --- */
+.govuk-error-summary{border:5px solid var(--red);padding:20px 25px;margin-bottom:30px}
+.govuk-error-summary h2{margin:0 0 10px;font-size:24px}
+.govuk-error-summary ul{margin:0;padding-left:20px}
+.govuk-error-summary li{margin-bottom:6px}
+.govuk-error-summary a{color:var(--red);font-weight:700}
+.govuk-form-group--error{border-left:5px solid var(--red);padding-left:15px}
+.govuk-error-message{color:var(--red);font-weight:700;display:block;margin-bottom:10px}
+.govuk-input--error{border-color:var(--red)}
+.auth-lede{font-size:24px;line-height:1.3;margin:0 0 25px;max-width:30em}
+.auth-list{margin:0 0 25px;padding-left:20px}
+.auth-list li{margin-bottom:8px}
+.prototype-warning code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-weight:700;background:var(--white);padding:1px 5px;border:1px solid var(--mid-grey)}
+
 /* --- Conditions strand list ---
    Only ever shown when there is more than one condition. One row per
    condition, each carrying its own state, because they do not move at
@@ -346,6 +360,21 @@ const GUIDANCE = {
     +'<li>tell us if you have a severe hypo, or if you stop being able to feel one coming on</li>'
     +'<li>keep fast-acting carbohydrate within reach in the vehicle</li>'
 };
+
+/* === ACCESS ===
+   No account and no GOV.UK One Login. The code arrives on the DVLA
+   letter, and it works for as long as the case does. A medical case can
+   run for months; making someone re-register part way through is a call,
+   not a service.
+
+   PROTOTYPE VALUES — the working code and licence ending are printed in
+   the fictional-prototype banner on purpose. A form asking for a licence
+   number is an invitation to type a real one, and this is a workshop
+   artefact that must never collect real personal data. */
+const ACCESS = { code:'Kj7 4Pq 9Rt' };
+const MAX_ATTEMPTS = 5;
+const normalise = v => String(v == null ? '' : v).replace(/\s+/g, '').toUpperCase();
+const licenceEnd = () => person.licenceNo.slice(-8);
 
 const gp = { name:'Dr Alison Pryce', practice:'Bryn Awel Surgery' };
 const today = '15 September 2026';
@@ -716,7 +745,8 @@ const CONTENT = {
    ================================================================ */
 let state = {};
 function resetState(){
-  state = { screen:'with-caseworker', showNotes:state.showNotes||false };
+  state = { screen:'with-caseworker', showNotes:state.showNotes||false,
+            unlocked:false, attempts:0, authErrors:null };
 }
 resetState();
 
@@ -732,9 +762,15 @@ function content(){ return CONTENT[state.screen] || CONTENT['with-caseworker']; 
 /* The prototype control lives inside this banner on purpose: it is the
    one part of the page already flagged as not a real service, so the
    page below it can be read as the service and nothing else. */
-function warn(withControl){
+function warn(withControl, withKeys){
   let html = '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>'
     +'This is a fictional prototype of a Drivers Medical case status tracker. It does not show a real case, it makes no real DVLA licensing decisions, and all personal details shown are invented.';
+  if(withKeys){
+    html += '<div class="prototype-warning__control">'
+      +'<span>Use code <code>'+esc(ACCESS.code)+'</code> and licence ending <code>'+esc(licenceEnd())+'</code>. Never enter real details.</span>'
+      +'<a href="#" onclick="skipSignIn();return false;">Skip the sign-in</a>'
+      +'</div>';
+  }
   if(withControl){
     let opts = '';
     SCREEN_GROUPS.forEach(([title,keys])=>{
@@ -928,6 +964,148 @@ const LABELS = {
   'multi-refused':'Two conditions — refused because of one'
 };
 
+/* ================================================================
+   ACCESS — start, sign in, and the ways it goes wrong
+   ================================================================ */
+
+function skipSignIn(){ state.unlocked = true; state.authErrors = null; navigate('#/tracker/'+state.screen); }
+function signOut(){ state.unlocked = false; state.attempts = 0; state.authErrors = null; navigate('#/start'); }
+
+function renderStart(){
+  app().innerHTML = warn(false, true)
+    + note('Why there is no account',
+        '<p>Most of the people who use this are telling DVLA about a condition once, and will not come back for months. An account is a password to forget, a reset journey to build, and a barrier in front of an anxious customer.</p>'
+       +'<p>The argument this screen makes is that a code on the letter we already send is enough. It is the same trade GOV.UK makes for checking driving information: two things the person already holds, and nothing new to remember.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Check your medical condition case</h1>'
+    +'<p class="auth-lede">See where your case is, what happens next, and whether you can drive.</p>'
+    +'<h2 class="govuk-heading-m">What you will need</h2>'
+    +'<ul class="auth-list govuk-body">'
+    +'<li>the code from the letter we sent you</li>'
+    +'<li>the last 8 characters of your driving licence number</li>'
+    +'</ul>'
+    +'<p class="govuk-body">Your code works for as long as your case is open. There is no account to set up and no password to remember.</p>'
+    +'<a class="govuk-button govuk-button--start" href="#/signin" style="text-decoration:none;">Start now</a>'
+    +'<hr class="govuk-section-break">'
+    +'<h2 class="govuk-heading-m">If you do not have your letter</h2>'
+    +'<p class="govuk-body">You can <a href="#/no-code">get a new code</a>. We will not email it, because of what it gives access to.</p>'
+    +'</div></div>';
+}
+
+function renderSignIn(){
+  const e = state.authErrors || {};
+  const list = e.list || [];
+  let summary = '';
+  if(list.length){
+    summary = '<div class="govuk-error-summary" id="error-summary" tabindex="-1">'
+      +'<h2 class="govuk-heading-m">There is a problem</h2><ul>'
+      + list.map(f => '<li><a href="#" onclick="focusField(\''+f[0]+'\');return false;">'+esc(f[1])+'</a></li>').join('')
+      +'</ul></div>';
+  }
+  const grp = f => 'govuk-form-group' + (e[f] ? ' govuk-form-group--error' : '');
+  const inp = f => 'govuk-input' + (e[f] ? ' govuk-input--error' : '');
+  /* A field can be flagged without carrying its own message — when the
+     pair does not match, the message belongs to the pair, not to one
+     of them. An empty message element would be an empty panel. */
+  const msg = f => (e[f] && e[f].trim()) ? '<span class="govuk-error-message">'+esc(e[f])+'</span>' : '';
+
+  app().innerHTML = warn(false, true)
+    +'<a class="govuk-back-link" href="#/start">Back</a>'
+    + summary
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Enter your details</h1>'
+    +'<div class="'+grp('code')+'">'
+    +'<label class="govuk-label" for="code">Code from your letter</label>'
+    +'<span class="govuk-hint">It is 9 characters, in three groups. For example, '+esc(ACCESS.code)+'</span>'
+    + msg('code')
+    +'<input class="'+inp('code')+'" id="code" type="text" autocomplete="off" spellcheck="false" value="'+esc(e.codeValue||'')+'">'
+    +'</div>'
+    +'<div class="'+grp('licence')+'">'
+    +'<label class="govuk-label" for="licence">Last 8 characters of your driving licence number</label>'
+    +'<span class="govuk-hint">This is on the front of your licence, in section 5. For example, '+esc(licenceEnd())+'</span>'
+    + msg('licence')
+    +'<input class="'+inp('licence')+'" id="licence" type="text" autocomplete="off" spellcheck="false" value="'+esc(e.licenceValue||'')+'">'
+    +'</div>'
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'<p class="govuk-body" style="margin-top:20px;"><a href="#/no-code">I do not have my code</a></p>'
+    +'</div></div>';
+
+  document.getElementById('continue-btn').addEventListener('click', submitSignIn);
+  ['code','licence'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown', ev=>{ if(ev.key==='Enter') submitSignIn(); });
+  });
+  const sum = document.getElementById('error-summary');
+  if(sum) sum.focus();
+}
+
+function focusField(id){ const el = document.getElementById(id); if(el) el.focus(); }
+
+function submitSignIn(){
+  const codeRaw = document.getElementById('code').value;
+  const licRaw  = document.getElementById('licence').value;
+  const errors = { list:[], codeValue:codeRaw, licenceValue:licRaw };
+
+  if(!codeRaw.trim()){
+    errors.code = 'Enter the code from your letter';
+    errors.list.push(['code', errors.code]);
+  }
+  if(!licRaw.trim()){
+    errors.licence = 'Enter the last 8 characters of your driving licence number';
+    errors.list.push(['licence', errors.licence]);
+  }
+
+  if(!errors.list.length){
+    const ok = normalise(codeRaw) === normalise(ACCESS.code)
+            && normalise(licRaw)  === normalise(licenceEnd());
+    if(ok){
+      state.unlocked = true;
+      state.attempts = 0;
+      state.authErrors = null;
+      return navigate('#/tracker/'+state.screen);
+    }
+    state.attempts += 1;
+    if(state.attempts >= MAX_ATTEMPTS){
+      state.authErrors = null;
+      return navigate('#/locked');
+    }
+    /* Which of the two is wrong is not said on purpose — naming the
+       wrong field tells someone holding a stolen letter which half
+       they already have right. */
+    const m = 'The code and licence number do not match a case';
+    errors.code = m; errors.licence = ' ';
+    errors.list.push(['code', m]);
+  }
+  state.authErrors = errors;
+  route();
+}
+
+function renderLocked(){
+  app().innerHTML = warn(false, true)
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">You have tried too many times</h1>'
+    +'<p class="auth-lede">For your security we have stopped any more attempts on this case for 15 minutes.</p>'
+    +'<p class="govuk-body">If you are sure your details are right, check that you are reading the code from the most recent letter we sent you. Older codes stop working when we send a new one.</p>'
+    +'<h2 class="govuk-heading-m">If you would rather not wait</h2>'
+    +'<p class="govuk-body">Call us on <strong>0300 790 6806</strong>, Monday to Friday 8am to 5pm, Saturday 8am to 1pm. We can tell you where your case is over the phone.</p>'
+    +'<p class="govuk-body"><a href="#" onclick="signOut();return false;">Try again</a></p>'
+    +'</div></div>';
+}
+
+function renderNoCode(){
+  app().innerHTML = warn(false, true)
+    +'<a class="govuk-back-link" href="#/start">Back</a>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Get a new code</h1>'
+    +'<p class="auth-lede">We will post a new code to the address on your driving licence. It usually arrives within 5 working days.</p>'
+    +'<p class="govuk-body">We will not email or text it. The code opens your medical case, so we only send it to an address we already hold for you.</p>'
+    +'<p class="govuk-body">Sending a new code stops the old one working.</p>'
+    +'<a class="govuk-button" href="#" onclick="stub(event)" style="text-decoration:none;">Request a new code</a>'
+    +'<hr class="govuk-section-break">'
+    +'<h2 class="govuk-heading-m">If you need an answer sooner</h2>'
+    +'<p class="govuk-body">Call us on <strong>0300 790 6806</strong>. We can tell you where your case is without the code, once we have checked who you are.</p>'
+    +'</div></div>';
+}
+
 function renderTracker(){
   app().innerHTML = warn(true)
     + note('Why there is no progress indicator',
@@ -954,9 +1132,10 @@ function renderTracker(){
 }
 
 function renderAllScreens(){
-  let html = warn()+'<a class="govuk-back-link" href="#/tracker/'+esc(state.screen)+'">Back to the tracker</a>'
+  let html = warn()+'<a class="govuk-back-link" href="'+(state.unlocked ? '#/tracker/'+esc(state.screen) : '#/start')+'">'+(state.unlocked ? 'Back to the tracker' : 'Back to the start')+'</a>'
     +'<h1 class="govuk-heading-l">All screens</h1>'
-    +'<p class="govuk-body">Every state this case can be in. Each one opens the tracker directly, so a single state can be put on a screen in a workshop without clicking through anything first.</p>';
+    +'<p class="govuk-body">Every state this case can be in. Each one opens the tracker directly, so a single state can be put on a screen in a workshop without clicking through anything first.</p>'
+    + (state.unlocked ? '' : '<div class="govuk-inset-text"><p style="margin:0;">You are signed out, so these links will ask for the code first. <a href="#" onclick="skipSignIn();return false;">Skip the sign-in</a> to open any screen directly.</p></div>');
   SCREEN_GROUPS.forEach(([title,keys])=>{
     html += '<div class="index-group"><h3 class="govuk-heading-m">'+esc(title)+'</h3><ul class="index-list">';
     keys.forEach(k=>{ html += '<li><a href="#/tracker/'+k+'">'+esc(LABELS[k])+'</a></li>'; });
@@ -967,19 +1146,24 @@ function renderAllScreens(){
 
 function renderChrome(){
   let html = '<header class="govuk-header" role="banner"><div class="govuk-header__container">'
-    +'<a href="#/tracker/'+esc(state.screen)+'" class="govuk-header__logotype-text">'
+    +'<a href="'+(state.unlocked ? '#/tracker/'+esc(state.screen) : '#/start')+'" class="govuk-header__logotype-text">'
     +'<svg class="govuk-crown" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 97" fill="white" role="img" aria-label="GOV.UK Crown">'
     +'<path d="M25 30.2c3.5 1.5 7.7-.2 9.1-3.7 1.5-3.6-.2-7.8-3.9-9.2-3.6-1.4-7.6.3-9.1 3.9-1.4 3.5.3 7.5 3.9 9zM9 39.5c3.6 1.5 7.8-.2 9.2-3.7 1.5-3.6-.2-7.8-3.9-9.1-3.6-1.5-7.6.2-9.1 3.8-1.4 3.5.3 7.5 3.8 9zM4.4 57.2c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.5-1.5-7.6.3-9.1 3.8-1.4 3.5.3 7.6 3.9 9.1zm38.3-21.4c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.6-1.5-7.6.3-9.1 3.8-1.3 3.6.4 7.7 3.9 9.1zm64.4-5.6c-3.6 1.5-7.8-.2-9.1-3.7-1.5-3.6.2-7.8 3.8-9.2 3.6-1.4 7.7.3 9.2 3.9 1.3 3.5-.4 7.5-3.9 9zm15.9 9.3c-3.6 1.5-7.7-.2-9.1-3.7-1.5-3.6.2-7.8 3.7-9.1 3.6-1.5 7.7.2 9.2 3.8 1.5 3.5-.3 7.5-3.8 9zm4.7 17.7c-3.6 1.5-7.8-.2-9.2-3.8-1.5-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.3 3.5-.4 7.6-3.9 9.1zM89.3 35.8c-3.6 1.5-7.8-.2-9.2-3.8-1.4-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.4 3.6-.3 7.7-3.9 9.1zM69.7 17.7l8.9 4.7V9.3l-8.9 2.8c-.2-.3-.5-.6-.9-.9L72.4 0H59.6l3.5 11.2c-.3.3-.6.5-.9.9l-8.8-2.8v13.1l8.8-4.7c.3.3.6.7.9.9l-5 15.4v.1c-.2.8-.4 1.6-.4 2.4 0 4.1 3.1 7.5 7 8.1h.2c.3 0 .7.1 1 .1.4 0 .7 0 1-.1h.2c4-.6 7.1-4 7.1-8.1 0-.8-.1-1.7-.4-2.4V34l-5.1-15.4c.4-.2.7-.6 1-.9zM66 92.8c16.9 0 32.8 1.1 47.1 3.2 4-16.9 8.9-26.7 14-33.5l-9.6-3.4c1 4.9 1.1 7.2 0 10.2-1.5-1.4-3-4.3-4.2-8.7L108.6 76c2.8-2 5-3.2 7.5-3.3-4.4 9.4-10 11.9-13.6 11.2-4.3-.8-6.3-4.6-5.6-7.9 1-4.7 5.7-5.9 8-.5 4.3-8.7-3-11.4-7.6-8.8 7.1-7.2 7.9-13.5 2.1-21.1-8 6.1-8.1 12.3-4.5 20.8-4.7-5.4-12.1-2.5-9.5 6.2 3.4-5.2 7.9-2 7.2 3.1-.6 4.3-6.4 7.8-13.5 7.2-10.3-.9-10.9-8-11.2-13.8 2.5-.5 7.1 1.8 11 7.3L80.2 47c-4.6-5.5-10.3-8-14.1-8s-9.5 2.5-14.1 8l.7-18c3.9-5.5 8.5-7.7 11-7.3-.3 5.8-.9 12.8-11.1 13.8-7.2.6-12.9-2.9-13.5-7.2-.7-5 3.8-8.3 7.1-3.1 2.7-8.7-4.8-11.6-9.4-6.2 3.7-8.5 3.6-14.7-4.6-20.8-5.8 7.6-5 13.9 2.2 21.1-4.7-2.6-11.9.1-7.7 8.8 2.3-5.5 7.1-4.2 8.1.5.7 3.3-1.3 7.1-5.7 7.9-3.5.7-9-1.8-13.5-11.2 2.5.1 4.7 1.3 7.5 3.3l-4.7-15.4c-1.2 4.4-2.7 7.2-4.3 8.7-1.1-3-.9-5.3 0-10.2l-9.5 3.4c5 6.9 9.9 16.7 14 33.5 14.8-2.1 30.8-3.2 47.7-3.2z"/></svg>'
-    +'GOV.UK</a>'
-    +'<a class="govuk-header__signout" href="#" onclick="stub(event)">Sign out</a>'
-    +'</div></header>';
+    +'GOV.UK</a>';
+  if(state.unlocked) html += '<a class="govuk-header__signout" href="#" onclick="signOut();return false;">Sign out</a>';
+  html += '</div></header>';
 
-  html += '<div class="service-nav"><div class="service-nav__wrapper">'
-    +'<a class="service-nav__name" href="#" onclick="stub(event)">Driver and vehicles account</a>'
-    +'<div class="service-nav__links">'
-    +'<a class="service-nav__link" href="#" onclick="stub(event)">Messages</a>'
-    +'<a class="service-nav__link" href="#" onclick="stub(event)">Manage your account</a>'
-    +'</div></div></div>';
+  /* The account bar only exists once the code has been accepted. Showing
+     "Manage your account" to someone who has not got in yet promises an
+     account this service deliberately does not have. */
+  if(state.unlocked){
+    html += '<div class="service-nav"><div class="service-nav__wrapper">'
+      +'<a class="service-nav__name" href="#" onclick="stub(event)">Driver and vehicles account</a>'
+      +'<div class="service-nav__links">'
+      +'<a class="service-nav__link" href="#" onclick="stub(event)">Messages</a>'
+      +'<a class="service-nav__link" href="#" onclick="stub(event)">Manage your account</a>'
+      +'</div></div></div>';
+  }
 
   html += '<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper">'
     +'<span class="govuk-phase-banner__tag">Prototype</span>'
@@ -995,20 +1179,31 @@ function renderChrome(){
 /* ================================================================
    ROUTER
    ================================================================ */
+/* Reachable without the code. All screens stays outside the gate on
+   purpose — it is prototype furniture, and a workshop should not have
+   to sign in before putting a single state on a screen. */
+const OPEN_ROUTES = ['#/start','#/signin','#/no-code','#/locked','#/all-screens'];
+
 function route(){
-  const hash = location.hash || '#/tracker/with-caseworker';
+  const hash = location.hash || '#/start';
   const parts = hash.split('/');
-  const base = '#/' + (parts[1] || 'tracker');
+  const base = '#/' + (parts[1] || 'start');
   const arg = parts[2];
   window.scrollTo(0,0);
 
   if(base === '#/tracker' && arg && SCREENS[arg]) state.screen = arg;
+  if(!state.unlocked && OPEN_ROUTES.indexOf(base) === -1) return navigate('#/start');
+  if(base !== '#/signin') state.authErrors = null;
   renderChrome();
 
   switch(base){
+    case '#/start':       renderStart(); break;
+    case '#/signin':      renderSignIn(); break;
+    case '#/no-code':     renderNoCode(); break;
+    case '#/locked':      renderLocked(); break;
     case '#/all-screens': renderAllScreens(); break;
     case '#/tracker':     renderTracker(); break;
-    default:              renderTracker(); break;
+    default:              state.unlocked ? renderTracker() : renderStart(); break;
   }
 }
 window.addEventListener('hashchange',route);
