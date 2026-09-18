@@ -2,17 +2,13 @@
 
 Design judgement for the CustomerFirst Drivers Medical prototypes. `CLAUDE.md` covers how to build here. This file covers what a screen should look like and say, and why.
 
-No token block. The GDS palette, type scale and spacing already live as CSS variables in the prototype you are extending, and that is the single source of truth. Read them from there.
+No token block. The GDS palette, type scale and spacing live as CSS variables in `components.html`, and that is the single source of truth. Read them from there.
 
 This file is short on purpose and grows only from real failures. Every line should trace back to a generation where the output was wrong.
 
 ## Overview
 
-<!-- TO WRITE, by Jack, after looking at the first built screen. Two or three
-     concrete sentences on what this service should feel like. Not "clean and
-     modern". Closer to: who the customer is at the moment they open this, what
-     they are afraid of, and what restraint that demands. Leave blank rather
-     than filling with something vague. -->
+Most people opening this screen are waiting to find out whether they can still drive, and for many the licence is how they get to work, to hospital, or to someone they look after. What frightens them is the silence. An open-ended wait with nothing visible inside it reads as a decision already being taken about them, out of sight, so what this service needs is definiteness: say what is happening, who holds the case and roughly how long, even when the honest answer is bad news or that DVLA does not know.
 
 ## What prominence is for
 

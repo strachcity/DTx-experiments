@@ -1,6 +1,6 @@
 # DTx-experiments
 
-HTML prototypes for CustomerFirst, the DSIT/GDS partnership transforming the DVLA Drivers Medical service. These are workshop artefacts used to make service design arguments visible. They get thrown away and rebuilt often.
+HTML prototypes for CustomerFirst, the DSIT/GDS partnership transforming the DVLA Drivers Medical service. These are workshop artefacts used to make service design arguments visible, and to develop concepts and draw out requirements. They are not an attempt at final UI design, and they get thrown away and rebuilt often.
 
 For anything affecting what a screen looks like or says, follow `DESIGN.md`.
 
@@ -18,7 +18,7 @@ Every prototype is one self-contained HTML file at the repo root, named for what
 
 Read the prototype you are extending as well, for how a screen is assembled from those parts. Anything in it specific to that one prototype — a case-status hero, a condition strand — stays there and does not belong in `components.html`.
 
-`components.html` carries the GOV.UK rebrand palette, read from `govuk-frontend` 6.0.0 rather than guessed. The three prototypes built before it still carry the older values, so a new prototype will not match them exactly. That was a deliberate choice, not drift: do not "fix" the older files to match without being asked.
+`components.html` carries the GOV.UK rebrand palette, read from `govuk-frontend` 6.0.0 rather than guessed. The prototypes built before it carry the older values. These are loose prototypes for demonstrating concepts, so exact visual consistency between them is not a goal and not worth spending time on. Do not retrofit the older files unless asked.
 
 ## Journey structure
 
@@ -38,7 +38,7 @@ A conditional reveal is a page you decided not to make. Fine for one short follo
 - The fictional-prototype warning banner and the "Prototype — this is not a real service" phase banner.
 - A `note()` design-note toggle, off by default. Design notes are prototype annotations, not service UI.
 - An "All screens" index so any single screen can be opened directly in a workshop.
-- Invented personal details only. Never anything resembling a real licence number or a real person.
+- Invented personal details only. Dummy data that looks like the real thing is good, because a plausible-looking record makes the screen easier to argue about. What matters is that it belongs to nobody: never a real person, and never a licence number issued to anyone.
 
 ## How to work here
 
