@@ -1,8 +1,10 @@
 # DTx-experiments
 
-HTML prototypes for CustomerFirst, the DSIT/GDS partnership transforming the DVLA Drivers Medical service.
+HTML prototypes for service design work, built to GOV.UK patterns.
 
 These are workshop artefacts. They exist to make a service design argument visible quickly, so a room can disagree with something concrete instead of with a description of it. They are here to develop concepts and draw out requirements, and they are not an attempt at final UI design. Expect them to be thrown away and rebuilt.
+
+Everything currently in here comes from the DVLA Drivers Medical work, and more projects will follow. While there are few enough prototypes for a flat list to stay readable, they sit at the root. Once that stops being true they move into a folder per project, with `components.html` staying at the root because it is shared.
 
 Nothing here is a real service. Every prototype carries a fictional-prototype warning and a prototype phase banner, every case is invented, no screen makes or reports a real licensing decision, and all personal details are dummy data.
 

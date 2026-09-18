@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Drivers Medical — Components</title>
+<title>Prototype components</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
@@ -200,13 +200,13 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 <div id="app"></div>
 <footer class="govuk-footer" role="contentinfo">
   <div class="govuk-footer__wrapper">
-    <p class="govuk-footer__meta-item">Drivers Medical component reference &mdash; Fictional, for workshop use only. Not a real DVLA or GOV.UK service. All personal details shown are invented.</p>
+    <p class="govuk-footer__meta-item">Prototype component reference &mdash; Fictional, for workshop use only. Not a real GOV.UK service. All personal details shown are invented.</p>
   </div>
 </footer>
 
 <script>
 /* ================================================================
-   DRIVERS MEDICAL — COMPONENT REFERENCE
+   PROTOTYPE COMPONENT REFERENCE
    The single authority for the govuk-* layer used by every prototype
    in this repo. Copy the <style> block from here, not from whichever
    prototype you happened to open.
@@ -277,7 +277,7 @@ function block(title, body){
 
 function warn(){
   return '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>'
-    +'This is a component reference for the Drivers Medical prototypes. It is not a real DVLA or GOV.UK service, it makes no licensing decisions, and every name, reference and licence number shown is invented.'
+    +'This is the component reference for the prototypes in this repo. It is not a real GOV.UK service and it makes no real decisions. The examples use Drivers Medical content because that is the work in hand; every name, reference and licence number is invented.'
     +'</div>';
 }
 
@@ -497,7 +497,7 @@ function renderChrome(inner){
     +'</div></header>';
 
   html += '<div class="service-nav"><div class="service-nav__wrapper">'
-    +'<a class="service-nav__name" href="#/all-screens">Drivers Medical &mdash; component reference</a>'
+    +'<a class="service-nav__name" href="#/all-screens">Prototype component reference</a>'
     +'</div></div>';
 
   html += '<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper">'
@@ -529,7 +529,7 @@ function route(){
   state.screen = RENDER[key] ? key : 'all-screens';
   document.getElementById('app').innerHTML = renderChrome(RENDER[state.screen]());
   const t = SCREENS[state.screen];
-  document.title = 'Drivers Medical — ' + (t ? t.title : 'Components');
+  document.title = (t ? t.title : 'Prototype components');
   window.scrollTo(0,0);
 }
 

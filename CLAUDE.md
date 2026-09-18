@@ -1,8 +1,10 @@
 # DTx-experiments
 
-HTML prototypes for CustomerFirst, the DSIT/GDS partnership transforming the DVLA Drivers Medical service. These are workshop artefacts used to make service design arguments visible, and to develop concepts and draw out requirements. They are not an attempt at final UI design, and they get thrown away and rebuilt often.
+HTML prototypes for service design work, built to GOV.UK patterns. These are workshop artefacts used to make service design arguments visible, and to develop concepts and draw out requirements. They are not an attempt at final UI design, and they get thrown away and rebuilt often.
 
-For anything affecting what a screen looks like or says, follow `DESIGN.md`.
+The repo holds more than one project. Prototypes sit flat at the root while there are few enough for that to be readable; when that stops being true they move into a folder per project, and `components.html` stays at the root because it is shared. Do not create that structure before it is needed.
+
+For anything affecting what a screen looks like or says, follow `DESIGN.md`. It is scoped to the DVLA Drivers Medical prototypes, so a new project needs its own design judgement rather than inheriting that one.
 
 ## Conventions
 
