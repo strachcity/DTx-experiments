@@ -1,6 +1,6 @@
 # DESIGN.md
 
-Design judgement for the CustomerFirst Drivers Medical prototypes. `CLAUDE.md` covers how to build here. This file covers what a screen should look like and say, and why.
+Design judgement for the DVLA Drivers Medical prototypes, and for those only. `CLAUDE.md` covers how to build anything in this repo. This file covers what a screen in this one service should look like and say, and why. Another project needs its own version of this file, not a stretched reading of this one.
 
 No token block. The GDS palette, type scale and spacing live as CSS variables in `components.html`, and that is the single source of truth. Read them from there.
 
