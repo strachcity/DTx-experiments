@@ -4110,7 +4110,7 @@ const PROPOSED = "Suggested";
 const FEAT_SUG = {
   "FR1-F3":{t:"Suggest two additions. Lorry and bus licences always go to BAU, because NewCo won't handle them. And the team can switch first-notification routing to NewCo on or off, to control how fast the cohort grows.",add:"And the licence is not for a lorry or bus\nAnd first-notification routing to NewCo is switched on"},
   "FR2-F2":{t:"Your team-closed script (FR2-01) already offers an adviser with “press 2”. FR2-05, FR2-06 and FR2-07 say the caller must not be directed to BAU. Suggest bringing these in line with the script."},
-  "FR3-F3":{t:"Suggest saying these responses apply to the BAU queue only. On the NewCo branch, the callback offer in the NewCo queue does this job, so a cohort caller is never cut off."},
+  "FR3-F3":{t:"Suggest saying these responses apply to the BAU queue only, so a cohort caller waiting for their team is never cut off."},
   "FR4-F7":{t:"Suggest two additions. Transfer only while the NewCo team is open. And the same transfer for phone calls, since this feature covers web chat only.",add:"Given the NewCo team is within its operating hours"}
 };
 
@@ -4118,7 +4118,7 @@ const FEAT_SUG = {
 const SUG = {
   "FR1-08":{t:"The script says “the team looking after your case”, but a first-notification caller has no case yet. Consider no message here, or “We're putting you through to an adviser.”"},
   "FR1-17":{t:"Consider keypad entry as well as saying the number out loud. Some customers' conditions affect their speech. This is the BAU prompt, so it's for DM to decide."},
-  "FR2-02":{t:"Suggest that while the team is open, cohort callers wait in the NewCo queue and are offered a callback, instead of hearing the unavailable message. This was agreed on 26 September.",add:"Then the call must join the NewCo queue for that team\nAnd the caller must be offered a callback from the team"},
+  "FR2-02":{t:"Suggest that while the team is open, cohort callers wait in the NewCo queue instead of hearing the unavailable message. This was agreed on 26 September.",add:"Then the call must join the NewCo queue for that team"},
   "FR2-09":{t:"Suggest that hanging up also saves the message. Most people hang up rather than press a key, and would otherwise lose their message without knowing.",add:"When the customer finishes the recording by pressing hash or by hanging up"},
   "FR4-08":{t:"Suggest one name for the reference everywhere, matching the letters. It's currently “case reference number” here, “MRN” on the phone map and “medical reference number” in web chat."},
   "FR7-02":{t:"Suggest adding when it starts working. The routing table updates once a day, so a reference given today routes to BAU until the next day.",add:"And explain that from the next working day, it will put them through to the team looking after their case"}
@@ -4147,7 +4147,7 @@ const SCRIPTS = {
   ref_prompt:{n:"Asking for the reference",src:"sug",t:"Please say your case reference number, or enter it using your keypad. You'll find it [where it appears on letters and emails]. If you don't have it, stay on the line."},
   ref_format:{n:"Reference in the wrong format",src:"sug",t:"Sorry, that doesn't look like a case reference number. Please try again."},
   connect_team:{n:"Connecting to a NewCo agent",src:"req",req:"FR1-08",t:"Thank you. We're putting you through to the team looking after your case."},
-  queue_msg:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Estimated wait.] If you'd like them to call you back instead, press 1.",note:"The web chat text isn't offered again here: the caller already heard that offer in the BAU options."},
+  queue_msg:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Estimated wait.]"},
   callback_ok:{n:"Callback confirmed",src:"sug",t:"Thank you. The team looking after your case will call you back [timing: team to decide]. Please keep your phone nearby."},
   team_closed:{n:"Team closed, BAU open",src:"req",req:"FR2-01",t:"The team looking after your case is closed at the moment. They're open [days and hours]. You can leave them a message and they'll call you back. Or an adviser can help you now.\nTo leave a message for your team, press 1. To speak to an adviser now, press 2."},
   closing:{n:"Closing message",src:"sug",t:"Thank you for calling. The team looking after your case is open [days and hours]. Please call back then, and have your case reference number ready. Goodbye."},
@@ -4169,9 +4169,9 @@ const OI = [
   {id:"d_queue",cat:"decided",t:"While the team is open, cohort customers wait for it",d:"A NewCo reference goes to the NewCo queue while the team is open. BAU is offered only when the team is closed.",n:["phone:p_open2","phone:p_q","chat:w_open2","chat:w_q"],r:["FR2-02"]},
   {id:"d_bau",cat:"decided",t:"BAU advisers can help NewCo customers",d:"They can do everything they do today. The contact is logged on the case so the team can follow up.",n:["phone:p_advend","phone:p_helprec","chat:w_helprec"]},
   {id:"d_xfer",cat:"decided",t:"BAU can transfer to the team while it's open",d:"On phone and web chat, only in the team's hours.",n:["phone:p_open3","chat:w_open3"]},
-  {id:"d_cb",cat:"decided",t:"Callbacks while the team is open, voicemail when it's closed",d:"A callback request is checked against the NewCo table.",n:["phone:p_cbhrs","phone:p_doa"],r:["FR2-S1","FR2-S2"]},
-  {id:"d_once",cat:"decided",t:"Don't ask or offer the same thing twice",d:"The reference is reused once given. The web chat text isn't offered again in the NewCo queue.",n:["phone:p_hasref","phone:p_q"],r:["FR2-S1"]},
-  {id:"d_dm",cat:"decided",t:"Demand management stays on the BAU queue",d:"The pilot is about 2% of customers. The callback offer is the relief if the NewCo queue gets long.",n:["phone:p_q"]},
+  {id:"d_cb",cat:"decided",t:"Callbacks while the team is open, voicemail when it's closed",d:"A callback asked for in the BAU options is checked against the NewCo table.",n:["phone:p_cbhrs"],r:["FR2-S1","FR2-S2"]},
+  {id:"d_once",cat:"decided",t:"Don't ask for the reference twice",d:"The reference is reused once given.",n:["phone:p_hasref"],r:["FR2-S1"]},
+  {id:"d_dm",cat:"decided",t:"Demand management stays on the BAU queue",d:"The pilot is about 2% of customers, so the NewCo queue isn't expected to get long.",n:["phone:p_q"]},
   {id:"d_hang",cat:"decided",t:"Hanging up saves the voicemail",d:"",n:["phone:p_vm"],r:["FR2-09"]},
   {id:"d_lorry",cat:"decided",t:"NewCo won't handle lorry or bus licences",d:"",n:["phone:p_lorrybau"]},
   {id:"d_switch",cat:"decided",t:"First-notification routing can be switched off",d:"To control how fast the cohort grows.",n:["phone:p_sw"]},
@@ -4179,6 +4179,7 @@ const OI = [
   {id:"d_wcmsg",cat:"decided",t:"Web chat doesn't take messages for the team",d:"",n:["chat:w_tc"]},
   {id:"d_outcomes",cat:"decided",t:"Routing outcomes are a requirement",d:"",n:["phone:p_cant","chat:w_cant"],r:["FR6-S1","FR6-S2"]},
 
+  {id:"t_queuecb",cat:"team",t:"Whether to offer a callback while waiting in the NewCo queue",d:"Not on the map for now. Callers can already ask for a callback in the BAU options before they give their reference. An offer in the NewCo queue would help if waits get long.",who:"NewCo team",n:["phone:p_q"]},
   {id:"t_timing",cat:"team",t:"How quickly NewCo calls back",d:"Left open for the team. Scripts show a placeholder.",who:"NewCo team",n:["phone:p_cbok","phone:p_vmok"],r:["FR2-22"]},
   {id:"t_hours",cat:"team",t:"NewCo operating hours",d:"The requirements give 5:00pm in one place and 8:30 to 4:30 in another.",who:"NewCo team",n:["phone:p_open2","chat:w_open2"],r:["FR2-01"]},
   {id:"t_outbound",cat:"team",t:"How customers know a callback is really DVLA",d:"The number callbacks come from, and what the agent says before asking for details.",who:"NewCo team",n:["phone:p_cbq","phone:p_vmq"]},
@@ -4271,11 +4272,9 @@ const PHONE = {
     {id:"p4",t:"NewCo team open",nodes:[
       {id:"p_connect",type:"step",k:"req",l:"Told they're being put through to their team",sc:["connect_team"],r:["FR1-13"]},
       {id:"p_q",type:"step",k:"prop",l:"Waits in the NewCo queue",sc:["queue_msg"],d:"Suggested: in hours the caller waits for their team rather than hearing the unavailable message.",r:["FR2-02","FR2-03"]},
-      {id:"p_doa",type:"q",k:"prop",dflt:"Waits",l:"What does the caller do?"},
-      {id:"p_agent",type:"end",k:"req",l:"NewCo agent answers",r:["FR2-03","FR6-01"]},
-      {id:"p_gocb2",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"}
+      {id:"p_agent",type:"end",k:"req",l:"NewCo agent answers",r:["FR2-03","FR6-01"]}
     ],edges:[
-      ["p_connect","p_q"],["p_q","p_doa"],["p_doa","p_agent","Waits"],["p_doa","p_gocb2","Presses 1: callback"]
+      ["p_connect","p_q"],["p_q","p_agent"]
     ]},
     {id:"p5",t:"NewCo team closed, BAU open",nodes:[
       {id:"p_tc",type:"step",k:"req",l:"Told the team is closed: leave a message or speak to an adviser",sc:["team_closed"],r:["FR2-01"]},
@@ -4700,7 +4699,7 @@ function reqHTML(id,withLinks){
     if(SUG[id]) body+=sugBlock(SUG[id],"Suggestion");
     const fs=FEAT_SUG[FEAT_OF[id]]; if(fs) body+=sugBlock(fs,`Suggestion on the feature “${esc(FEAT_BY_ID[FEAT_OF[id]].t)}”`);
   }
-  return `<div class="req"><div class="head"><span class="id">${id}</span><strong>${esc(s.title)}</strong>${tag(S.t,S.c)}</div>${body}${withLinks?`<div class="part"><a href="#/reqs/${id}">Open in the requirements page</a></div>`:""}</div>`;
+  return `<div class="req"><div class="head"><span class="id">${id}</span><strong>${esc(s.title)}</strong>${st==="same"?"":tag(S.t,S.c)}</div>${body}${withLinks?`<div class="part"><a href="#/reqs/${id}">Open in the requirements page</a></div>`:""}</div>`;
 }
 function renderSide(){
   const body=$("#sidebody"); if(!body) return;
