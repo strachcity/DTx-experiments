@@ -115,6 +115,7 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .sw.today{background:#f3f3f3;border-color:#858686}
 .sw.req{background:#d2e2f1;border-color:var(--blue)}
 .sw.prop{background:#f4d7e5;border-color:#651b3e;border-style:dashed}
+.sw.ans{background:var(--white);border:1.5px solid var(--black);border-radius:6px}
 .sw.route{height:0;border:0;border-top:4px solid var(--blue);width:26px}
 .diam{width:12px;height:12px;background:var(--black);transform:rotate(45deg);display:inline-block;margin:0 3px}
 .enddot{width:13px;height:13px;border-radius:50%;background:var(--black);display:inline-block}
@@ -124,6 +125,8 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .lane{background:var(--light-grey);border:1px solid #dfe5eb}
 .lane h2{margin:0;background:#505a5f;color:var(--white);font-size:16px;line-height:1.3;padding:8px 14px;scroll-margin-top:20px}
 .lane h2 .n{font-weight:400;opacity:.85;margin-right:6px}
+.lanestart{font:inherit;font-size:14px;font-weight:400;margin-left:12px;background:none;border:0;color:var(--white);text-decoration:underline;cursor:pointer;padding:0}
+.lanestart:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--black)}
 .lane svg{display:block}
 
 /* svg */
@@ -144,6 +147,10 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .node .dot{fill:var(--black)}
 .node .goto{fill:var(--white);stroke:var(--blue);stroke-width:2}
 .node .gototext{fill:var(--link);text-decoration:underline}
+.node .ans{fill:var(--white);stroke:var(--black);stroke-width:1.5}
+.node .anstext{font-size:13.5px}
+.node.on .ans{fill:#1d70b8;stroke:#1d70b8;stroke-width:3}
+.node.on .anstext{fill:var(--white);font-weight:700}
 .node.on .box{stroke:var(--blue);stroke-width:4;stroke-dasharray:none}
 .node.on .diamond,.node.on .dot{fill:var(--blue)}
 .node.on .goto{stroke-width:4}
@@ -199,6 +206,9 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .req .lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
 .req .g{white-space:pre-line;margin:0;font-size:15px;overflow-wrap:anywhere}
 .req .why{margin:8px 0 0;font-size:15px}
+.answers li{margin-bottom:12px}
+.answers .linkbtn{font-size:16px}
+.answers .linkbtn[aria-pressed="true"]{font-weight:700}
 .transcript{list-style:none;margin:0;padding:0}
 .transcript li{padding:10px 0;border-top:1px solid var(--mid-grey);white-space:pre-line}
 .transcript li:first-child{border-top:0}
@@ -4275,8 +4285,10 @@ const OICAT = {
 /* ====================================================================
    The map. One lane per part of the journey, as in the Mural.
    kind: today (existing BAU), req (in the requirements), prop (proposed)
-   type: step | q (question, a diamond) | end (a dot) | go (jump to a lane)
-   Every question lists every answer. Nothing is decided off the map.
+   type: step | q (question) | end | go (jump to another lane)
+   Every answer to a question is drawn as its own box on the map, so
+   every option a customer has is visible. Select an answer to follow it.
+   Edge: [from, to, answer label, what the customer does]
    ==================================================================== */
 const PHONE = {
   key:"phone", name:"Phone", sys:"Phone line", start:"p_start",
@@ -4285,34 +4297,44 @@ const PHONE = {
       {id:"p_start",type:"step",k:"today",l:"Customer calls the DVLA medical line",d:"One number for everyone.",r:["FR1-01"]},
       {id:"p_open",type:"q",k:"today",l:"Are BAU phone lines open?",d:"The existing time-of-day check."},
       {id:"p_closed",type:"end",k:"today",l:"Existing closed message. Call ends.",d:"We think this plays before any NewCo step, so NewCo needs no “everything closed” message. Telecoms to confirm."},
-      {id:"p_msgs",type:"step",k:"today",l:"Existing messages: wait times, web chat",d:"Unchanged."},
-      {id:"p_welsh",type:"q",k:"today",l:"Wants to speak Welsh?",d:"Welsh speakers are served by BAU during the pilot, even if their case is with NewCo."},
+      {id:"p_msgs",type:"step",k:"today",l:"Told about wait times and that web chat is quicker",d:"Existing message."},
+      {id:"p_welsh",type:"q",dflt:"Presses 2: no",k:"today",l:"Asked: do you want to speak Welsh?",d:"Welsh speakers are served by BAU during the pilot, even if their case is with NewCo."},
       {id:"p_welshend",type:"end",k:"today",l:"Welsh journey, as today"},
-      {id:"p_says",type:"step",k:"today",l:"Says what they need help with",d:"Unchanged."},
-      {id:"p_type",type:"q",k:"today",l:"Existing application or new condition?",d:"The existing menu choice.",r:["FR1-01","FR1-02"]},
-      {id:"p_go2",type:"go",to:"p_lic",l:"Go to lane 2: New condition"},
+      {id:"p_says",type:"step",k:"today",l:"Says out loud what they need help with",d:"Existing speech step."},
+      {id:"p_type",type:"q",k:"today",l:"Menu: existing application or new condition?",d:"The existing menu.",r:["FR1-01","FR1-02"]},
+      {id:"p_go2",type:"go",to:"p_lorry",l:"Go to lane 2: New condition"},
       {id:"p_go3",type:"go",to:"p_ref",l:"Go to lane 3: Find the case"}
     ],edges:[
       ["p_start","p_open"],["p_open","p_msgs","Yes"],["p_open","p_closed","No"],
-      ["p_msgs","p_welsh"],["p_welsh","p_says","No"],["p_welsh","p_welshend","Yes"],
-      ["p_says","p_type"],["p_type","p_go3","Existing application","Presses 1: already has an application"],["p_type","p_go2","New condition","Presses 2: reporting a new condition"]
+      ["p_msgs","p_welsh"],["p_welsh","p_welshend","Presses 1: yes"],["p_welsh","p_says","Presses 2: no"],
+      ["p_says","p_type"],["p_type","p_go3","Presses 1: already have an application"],["p_type","p_go2","Presses 2: reporting a new condition"]
     ]},
     {id:"p2",t:"New condition",nodes:[
-      {id:"p_lic",type:"step",k:"today",l:"Asked what type of licence it is",d:"Unchanged."},
-      {id:"p_lorry",type:"q",k:"prop",l:"Lorry or bus licence?",d:"NewCo won't handle lorry or bus licences.",r:["FR1-N1"]},
-      {id:"p_sw",type:"q",k:"prop",l:"New-condition routing switched on?",d:"The team can switch this off to control how fast the cohort grows.",r:["FR1-N2","FR1-N5","FR1-N6","FR1-N7"]},
+      {id:"p_lorry",type:"q",dflt:"Presses 2: any other vehicle",k:"today",l:"Menu: what type of licence is this about?",d:"Existing menu. Proposed: NewCo won't take lorry or bus licences.",r:["FR1-N1"]},
+      {id:"p_onl1",type:"q",dflt:"Presses 2: speak to an adviser",k:"today",l:"Told they can do this online. Text link or adviser?",d:"Existing offer."},
+      {id:"p_onl2",type:"q",dflt:"Presses 2: speak to an adviser",k:"today",l:"Told they can do this online. Text link or adviser?",d:"Existing offer."},
+      {id:"p_txt",type:"end",k:"today",l:"Text sent. Call ends.",d:"As today."},
+      {id:"p_sw",type:"q",k:"prop",l:"Is new-condition routing to NewCo switched on?",d:"The team can switch this off to control how fast the cohort grows.",r:["FR1-N2","FR1-N5","FR1-N6","FR1-N7"]},
       {id:"p_free",type:"q",k:"req",l:"Is a NewCo agent free now?",d:"If not, the call goes straight to BAU. The caller never waits for NewCo. Outside NewCo hours, no agent is free.",r:["FR1-08","FR1-09","FR1-10","FR1-11","FR1-12"]},
       {id:"p_fnagent",type:"step",k:"req",l:"NewCo agent takes the notification and gives the case reference",sc:["agent_ref"],d:"No NewCo message plays first.",r:["FR1-08","FR7-01","FR7-02"]},
       {id:"p_fnend",type:"end",k:"req",l:"Case joins the NewCo cohort",r:["FR1-21"]},
-      {id:"p_fnbau",type:"end",k:"today",l:"BAU queue, as today"}
+      {id:"p_fnbau",type:"end",k:"today",l:"BAU queue, as today"},
+      {id:"p_lorrybau",type:"end",k:"prop",l:"BAU queue. Never offered to NewCo.",r:["FR1-N1"]}
     ],edges:[
-      ["p_lic","p_lorry"],["p_lorry","p_sw","No"],["p_lorry","p_fnbau","Yes"],
+      ["p_lorry","p_onl1","Presses 1: lorry or bus"],["p_lorry","p_onl2","Presses 2: any other vehicle"],
+      ["p_onl1","p_txt","Presses 1: send the text"],["p_onl1","p_lorrybau","Presses 2: speak to an adviser"],
+      ["p_onl2","p_txt","Presses 1: send the text"],["p_onl2","p_sw","Presses 2: speak to an adviser"],
       ["p_sw","p_free","Yes"],["p_sw","p_fnbau","No"],
       ["p_free","p_fnagent","Yes"],["p_free","p_fnbau","No"],["p_fnagent","p_fnend"]
     ]},
     {id:"p3",t:"Existing application: find the case",nodes:[
-      {id:"p_ref",type:"step",k:"prop",l:"Asked for the case reference: keypad, then read back",sc:["ref_prompt","ref_readback","ref_format"],hear:["ref_prompt","ref_readback"],d:"Asked straight after the menu, before the BAU queue messages. Asked once, then reused for the rest of the call.",r:["FR1-17","FR1-19","FR1-20","FR1-N4","FR1-N8"]},
-      {id:"p_intable",type:"q",k:"req",l:"Is the reference in the NewCo table?",d:"The shared table used by phone and web chat. It updates once a day.",r:["FR1-03","FR1-04","FR1-05","FR1-06","FR1-07","FR1-13","FR1-15","FR1-16"]},
+      {id:"p_ref",type:"step",k:"prop",l:"Asked for the case reference",sc:["ref_prompt"],d:"Asked straight after the menu, before the BAU queue messages. Asked once, then reused for the rest of the call.",r:["FR1-17","FR1-N8"]},
+      {id:"p_refq",type:"q",k:"prop",l:"What does the caller do?",r:["FR1-05","FR1-06","FR1-19"]},
+      {id:"p_rb",type:"step",k:"prop",l:"Reference read back",sc:["ref_readback"],r:["FR1-N4"]},
+      {id:"p_rbq",type:"q",k:"prop",l:"Is the reference right?",r:["FR1-N4"]},
+      {id:"p_retry",type:"step",k:"prop",l:"Asked to enter it again",sc:["ref_format"],d:"Up to the agreed number of attempts.",r:["FR1-19"]},
+      {id:"p_retryq",type:"q",k:"req",l:"Right before the attempts run out?",r:["FR1-20"]},
+      {id:"p_intable",type:"q",k:"req",l:"Is the reference in the NewCo table?",d:"The shared table used by phone and web chat. It updates once a day.",r:["FR1-03","FR1-04","FR1-07","FR1-13","FR1-15","FR1-16"]},
       {id:"p_notnc",type:"end",k:"today",l:"BAU queue, as today. No extra message.",d:"Most callers take this route.",r:["FR1-04","FR1-15"]},
       {id:"p_cant",type:"end",k:"prop",l:"BAU queue. The failure is recorded.",r:["FR1-07","FR1-16","FR1-31","FR6-N3"]},
       {id:"p_noref",type:"step",k:"prop",l:"Told they'll be put through to an adviser",sc:["ref_none"],d:"Most callers on this route are BAU customers, so the message is neutral.",r:["FR1-05","FR1-20"]},
@@ -4321,8 +4343,11 @@ const PHONE = {
       {id:"p_go4",type:"go",to:"p_connect",l:"Go to lane 4: Team open"},
       {id:"p_go5",type:"go",to:"p_tc",l:"Go to lane 5: Team closed"}
     ],edges:[
-      ["p_ref","p_intable",null,"Enters a case reference, or presses star"],
-      ["p_intable","p_open2","Yes"],["p_intable","p_notnc","Yes, but not NewCo"],["p_intable","p_noref","No reference"],["p_intable","p_cant","Table can't be checked"],
+      ["p_ref","p_refq"],
+      ["p_refq","p_rb","Enters a reference"],["p_refq","p_retry","Enters it in the wrong format"],["p_refq","p_noref","Presses star: doesn't have it"],
+      ["p_rb","p_rbq"],["p_rbq","p_intable","Presses 1: it's right"],["p_rbq","p_retry","Presses 2: enter it again"],
+      ["p_retry","p_retryq"],["p_retryq","p_intable","Yes"],["p_retryq","p_noref","No"],
+      ["p_intable","p_open2","Yes, a NewCo case"],["p_intable","p_notnc","Yes, not a NewCo case"],["p_intable","p_cant","Table can't be checked"],
       ["p_noref","p_go6"],["p_open2","p_go4","Yes"],["p_open2","p_go5","No"]
     ]},
     {id:"p4",t:"Team open: wait for the team",nodes:[
@@ -4333,14 +4358,17 @@ const PHONE = {
       {id:"p_doa",type:"q",k:"prop",l:"What does the caller do?",r:["FR2-N2"]},
       {id:"p_dob",type:"q",k:"prop",l:"What does the caller do?",r:["FR2-N2"]},
       {id:"p_agent",type:"end",k:"req",l:"NewCo agent answers",d:"The NewCo satisfaction survey follows.",r:["FR2-03","FR6-01"]},
+      {id:"p_cbnum",type:"q",k:"today",l:"Which number should we call?",d:"The existing BAU callback steps.",r:["FR2-N2"]},
+      {id:"p_newnum",type:"step",k:"today",l:"Enters a different number"},
       {id:"p_cb",type:"step",k:"prop",l:"Callback confirmed",sc:["callback_ok"],r:["FR2-N2"]},
       {id:"p_cbq",type:"end",k:"req",l:"Team's callback work queue",r:["FR2-18","FR2-19","FR2-20","FR2-21","FR2-22","FR2-N1"]},
       {id:"p_sms",type:"end",k:"prop",l:"Text sent. Call ends.",sc:["sms_sent"],r:["FR4-06","FR4-07","FR3.1-01"]}
     ],edges:[
       ["p_connect","p_offered"],["p_offered","p_qa","No"],["p_offered","p_qb","Yes"],
       ["p_qa","p_doa"],["p_qb","p_dob"],
-      ["p_doa","p_agent","Waits","Waits for the team"],["p_doa","p_cb","Presses 1","Presses 1 for a callback"],["p_doa","p_sms","Presses 2","Presses 2 for the text"],
-      ["p_dob","p_agent","Waits","Waits for the team"],["p_dob","p_cb","Presses 1","Presses 1 for a callback"],
+      ["p_doa","p_agent","Waits"],["p_doa","p_cbnum","Presses 1: callback"],["p_doa","p_sms","Presses 2: text link"],
+      ["p_dob","p_agent","Waits"],["p_dob","p_cbnum","Presses 1: callback"],
+      ["p_cbnum","p_cb","Presses 1: this number"],["p_cbnum","p_newnum","Presses 2: a different number"],["p_newnum","p_cb"],
       ["p_cb","p_cbq"]
     ]},
     {id:"p5",t:"Team closed, BAU open",nodes:[
@@ -4351,7 +4379,7 @@ const PHONE = {
       {id:"p_vm",type:"step",k:"prop",l:"Voicemail instructions",sc:["vm_instr"],d:"Asks for a callback number, because the caller's number isn't always available. Hanging up saves the message.",r:["FR2-08","FR2-14"]},
       {id:"p_rec",type:"q",k:"req",l:"Did the recording work?",r:["FR2-09","FR2-10","FR2-12"]},
       {id:"p_again",type:"step",k:"req",l:"Asked to try again",sc:["vm_nothing"],r:["FR2-10"]},
-      {id:"p_rec2",type:"q",k:"req",l:"Recorded before the attempt limit?",r:["FR2-11"]},
+      {id:"p_rec2",type:"q",k:"req",l:"Recorded before the attempts run out?",r:["FR2-11"]},
       {id:"p_vmok",type:"step",k:"prop",l:"Message received",sc:["vm_ok"],r:["FR2-09"]},
       {id:"p_vmq",type:"end",k:"req",l:"Team's callback work queue",r:["FR2-13","FR2-15","FR2-16","FR2-17","FR2-18"]},
       {id:"p_vmfail",type:"step",k:"prop",l:"Told a message can't be taken",sc:["vm_fail"],r:["FR2-11","FR2-12"]},
@@ -4359,11 +4387,11 @@ const PHONE = {
       {id:"p_advend",type:"end",k:"prop",l:"BAU adviser helps. Contact recorded on the case.",d:"BAU advisers can do everything they do today.",r:["FR6-N1","FR6-N3"]}
     ],edges:[
       ["p_tc","p_ch"],
-      ["p_ch","p_vm","Presses 1","Presses 1 to leave a message"],["p_ch","p_adv","Presses 2","Presses 2 to speak to an adviser"],["p_ch","p_rep","Nothing","Doesn't press anything"],
-      ["p_rep","p_ch2"],["p_ch2","p_vm","Presses 1","Presses 1 to leave a message"],["p_ch2","p_adv","Presses 2 or nothing","Presses 2, or still nothing"],
+      ["p_ch","p_vm","Presses 1: leave a message"],["p_ch","p_adv","Presses 2: speak to an adviser"],["p_ch","p_rep","Presses nothing"],
+      ["p_rep","p_ch2"],["p_ch2","p_vm","Presses 1: leave a message"],["p_ch2","p_adv","Presses 2, or still nothing"],
       ["p_vm","p_rec"],
-      ["p_rec","p_vmok","Yes","Leaves a message, then presses hash or hangs up"],["p_rec","p_again","Nothing recorded","Says nothing before the time limit"],["p_rec","p_vmfail","Voicemail not working"],
-      ["p_again","p_rec2"],["p_rec2","p_vmok","Yes","Leaves a message"],["p_rec2","p_vmfail","No","Still nothing recorded"],
+      ["p_rec","p_vmok","Yes: presses hash or hangs up"],["p_rec","p_again","Nothing recorded"],["p_rec","p_vmfail","Voicemail not working"],
+      ["p_again","p_rec2"],["p_rec2","p_vmok","Yes"],["p_rec2","p_vmfail","No"],
       ["p_vmok","p_vmq"],["p_vmfail","p_adv"],["p_adv","p_advend"]
     ]},
     {id:"p6",t:"With a BAU adviser, no reference given",nodes:[
@@ -4372,16 +4400,21 @@ const PHONE = {
       {id:"p_asnow",type:"end",k:"today",l:"Adviser helps, as today"},
       {id:"p_open3",type:"q",k:"prop",l:"Is the NewCo team open?",r:["FR4-N3","FR4-N5"]},
       {id:"p_offer",type:"step",k:"prop",l:"Adviser offers a transfer",sc:["bau_offer"],r:["FR4-N3"]},
-      {id:"p_wants",type:"q",k:"prop",l:"Does the customer want the transfer?",r:["FR4-N3","FR4-N4"]},
+      {id:"p_wants",type:"q",k:"prop",l:"What does the customer choose?",r:["FR4-N3","FR4-N4"]},
       {id:"p_helprec",type:"end",k:"prop",l:"Adviser helps. Contact recorded on the case.",r:["FR4-N5","FR4-N6","FR6-N3"]},
       {id:"p_go4b",type:"go",to:"p_offered",l:"Go to lane 4: joins the team's queue"}
     ],edges:[
       ["p_badv","p_marker"],["p_marker","p_open3","Yes"],["p_marker","p_asnow","No"],
       ["p_open3","p_offer","Yes"],["p_open3","p_helprec","No"],
-      ["p_offer","p_wants"],["p_wants","p_go4b","Yes","Agrees to be transferred"],["p_wants","p_helprec","No","Stays with the adviser"]
+      ["p_offer","p_wants"],["p_wants","p_go4b","Transfer to the team"],["p_wants","p_helprec","Stay with the adviser"]
     ]},
     {id:"p7",t:"Callback asked for in the BAU queue",own:true,nodes:[
-      {id:"p_bq",type:"step",k:"today",l:"Caller in the BAU queue presses 1 for a callback",d:"This lane starts on its own: any caller in the BAU queue can reach it."},
+      {id:"p_bq",type:"step",k:"today",l:"Caller waiting in the BAU queue",d:"Any caller in the BAU queue can reach this lane."},
+      {id:"p_bqq",type:"q",dflt:"Presses 1: callback",k:"today",l:"What does the caller do?",d:"The existing BAU queue options."},
+      {id:"p_bqwait",type:"end",k:"today",l:"BAU adviser answers, as today"},
+      {id:"p_bqsms",type:"end",k:"today",l:"Text sent. Call ends."},
+      {id:"p_bqnum",type:"q",k:"today",l:"Which number should we call?"},
+      {id:"p_bqnew",type:"step",k:"today",l:"Enters a different number"},
       {id:"p_hasref",type:"q",k:"prop",l:"Case reference already given in this call?",r:["FR1-N8"]},
       {id:"p_reuse",type:"step",k:"prop",l:"The reference is reused",r:["FR1-N8"]},
       {id:"p_askref",type:"step",k:"prop",l:"Asked for the case reference",sc:["ref_prompt"]},
@@ -4389,22 +4422,12 @@ const PHONE = {
       {id:"p_cbq2",type:"end",k:"prop",l:"Team's callback work queue",r:["FR2-N4"]},
       {id:"p_baucb",type:"end",k:"today",l:"BAU callback, as today"}
     ],edges:[
-      ["p_bq","p_hasref"],["p_hasref","p_reuse","Yes"],["p_hasref","p_askref","No"],
+      ["p_bq","p_bqq"],["p_bqq","p_bqwait","Waits"],["p_bqq","p_bqnum","Presses 1: callback"],["p_bqq","p_bqsms","Presses 2: web chat text"],
+      ["p_bqnum","p_hasref","Presses 1: this number"],["p_bqnum","p_bqnew","Presses 2: a different number"],["p_bqnew","p_hasref"],
+      ["p_hasref","p_reuse","Yes"],["p_hasref","p_askref","No"],
       ["p_reuse","p_intable2"],["p_askref","p_intable2"],
-      ["p_intable2","p_cbq2","Yes"],["p_intable2","p_baucb","No"]
+      ["p_intable2","p_cbq2","Yes, a NewCo case"],["p_intable2","p_baucb","No"]
     ]}
-  ],
-  presets:[
-    ["Reaches their team",{}],
-    ["Asks for a callback",{p_doa:"Presses 1"}],
-    ["Asks for the text link",{p_doa:"Presses 2"}],
-    ["Team closed, leaves a message",{p_open2:"No"}],
-    ["Team closed, speaks to an adviser",{p_open2:"No",p_ch:"Presses 2"}],
-    ["No reference, transferred to the team",{p_intable:"No reference"}],
-    ["Not a NewCo customer",{p_intable:"Yes, but not NewCo"}],
-    ["New condition, NewCo agent free",{p_type:"New condition"}],
-    ["New condition, lorry or bus",{p_type:"New condition",p_lorry:"Yes"}],
-    ["Callback asked for in the BAU queue",{},"p_bq"]
   ]
 };
 
@@ -4415,9 +4438,15 @@ const CHAT = {
       {id:"w_start",type:"step",k:"today",l:"Customer opens the medical web chat",d:"The existing link. No separate NewCo link.",r:["FR4-01","FR4-04"]},
       {id:"w_open",type:"q",k:"today",l:"Is web chat open?"},
       {id:"w_closed",type:"end",k:"today",l:"Existing closed message"},
-      {id:"w_reason",type:"q",k:"today",l:"Which reason does the customer pick?",d:"The existing list of 6 reasons.",r:["FR4-03"]},
+      {id:"w_reason",type:"q",dflt:"I want to check the progress of my case",k:"today",l:"Which reason does the customer pick?",d:"The existing list of 6 reasons. Proposed: every reason except notifying a new condition goes on to the NewCo check. To confirm.",r:["FR4-03","FR4-N2"]},
       {id:"w_fn",type:"end",k:"prop",l:"BAU web chat. New-condition routing is phone only.",r:["FR4-N2"]},
-      {id:"w_pre",type:"step",k:"prop",l:"Data protection questions and case reference",sc:["w_ref_field"],d:"The field exists today. Only its label, hint and error change, to match the letters.",r:["FR4-08","FR4-09","FR4-10","FR4-11","FR4-12"]},
+      {id:"w_related",type:"step",k:"today",l:"Shown related questions for that reason",d:"Existing chatbot answers. The customer can stop here if one answers their question."},
+      {id:"w_dp",type:"step",k:"today",l:"Answers data protection questions",d:"Existing."},
+      {id:"w_name",type:"step",k:"today",l:"Enters name and email",d:"Existing. The Mural shows this after the reference; the order doesn't change the routing."},
+      {id:"w_pre",type:"step",k:"prop",l:"Asked for the case reference",sc:["w_ref_field"],d:"The field exists today. Only its label, hint and error change, to match the letters.",r:["FR4-08"]},
+      {id:"w_refq",type:"q",k:"req",l:"What does the customer enter?",r:["FR4-09","FR4-10","FR4-11"]},
+      {id:"w_err",type:"step",k:"req",l:"Error shown: try again",d:"Up to the agreed number of attempts.",r:["FR4-10"]},
+      {id:"w_errq",type:"q",k:"req",l:"Right before the attempts run out?",r:["FR4-12"]},
       {id:"w_intable",type:"q",k:"req",l:"Is the reference in the NewCo table?",d:"The same table as the phone line.",r:["FR4-02","FR4-09","FR1-23"]},
       {id:"w_notnc",type:"end",k:"today",l:"BAU web chat, as today",r:["FR4-03"]},
       {id:"w_cant",type:"end",k:"req",l:"BAU web chat. The failure is recorded.",r:["FR4-14","FR4-15"]},
@@ -4427,9 +4456,16 @@ const CHAT = {
       {id:"w_go3",type:"go",to:"w_tc",l:"Go to lane 3: Team closed"}
     ],edges:[
       ["w_start","w_open"],["w_open","w_reason","Yes"],["w_open","w_closed","No"],
-      ["w_reason","w_pre","About an existing case","Picks a reason about an existing case"],["w_reason","w_fn","Notify a new condition","Picks: I need to notify DVLA of a medical condition"],
-      ["w_pre","w_intable",null,"Answers the questions and enters a case reference, or leaves it blank"],
-      ["w_intable","w_open2","Yes"],["w_intable","w_notnc","Yes, but not NewCo"],["w_intable","w_go4","Left blank"],["w_intable","w_cant","Table can't be checked"],
+      ["w_reason","w_fn","I need to notify DVLA of a medical condition"],
+      ["w_reason","w_related","I want to renew or reapply for a medical licence"],
+      ["w_reason","w_related","I want to check the progress of my case"],
+      ["w_reason","w_related","Can I drive while my application is with DVLA?"],
+      ["w_reason","w_related","I want to tell you about a change in details"],
+      ["w_reason","w_related","Other enquiries"],
+      ["w_related","w_dp"],["w_dp","w_name"],["w_name","w_pre"],["w_pre","w_refq"],
+      ["w_refq","w_intable","A reference in the right format"],["w_refq","w_err","A reference in the wrong format"],["w_refq","w_go4","Leaves it blank"],
+      ["w_err","w_errq"],["w_errq","w_intable","Yes"],["w_errq","w_go4","No"],
+      ["w_intable","w_open2","Yes, a NewCo case"],["w_intable","w_notnc","Yes, not a NewCo case"],["w_intable","w_cant","Table can't be checked"],
       ["w_open2","w_go2","Yes"],["w_open2","w_go3","No"]
     ]},
     {id:"w2",t:"Team open: wait for the team",nodes:[
@@ -4439,35 +4475,30 @@ const CHAT = {
     ],edges:[["w_connect","w_q"],["w_q","w_agent"]]},
     {id:"w3",t:"Team closed, web chat open",nodes:[
       {id:"w_tc",type:"step",k:"prop",l:"Told the team is closed: chat to an adviser or come back later",sc:["w_team_closed"],d:"Web chat doesn't take messages for the team.",r:["FR4-N1"]},
-      {id:"w_ch",type:"q",k:"prop",l:"What does the customer choose?",r:["FR4-N1"]},
+      {id:"w_ch",type:"q",k:"prop",l:"Which button does the customer select?",r:["FR4-N1"]},
       {id:"w_adv",type:"step",k:"prop",l:"Connected to an adviser",sc:["w_to_adviser"],r:["FR4-N1"]},
       {id:"w_advend",type:"end",k:"prop",l:"BAU adviser helps. Contact recorded on the case.",r:["FR6-N1"]},
       {id:"w_later",type:"end",k:"prop",l:"Chat ends with the team's opening hours",sc:["w_later"],r:["FR4-N1"]}
-    ],edges:[["w_tc","w_ch"],["w_ch","w_adv","Chat to an adviser now","Selects: Chat to an adviser now"],["w_ch","w_later","Come back later","Selects: I'll come back later"],["w_adv","w_advend"]]},
+    ],edges:[["w_tc","w_ch"],["w_ch","w_adv","Chat to an adviser now"],["w_ch","w_later","I'll come back later"],["w_adv","w_advend"]]},
     {id:"w4",t:"With a BAU adviser, no reference given",nodes:[
       {id:"w_badv",type:"step",k:"today",l:"BAU adviser answers the chat",d:"As today."},
       {id:"w_marker",type:"q",k:"req",l:"NewCo marker on the case?",r:["FR4-17","FR4-18","FR4-20"]},
       {id:"w_asnow",type:"end",k:"today",l:"Adviser helps, as today"},
       {id:"w_open3",type:"q",k:"prop",l:"Is the NewCo team open?",r:["FR4-21","FR4-25"]},
       {id:"w_offer",type:"step",k:"prop",l:"Adviser offers a transfer",sc:["w_bau_offer"],r:["FR4-21"]},
-      {id:"w_wants",type:"q",k:"prop",l:"Does the customer want the transfer?",r:["FR4-21","FR4-22","FR4-23","FR4-24"]},
+      {id:"w_wants",type:"q",k:"prop",l:"What does the customer choose?",r:["FR4-21","FR4-22","FR4-23","FR4-24"]},
       {id:"w_helprec",type:"end",k:"prop",l:"Adviser helps. Contact recorded on the case.",r:["FR6-N1","FR6-N3"]},
       {id:"w_go2b",type:"go",to:"w_q",l:"Go to lane 2: joins the team's queue"}
     ],edges:[
       ["w_badv","w_marker"],["w_marker","w_open3","Yes"],["w_marker","w_asnow","No"],
       ["w_open3","w_offer","Yes"],["w_open3","w_helprec","No"],
-      ["w_offer","w_wants"],["w_wants","w_go2b","Yes","Agrees to be transferred"],["w_wants","w_helprec","No","Stays with the adviser"]
+      ["w_offer","w_wants"],["w_wants","w_go2b","Transfer to the team"],["w_wants","w_helprec","Stay with the adviser"]
     ]}
-  ],
-  presets:[
-    ["Reaches their team",{}],
-    ["Team closed, chats to an adviser",{w_open2:"No"}],
-    ["Team closed, comes back later",{w_open2:"No",w_ch:"Come back later"}],
-    ["No reference, transferred to the team",{w_intable:"Left blank"}],
-    ["Not a NewCo customer",{w_intable:"Yes, but not NewCo"}],
-    ["New condition",{w_reason:"Notify a new condition"}]
   ]
 };
+
+/* An open question the 6 reasons raise. Newly drafted 26 September. */
+OI.push({id:"c_reasons",cat:"confirm",t:"Which web chat reasons go to the NewCo check",d:"Assumed: every reason except “I need to notify DVLA of a medical condition” asks for the case reference and goes to the NewCo check. Confirm, especially for “Other enquiries”.",who:"Web chat owners",n:["chat:w_reason"],r:["FR4-N2"]});
 
 const CH = {phone:PHONE, chat:CHAT};
 for (const c of Object.values(CH)){
@@ -4475,8 +4506,20 @@ for (const c of Object.values(CH)){
   c.lanes.forEach((ln,li)=>{
     ln.n=li+1;
     ln.nodes.forEach(n=>{ c.byId[n.id]=n; c.laneOf[n.id]=ln; });
-    ln.edges.forEach((e,i)=>c.E.push({id:ln.id+"-"+i,lane:ln.id,from:e[0],to:e[1],l:e[2]||"",act:e[3]||""}));
+    /* Turn every answer into its own box: question -> answer -> next step */
+    const edges=[];
+    ln.edges.forEach((e,i)=>{
+      const from=c.byId[e[0]];
+      if(from.type==="q" && e[2]){
+        const a={id:`${e[0]}~${i}`,type:"a",l:e[2],q:e[0],k:from.k};
+        ln.nodes.push(a); c.byId[a.id]=a; c.laneOf[a.id]=ln;
+        edges.push([e[0],a.id]); edges.push([a.id,e[1]]);
+      } else edges.push(e);
+    });
+    ln.edges=edges;
+    ln.edges.forEach((e,i)=>c.E.push({id:ln.id+"-"+i,lane:ln.id,from:e[0],to:e[1],l:e[2]||""}));
   });
+  Object.values(c.byId).forEach(n=>{ if(n.type==="q") n.answers=c.E.filter(e=>e.from===n.id).map(e=>c.byId[e.to]); });
 }
 
 /* ---------- indexes ---------- */
@@ -4517,7 +4560,7 @@ function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,
 function said(t){ return esc(t).replace(/\[([^\]]+)\]/g,'<span class="ph">[$1]</span>'); }
 function tag(t,c){ return `<strong class="govuk-tag ${c}">${esc(t)}</strong>`; }
 function outs(c,id){ return c.E.filter(e=>e.from===id); }
-function pick(c,id){ const o=outs(c,id), want=state.choice[c.key][id]; return o.find(e=>e.l===want)||o[0]; }
+function pick(c,id){ const q=c.byId[id]; return q.answers.find(a=>a.id===state.choice[c.key][id])||q.answers.find(a=>a.l===q.dflt)||q.answers[0]; }
 
 function route(c){
   const nodes=[], edges=[]; let at=state.start[c.key], guard=80;
@@ -4526,7 +4569,7 @@ function route(c){
     const n=c.byId[at];
     if(n.type==="go"){ at=n.to; continue; }
     const o=outs(c,at); if(!o.length) break;
-    const e=n.type==="q"?pick(c,at):o[0];
+    const e=n.type==="q"?o.find(x=>x.to===pick(c,at).id):o[0];
     edges.push(e); at=e.to;
   }
   return {nodes,edges};
@@ -4542,6 +4585,7 @@ function size(n){
   if(n.type==="q"){ n.lines=wrap(n.l,20); return {w:210,h:Math.max(54,n.lines.length*18+18+(n.k==="prop"?14:0))}; }
   if(n.type==="end"){ n.lines=wrap(n.l,22); return {w:210,h:Math.max(40,n.lines.length*18+14)}; }
   if(n.type==="go"){ n.lines=wrap(n.l,22); return {w:200,h:n.lines.length*18+18}; }
+  if(n.type==="a"){ n.lines=wrap(n.l,24); return {w:200,h:n.lines.length*18+16}; }
   n.lines=wrap(n.l,22); return {w:190,h:n.lines.length*18+22+(n.k==="prop"?14:0)};
 }
 function drawLane(c,ln){
@@ -4567,7 +4611,7 @@ function drawLane(c,ln){
     const p=g.node(n.id), x=p.x-p.width/2, y=p.y-p.height/2;
     const gr=el("g",{class:`node ${n.k||""} t-${n.type}`,"data-id":n.id,tabindex:"0",role:"button"},ng);
     const kindWord=n.type==="go"?"Link to another lane":(KIND[n.k]||{}).t;
-    gr.setAttribute("aria-label",`${n.type==="q"?"Question: ":""}${n.l}. ${kindWord}.`);
+    gr.setAttribute("aria-label",n.type==="a"?`Answer to “${c.byId[n.q].l}”: ${n.l}. Select to follow it.`:`${n.type==="q"?"Question: ":""}${n.l}. ${kindWord}.`);
     if(n.type==="q"){
       const cx=x+20, cy=p.y;
       el("rect",{class:"ringy",x:x-6,y:y-6,width:p.width+12,height:p.height+12},gr);
@@ -4584,6 +4628,10 @@ function drawLane(c,ln){
       el("circle",{class:"dot",cx:x+14,cy:p.y,r:10},gr);
       const top=p.y-(n.lines.length*18)/2+13;
       n.lines.forEach((l2,i)=>{ const t=el("text",{x:x+34,y:top+i*18},gr); t.textContent=l2; });
+    } else if(n.type==="a"){
+      el("rect",{class:"ringy",x:x-6,y:y-6,width:p.width+12,height:p.height+12,rx:14},gr);
+      el("rect",{class:"ans",x,y,width:p.width,height:p.height,rx:12},gr);
+      n.lines.forEach((l2,i)=>{ const t=el("text",{class:"anstext",x:p.x,y:y+21+i*18,"text-anchor":"middle"},gr); t.textContent=l2; });
     } else if(n.type==="go"){
       el("rect",{class:"ringy",x:x-6,y:y-6,width:p.width+12,height:p.height+12},gr);
       el("rect",{class:"goto",x,y,width:p.width,height:p.height},gr);
@@ -4605,7 +4653,9 @@ function drawLane(c,ln){
 }
 const LANE_SVG={};
 function onNode(n){
-  if(n.type==="go"){ const t=CH[state.ch].byId[n.to]; select(t.id); scrollToNode(t.id); return; }
+  const c=CH[state.ch];
+  if(n.type==="go"){ const t=c.byId[n.to]; select(t.id); scrollToNode(t.id); return; }
+  if(n.type==="a"){ state.choice[c.key][n.q]=n.id; select(n.q,true); return; }
   select(n.id);
 }
 
@@ -4620,10 +4670,8 @@ function renderMap(){
       <div class="toolbar">
         <div><span class="govuk-label" id="chan-l">Channel</span><div class="chan" role="group" aria-labelledby="chan-l">
           <button type="button" data-ch="phone" aria-pressed="${state.ch==="phone"}">Phone</button><button type="button" data-ch="chat" aria-pressed="${state.ch==="chat"}">Web chat</button></div></div>
-        <div><label class="govuk-label" for="preset">Show a route</label>
-          <select class="govuk-select" id="preset"><option value="">Choose a route</option>${c.presets.map((p,i)=>`<option value="${i}">${esc(p[0])}</option>`).join("")}</select></div>
         <div class="links">
-          <button type="button" class="linkbtn" id="reset">Reset</button>
+          <button type="button" class="linkbtn" id="reset">Reset the route</button>
           <button type="button" class="linkbtn" id="listbtn">${state.list?"Show as a map":"Show as a list"}</button>
           <span class="zoom" ${state.list?"hidden":""}><button type="button" class="govuk-button govuk-button--secondary" id="zout" aria-label="Zoom out">−</button><button type="button" class="govuk-button govuk-button--secondary" id="zin" aria-label="Zoom in">+</button></span>
         </div>
@@ -4634,6 +4682,7 @@ function renderMap(){
         <span><i class="sw req"></i>In the requirements</span>
         <span><i class="sw prop"></i>${PROPOSED}, not agreed yet</span>
         <span><i class="diam"></i>Question</span>
+        <span><i class="sw ans"></i>Answer: select to follow</span>
         <span><i class="enddot"></i>End</span>
         <span><i class="sw route"></i>Route shown</span>
       </div>
@@ -4647,8 +4696,7 @@ function renderMap(){
     </aside>
   </main>`;
   document.querySelectorAll(".chan button").forEach(b=>b.onclick=()=>go(`#/map/${b.dataset.ch}`));
-  $("#preset").onchange=e=>{ if(e.target.value==="") return; const p=c.presets[+e.target.value]; state.choice[c.key]={...p[1]}; state.start[c.key]=p[2]||c.start; state.tab="route"; refresh(); const r=route(c); scrollToNode(r.nodes[0]); };
-  $("#reset").onclick=()=>{ state.choice[c.key]={}; state.start[c.key]=c.start; state.sel=null; state.tab="step"; $("#preset").value=""; history.replaceState(null,"",`#/map/${c.key}`); refresh(); };
+  $("#reset").onclick=()=>{ state.choice[c.key]={}; state.start[c.key]=c.start; state.sel=null; state.tab="step"; history.replaceState(null,"",`#/map/${c.key}`); refresh(); };
   $("#listbtn").onclick=()=>{ state.list=!state.list; renderMap(); };
   $("#t-step").onclick=()=>{ state.tab="step"; renderSide(); };
   $("#t-route").onclick=()=>{ state.tab="route"; renderSide(); };
@@ -4658,7 +4706,7 @@ function renderMap(){
     const wrapEl=document.createElement("div"); wrapEl.className="lanes"; cv.appendChild(wrapEl);
     c.lanes.forEach(ln=>{
       const sec=document.createElement("section"); sec.className="lane"; sec.setAttribute("aria-labelledby","lane-"+ln.id);
-      sec.innerHTML=`<h2 id="lane-${ln.id}"><span class="n">Lane ${ln.n}</span>${esc(ln.t)}${ln.own?" (starts on its own)":""}</h2>`;
+      sec.innerHTML=`<h2 id="lane-${ln.id}"><span class="n">Lane ${ln.n}</span>${esc(ln.t)}${ln.own?` <button type="button" class="lanestart" data-start="${ln.nodes[0].id}">Start the route here</button>`:""}</h2>`;
       if(!LANE_SVG[ln.id]) LANE_SVG[ln.id]=drawLane(c,ln);
       sec.appendChild(LANE_SVG[ln.id]); wrapEl.appendChild(sec);
     });
@@ -4667,6 +4715,7 @@ function renderMap(){
       state.zoom[c.key]=Math.max(.85,Math.min(1,(cv.clientWidth-80)/maxW));
     }
     applyZoom();
+    document.querySelectorAll(".lanestart").forEach(b=>b.onclick=()=>{ state.start[c.key]=b.dataset.start; state.tab="route"; refresh(); });
     $("#zin").onclick=()=>{ state.zoom[c.key]=Math.min(1.6,state.zoom[c.key]*1.15); applyZoom(); };
     $("#zout").onclick=()=>{ state.zoom[c.key]=Math.max(.4,state.zoom[c.key]/1.15); applyZoom(); };
   }
@@ -4687,16 +4736,18 @@ function refresh(){
 }
 function renderList(){
   const c=CH[state.ch], on=new Set(state.route?state.route.nodes:[]);
-  $("#canvas").innerHTML=`<div class="steplist"><p class="govuk-body-s">Every step, lane by lane. Steps on the route shown have a blue line.</p>${c.lanes.map(ln=>`<h2>Lane ${ln.n}: ${esc(ln.t)}</h2><ol>${ln.nodes.map(n=>{
-    const o=outs(c,n.id);
+  $("#canvas").innerHTML=`<div class="steplist"><p class="govuk-body-s">Every step, lane by lane. Steps on the route shown have a blue line.</p>${c.lanes.map(ln=>`<h2>Lane ${ln.n}: ${esc(ln.t)}</h2><ol>${ln.nodes.filter(n=>n.type!=="a").map(n=>{
+    const o=n.type==="q"?n.answers.map(a=>({l:a.l,to:outs(c,a.id)[0].to,a})):outs(c,n.id);
     return `<li class="${on.has(n.id)?"on":""}"><button type="button" class="linkbtn" data-sel="${n.id}">${n.type==="q"?"Question: ":""}${esc(n.l)}</button> ${n.type==="go"?"":tag(KIND[n.k].t,KIND[n.k].c)}
-      ${o.length?`<ul class="next">${o.map(e=>`<li>${e.l?esc(e.l)+": ":"Then: "}${esc(c.byId[e.to].l)}</li>`).join("")}</ul>`:""}</li>`;}).join("")}</ol>`).join("")}</div>`;
+      ${o.length?`<ul class="next">${o.map(e=>`<li>${e.a?`<button type="button" class="linkbtn" data-sel="${e.a.id}">${esc(e.l)}</button>${pick(c,n.id)===e.a?" (followed)":""}, then: `:"Then: "}${esc(c.byId[e.to].l)}</li>`).join("")}</ul>`:""}</li>`;}).join("")}</ol>`).join("")}</div>`;
   document.querySelectorAll("[data-sel]").forEach(b=>b.onclick=()=>onNode(c.byId[b.dataset.sel]));
 }
-function select(id){
+function select(id,keepFocus){
   state.sel=id; state.tab="step";
   history.replaceState(null,"",`#/map/${state.ch}/${id}`);
+  const f=keepFocus&&document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.id;
   refresh(); $("#sidebody").scrollTop=0;
+  if(f){ const g=document.querySelector(`.node[data-id="${f}"]`); if(g) g.focus({preventScroll:true}); }
 }
 
 /* ---------- sidebar ---------- */
@@ -4728,16 +4779,17 @@ function renderSide(){
   if(!n){
     body.innerHTML=`<h2>How to use this map</h2>
       <p>The map reads left to right, one lane per part of the journey, like the Mural.</p>
-      <ul class="govuk-list govuk-list--bullet"><li>Select any step to read its script and requirements here.</li><li>Select a question (the black diamond) to choose the answer. The blue route follows your answers.</li><li>Use “Show a route” to jump to a common route.</li></ul>
+      <ul class="govuk-list govuk-list--bullet"><li>Select any step to read its script and requirements here.</li><li>Every answer to a question is a white box. Select one to follow it: the route turns blue.</li><li>Lanes join with “Go to lane” links.</li></ul>
       <p>Pink steps are ${PROPOSED.toLowerCase()}: suggested in the review on 26 September and not agreed yet. The requirements are shown as written, with any proposed wording beside them.</p>`;
     return;
   }
+  if(n.type==="a"){ state.sel=n.q; return renderSide(); }
   const ln=c.laneOf[n.id], on=state.route.nodes.includes(n.id), K=KIND[n.k];
   const ois=OI_BY_NODE[c.key+":"+n.id]||[];
   let q="";
   if(n.type==="q"){
-    const o=outs(c,n.id), cur=pick(c,n.id);
-    q=`<div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend">Choose the answer</legend>${o.map((e,i)=>`<div class="govuk-radios__item"><input class="govuk-radios__input" id="ans-${i}" name="ans" type="radio" value="${esc(e.l)}" ${e===cur?"checked":""}><label class="govuk-radios__label" for="ans-${i}">${esc(e.l)} <span class="govuk-visually-hidden">then</span><br><span class="govuk-hint" style="margin:0">Then: ${esc(c.byId[e.to].l)}</span></label></div>`).join("")}</fieldset></div>`;
+    const cur=pick(c,n.id);
+    q=`<h3>Answers</h3><p class="govuk-body-s">Select an answer here or on the map to follow it.</p><ul class="govuk-list answers">${n.answers.map(a=>{ const nx=c.byId[outs(c,a.id)[0].to]; return `<li><button type="button" class="linkbtn" data-ans="${a.id}" aria-pressed="${a===cur}">${esc(a.l)}</button>${a===cur?` ${tag("Followed","govuk-tag--blue")}`:""}<br><span class="govuk-hint" style="margin:0">Then: ${esc(nx.l)}</span></li>`; }).join("")}</ul>`;
   }
   const scripts=(n.sc||[]).map(scriptHTML).join("");
   const reqs=(n.r||[]).map(id=>reqHTML(id,true)).join("");
@@ -4750,23 +4802,20 @@ function renderSide(){
     ${scripts?`<h3>Script</h3>${scripts}`:""}
     ${reqs?`<h3>Requirements</h3>${reqs}`:""}
     ${ois.length?`<h3>Decisions and questions</h3><ul class="govuk-list">${ois.map(o=>`<li>${tag(OICAT[o.cat].h,o.cat==="decided"?"govuk-tag--green":o.cat==="team"?"govuk-tag--yellow":"govuk-tag--grey")} <a href="#/open/${o.id}">${esc(o.t)}</a></li>`).join("")}</ul>`:""}`;
-  body.querySelectorAll('input[name="ans"]').forEach(r=>r.onchange=e=>{ state.choice[c.key][n.id]=e.target.value; const keep=document.activeElement&&document.activeElement.id; refresh(); if(keep){ const k=document.getElementById(keep); if(k) k.focus(); } });
+  body.querySelectorAll('[data-ans]').forEach(b=>b.onclick=()=>{ state.choice[c.key][n.id]=b.dataset.ans; refresh(); const k=body.querySelector(`[data-ans="${b.dataset.ans}"]`); if(k) k.focus(); });
 }
 function routeHTML(c){
   const r=state.route, lines=[];
   r.nodes.forEach((id,i)=>{
     const n=c.byId[id];
-    if(n.type==="go"){ lines.push(`<li><span class="does">${esc(n.l)}</span></li>`); }
-    else {
-      const ks=n.hear||n.sc||[];
-      ks.forEach(k=>{ const s=SCRIPTS[k]; if(s.form) lines.push(`<li><span class="who">On screen</span>${said(s.t)}</li>`); else lines.push(`<li><span class="who">${esc(s.who||c.sys)}</span>${said(s.t)}</li>`); });
-      const e0=r.edges.find(x=>x.from===id && r.nodes[i+1]===x.to);
-      if(!ks.length && !(n.type==="q" && e0 && e0.act)) lines.push(`<li><span class="does">${esc(n.l)}${n.type==="q"&&e0?` <strong>${esc(e0.l)}</strong>`:""}</span></li>`);
-    }
-    const e=r.edges.find(x=>x.from===id && r.nodes[i+1]===x.to);
-    if(e && e.act) lines.push(`<li class="caller"><span class="who">${c.key==="phone"?"Caller":"Customer"}</span>${esc(e.act)}</li>`);
+    if(n.type==="a") return;
+    if(n.type==="go"){ lines.push(`<li><span class="does">${esc(n.l)}</span></li>`); return; }
+    if(n.type==="q"){ const a=c.byId[r.nodes[i+1]]; lines.push(`<li><span class="does">${esc(n.l)}</span> <strong>${a?esc(a.l):""}</strong></li>`); return; }
+    const ks=n.hear||n.sc||[];
+    ks.forEach(k=>{ const s=SCRIPTS[k]; lines.push(`<li><span class="who">${esc(s.form?"On screen":(s.who||c.sys))}</span>${said(s.t)}</li>`); });
+    if(!ks.length) lines.push(`<li><span class="does">${esc(n.l)}</span></li>`);
   });
-  return `<h2>The route shown</h2><p class="govuk-body-s">What the ${c.key==="phone"?"caller hears and does":"customer sees and does"}, in order. Choose a different route with “Show a route”, or by answering the questions on the map.</p><ol class="transcript">${lines.join("")}</ol>`;
+  return `<h2>The route shown</h2><p class="govuk-body-s">What the ${c.key==="phone"?"caller hears and chooses":"customer sees and chooses"}, in order. Change it by selecting a different answer on the map.</p><ol class="transcript">${lines.join("")}</ol>`;
 }
 
 /* ====================================================================
