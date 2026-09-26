@@ -128,6 +128,11 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .lanestart{font:inherit;font-size:14px;font-weight:400;margin-left:12px;background:none;border:0;color:var(--white);text-decoration:underline;cursor:pointer;padding:0}
 .lanestart:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--black)}
 .lane svg{display:block}
+.whole{padding:30px 40px 60px;width:max-content;margin:0 auto;min-height:100%;display:flex;align-items:center}
+.whole svg{display:block;overflow:visible}
+.cluster{fill:var(--light-grey);stroke:#dfe5eb}
+.clusterhead{fill:#505a5f}
+.clustertext{font:700 15px "GDS Transport","Inter",Arial,sans-serif;fill:var(--white)}
 
 /* svg */
 .edge path{fill:none;stroke:#8e9296;stroke-width:1.5}
@@ -4092,339 +4097,236 @@ function stubFalse(){return false}module.exports=stubFalse},{}],279:[function(re
    export "User Stories for IVR Day 1 Readiness" (26 September 2026). */
 const REQS = [{"code": "FR1", "title": "IVR Call Routing and Cohort Identification", "features": [{"id": "FR1-F1", "t": "Retain the existing IVR routing", "story": "As a NewCo customer calling the NewCo DM Line,\nI want to continue through the existing IVR journey,\nso that I can access the appropriate service without disruption from the introduction of NewCo routing.", "sc": [{"id": "FR1-01", "title": "Customer enters the IVR", "t": "Scenario: Customer enters the IVR\nGiven the customer has called the existing IVR telephone number\nWhen the call is connected to the IVR\nThen the customer must enter the existing IVR routing flow\nAnd the existing IVR options must remain available", "script": ""}, {"id": "FR1-02", "title": "Customer is not eligible for NewCo routing", "t": "Scenario: Customer is not eligible for NewCo routing\nGiven the customer is progressing through the existing IVR routing flow\nAnd the customer is not identified as eligible for the NewCo cohort\nWhen the IVR determines the route for the call\nThen the call must continue through the standard BAU route", "script": ""}]}, {"id": "FR1-F2", "t": "Identify eligible customers using a shared routing table (Given the IVR and web chat use the same shared cohort routing table)", "story": "As a customer with an eligible case,\nI want the IVR to identify my case using my reference number,\nso that my call can be routed to the appropriate NewCo team.", "sc": [{"id": "FR1-03", "title": "Customer provides a reference number that matches an eligible NewCo record", "t": "Scenario: Customer provides a reference number that matches an eligible NewCo record\nGiven the customer has been prompted to provide their case reference number\nAnd the customer's case reference number is recorded in the shared routing table\nAnd the record is active and eligible for NewCo routing\nWhen the IVR validates the case reference number\nThen the IVR must identify the customer as belonging to the NewCo cohort\nAnd the call must branch from the existing IVR route to the route specified for that record", "script": ""}, {"id": "FR1-04", "title": "Customer provides a reference number that does not match an eligible record", "t": "Scenario: Customer provides a reference number that does not match an eligible record\nGiven the customer has provided a case reference number\nAnd the case reference number is not recorded as an active eligible record in the shared routing table\nWhen the IVR validates the case reference number\nThen the call must continue through the standard BAU route", "script": ""}, {"id": "FR1-05", "title": "Customer cannot provide a reference number", "t": "Scenario: Customer cannot provide a reference number\nGiven the customer has been prompted to provide their case reference number\nWhen the customer cannot provide the required reference number\nThen the call must continue through the standard BAU route", "script": ""}, {"id": "FR1-06", "title": "Customer provides an invalidly formatted reference number", "t": "Scenario: Customer provides an invalidly formatted reference number\nGiven the customer has been prompted to provide their case reference number\nWhen the customer provides a reference number in an invalid format\nThen the IVR must not route the customer to the NewCo cohort\nAnd the call must continue through the standard BAU route", "script": ""}, {"id": "FR1-07", "title": "The reference number cannot be validated", "t": "Scenario: The reference number cannot be validated\nGiven the customer has provided a case reference number\nWhen the IVR is unable to validate the reference number against the shared routing table\nThen the call must continue through the standard BAU route\nAnd the customer must not be left in an incomplete routing journey", "script": ""}]}, {"id": "FR1-F3", "t": "Route first-notification calls using the Super Cell approach (Given the call has been identified as a first-notification call and NewCo agents are configured as an availability based routing option)", "story": "As a NewCo customer making a first-notification call,\nI want my call to be offered to an available NewCo agent,\nso that I can receive support promptly without being in an additional queue.", "sc": [{"id": "FR1-08", "title": "A NewCo agent is available", "t": "Scenario: A NewCo agent is available\nGiven at least one eligible NewCo agent is available at the point of routing\nWhen the IVR routes the first-notification call\nThen the call must be sent to an available NewCo agent\nAnd no separate NewCo agent queue must be created or used", "script": "Connecting to a NewCo agent: Thank you. We're putting you through to the team looking after your case."}, {"id": "FR1-09", "title": "No NewCo agent is available", "t": "Scenario: No NewCo agent is available\nGiven no eligible NewCo agent is available at the point of routing\nWhen the IVR routes the first-notification call\nThen the call must immediately fall back to the standard BAU queue\nAnd the NewCo customer must not wait for a NewCo agent to become available", "script": ""}, {"id": "FR1-10", "title": "NewCo agent availability cannot be confirmed", "t": "Scenario: NewCo agent availability cannot be confirmed\nGiven the IVR cannot determine whether a NewCo agent is available\nWhen the call reaches the routing decision\nThen the call must immediately fall back to the standard BAU queue", "script": ""}, {"id": "FR1-11", "title": "A NewCo agent becomes unavailable during routing", "t": "Scenario: A NewCo agent becomes unavailable during routing\nGiven a NewCo agent appears to be available\nAnd the NewCo agent becomes unavailable before the call is connected\nWhen the IVR completes the routing attempt\nThen the call must fall back to the standard BAU queue\nAnd the NewCo customer must not be in a NewCo only queue", "script": ""}, {"id": "FR1-12", "title": "NewCo Customer is not held in a universal-agent-only queue", "t": "Scenario: NewCo Customer is not held in a universal-agent-only queue\nGiven no NewCo agent is currently available\nWhen the first-notification call reaches the Super Cell routing decision\nThen the call must not be in a queue that exists solely for NewCo agents\nAnd the call must follow the standard BAU queue route", "script": ""}]}, {"id": "FR1-F4", "t": "Route customers with existing cases", "story": "As a NewCo customer with an existing case,\nI want to provide my case reference number or another agreed identifier,\nso that the IVR can route me to the team responsible for my case.", "sc": [{"id": "FR1-13", "title": "Existing-case NewCo customer provides a matching case reference number", "t": "Scenario: Existing-case NewCo customer provides a matching case reference number\nGiven the NewCo customer has indicated that they have an existing case\nAnd the NewCo customer has provided their case reference number\nAnd the case reference number matches an active NewCo cohort record\nWhen the IVR checks the identifier against the cohort routing data\nThen the call must be routed to the NewCo team or route stored against that record", "script": ""}, {"id": "FR1-14", "title": "Existing-case NewCo customer provides another agreed identifier", "t": "Scenario: Existing-case NewCo customer provides another agreed identifier\nGiven the NewCo customer has indicated that they have an existing case\nAnd the NewCo customer provides an agreed alternative identifier\nAnd the identifier matches an active NewCo cohort record\nWhen the IVR checks the identifier against the cohort routing data\nThen the call must be routed to the NewCo team or route stored against that record", "script": ""}, {"id": "FR1-15", "title": "Existing-case identifier does not match", "t": "Scenario: Existing-case identifier does not match\nGiven the NewCo customer has indicated that they have an existing case\nAnd the NewCo customer has provided a case reference number or agreed identifier\nAnd the identifier does not match an active NewCo cohort record\nWhen the IVR completes the identifier check\nThen the call must continue through the standard BAU route", "script": ""}, {"id": "FR1-16", "title": "Existing-case identifier cannot be validated", "t": "Scenario: Existing-case identifier cannot be validated\nGiven the NewCo customer has provided a case reference number or agreed identifier\nWhen the NewCo cohort routing data cannot be accessed or the identifier cannot be validated\nThen the call must continue through the standard BAU route", "script": ""}]}, {"id": "FR1-F5", "t": "Provide clear IVR instructions", "story": "As a NewCo customer using the IVR,\nI want clear instructions about which identifier I need to provide,\nso that I can supply the correct information and be routed appropriately.", "sc": [{"id": "FR1-17", "title": "NewCo Customer is asked to provide a case reference number", "t": "Scenario: NewCo Customer is asked to provide a case reference number\nGiven the NewCo customer has reached a stage where their case must be identified\nWhen the IVR requests the customer's case reference number\nThen the message must explain which reference number is required\nAnd the message must explain where the customer can find it\nAnd the message must explain how the customer should enter or provide it", "script": ""}, {"id": "FR1-18", "title": "An alternative identifier is accepted", "t": "Scenario: An alternative identifier is accepted\nGiven an agreed alternative identifier can be used\nWhen the IVR asks the NewCo customer to identify their case\nThen the message must explain which alternative identifier is accepted\nAnd the message must explain the required format", "script": ""}, {"id": "FR1-19", "title": "NewCo Customer enters information in an invalid format", "t": "Scenario: NewCo Customer enters information in an invalid format\nGiven the customer has been asked to provide an identifier\nWhen the customer enters the identifier in an invalid format\nThen the IVR must provide a clear error message\nAnd the IVR must provide another opportunity to enter the identifier\nAnd the number of retry attempts must follow the agreed IVR retry rules", "script": ""}, {"id": "FR1-20", "title": "Maximum retry attempts are reached", "t": "Scenario: Maximum retry attempts are reached\nGiven the NewCo customer has reached the maximum permitted number of identifier-entry attempts\nWhen the identifier has not been successfully captured\nThen the call must continue through the standard BAU route", "script": ""}]}, {"id": "FR1-F6", "t": "Maintain daily NewCo cohort routing data table", "story": "As an authorised operational user,\nI want eligible customers to be added to and removed from the shared routing table daily,\nso that IVR and web chat use current and consistent NEWCO cohort information.", "sc": [{"id": "FR1-21", "title": "Add a customer to the NewCo cohort", "t": "Scenario: Add a customer to the NewCo cohort\nGiven a customer has become eligible for the NewCo cohort\nWhen the customer's record is added during the daily routing-table update\nThen the customer's identifier must be available for IVR and web-chat routing\nAnd the record must include the customer's active routing destination", "script": ""}, {"id": "FR1-22", "title": "Remove a customer from the NewCo cohort", "t": "Scenario: Remove a customer from the NewCo cohort\nGiven a customer is no longer eligible for the NewCo cohort\nWhen the customer's record is removed or made inactive during the daily update\nThen the customer must no longer be routed to an NEWCO team\nAnd subsequent calls must follow the standard BAU route unless another routing rule applies", "script": ""}, {"id": "FR1-23", "title": "Apply the same routing data to IVR and web chat", "t": "Scenario: Apply the same routing data to IVR and web chat\nGiven the daily NewCo cohort routing update has been completed\nWhen IVR or web chat checks a customer's identifier\nThen both channels must use the same current routing record\nAnd both channels must identify the same owning team or routing destination", "script": ""}, {"id": "FR1-24", "title": "Reject an incomplete routing record", "t": "Scenario: Reject an incomplete routing record\nGiven a new cohort record does not contain all mandatory routing information\nWhen the daily update is validated\nThen the incomplete record must not be activated\nAnd the validation issue must be recorded for investigation", "script": ""}, {"id": "FR1-25", "title": "Record routing table changes", "t": "Scenario: Record routing table changes\nGiven an authorised user or automated process changes a cohort record\nWhen the change is completed\nThen the system must record the identifier affected\nAnd the type of change\nAnd the date and time of the change\nAnd the user or process that made the change", "script": ""}]}, {"id": "FR1-F7", "t": "Support multiple NewCo teams and case-reference ranges", "story": "As an NewCo manager,\nI want the routing table to support multiple NEWCO teams and case-reference ranges,\nso that calls can be directed to the correct team as the programme scales.", "sc": [{"id": "FR1-26", "title": "Route a case to its owning NEWCO team", "t": "Scenario: Route a case to its owning NEWCO team\nGiven the NewCo customer has provided a valid case reference number\nAnd the case reference number is recorded against \"<owning_team>\"\nAnd the active routing destination is \"<routing_destination>\"\nWhen the IVR validates the reference number\nThen the call must be routed to \"<routing_destination>\"", "script": ""}, {"id": "FR1-27", "title": "Route using an assigned case-reference range", "t": "Scenario: Route using an assigned case-reference range\nGiven a case reference range is assigned to an NEWCO team\nAnd the customer's case reference number falls within that range\nWhen the IVR validates the reference number\nThen the call must be routed to the destination assigned to that case-reference range", "script": ""}, {"id": "FR1-28", "title": "Use individual ownership where it overrides a case-reference range", "t": "Scenario: Use individual ownership where it overrides a case-reference range\nGiven the customer's reference number falls within a configured case-reference range\nAnd the customer's routing record contains a specific active owning team\nWhen the IVR determines the routing destination\nThen the call must be routed to the specific owning team recorded against the customer\nAnd the agreed routing precedence rules must be applied", "script": ""}, {"id": "FR1-29", "title": "Add another NEWCO team", "t": "Scenario: Add another NEWCO team\nGiven a new NEWCO team and routing destination have been approved\nWhen the team is added to the routing configuration\nThen eligible reference numbers must be assignable to the new team\nAnd existing IVR and web-chat routing must continue to operate", "script": ""}, {"id": "FR1-30", "title": "Owning team or routing destination is missing", "t": "Scenario: Owning team or routing destination is missing\nGiven the customer's identifier matches an active NewCo cohort record\nAnd the record does not contain a valid owning team or routing destination\nWhen the IVR attempts to route the call\nThen the call must follow the standard BAU route\nAnd the routing-data issue must be recorded for investigation", "script": ""}, {"id": "FR1-31", "title": "Configured NewCo destination is unavailable", "t": "Scenario: Configured NewCo destination is unavailable\nGiven the customer's identifier matches an active NewCo cohort record\nAnd the configured NewCo routing destination is unavailable\nWhen the IVR attempts to route the call\nThen the call must follow the agreed fallback route\nAnd the customer must not be left in an incomplete routing journey", "script": ""}]}]}, {"code": "FR2", "title": "Out-of-Hours and No-Agent Handling", "features": [{"id": "FR2-F1", "t": "Inform callers when the NewCo team is unavailable", "story": "As a customer calling the NewCo line,\nI want to receive a clear message when the team is unavailable,\nso that I understand why my call cannot be answered and what I can do next.\ni.e. “Our advisors currently unavailable to help you, Please leave a message with your reference number and an agent will call you back or, please call back Monday to Friday 8:30 – 4:30.”", "sc": [{"id": "FR2-01", "title": "Customer calls outside NewCo operating hours", "t": "Scenario: Customer calls outside NewCo operating hours\nGiven the NewCo line is configured to close at 5:00pm\nAnd the current time is outside the configured operating hours\nWhen a customer calls the NewCo line\nThen the IVR must play the approved out-of-hours message\nAnd the message must explain that NewCo agents are currently unavailable\nAnd the caller must be offered the option to leave a voicemail for a callback", "script": "Team closed, BAU open:\nThe team looking after your case is closed at the moment. They're open [days and hours]. You can leave them a message and they'll call you back. Or an adviser can help you now.\nTo leave a message for your team, press 1. To speak to an adviser now, press 2."}, {"id": "FR2-02", "title": "Customer calls when the line is open, but no NewCo agents are available", "t": "Scenario: Customer calls when the line is open, but no NewCo agents are available\nGiven the current time is within the configured NewCo operating hours\nAnd no NewCo agents are available based on the agreed availability settings\nWhen a customer calls the NewCo line\nThen the IVR must play the approved unavailable message\nAnd the message must explain that no NewCo agents are currently available\nAnd the caller must be offered the option to leave a voicemail for a callback", "script": "Team busy (in hours, no agent free, or availability unknown):\nThe team looking after your case is busy helping other people right now. They know your case, and if you leave them a message, they'll call you back. Or an adviser can help you now.\nTo leave a message for your team, press 1. To speak to an adviser now, press 2."}, {"id": "FR2-03", "title": "NewCo agent is available during operating hours", "t": "Scenario: NewCo agent is available during operating hours\nGiven the current time is within the configured NewCo operating hours\nAnd at least one eligible NewCo agent is available\nWhen a customer calls the NewCo line\nThen the call must follow the normal NewCo routing process\nAnd the out-of-hours or unavailable message must not be played", "script": ""}, {"id": "FR2-04", "title": "NewCo availability cannot be determined", "t": "Scenario: NewCo availability cannot be determined\nGiven the current time is within the configured operating hours\nAnd the IVR cannot determine whether a NewCo agent is available\nWhen the customer reaches the availability check\nThen the IVR must play the approved unavailable message\nAnd the caller must be offered the option to leave a voicemail", "script": ""}]}, {"id": "FR2-F2", "t": "Avoid inappropriate redirection to the BAU contact centre", "story": "As a customer calling when the NewCo team is unavailable,\nI want to be given an appropriate follow-up option,\nso that I am not transferred to a team that cannot fully answer my case-specific query.", "sc": [{"id": "FR2-05", "title": "Default out-of-hours message is played", "t": "Scenario: Default out-of-hours message is played\nGiven the customer has called outside NewCo operating hours\nWhen the IVR plays the default out-of-hours message\nThen the message must not direct the customer to contact the BAU contact centre\nAnd the message must offer the customer the option to leave a voicemail", "script": ""}, {"id": "FR2-06", "title": "No-agent message is played", "t": "Scenario: No-agent message is played\nGiven the NewCo line is open\nAnd no NewCo agents are available\nWhen the IVR plays the unavailable message\nThen the message must not direct the customer to contact the BAU contact centre\nAnd the message must offer the customer the option to leave a voicemail", "script": ""}, {"id": "FR2-07", "title": "Customer chooses not to leave a voicemail", "t": "Scenario: Customer chooses not to leave a voicemail\nGiven the IVR has offered the customer the option to leave a voicemail\nWhen the customer declines or does not select the voicemail option\nThen the IVR must play the approved closing message\nAnd the closing message must explain how and when the customer can contact NewCo again\nAnd the call must end without being automatically transferred to the BAU contact centre", "script": ""}]}, {"id": "FR2-F3", "t": "Offer a voicemail callback option (Given the NewCo team is unavailable and the IVR has played the approved out-of-hours or unavailable message)", "story": "As a customer calling when a NewCo agent is unavailable,\nI want to leave a voicemail requesting a callback,\nso that the NewCo team can review my query and contact me.\ni.e. “We're currently experiencing high demand and waiting times are longer than usual. You can continue to hold, switch to webchat by receiving a link via text message, or leave a voicemail and we'll contact you back. Press 1 for a webchat link, press 2 to leave a voicemail, or stay on the line to continue waiting.”", "sc": [{"id": "FR2-08", "title": "Customer chooses to leave a voicemail", "t": "Scenario: Customer chooses to leave a voicemail\nGiven the IVR has offered the voicemail option\nWhen the customer selects the option to leave a voicemail\nThen the IVR must play the approved voicemail instructions\nAnd the IVR must allow the customer to record a message", "script": ""}, {"id": "FR2-09", "title": "Customer completes a voicemail recording", "t": "Scenario: Customer completes a voicemail recording\nGiven the customer is recording a voicemail\nWhen the customer completes and submits the recording\nThen the IVR must save the voicemail\nAnd the IVR must play a confirmation message\nAnd the confirmation must explain that the voicemail has been received for follow-up", "script": ""}, {"id": "FR2-10", "title": "Customer does not record a message", "t": "Scenario: Customer does not record a message\nGiven the customer has selected the voicemail option\nWhen no audible message is captured within the configured time limit\nThen the IVR must inform the customer that no message was recorded\nAnd the IVR must offer another recording attempt in line with the agreed retry rules", "script": ""}, {"id": "FR2-11", "title": "Customer reaches the maximum number of recording attempts", "t": "Scenario: Customer reaches the maximum number of recording attempts\nGiven the customer has not successfully recorded a voicemail\nAnd the maximum number of recording attempts has been reached\nWhen the final recording attempt ends\nThen the IVR must play the approved closing message\nAnd the call must end without creating an empty voicemail work item", "script": ""}, {"id": "FR2-12", "title": "Voicemail service is unavailable", "t": "Scenario: Voicemail service is unavailable\nGiven the NewCo team is unavailable\nAnd the voicemail service cannot accept a recording\nWhen the customer selects the voicemail option\nThen the IVR must play an approved service-unavailable message\nAnd the message must explain how and when the customer can contact NewCo again", "script": ""}]}, {"id": "FR2-F4", "t": "Deliver voicemail recordings to a dedicated NewCo mailbox", "story": "As a NewCo agent,\nI want customer voicemail recordings delivered to a dedicated NewCo mailbox,\nso that the team can access and manage callback requests from one controlled location.", "sc": [{"id": "FR2-13", "title": "Successfully deliver a voicemail", "t": "Scenario: Successfully deliver a voicemail\nGiven the customer has completed and submitted a voicemail\nWhen the IVR processes the recording\nThen the voicemail must be delivered as a playable voice clip\nAnd the voice clip must be delivered to the dedicated NewCo mailbox\nAnd the voicemail must be available only to authorised users", "script": ""}, {"id": "FR2-14", "title": "Provide information to support voicemail management", "t": "Scenario: Provide information to support voicemail management\nGiven a voicemail has been successfully delivered\nWhen the voicemail appears in the dedicated NewCo mailbox\nThen the work item must include the date and time it was received\nAnd it must include the originating telephone number where technically available and permitted\nAnd it must show that the item originated from the IVR voicemail service", "script": ""}, {"id": "FR2-15", "title": "Voicemail delivery fails", "t": "Scenario: Voicemail delivery fails\nGiven the customer has completed a voicemail recording\nWhen the recording cannot be delivered to the dedicated NewCo mailbox\nThen the delivery failure must be recorded\nAnd the appropriate support team must be alerted in accordance with the agreed support process\nAnd the recording must be retained for an agreed period to allow delivery to be retried", "script": ""}, {"id": "FR2-16", "title": "Voicemail delivery is retried", "t": "Scenario: Voicemail delivery is retried\nGiven a voicemail delivery attempt has failed\nAnd the recording remains available for retry\nWhen the configured retry process is triggered\nThen the system must attempt to deliver the recording again\nAnd the outcome of the retry must be recorded", "script": ""}, {"id": "FR2-17", "title": "Unauthorised user attempts to access the mailbox", "t": "Scenario: Unauthorised user attempts to access the mailbox\nGiven the dedicated NewCo mailbox contains customer voicemail recordings\nAnd a user does not have the required access permission\nWhen the user attempts to access the mailbox\nThen access must be denied\nAnd the attempted access must be managed in accordance with the applicable security policy", "script": ""}]}, {"id": "FR2-F5", "t": "Manage voicemail as a formal NewCo workstream", "story": "As a NewCo team manager,\nI want voicemail callback requests to be managed as a formal workstream,\nso that they can be prioritised, assigned and completed alongside web chat and casework.", "sc": [{"id": "FR2-18", "title": "New voicemail enters the workstream", "t": "Scenario: New voicemail enters the workstream\nGiven a NewCo customer voicemail has been delivered to the dedicated NewCo mailbox\nWhen the voicemail becomes available to the NewCo team\nThen it must be identifiable as a new callback work item\nAnd it must be available for triage and assignment", "script": ""}, {"id": "FR2-19", "title": "Agent takes ownership of a voicemail", "t": "Scenario: Agent takes ownership of a voicemail\nGiven a voicemail callback work item has not been assigned\nWhen an authorised Agent accepts the work item\nThen the work item must be marked as assigned\nAnd the responsible Agent must be identifiable\nAnd other Agents must be able to see that the item is being handled", "script": ""}, {"id": "FR2-20", "title": "Agent reviews the voicemail before calling the customer", "t": "Scenario: Agent reviews the voicemail before calling the customer\nGiven a voicemail work item has been assigned to an Agent\nWhen the Agent prepares to make the callback\nThen the Agent must be able to play the voice clip\nAnd the Agent must be able to review the customer's query before initiating the callback", "script": ""}, {"id": "FR2-21", "title": "Callback work item is completed", "t": "Scenario: Callback work item is completed\nGiven an Agent has reviewed the voicemail\nAnd the callback has been attempted or completed\nWhen the Agent updates the work item\nThen the callback outcome must be recorded\nAnd the date and time of the callback attempt must be recorded\nAnd the work item status must be updated", "script": ""}, {"id": "FR2-22", "title": "Voicemail has not been actioned within the agreed service level", "t": "Scenario: Voicemail has not been actioned within the agreed service level\nGiven a voicemail callback work item remains open\nAnd the agreed callback service level has been exceeded\nWhen the workstream is monitored\nThen the work item must be highlighted or escalated in accordance with the agreed operating process", "script": ""}]}]}, {"code": "FR3", "title": "Agent Availability & Demand Management (Storm/SBT)", "features": [{"id": "FR3-F1", "t": "Configure IVR demand management controls", "story": "As an authorised service administrator,\nI want to configure demand-management rules within Storm/SBT,\nso that call volumes can be managed when Agent availability is low or waiting times are high.", "sc": [{"id": "FR3-01", "title": "Configure a queue-time threshold", "t": "Scenario: Configure a queue-time threshold\nGiven the user is authorised to manage IVR routing settings\nWhen the user configures an agreed maximum queue-time threshold\nThen the threshold must be saved in Storm/SBT\nAnd the threshold must be available to the IVR routing process\nAnd the change must not require a software deployment", "script": ""}, {"id": "FR3-02", "title": "Configure an Agent-availability threshold", "t": "Scenario: Configure an Agent-availability threshold\nGiven the user is authorised to manage IVR routing settings\nWhen the user configures an agreed minimum number of available Agents\nThen the threshold must be saved in Storm/SBT\nAnd the threshold must be available to the IVR routing process\nAnd the change must not require a software deployment", "script": ""}, {"id": "FR3-03", "title": "Configure the response to a threshold breach", "t": "Scenario: Configure the response to a threshold breach\nGiven a queue-time or Agent-availability threshold has been configured\nWhen an authorised user assigns an agreed demand-management response\nThen the response must be saved against the relevant threshold\nAnd the response must be one of the supported options\nAnd the configuration must identify the IVR route or queue to which it applies", "script": ""}, {"id": "FR3-04", "title": "Change a configured threshold", "t": "Scenario: Change a configured threshold\nGiven a demand management threshold is active\nWhen an authorised user changes the threshold\nThen the revised threshold must be applied within the agreed implementation time\nAnd the previous configuration must be retained in the audit history", "script": ""}, {"id": "FR3-05", "title": "Unauthorised user attempts to change a threshold", "t": "Scenario: Unauthorised user attempts to change a threshold\nGiven the user does not have permission to manage IVR routing settings\nWhen the user attempts to change a demand-management threshold or response\nThen the change must be rejected", "script": ""}]}, {"id": "FR3-F2", "t": "Manage demand using the queue-time threshold (Given an agreed queue-time threshold has been configured in Storm/SBT and an approved demand-management response has been assigned to the threshold)", "story": "As an operational manager,\nI want the IVR to apply a configured response when expected queue time becomes too long,\nso that additional calls do not create unmanaged demand.", "sc": [{"id": "FR3-06", "title": "Queue time remains within the threshold", "t": "Scenario: Queue time remains within the threshold\nGiven the current queue time is equal to or below the configured threshold\nWhen a new call reaches the queue-time check\nThen the call must continue through the normal routing flow\nAnd the high-demand response must not be triggered", "script": ""}, {"id": "FR3-07", "title": "Queue time exceeds the threshold", "t": "Scenario: Queue time exceeds the threshold\nGiven the current queue time is above the configured threshold\nWhen a new call reaches the queue-time check\nThen the IVR must apply the configured demand-management response\nAnd the normal routing flow must only continue where permitted by that response", "script": ""}, {"id": "FR3-08", "title": "Queue time returns within the threshold", "t": "Scenario: Queue time returns within the threshold\nGiven the queue-time demand-management response is active\nAnd the current queue time returns to or below the configured threshold\nWhen a new call reaches the queue-time check\nThen the call must follow the normal routing flow\nAnd the threshold response must no longer be applied", "script": ""}, {"id": "FR3-09", "title": "Queue-time data is unavailable", "t": "Scenario: Queue-time data is unavailable\nGiven the IVR cannot obtain current queue-time information\nWhen a new call reaches the queue-time check\nThen the IVR must apply the agreed fail-safe routing behaviour\nAnd the customer must not be left in an incomplete routing journey\nAnd the failure must be recorded for investigation", "script": ""}]}, {"id": "FR3-F3", "t": "Apply the configured demand management response", "story": "As a customer calling during a period of high demand,\nI want to receive clear and consistent handling,\nso that I understand whether I will be connected, asked to wait, diverted or advised to call again.", "sc": [{"id": "FR3-10", "title": "Limit new calls", "t": "Scenario: Limit new calls\nGiven a demand-management threshold has been breached\nAnd \"limit new calls\" is the configured response\nWhen a new call reaches the affected route\nThen the IVR must restrict entry in accordance with the configured call limit\nAnd callers who are not admitted must hear the approved high-demand message", "script": ""}, {"id": "FR3-11", "title": "Divert new calls", "t": "Scenario: Divert new calls\nGiven a demand management threshold has been breached\nAnd \"divert calls\" is the configured response\nWhen a new call reaches the affected route\nThen the IVR must divert the call to the approved alternative destination\nAnd the customer must hear an appropriate message before the call is diverted", "script": ""}, {"id": "FR3-12", "title": "Hold new calls", "t": "Scenario: Hold new calls\nGiven a demand management threshold has been breached\nAnd \"hold calls\" is the configured response\nWhen a new call reaches the affected route\nThen the call must be held according to the agreed queue rules\nAnd the customer must hear the approved waiting message\nAnd the hold time must not exceed the configured maximum", "script": ""}, {"id": "FR3-13", "title": "Advise NewCo customers to try again later", "t": "Scenario: Advise NewCo customers to try again later\nGiven a demand management threshold has been breached\nAnd \"try again later\" is the configured response\nWhen a new call reaches the affected route\nThen the IVR must play the approved high-demand message\nAnd the message must clearly explain that the service is experiencing high demand\nAnd the message must tell the customer when or how to try again\nAnd the call must end according to the configured routing rules", "script": ""}, {"id": "FR3-14", "title": "Different messaging is configured", "t": "Scenario: Different messaging is configured\nGiven a demand management threshold has been breached\nAnd an alternative approved message is configured for that threshold\nWhen a new call reaches the affected route\nThen the IVR must play the message associated with that threshold\nAnd the IVR must apply the corresponding configured routing response", "script": ""}, {"id": "FR3-15", "title": "Both thresholds are breached", "t": "Scenario: Both thresholds are breached\nGiven the queue-time threshold has been breached\nAnd the Agent-availability threshold has been breached\nWhen a new call reaches the demand-management checks\nThen the IVR must apply the response defined by the agreed precedence rules\nAnd the customer must not receive conflicting messages or routing instructions", "script": ""}, {"id": "FR3-16", "title": "A configured response fails", "t": "Scenario: A configured response fails\nGiven a demand management threshold has been breached\nAnd the IVR cannot apply the configured response\nWhen the routing attempt fails\nThen the IVR must apply the agreed fail-safe response\nAnd the customer must receive an appropriate message\nAnd the failure must be recorded for investigation", "script": ""}]}, {"id": "FR3-F4", "t": "Provide demand management capability from day one", "story": "As the service owner,\nI want demand- management controls to be technically available from day one,\nso that thresholds and routing responses can be activated once agreed with Resourcing and SBT.", "sc": [{"id": "FR3-17", "title": "Day-one capability is available", "t": "Scenario: Day-one capability is available\nGiven the service is ready to begin live operation\nWhen the day one readiness assessment is completed\nThen Storm/SBT must support configuration of a queue-time threshold\nAnd Storm/SBT must support configuration of an Agent-availability threshold\nAnd the IVR must support the agreed call-limiting, diversion, holding or messaging responses\nAnd the capability must be tested before live operation", "script": ""}, {"id": "FR3-18", "title": "Business thresholds have not yet been agreed", "t": "Scenario: Business thresholds have not yet been agreed\nGiven the technical demand-management capability is available\nAnd Resourcing and SBT have not approved the operational thresholds\nWhen the service begins live operation\nThen no unapproved threshold must be activated\nAnd the normal routing flow must remain in place\nAnd authorised users must be able to configure the thresholds once they are approved", "script": ""}, {"id": "FR3-19", "title": "A configured demand management rule is activated", "t": "Scenario: A configured demand management rule is activated\nGiven an approved threshold and response have been configured\nWhen an authorised user activates the rule\nThen the IVR must apply the rule to new calls\nAnd calls already connected to an Agent must not be interrupted", "script": ""}, {"id": "FR3-20", "title": "A demand management rule is deactivated", "t": "Scenario: A demand management rule is deactivated\nGiven a demand management rule is active\nWhen an authorised user deactivates the rule\nThen new calls must return to the normal routing flow\nAnd the deactivation must be recorded in the audit history", "script": ""}]}]}, {"code": "FR3.1", "title": "SMS Cost and Benefit Assessment", "features": [{"id": "FR3.1-F1", "t": "Assess SMS costs before implementation", "story": "As the NewCo service owner,\nI want the costs of using SMS for demand management or channel shift to be assessed,\nso that an informed decision can be made before SMS is introduced", "sc": [{"id": "FR3.1-01", "title": "Complete the SMS cost assessment", "t": "Scenario: Complete the SMS cost assessment\nGiven SMS is being considered for demand management or channel shift\nWhen the cost assessment is completed\nThen it must include the cost per message\nAnd it must include any setup or implementation costs\nAnd it must include ongoing operating and support costs\nAnd it must include expected message volumes\nAnd it must calculate the estimated total cost for the assessment period", "script": ""}, {"id": "FR3.1-02", "title": "Consider different SMS-volume assumptions", "t": "Scenario: Consider different SMS-volume assumptions\nGiven estimated SMS volumes may vary\nWhen the assessment is produced\nThen it must include agreed low, expected and high-volume scenarios\nAnd it must show the estimated cost for each scenario", "script": ""}, {"id": "FR3.1-03", "title": "SMS costs are not fully known", "t": "Scenario: SMS costs are not fully known\nGiven one or more SMS cost components have not been confirmed\nWhen the assessment is reviewed\nThen the unknown costs and assumptions must be clearly identified\nAnd SMS must not be approved solely on an incomplete cost estimate", "script": ""}]}]}, {"code": "FR4", "title": "Web Chat Requirements", "features": [{"id": "FR4-F1", "t": "Use the existing medical web chat as the primary entry point", "story": "As a customer seeking support through web chat,\nI want to access NewCo support through the existing DVLA medical web chat,\nso that I have a consistent and trusted entry point.", "sc": [{"id": "FR4-01", "title": "Customer accesses web chat directly", "t": "Scenario: Customer accesses web chat directly\nGiven the customer needs support with a medical case\nWhen the customer selects the existing DVLA medical web chat link\nThen the customer must enter the existing medical web chat journey\nAnd the customer must not need a separate NewCo-specific URL", "script": "Connecting to a NewCo agent\nYou're being connected to the team looking after your case."}, {"id": "FR4-02", "title": "NewCo-eligible customer enters through the existing URL", "t": "Scenario: NewCo-eligible customer enters through the existing URL\nGiven the customer is eligible for the NewCo cohort\nWhen the customer enters through the existing medical web chat URL\nThen the web chat journey must assess the customer's NewCo eligibility\nAnd the customer must be capable of being routed to the NewCo Agent queue", "script": ""}, {"id": "FR4-03", "title": "BAU customer enters through the existing URL", "t": "Scenario: BAU customer enters through the existing URL\nGiven the customer is not eligible for the NewCo cohort\nWhen the customer enters through the existing medical web chat URL\nThen the customer must follow the appropriate BAU web chat route\nAnd the customer must not be incorrectly routed to NewCo", "script": ""}, {"id": "FR4-04", "title": "The existing URL supports the required branching", "t": "Scenario: The existing URL supports the required branching\nGiven the existing medical web chat URL can support NewCo eligibility checks and routing\nWhen the NewCo web chat journey is implemented\nThen a standalone NewCo web chat URL must not be introduced", "script": ""}, {"id": "FR4-05", "title": "The existing URL cannot support the required branching", "t": "Scenario: The existing URL cannot support the required branching\nGiven technical assessment confirms that the existing medical web chat URL cannot support the required branching\nWhen an alternative approach is proposed\nThen the decision must be documented and approved through the agreed governance process\nAnd existing DVLA and GDS branding requirements must be retained", "script": ""}]}, {"id": "FR4-F2", "t": "Direct controlled communications to the existing web chat journey", "story": "As a NewCo customer receiving an SMS or other controlled communication,\nI want the web chat link to take me to the correct existing journey,\nso that my eligibility can be assessed before I am routed.", "sc": [{"id": "FR4-06", "title": "NewCo Customer selects a web chat link in an IVR-triggered SMS", "t": "Scenario: NewCo Customer selects a web chat link in an IVR-triggered SMS\nGiven the NewCo customer has received an IVR-triggered SMS containing a web chat link\nWhen the customer selects the link\nThen the customer must be directed to the existing DVLA medical web chat URL\nAnd the customer must enter the NewCo branching journey", "script": ""}, {"id": "FR4-07", "title": "Communication link does not bypass eligibility checks", "t": "Scenario: Communication link does not bypass eligibility checks\nGiven a communication has been sent to a NewCo customer believed to be eligible\nWhen the customer enters web chat using the supplied link\nThen the customer must still provide their case reference number\nAnd the case reference number must be validated before the customer is routed to the NewCo team", "script": ""}]}, {"id": "FR4-F3", "t": "Capture and validate the case reference number", "story": "As a customer entering the medical web chat journey,\nI want to provide my case reference number,\nso that the service can identify whether my case is eligible for NewCo support.", "sc": [{"id": "FR4-08", "title": "Customer is asked for a case reference number", "t": "Scenario: Customer is asked for a case reference number\nGiven the NewCo customer has entered the web chat journey\nWhen the eligibility stage begins\nThen the web chat must request the customer's case reference number\nAnd the guidance must explain which reference number is required\nAnd the guidance must explain where the customer can find it\nAnd the case reference number must be treated as the unique routing identifier", "script": ""}, {"id": "FR4-09", "title": "Customer enters a correctly formatted reference number", "t": "Scenario: Customer enters a correctly formatted reference number\nGiven the customer has been asked for their case reference number\nWhen the customer enters a reference number in the required format\nThen the web chat must check it against the shared NewCo routing table", "script": ""}, {"id": "FR4-10", "title": "Customer enters an incorrectly formatted reference number", "t": "Scenario: Customer enters an incorrectly formatted reference number\nGiven the NewCo customer has been asked for their case reference number\nWhen the customer enters a reference number in an invalid format\nThen the web chat must explain that the reference number is not in the expected format\nAnd the customer must be offered another attempt in accordance with the agreed retry rules\nAnd the customer must not be routed to the NewCo team based on the invalid reference number", "script": ""}, {"id": "FR4-11", "title": "NewCo Customer does not provide a case reference number", "t": "Scenario: NewCo Customer does not provide a case reference number\nGiven the customer has been asked for their case reference number\nWhen the customer cannot or does not provide it\nThen the customer must not be automatically routed to NewCo\nAnd the customer must remain in or be directed to the appropriate BAU route", "script": ""}, {"id": "FR4-12", "title": "Maximum entry attempts are reached", "t": "Scenario: Maximum entry attempts are reached\nGiven the customer has reached the maximum permitted number of entry attempts\nAnd a validly formatted case reference number has not been captured\nWhen the web chat continues\nThen the customer must remain in or be directed to the appropriate BAU route", "script": ""}]}, {"id": "FR4-F4", "t": "Update and verify the shared routing table daily (Given an agreed person or team owns the daily routing-table update)", "story": "As the operational owner of the NewCo routing data,\nI want the shared routing table to be updated and checked daily,\nso that routing decisions are based on current and accurate information.", "sc": [{"id": "FR4-13", "title": "Daily update completes successfully", "t": "Scenario: Daily update completes successfully\nGiven the current NewCo cohort data is available\nWhen the scheduled daily update is run\nThen new eligible case references must be added\nAnd closed or ineligible case references must be removed or made inactive\nAnd current team ownership must be recorded\nAnd the process must confirm that the update completed successfully.", "script": ""}]}, {"id": "FR4-F5", "t": "Identify routing failures for operational review (Record web chat routing failures)", "story": "As an operational owner,\nI want failed web chat routing attempts to be identifiable,\nso that data issues and recurring routing problems can be investigated and corrected.", "sc": [{"id": "FR4-14", "title": "Record a routing failure", "t": "Scenario: Record a routing failure\nGiven a customer is using the medical web chat\nWhen routing fails because the case reference is \"<failure_reason>\"\nThen the failure must be recorded for operational review\nAnd the record must include the date and time\nAnd the failure category must be recorded as \"<failure_reason>\"\nAnd the outcome or fallback route must be recorded", "script": ""}, {"id": "FR4-15", "title": "Automatic routing fails despite an eligible record", "t": "Scenario: Automatic routing fails despite an eligible record\nGiven the case reference number matches an active record\nWhen the web chat cannot route the customer to the configured NewCo queue\nThen the failure must be recorded as an automatic routing failure\nAnd the intended NewCo queue must be identifiable\nAnd the agreed fallback or manual transfer route must be made available", "script": ""}, {"id": "FR4-16", "title": "Operational user reviews routing failures", "t": "Scenario: Operational user reviews routing failures\nGiven one or more web chat routing failures have been recorded\nWhen an authorised operational user reviews the failure information\nThen the user must be able to distinguish data validation failures from technical routing failures\nAnd the user must be able to identify recurring failure reasons\nAnd access to customer information must follow applicable security and data protection controls", "script": ""}]}, {"id": "FR4-F6", "t": "Display the NewCo cohort indicator in Dynamics", "story": "As a BAU Agent,\nI want to see a clear NewCo indicator on the Dynamics front screen,\nso that I can identify NewCo cases and transfer customers correctly when automatic routing fails.", "sc": [{"id": "FR4-17", "title": "Agent opens an NewCo case", "t": "Scenario: Agent opens an NewCo case\nGiven the case is recorded as active and eligible for NewCo\nWhen an authorised Agent opens the customer or case front screen in Dynamics\nThen a clear NewCo indicator must be displayed\nAnd the indicator must be visible without requiring the Agent to search through case notes\nAnd the owning NewCo team or queue must be shown where available", "script": ""}, {"id": "FR4-18", "title": "BAU agent receives a NewCo case", "t": "Scenario: BAU agent receives a NewCo case\nGiven automatic routing has failed\nAnd a BAU agent receives a NewCo customer's call or web chat\nWhen the Agent accesses the relevant Dynamics record\nThen the NewCo indicator must be visible to the BAU agent\nAnd the indicator must provide enough information to identify the correct transfer destination", "script": ""}, {"id": "FR4-19", "title": "NewCo eligibility ends", "t": "Scenario: NewCo eligibility ends\nGiven the case was previously eligible for NewCo\nAnd the case has been closed or made ineligible\nWhen the updated case information is available in Dynamics\nThen the case must no longer display an active NewCo indicator", "script": ""}, {"id": "FR4-20", "title": "Dynamics cannot retrieve current NewCo status", "t": "Scenario: Dynamics cannot retrieve current NewCo status\nGiven the Agent has opened the customer or case front screen\nWhen current NewCo eligibility cannot be retrieved\nThen Dynamics must not present an unconfirmed status as current\nAnd the Agent must be able to follow the agreed fallback process", "script": ""}]}, {"id": "FR4-F7", "t": "Manually transfer an NewCo web customer contact", "story": "As a BAU agent who receives a NewCo eligible customer,\nI want to transfer the contact to the correct NewCo team,\nso that the customer reaches the appropriate NewCo agent when automatic routing has failed.", "sc": [{"id": "FR4-21", "title": "BAU Agent initiates a manual transfer", "t": "Scenario: BAU Agent initiates a manual transfer\nWhen the BAU Agent selects the approved NEWCO transfer destination\nThen the chat must be transferred to the correct NewCo team or queue\nAnd the transfer outcome must be visible to the BAU Agent", "script": ""}, {"id": "FR4-22", "title": "Manual transfer succeeds", "t": "Scenario: Manual transfer succeeds\nGiven the BAU Agent has initiated a manual transfer\nWhen the NEWCO team accepts the chat\nThen the NEWCO Agent must receive the active chat\nAnd the existing chat transcript must be retained\nAnd customer information already captured must be available to the NEWCO Agent\nAnd the customer must not be asked to repeat information that has already been captured and remains valid", "script": ""}, {"id": "FR4-23", "title": "Manual transfer is waiting to be accepted", "t": "Scenario: Manual transfer is waiting to be accepted\nGiven the BAU Agent has initiated a manual transfer\nAnd the NEWCO team has not yet accepted the chat\nWhen the transfer remains pending\nThen the customer must receive appropriate waiting information\nAnd the chat must not be disconnected solely because the transfer is pending\nAnd the transfer must follow the agreed timeout rules", "script": ""}, {"id": "FR4-24", "title": "Manual transfer fails", "t": "Scenario: Manual transfer fails\nGiven the BAU Agent has initiated a manual transfer\nWhen the transfer cannot be completed\nThen the BAU Agent must be informed that the transfer failed\nAnd the chat transcript and captured customer information must remain available\nAnd the Agent must be able to follow the agreed fallback process\nAnd the failure must be recorded for operational review", "script": ""}, {"id": "FR4-25", "title": "NewCo team or queue is unavailable", "t": "Scenario: NewCo team or queue is unavailable\nGiven the customer is confirmed as NewCo eligible \nAnd the correct NewCo queue is unavailable\nWhen the BAU Agent attempts to transfer the chat\nThen the customer must not be transferred to an incorrect queue\nAnd the BAU Agent must follow the agreed unavailable team process", "script": ""}]}, {"id": "FR4-F8", "t": "Protect customer information during web chat routing", "story": "As a NewCo customer,\nI want my personal information and chat transcript to remain secure during routing and transfer,\nso that my information is only available to authorised agents handling my query.", "sc": [{"id": "FR4-26", "title": "Customer information is transferred to an agent", "t": "Scenario: Customer information is transferred to an agent\nGiven the customer has entered personal and case information\nWhen the chat is routed or transferred to an agent\nThen the information must be passed through an approved secure mechanism\nAnd it must only be available to authorised users", "script": ""}, {"id": "FR4-27", "title": "Chat is transferred between BAU and NewCo", "t": "Scenario: Chat is transferred between BAU and NewCo\nGiven a BAU agent has received an NewCo eligible chat\nWhen the chat is transferred to an NewCo agent\nThen only information relevant to handling the contact must be transferred\nAnd the transcript must remain linked to the correct chat session and customer case", "script": ""}, {"id": "FR4-28", "title": "Chat session ends before handover", "t": "Scenario: Chat session ends before handover\nGiven the customer has entered mandatory personal information\nWhen the chat session ends before agent handover \nThen the captured information must be retained or deleted in accordance with the agreed retention policy\nAnd it must not be accessible through another customer's chat session", "script": ""}]}]}, {"code": "FR5", "title": "Shared Routing Table Data Management", "features": [{"id": "FR5-F1", "t": "Assess the feasibility of automated routing table updates", "story": "As the NewCo service owner,\nI want Midas or an equivalent reporting function assessed for routing-table automation,\nso that the most reliable and proportionate update method can be selected.", "sc": [{"id": "FR5-01", "title": "Assess Midas as the source of routing data", "t": "Scenario: Assess Midas as the source of routing data\nGiven the routing table requires daily NewCo eligibility data\nWhen the technical assessment of Midas is completed\nThen the assessment must confirm whether Midas can identify eligible case reference numbers\nAnd Midas can identify the owning NewCo team or queue\nAnd Midas can produce the data at the required frequency\nAnd its output can be provided in a format suitable for updating the routing table", "script": ""}, {"id": "FR5-02", "title": "Midas can support the required automation", "t": "Scenario: Midas can support the required automation\nGiven the assessment confirms that Midas can meet the agreed requirements\nWhen the automation approach is approved\nThen Midas must be used to produce or trigger the routing-data extract\nAnd the extract must be made available to the agreed update mechanism", "script": ""}, {"id": "FR5-03", "title": "Midas cannot support all requirements", "t": "Scenario: Midas cannot support all requirements\nGiven the assessment identifies requirements that Midas cannot meet\nWhen the assessment is concluded\nThen the limitations must be documented\nAnd an equivalent reporting function or controlled alternative must be assessed\nAnd the selected approach must be approved through the agreed governance process", "script": ""}, {"id": "FR5-04", "title": "Full automation is not technically feasible", "t": "Scenario: Full automation is not technically feasible\nGiven neither Midas nor an equivalent function can fully automate the update\nWhen an interim update process is designed\nThen the process must include controlled manual steps\nAnd responsibilities for each manual step must be assigned\nAnd validation and completion checks must be included\nAnd the residual operational risks must be documented", "script": ""}]}, {"id": "FR5-F2", "t": "Produce the automated routing data extract", "story": "As the NewCo team responsible for routing data,\nI want Midas or the agreed reporting function to produce a valid extract of NewCo cases,\nso that the shared routing table can be updated accurately.", "sc": [{"id": "FR5-05", "title": "Produce the scheduled extract", "t": "Scenario: Produce the scheduled extract\nGiven the approved reporting function is available\nAnd the daily extract is scheduled\nWhen the scheduled extraction time is reached\nThen the extract must identify all cases eligible for NewCo routing\nAnd it must include the eligible case reference number\nAnd it must include the owning NewCo team or destination queue where required\nAnd it must be produced in the agreed format", "script": ""}, {"id": "FR5-06", "title": "Extract includes a newly eligible NewCo case", "t": "Scenario: Extract includes a newly eligible NewCo case\nGiven a case has entered the NewCo cohort before the agreed data cut-off\nWhen the next daily extract is produced\nThen the case reference number must be included\nAnd the current owning team or destination queue must be included where required", "script": ""}, {"id": "FR5-07", "title": "Extract reflects a case leaving the NewCo cohort", "t": "Scenario: Extract reflects a case leaving the NewCo cohort\nGiven a case has closed or left the NewCo cohort\nAnd the agreed retention period has expired\nWhen the next daily extract is produced\nThen the case reference number must be identified for removal or omitted in accordance with the agreed update method", "script": ""}]}, {"id": "FR5-F3", "t": "Apply routing data to routing table", "story": "As the NewCo Service owner, I want Telecoms/agreed mechanism to apply the daily routing data extract,\nso that IVR and web chat use the same current NewCo routing information", "sc": [{"id": "FR5-08", "title": "Daily Update", "t": "Scenario: Daily Update\nGiven a valid daily routing data extract is available\nAnd the agreed update mechanism can access the shared routing table\nWhen the update process is run\nThen eligible reference number additions must be applied\nAnd the NewCo team/queue ownership changes must be applied\nAnd the updated data must be available to IVR and web chat", "script": ""}]}, {"id": "FR5-F4", "t": "Add eligible NewCo cases to routing table", "story": "As the NewCo Service owner,\nI want eligible case references added to the routing table,\nso that NewCo customers entering the NewCo cohort are routed to the correct team", "sc": [{"id": "FR5-09", "title": "Add a newly eligible case", "t": "Scenario: Add a newly eligible case\nGiven a case has entered the NewCo cohort\nAnd the case reference number has passed validation\nWhen the next daily update completes\nThen the case reference number must be active in the shared routing table\nAnd it must be available to both IVR and web chat\nAnd the correct owning team or destination queue must be recorded where required", "script": ""}, {"id": "FR5-10", "title": "Attempt to add an existing active reference number", "t": "Scenario: Attempt to add an existing active reference number\nGiven the case reference number already has an active routing record\nWhen the same reference number is included as a new addition\nThen a duplicate active record must not be created\nAnd any valid ownership or eligibility change must be processed according to the agreed update rules", "script": ""}]}, {"id": "FR5-F5", "t": "Remove cases leaving the NewCo cohort", "story": "As the NewCo Service owner,\nI want case references removed after the agreed retention period,\nso that closed or ineligible cases are not incorrectly routed to the NewCo team", "sc": [{"id": "FR5-11", "title": "Closed case reaches the end of its retention period.", "t": "Scenario: Closed case reaches the end of its retention period.\nGiven a NewCo case has closed \nAnd the agreed retention period has expired\nWhen the next daily update is complete\nThen the reference number must be removed or made inactive for the NewCo routing\nAnd IVR and web chat must no longer route the case to NewCo", "script": ""}]}]}, {"code": "FR6", "title": "CSAT Requirements for the NewCo Queue", "features": [{"id": "FR6-F1", "t": "Provide a separate CSAT survey for NewCo customer\n(CSAT Questions can be found here: CSAT Questions refresh)", "story": "As an NewCo service owner,\nI want customers handled through the NewCo queue to receive a separate CSAT survey,\nso that NewCo customer outcomes can be measured independently from BAU performance.", "sc": [{"id": "FR6-01", "title": "Customer completes a contact through the NewCo queue", "t": "Scenario: Customer completes a contact through the NewCo queue\nGiven the customer's call has been handled through the NewCo queue\nAnd the call reaches the agreed survey trigger point\nWhen the customer is invited to complete a CSAT survey\nThen the customer must be presented with the NewCo CSAT survey\nAnd the response must be identified as an NewCo response\nAnd the response must not be recorded as a BAU survey response", "script": ""}, {"id": "FR6-02", "title": "Customer declines the NEWCO survey", "t": "Scenario: Customer declines the NEWCO survey\nGiven an NEWCO customer has been invited to complete the survey\nWhen the customer declines or exits without responding\nThen the interaction must not be recorded as a completed survey\nAnd the invitation or non-completion outcome must be captured where technically available", "script": ""}, {"id": "FR6-03", "title": "NEWCO customer completes only part of the survey", "t": "Scenario: NEWCO customer completes only part of the survey\nGiven an NEWCO customer has started the survey\nWhen the customer exits before answering all questions\nThen each valid response already submitted must be retained according to the agreed survey rules\nAnd the survey must be identifiable as partially completed", "script": ""}]}, {"id": "FR6-F2", "t": "Configure the NEWCO CSAT journey", "story": "As the Telecoms team,\nI want the approved NewCo survey questions and response scales configured in the telephony journey,\nso that eligible NewCo customers can provide feedback after their call.", "sc": [{"id": "FR6-04", "title": "Configure the NewCo survey", "t": "Scenario: Configure the NewCo survey \nGiven the NewCo team has supplied the approved survey questions And the approved response scales\nWhen Telecoms configures the NewCo CSAT journey\nThen the survey must contain the approved NewCo questions\nAnd the questions must appear in the approved order\nAnd each question must use the approved response scale\nAnd the shared benchmark question must match the BAU version", "script": ""}, {"id": "FR6-05", "title": "NewCo survey configuration is tested", "t": "Scenario: NewCo survey configuration is tested\nGiven Telecoms has configured the NewCo CSAT journey\nWhen testing is completed\nThen each question must play or display correctly\nAnd each response option must be captured correctly\nAnd the response must be assigned to the correct MI counter\nAnd NewCo responses must remain separate from BAU responses", "script": ""}]}, {"id": "FR6-F3", "t": "Configure NewCo CSAT MI counters", "story": "As a data analyst,\nI want dedicated MI counters for the NewCo survey,\nso that response volumes and outcomes can be reported separately and accurately.", "sc": [{"id": "FR6-06", "title": "Configure separate NewCo counters", "t": "Scenario: Configure separate NewCo counters\nGiven the final NewCo questions and response scales have been approved\nWhen Telecoms configures the MI counters\nThen each NewCo survey question must have an associated response counter\nAnd NewCo counters must be distinguishable from BAU counters\nAnd incomplete, invalid or unanswered responses must be identifiable where technically possible", "script": ""}, {"id": "FR6-07", "title": "Reconcile survey responses and counters", "t": "Scenario: Reconcile survey responses and counters\nGiven NewCo CSAT responses have been collected\nWhen the reporting data is reconciled\nThen the number of recorded responses must align with the relevant MI counters\nAnd any discrepancy must be identifiable for investigation", "script": ""}]}]}, {"code": "FR7", "title": "Training & Communications - Case Reference Emphasis", "features": [{"id": "FR7-F1", "t": "Include case reference guidance in Agent training", "story": "As a NewCo agent,\nI want clear training on when and how to provide the case reference number,\nso that customers can use it to access the correct IVR route during future calls", "sc": [{"id": "FR7-01", "title": "Agent completes first-notification training", "t": "Scenario: Agent completes first-notification training\nGiven an Agent will handle first-notification calls\nWhen the Agent completes the required training\nThen the training must explain why the case reference number is required for IVR routing\nAnd it must instruct the Agent to give the customer their case reference number\nAnd it must instruct the Agent to ask the customer to keep the reference number for future contact\nAnd it must instruct the Agent to have the customer use the number when calling NewCo Team", "script": ""}]}, {"id": "FR7-F2", "t": "Give NewCo customers their reference number during first notification", "story": "As a NewCo customer making a first notification,\nI want to be given my case reference number and understand how to use it,\nso that future calls can be routed to the correct team.", "sc": [{"id": "FR7-02", "title": "Case reference number is available", "t": "Scenario: Case reference number is available\nGiven the customer is completing a first-notification call\nAnd a case reference number is available\nWhen the Agent reaches the end of the relevant notification process\nThen the Agent must provide the customer with the case reference number\nAnd tell the customer to keep it for future contact\nAnd tell the customer to have it ready whenever they call DVLA\nAnd explain that providing it will help the system route the call correctly", "script": ""}]}, {"id": "FR7-F3", "t": "Display the case reference number clearly in letters", "story": "As a NewCo customer receiving a letter about my NewCo Cohort case,\nI want my case reference number to be clearly displayed,\nso that I can find and use it when I contact NewCo team.", "sc": [{"id": "FR7-03", "title": "Generate a standard letter for an NewCo customer", "t": "Scenario: Generate a standard letter for an NewCo customer\nGiven an approved standard letter is being produced for an NewCo case\nWhen the letter is generated\nThen the correct case reference number must be displayed\nAnd it must appear in a clear and prominent location\nAnd it must be labelled as the customer's case reference number", "script": ""}]}, {"id": "FR7-F4", "t": "Display the case reference number in standard emails", "story": "As a NewCo customer receiving an email about my DM case,\nI want my case reference number to be clearly displayed,\nso that I can easily use it when I call the NewCo team", "sc": [{"id": "FR7-04", "title": "Generate a standard email for an NewCo customer", "t": "Scenario: Generate a standard email for an NewCo customer\nGiven an approved standard email is being produced for an NewCo case\nWhen the email is generated\nThen the correct case reference number must be displayed prominently\nAnd it must be labelled as the customer's case reference number", "script": ""}]}, {"id": "FR7-F5", "t": "Maintain consistent customer guidance", "story": "As the NewCo service owner,\nI want training, scripts, letters and emails to use consistent case-reference guidance,\nso that customers receive the same instruction across all contact points.", "sc": [{"id": "FR7-05", "title": "Review case-reference messaging", "t": "Scenario: Review case-reference messaging\nGiven approved case-reference wording has been agreed\nWhen the communication type is reviewed\nThen it must explain that the customer should have their case reference number ready when calling DVLA\nAnd it must explain that quoting the number will help route the call correctly", "script": ""}]}]}];
 
-const PROPOSED = "Proposed";
+const PROPOSED = "Suggested";
 
-/* ---------- recommendations on features (title or story) ---------- */
-const FEAT_REC = {
-  "FR1-F1":{story:"As a customer calling the DVLA medical line,\nI want to continue through the existing IVR journey,\nso that I can access the appropriate service without disruption from the introduction of NewCo routing.",why:"There is one number for everyone. “The NewCo DM Line” reads as a separate number, which FR1 rules out."},
-  "FR1-F3":{t:"Route first-notification calls using the Super Cell approach (Given the call has been identified as a first-notification call, the licence is not for a lorry or bus, first-notification routing to NewCo is switched on, and NewCo agents are configured as an availability based routing option)",why:"Decided 26 Sep: NewCo will not handle lorry or bus licences, and first-notification routing needs an on/off switch to control cohort growth. The “no NewCo-only queue” rule applies to first notifications only; existing cases do join a NewCo queue (FR1-13)."},
-  "FR2-F1":{t:"Inform callers when the NewCo team is closed",story:"As a NewCo customer calling when the team looking after my case is closed,\nI want to be told when they're open and what I can do now,\nso that I can choose between leaving them a message and speaking to an adviser.",why:"Decided 26 Sep: in hours, cohort callers wait in the NewCo queue for their team. The only time they are offered BAU is when the team is closed. The example message is replaced by the team-closed script in FR2-01."},
-  "FR2-F2":{t:"Handle callers who don't choose an option",why:"This feature stops a cohort caller reaching an adviser. Decided 26 Sep: when the team is closed and BAU is open, the caller can choose an adviser. FR2-05 and FR2-06 are recommended for removal; FR2-07 is rewritten."},
-  "FR2-F3":{t:"Offer a voicemail callback option (Given the NewCo team is closed and the customer has chosen to leave a voicemail)",story:"As a customer calling when the team looking after my case is closed,\nI want to leave a voicemail requesting a callback,\nso that the NewCo team can review my query and contact me.",why:"The example text in the story is a high-demand message (hold, web chat link or voicemail), not a voicemail prompt. Recommend removing it; the voicemail scripts are on the map."}
+/* ====================================================================
+   Suggestions on the requirements. Kept few and short on purpose: the
+   requirements belong to the business architect, so these sit beside
+   her text as suggestions and never replace it. Each one traces to a
+   decision made in the 26 September review, or to a risk to customers.
+   ==================================================================== */
+
+/* On a feature as a whole */
+const FEAT_SUG = {
+  "FR1-F3":{t:"Suggest two additions. Lorry and bus licences always go to BAU, because NewCo won't handle them. And the team can switch first-notification routing to NewCo on or off, to control how fast the cohort grows.",add:"And the licence is not for a lorry or bus\nAnd first-notification routing to NewCo is switched on"},
+  "FR2-F2":{t:"Your team-closed script (FR2-01) already offers an adviser with “press 2”. FR2-05, FR2-06 and FR2-07 say the caller must not be directed to BAU. Suggest bringing these in line with the script."},
+  "FR3-F3":{t:"Suggest saying these responses apply to the BAU queue only. On the NewCo branch, the callback offer in the NewCo queue does this job, so a cohort caller is never cut off."},
+  "FR4-F7":{t:"Suggest two additions. Transfer only while the NewCo team is open. And the same transfer for phone calls, since this feature covers web chat only.",add:"Given the NewCo team is within its operating hours"}
 };
 
-/* ---------- recommendations on scenarios ----------
-   s: change | remove | comment        t: recommended text      why: reason
-   scr: recommendation on the script column                          */
-const REC = {
-  "FR1-05":{s:"change",t:"Scenario: Customer cannot provide a reference number\nGiven the customer has been prompted to provide their case reference number\nWhen the customer presses star, or cannot provide the reference number\nThen the IVR must play the approved “putting you through to an adviser” message\nAnd the call must continue through the standard BAU route",why:"One short line says what is happening instead of silence. It must not say we couldn't find the case: most callers on this path are BAU customers."},
-  "FR1-08":{s:"change",t:"Scenario: A NewCo agent is available\nGiven at least one eligible NewCo agent is available at the point of routing\nWhen the IVR routes the first-notification call\nThen the call must be sent to an available NewCo agent\nAnd no separate NewCo agent queue must be created or used\nAnd no NewCo-specific message must be played",scr:"No message. The written script is kept, but moved to existing cases (FR1-13).",why:"A first-notification caller has no case yet, so “the team looking after your case” doesn't fit. The routing is invisible to them, as it should be."},
-  "FR1-12":{s:"comment",why:"Keep. Recommend stating that this applies to first notifications only. Existing cases do join a NewCo queue (FR1-13)."},
-  "FR1-13":{s:"change",t:"Scenario: Existing-case NewCo customer provides a matching case reference number\nGiven the NewCo customer has indicated that they have an existing case\nAnd the NewCo customer has provided their case reference number\nAnd the case reference number matches an active NewCo cohort record\nAnd the owning NewCo team is within its operating hours\nWhen the IVR checks the identifier against the cohort routing data\nThen the IVR must play the approved connecting message\nAnd the call must join the NewCo queue for the team stored against that record\nAnd the call must not fall back to the BAU queue while the team is open",scr:"Thank you. We're putting you through to the team looking after your case.\n(Written for FR1-08; recommended for use here.)",why:"Decided 26 Sep: cohort customers wait for the right team while it is open. The pilot is about 2% of customers, so waits are expected to be short."},
-  "FR1-14":{s:"comment",why:"The “agreed alternative identifier” isn't named anywhere. If there isn't one for day one, recommend removing this scenario and FR1-18, so the prompt only asks for the case reference number."},
-  "FR1-17":{s:"change",t:"Scenario: NewCo Customer is asked to provide a case reference number\nGiven the customer has chosen the option for an existing application\nWhen the IVR requests the customer's case reference number\nThen the request must be made before the BAU queue messages are played\nAnd the message must explain which reference number is required, using the label printed on letters\nAnd the message must explain where the customer can find it\nAnd the customer must be able to enter it using the phone keypad\nAnd the customer must be able to press star if they don't have it",why:"Keypad entry is needed because conditions that affect speech are among the things customers tell DVLA about. Asking before the BAU queue messages spares cohort callers wait-time messages for a queue they won't join. This changes the order for every existing-application caller, so it needs BAU sign-off."},
-  "FR1-18":{s:"comment",why:"See FR1-14: remove if no alternative identifier is agreed for day one."},
-  "FR1-20":{s:"change",t:"Scenario: Maximum retry attempts are reached\nGiven the NewCo customer has reached the maximum permitted number of identifier-entry attempts\nWhen the identifier has not been successfully captured\nThen the IVR must play the approved “putting you through to an adviser” message\nAnd the call must continue through the standard BAU route",why:"Same as FR1-05."},
-  "FR1-28":{s:"comment",why:"The precedence rules this refers to haven't been written yet. Needed before build."},
-  "FR1-31":{s:"change",t:"Scenario: Configured NewCo destination is unavailable\nGiven the customer's identifier matches an active NewCo cohort record\nAnd the configured NewCo routing destination is unavailable because of a technical fault\nWhen the IVR attempts to route the call\nThen the IVR must play the approved “putting you through to an adviser” message\nAnd the call must follow the standard BAU route\nAnd the routing failure must be recorded",why:"“The agreed fallback route” isn't defined. A fault is not the same as the team being closed, so it goes to BAU rather than voicemail."},
-  "FR2-01":{s:"change",t:"Scenario: Customer calls outside NewCo operating hours\nGiven the owning NewCo team is outside its configured operating hours\nAnd BAU lines are open\nWhen a NewCo customer is identified by the IVR\nThen the IVR must play the approved team-closed message\nAnd the message must give the team's opening hours\nAnd the caller must be offered the option to leave a voicemail for a callback\nAnd the caller must be offered the option to speak to an adviser now",scr:"Keep the written script as it is.",why:"Brings the acceptance criteria into line with the script, which already offers an adviser. Also checks the owning team's hours rather than one closing time: the criteria say 5:00pm but the story's example says 8:30 to 4:30."},
-  "FR2-02":{s:"change",t:"Scenario: The team is open but no NewCo agent is free\nGiven the owning NewCo team is within its operating hours\nAnd no NewCo agent is free\nWhen a NewCo customer is identified by the IVR\nThen the call must join the NewCo queue for that team\nAnd the caller must hear the approved queue message\nAnd the caller must be offered a callback from the team\nAnd the call must not be moved to the BAU queue",scr:"Remove the “team busy” script. It is replaced by the queue message on the map.",why:"Decided 26 Sep: customers wait for the right team while it's open. The busy message and its choice are no longer needed."},
-  "FR2-04":{s:"change",t:"Scenario: NewCo availability cannot be determined\nGiven the current time is within the configured operating hours\nAnd the IVR cannot determine whether a NewCo agent is available\nWhen the customer reaches the availability check\nThen the call must join the NewCo queue for the owning team",why:"Consistent with FR2-02: in hours, the caller waits for their team."},
-  "FR2-05":{s:"remove",why:"Conflicts with FR2-01 as recommended: when the team is closed and BAU is open, the caller is offered an adviser."},
-  "FR2-06":{s:"remove",why:"There is no “no agents” message any more. In hours, callers wait in the NewCo queue (FR2-02)."},
-  "FR2-07":{s:"change",t:"Scenario: Customer doesn't choose an option\nGiven the IVR has offered the customer the choice of leaving a voicemail or speaking to an adviser\nWhen the customer doesn't select an option\nThen the IVR must repeat the options once\nAnd if the customer still doesn't select an option, the call must be put through to an adviser",why:"Ending the call leaves the customer with nothing. An adviser is the safer default while BAU is open."},
-  "FR2-09":{s:"change",t:"Scenario: Customer completes a voicemail recording\nGiven the customer is recording a voicemail\nWhen the customer finishes the recording by pressing hash or by hanging up\nThen the IVR must save the voicemail\nAnd if the customer is still on the line, the IVR must play a confirmation message\nAnd the confirmation must explain that the voicemail has been received for follow-up",why:"Decided 26 Sep. Most people hang up rather than press hash. Without this, their messages are lost and they believe they're waiting for a call."},
-  "FR2-11":{s:"change",t:"Scenario: Customer reaches the maximum number of recording attempts\nGiven the customer has not successfully recorded a voicemail\nAnd the maximum number of recording attempts has been reached\nWhen the final recording attempt ends\nThen the IVR must tell the customer their message couldn't be taken\nAnd the call must be put through to an adviser\nAnd no empty voicemail work item must be created",why:"BAU is open whenever this route is reached, so an adviser is better than ending the call."},
-  "FR2-12":{s:"change",t:"Scenario: Voicemail service is unavailable\nGiven the customer has chosen to leave a voicemail\nAnd the voicemail service cannot accept a recording\nWhen the customer selects the voicemail option\nThen the IVR must play an approved service-unavailable message\nAnd the call must be put through to an adviser",why:"Same as FR2-11."},
-  "FR2-14":{s:"comment",why:"Keep. Because the originating number isn't always available, the voicemail prompt asks the caller to say the best number to call them back on."},
-  "FR2-22":{s:"comment",why:"The callback service level is a team decision and is deliberately left open. Scripts use a placeholder, so the timing can be recorded as a separate segment and dropped in later."},
-  "FR3-03":{s:"comment",why:"Recommend stating that the configured responses apply to the BAU queue only. See the new scenario under “Apply the configured demand management response”."},
-  "FR3-13":{s:"change",t:"Scenario: Advise customers to try again later\nGiven a demand management threshold has been breached\nAnd \"try again later\" is the configured response\nWhen a new call reaches the affected route\nThen the IVR must play the approved high-demand message\nAnd the message must clearly explain that the service is experiencing high demand\nAnd the message must tell the customer when or how to try again\nAnd the call must end according to the configured routing rules",why:"Only the title changes (“NewCo customers” to “customers”): demand management applies to the BAU queue, not to cohort calls."},
-  "FR3.1-01":{s:"comment",why:"The text-link offer in the NewCo queue depends on this assessment."},
-  "FR4-02":{s:"change",t:"Scenario: NewCo-eligible customer enters through the existing URL\nGiven the customer is eligible for the NewCo cohort\nWhen the customer enters through the existing medical web chat URL\nThen the web chat journey must assess the customer's NewCo eligibility\nAnd, if the owning team is open, the customer must be routed to the NewCo queue for that team\nAnd the customer must see the approved queue message while they wait",why:"Web chat and phone both triage to a NewCo queue (confirmed 26 Sep). The customer should be told they're waiting for their team."},
-  "FR4-06":{s:"comment",why:"The text should say “Have your case reference number ready”, because web chat will ask for it again (FR4-07)."},
-  "FR4-08":{s:"change",t:"Scenario: Customer is asked for a case reference number\nGiven the NewCo customer has entered the web chat journey\nWhen the eligibility stage begins\nThen the web chat must request the customer's case reference number\nAnd the field label must use the same words as letters, emails and the IVR\nAnd the hint must explain where the customer can find it\nAnd the hint must say the field can be left blank if the customer doesn't have it\nAnd the case reference number must be treated as the unique routing identifier",why:"Letters, the phone map and web chat currently use three names for one number: case reference number, MRN and medical reference number."},
-  "FR4-14":{s:"comment",why:"Extended to every NewCo contact on both channels by the new routing outcomes feature in FR6."},
-  "FR4-21":{s:"change",t:"Scenario: BAU Agent initiates a manual transfer\nGiven the NewCo team is within its operating hours\nAnd the customer has agreed to be transferred\nWhen the BAU Agent selects the approved NEWCO transfer destination\nThen the chat must be transferred to the correct NewCo team or queue\nAnd the transfer outcome must be visible to the BAU Agent",why:"Decided 26 Sep: transfer only while the team is open. The customer is asked first, so no one is moved into a second queue without agreeing."},
-  "FR5-09":{s:"comment",why:"Daily updates mean a case created today routes to BAU until the next update. The agent's line in FR7-02 says “from the next working day” for this reason."},
-  "FR6-01":{s:"comment",why:"CSAT only reaches contacts the NewCo queue handled. Read it with the new routing outcomes feature below."},
-  "FR7-02":{s:"change",t:"Scenario: Case reference number is available\nGiven the customer is completing a first-notification call with a NewCo agent\nAnd the case will join the NewCo cohort\nAnd a case reference number is available\nWhen the Agent reaches the end of the relevant notification process\nThen the Agent must provide the customer with the case reference number\nAnd tell the customer to keep it for future contact\nAnd tell the customer to have it ready whenever they contact DVLA by phone or web chat\nAnd explain that from the next working day, entering it will put them through to the team looking after their case",why:"“Help route the call correctly” is only true for cohort cases, and only after the daily routing-table update."},
-  "FR7-03":{s:"comment",why:"The label printed on the letter is the one the IVR prompt and the web chat field must use."},
-  "FR7-05":{s:"change",t:"Scenario: Review case-reference messaging\nGiven approved case-reference wording has been agreed\nWhen the communication type is reviewed\nThen it must use the same label for the number as letters, emails, the IVR and web chat\nAnd it must explain that the customer should have their case reference number ready when contacting DVLA",why:"“Quoting the number will help route the call” is only true for cohort cases. The routing promise sits with the NewCo agent (FR7-02)."}
+/* On single scenarios */
+const SUG = {
+  "FR1-08":{t:"The script says “the team looking after your case”, but a first-notification caller has no case yet. Consider no message here, or “We're putting you through to an adviser.”"},
+  "FR1-17":{t:"Consider keypad entry as well as saying the number out loud. Some customers' conditions affect their speech. This is the BAU prompt, so it's for DM to decide."},
+  "FR2-02":{t:"Suggest that while the team is open, cohort callers wait in the NewCo queue and are offered a callback, instead of hearing the unavailable message. This was agreed on 26 September.",add:"Then the call must join the NewCo queue for that team\nAnd the caller must be offered a callback from the team"},
+  "FR2-09":{t:"Suggest that hanging up also saves the message. Most people hang up rather than press a key, and would otherwise lose their message without knowing.",add:"When the customer finishes the recording by pressing hash or by hanging up"},
+  "FR4-08":{t:"Suggest one name for the reference everywhere, matching the letters. It's currently “case reference number” here, “MRN” on the phone map and “medical reference number” in web chat."},
+  "FR7-02":{t:"Suggest adding when it starts working. The routing table updates once a day, so a reference given today routes to BAU until the next day.",add:"And explain that from the next working day, it will put them through to the team looking after their case"}
 };
 
-/* ---------- new scenarios inside existing features ---------- */
-const NEW_SC = {
-  "FR1-F3":[
-    {id:"FR1-N1",t:"Scenario: First notification for a lorry or bus licence\nGiven the customer has said the call is about a lorry or bus licence\nWhen the IVR routes the first-notification call\nThen the call must follow the standard BAU route\nAnd it must not be offered to a NewCo agent",why:"Decided 26 Sep: NewCo will not handle lorry or bus licences."},
-    {id:"FR1-N2",t:"Scenario: First-notification routing is switched off\nGiven an authorised user has switched off first-notification routing to NewCo\nWhen a first-notification call reaches the routing decision\nThen the call must follow the standard BAU route\nAnd no NewCo agent availability check must be made",why:"Decided 26 Sep: the on/off switch is how the team controls cohort growth. See the new feature below."}
-  ],
-  "FR1-F4":[
-    {id:"FR1-N3",t:"Scenario: Existing-case NewCo customer calls when the owning team is closed\nGiven the case reference number matches an active NewCo cohort record\nAnd the owning NewCo team is outside its operating hours\nAnd BAU lines are open\nWhen the IVR checks the identifier against the cohort routing data\nThen the IVR must follow the team-closed route in FR2-01",why:"Makes the hand-off between FR1 and FR2 explicit."}
-  ],
-  "FR1-F5":[
-    {id:"FR1-N4",t:"Scenario: The IVR reads the reference back\nGiven the customer has entered a correctly formatted case reference number\nWhen the IVR has captured it\nThen the IVR must read the reference back\nAnd ask the customer to confirm it or enter it again\nAnd a re-entry must count towards the agreed retry limit",why:"A mistyped reference that happens to be valid would otherwise route silently to the wrong place."}
-  ],
-  "FR2-F5":[
-    {id:"FR2-N1",t:"Scenario: Callback request enters the workstream\nGiven a NewCo customer has asked for a callback from the NewCo queue\nWhen the request is created\nThen it must enter the same workstream as voicemail callbacks\nAnd it must include the case reference number, callback number and time of request",why:"Callbacks and voicemails are the same kind of work for the team: one queue, one service level."}
-  ],
-  "FR3-F3":[
-    {id:"FR3-N1",t:"Scenario: Demand management and the NewCo queue\nGiven a demand-management threshold has been breached\nWhen a call is routed to the NewCo queue\nThen the configured demand-management response must not be applied to that call\nAnd the caller must still be offered a callback from the team",why:"Decided 26 Sep. The callback offer in the NewCo queue is the relief when the team is busy. Demand management stays on the BAU queue."}
-  ],
-  "FR4-F1":[
-    {id:"FR4-N1",t:"Scenario: NewCo customer starts a web chat when the team is closed\nGiven the customer's case reference matches an active NewCo cohort record\nAnd the owning team is outside its operating hours\nAnd web chat is open\nWhen the web chat routes the customer\nThen the customer must see the approved team-closed message with the team's opening hours\nAnd the customer must be able to choose to chat to an adviser now or come back later",why:"The same rule as phone, without voicemail. Decided 26 Sep: web chat doesn't take messages for the team."},
-    {id:"FR4-N2",t:"Scenario: Customer chooses a reason about a new condition\nGiven the customer has chosen “I need to notify DVLA of a medical condition”\nWhen the web chat routes the customer\nThen the customer must follow the BAU web chat route",why:"First-notification routing to NewCo is specified for phone only. This says so, so it isn't read as a gap."}
-  ]
-};
-
-/* ---------- new features ---------- */
+/* New features. Only the two agreed on 26 September. */
 const NEW_FEAT = {
-  "FR1":[
-    {id:"FR1-NF1",t:"Switch first-notification routing to NewCo on or off",story:"As a NewCo team manager,\nI want to switch first-notification routing to NewCo agents on or off,\nso that I can control how fast the cohort grows and protect the team's capacity.",why:"Every first notification a NewCo agent takes joins the cohort, so the cohort grows with the team's spare capacity rather than staying at 2%. Agreed 26 Sep that the switch is important.",sc:[
-      {id:"FR1-N5",t:"Scenario: Switch first-notification routing off\nGiven the user is authorised to manage NewCo routing\nWhen the user switches first-notification routing to NewCo off\nThen new first-notification calls must follow the standard BAU route\nAnd the change must not require a software deployment\nAnd the change must be recorded in the audit history"},
-      {id:"FR1-N6",t:"Scenario: Switch first-notification routing on\nGiven first-notification routing to NewCo is switched off\nWhen an authorised user switches it on\nThen new first-notification calls must be offered to available NewCo agents again\nAnd the change must be recorded in the audit history"},
-      {id:"FR1-N7",t:"Scenario: Show the size of the cohort\nGiven first notifications taken by NewCo agents join the cohort\nWhen a NewCo team manager views the routing configuration\nThen the current number of active cohort records must be shown"}
-    ]},
-    {id:"FR1-NF2",t:"Don't ask the customer the same thing twice",story:"As a customer calling DVLA,\nI want to give my case reference once and hear each offer once in a call,\nso that the call is as short as it can be.",why:"Asked for 26 Sep: reduce repetition in the flow.",sc:[
-      {id:"FR1-N8",t:"Scenario: Reuse the case reference within a call\nGiven the customer has entered a valid case reference number earlier in the call\nWhen a later step needs it, such as a callback request, a transfer or the adviser's screen\nThen the IVR must reuse it\nAnd must not ask the customer for it again"},
-      {id:"FR1-N9",t:"Scenario: Offer the web chat text link in the NewCo queue\nGiven the customer has not been offered a text with a link to web chat earlier in the call\nWhen the customer joins the NewCo queue\nThen the queue message must offer the text\nAnd must tell the customer the call will end when the text is sent"},
-      {id:"FR1-N10",t:"Scenario: Don't offer the text link twice\nGiven the customer has already been offered a text with a link to web chat earlier in the call\nWhen the customer joins the NewCo queue\nThen the queue message must not offer the text again"}
-    ]}
-  ],
   "FR2":[
-    {id:"FR2-NF1",t:"Offer a callback from the NewCo queue",story:"As a NewCo customer waiting for my team,\nI want to ask them to call me back,\nso that I don't have to stay on hold.",why:"Confirmed 26 Sep: callbacks run in the team's hours only; out of hours the customer can leave a voicemail. A callback request is checked against the shared routing table.",sc:[
-      {id:"FR2-N2",t:"Scenario: Customer asks for a callback from the NewCo queue\nGiven the owning team is within its operating hours\nAnd the customer is in the NewCo queue\nWhen the customer chooses a callback\nThen the IVR must confirm the number to call back, using the existing BAU callback steps\nAnd a callback work item must be created for the owning team\nAnd the IVR must play the approved callback confirmation"},
-      {id:"FR2-N3",t:"Scenario: Callbacks aren't offered when the team is closed\nGiven the owning team is outside its operating hours\nWhen a NewCo customer is identified\nThen a callback must not be offered\nAnd the customer must be offered a voicemail instead, as in FR2-01"},
-      {id:"FR2-N4",t:"Scenario: A NewCo customer asks for a callback from the BAU queue\nGiven a customer in the BAU queue asks for a callback\nAnd gives a case reference number that matches an active NewCo cohort record\nWhen the callback request is created\nThen it must be routed to the NewCo team's callback workstream\nAnd not to the BAU callback queue"}
-    ]}
-  ],
-  "FR4":[
-    {id:"FR4-NF1",t:"Transfer a NewCo phone customer from BAU to the team",story:"As a BAU adviser who receives a call from a NewCo customer,\nI want to offer to transfer them to the team looking after their case,\nso that NewCo customers are handled by NewCo agents wherever possible.",why:"Decided 26 Sep: yes, but only while the team is open. FR4 covers transfer for web chat only; this adds phone.",sc:[
-      {id:"FR4-N3",t:"Scenario: BAU adviser offers a transfer\nGiven a BAU adviser is handling a call about a case that carries the NewCo indicator\nAnd the owning NewCo team is within its operating hours\nWhen the adviser sees the indicator\nThen the adviser must offer the customer a transfer to the team, or to help them now\nAnd the customer's choice must be recorded"},
-      {id:"FR4-N4",t:"Scenario: Customer accepts the transfer\nGiven the customer has agreed to be transferred\nWhen the adviser transfers the call\nThen the call must join the NewCo queue for the owning team\nAnd the case reference must pass with the call"},
-      {id:"FR4-N5",t:"Scenario: The team is closed\nGiven the owning team is outside its operating hours\nWhen a BAU adviser handles a NewCo customer\nThen a transfer must not be offered\nAnd the adviser must handle the query and record the contact on the case"},
-      {id:"FR4-N6",t:"Scenario: The transfer fails\nGiven the adviser has started a transfer\nWhen the transfer can't be completed\nThen the adviser must stay on the call and handle the query\nAnd the failure must be recorded"}
+    {id:"FR2-NF1",t:"Offer a callback to NewCo customers",story:"As a NewCo customer waiting for my team,\nI want to ask them to call me back,\nso that I don't have to stay on hold.",why:"Agreed on 26 September. It follows the callback lane in the Mural.",sc:[
+      {id:"FR2-S1",t:"Scenario: Customer asks for a callback while the team is open\nGiven the customer's reference matches an active NewCo cohort record\nAnd the owning team is within its operating hours\nWhen the customer asks for a callback\nThen a callback work item must be created for the owning team\nAnd the case reference must not be asked for again if it was given earlier in the call"},
+      {id:"FR2-S2",t:"Scenario: Customer asks for a callback when the team is closed\nGiven the customer's reference matches an active NewCo cohort record\nAnd the owning team is outside its operating hours\nWhen the customer asks for a callback\nThen the customer must be offered the team-closed options in FR2-01"}
     ]}
   ],
   "FR6":[
-    {id:"FR6-NF1",t:"Record the routing outcome of every NewCo contact",story:"As the NewCo service owner,\nI want the outcome of every contact from a NewCo customer recorded,\nso that I can tell how well the routing works and whether it is sending customers to the wrong place.",why:"Confirmed 26 Sep as a requirement. CSAT alone can't show this: it only reaches contacts the NewCo queue handled.",sc:[
-      {id:"FR6-N1",t:"Scenario: Record the outcome of a NewCo contact\nGiven a phone call or web chat has been identified as a NewCo contact\nWhen the contact ends\nThen the outcome must be recorded as one of: handled by a NewCo agent, NewCo callback requested, voicemail left, text link sent, BAU adviser by customer choice, transferred from BAU to NewCo, handled by BAU after a failed identification, abandoned in the NewCo queue\nAnd the channel, date and time must be recorded"},
-      {id:"FR6-N2",t:"Scenario: Report waiting in the NewCo queue\nGiven NewCo contact outcomes have been recorded\nWhen they are reported\nThen waiting times and abandonment in the NewCo queue must be shown alongside the equivalent BAU figures"},
-      {id:"FR6-N3",t:"Scenario: Identify unintended triage\nGiven a BAU agent has handled a contact about a case that carries the NewCo indicator\nWhen the contact ends\nThen it must be recorded as a NewCo contact handled by BAU\nAnd the reason must be identifiable: no reference, invalid reference, routing table not yet updated, technical failure, team closed or customer choice"},
-      {id:"FR6-N4",t:"Scenario: Report outcomes with CSAT\nGiven NewCo CSAT results are reported\nWhen they are reviewed\nThen the routing outcomes for the same period must be reported with them"}
+    {id:"FR6-NF1",t:"Record the routing outcome of every NewCo contact",story:"As the NewCo service owner,\nI want to know how every NewCo customer's contact was routed,\nso that I can see whether the routing works and whether it sends anyone to the wrong place.",why:"Agreed on 26 September. CSAT only reaches contacts the NewCo queue handled, so it can't show this on its own.",sc:[
+      {id:"FR6-S1",t:"Scenario: Record the routing outcome\nGiven a call or web chat has been identified as a NewCo contact\nWhen the contact ends\nThen the outcome must be recorded: NewCo agent, NewCo callback, voicemail, BAU adviser by choice, transferred from BAU, handled by BAU, or abandoned in the NewCo queue"},
+      {id:"FR6-S2",t:"Scenario: Spot contacts that reached BAU by mistake\nGiven a BAU agent has handled a contact about a case with the NewCo marker\nWhen the contact ends\nThen it must be recorded as a NewCo contact handled by BAU, with the reason"}
     ]}
   ]
 };
 
 /* ====================================================================
-   Scripts. src "req": the wording in the requirements, as written.
-   src "draft": newly drafted. No codes: named for what they do.
+   Scripts. src "req": written in the requirements. "sug": suggested.
    ==================================================================== */
 const SCRIPTS = {
-  ref_prompt:{n:"Asking for the case reference",src:"draft",t:"Please enter your case reference number using your keypad, then press hash. You'll find it [where it appears on letters and emails]. If you don't have it, press star."},
-  ref_readback:{n:"Reading the reference back",src:"draft",t:"You entered [reference, read in groups]. If that's right, press 1. To enter it again, press 2."},
-  ref_format:{n:"Reference in the wrong format",src:"draft",t:"Sorry, that doesn't look like a case reference number. It's [format hint, for example “8 digits”]. Please try again, or press star if you don't have it.",note:"Plays up to the agreed retry limit."},
-  ref_none:{n:"No reference, or attempts used up",src:"draft",t:"We'll put you through to an adviser now.",note:"Deliberately neutral: most callers on this path are BAU customers."},
-  connect_team:{n:"Putting the caller through to their team",src:"req",req:"FR1-08",t:"Thank you. We're putting you through to the team looking after your case.",note:"As written in FR1-08 for first notifications. Recommended for existing cases instead, where there is a case to refer to."},
-  queue_msg:{n:"Waiting in the team's queue (text not yet offered)",src:"draft",t:"You're in the queue for the team looking after your case. [Estimated wait.] If you'd like them to call you back instead, press 1. If you're calling from a mobile, you can get a text with a link to web chat. To get the text, press 2. This call will end when we send it."},
-  queue_msg_offered:{n:"Waiting in the team's queue (text already offered)",src:"draft",t:"You're in the queue for the team looking after your case. [Estimated wait.] If you'd like them to call you back instead, press 1."},
-  callback_ok:{n:"Callback requested",src:"draft",t:"Thank you. The team looking after your case will call you back [timing: team to decide]. Please keep your phone nearby.",note:"Follows the existing BAU steps for choosing the number: press 1 for this number, press 2 for a different one."},
-  sms_sent:{n:"Text link sent",src:"draft",t:"Thank you. We've sent you a text with a link to web chat. Have your case reference number ready when you start the chat. Goodbye."},
-  team_closed:{n:"Team closed, BAU open",src:"req",req:"FR2-01",t:"The team looking after your case is closed at the moment. They're open [days and hours]. You can leave them a message and they'll call you back. Or an adviser can help you now.\nTo leave a message for your team, press 1. To speak to an adviser now, press 2.",note:"As written. Kept unchanged."},
-  no_choice:{n:"No choice made",src:"draft",t:"Sorry, we didn't get a choice. To leave a message for your team, press 1. To speak to an adviser now, press 2.",note:"Plays once. If there's still no choice, the caller is put through to an adviser."},
-  to_adviser:{n:"Putting the caller through to an adviser",src:"draft",t:"We'll put you through to an adviser now."},
-  vm_instr:{n:"Voicemail instructions",src:"draft",t:"After the tone, please say your name, your case reference number if you have it, and the best number to call you back on. Then tell us briefly how we can help. Your message will go to the team looking after your case. When you've finished, press hash or hang up."},
-  vm_ok:{n:"Voicemail received",src:"draft",t:"Thank you, we've got your message. The team looking after your case will call you back [timing: team to decide]. [The call will come from (number), or may show as withheld.] Goodbye."},
-  vm_nothing:{n:"Nothing recorded",src:"draft",t:"Sorry, we didn't hear a message. Please try again after the tone."},
-  vm_fail:{n:"Voicemail not working, or attempts used up",src:"draft",t:"Sorry, we can't take a message right now. We'll put you through to an adviser."},
-  agent_ref:{n:"NewCo agent, end of a first notification",src:"draft",who:"Agent",t:"Your case reference number is [number]. Please keep it safe, and have it ready whenever you contact us by phone or web chat. From [the next working day], entering it will put you through to the team looking after your case.",note:"Only when the case joins the cohort. “Next working day” is the routing-table update, not a callback promise."},
-  bau_offer:{n:"BAU adviser offers a transfer",src:"draft",who:"Adviser",t:"I can see a dedicated team is looking after your case. I can put you through to them now, though you may have a short wait. Or I can help you with this myself. Which would you prefer?",note:"Only while the team is open."},
-  w_ref_field:{n:"Case reference field (pre-chat)",src:"draft",form:true,t:"Label: Case reference number\nHint: You'll find this [where] on letters and emails from us. Leave this blank if you don't have it.\nError: Enter your case reference number in the correct format, like [example]",note:"The field already exists. Only the label, hint and error change."},
-  w_connect:{n:"Connecting to the team",src:"req",req:"FR4-01",t:"You're being connected to the team looking after your case.",note:"As written. Kept unchanged."},
-  w_queue:{n:"Waiting in the team's queue",src:"draft",t:"You're in the queue for the team looking after your case. [Position or estimated wait.]"},
-  w_team_closed:{n:"Team closed, web chat open",src:"draft",t:"The team looking after your case is closed at the moment. They're open [days and hours]. You can chat to an adviser now, or come back when your team is open.",b:["Chat to an adviser now","I'll come back later"]},
-  w_to_adviser:{n:"Connecting to an adviser",src:"draft",t:"We're connecting you to an adviser."},
-  w_later:{n:"Coming back later",src:"draft",t:"No problem. The team looking after your case is open [days and hours]. Have your case reference number ready when you come back."},
-  w_bau_offer:{n:"BAU adviser offers a transfer (chat)",src:"draft",who:"Adviser",t:"I can see a dedicated team is looking after your case. I can transfer this chat to them now, though you may have a short wait. Or I can help you with this myself. Which would you prefer?",note:"Only while the team is open."}
+  ref_prompt:{n:"Asking for the reference",src:"sug",t:"Please say your case reference number, or enter it using your keypad. You'll find it [where it appears on letters and emails]. If you don't have it, stay on the line."},
+  ref_format:{n:"Reference in the wrong format",src:"sug",t:"Sorry, that doesn't look like a case reference number. Please try again."},
+  connect_team:{n:"Connecting to a NewCo agent",src:"req",req:"FR1-08",t:"Thank you. We're putting you through to the team looking after your case."},
+  queue_msg:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Estimated wait.] If you'd like them to call you back instead, press 1.",note:"The web chat text isn't offered again here: the caller already heard that offer in the BAU options."},
+  callback_ok:{n:"Callback confirmed",src:"sug",t:"Thank you. The team looking after your case will call you back [timing: team to decide]. Please keep your phone nearby."},
+  team_closed:{n:"Team closed, BAU open",src:"req",req:"FR2-01",t:"The team looking after your case is closed at the moment. They're open [days and hours]. You can leave them a message and they'll call you back. Or an adviser can help you now.\nTo leave a message for your team, press 1. To speak to an adviser now, press 2."},
+  closing:{n:"Closing message",src:"sug",t:"Thank you for calling. The team looking after your case is open [days and hours]. Please call back then, and have your case reference number ready. Goodbye."},
+  to_adviser:{n:"Putting the caller through to an adviser",src:"sug",t:"We'll put you through to an adviser now."},
+  vm_instr:{n:"Voicemail instructions",src:"sug",t:"After the tone, please say your name, your case reference number if you have it, and the best number to call you back on. Then tell us briefly how we can help. Your message will go to the team looking after your case. When you've finished, press hash or hang up."},
+  vm_ok:{n:"Voicemail received",src:"sug",t:"Thank you, we've got your message. The team looking after your case will call you back [timing: team to decide]. Goodbye."},
+  vm_nothing:{n:"Nothing recorded",src:"sug",t:"Sorry, we didn't hear a message. Please try again after the tone."},
+  vm_unavail:{n:"Voicemail not working",src:"sug",t:"Sorry, we can't take a message at the moment. The team looking after your case is open [days and hours]. Please call back then. Goodbye."},
+  agent_ref:{n:"NewCo agent, end of a first notification",src:"sug",who:"Agent",t:"Your case reference number is [number]. Please keep it safe, and have it ready whenever you contact us. From [the next working day], it will put you through to the team looking after your case."},
+  w_connect:{n:"Connecting to the team",src:"req",req:"FR4-01",t:"You're being connected to the team looking after your case."},
+  w_queue:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Position or estimated wait.]"},
+  w_team_closed:{n:"Team closed",src:"sug",t:"The team looking after your case is closed at the moment. They're open [days and hours]. We're connecting you to an adviser who can help."}
 };
 
 /* ====================================================================
-   Decisions and open items. All newly drafted, 26 Sep.
-   cat: decided | team | confirm
+   Decisions and questions
    ==================================================================== */
 const OI = [
-  {id:"d_queue",cat:"decided",t:"In hours, cohort customers wait for their team",d:"A recognised cohort reference goes to the NewCo queue while the team is open, with no fallback to BAU. BAU is only offered when the team is closed.",n:["phone:p_open2","phone:p_offered","chat:w_open2","chat:w_q"],r:["FR1-13","FR2-02"]},
-  {id:"d_bau",cat:"decided",t:"BAU advisers can help NewCo customers",d:"They can do everything they do today, though they aren't trained in the NewCo service model. Adviser scripts are kept simple: the customer doesn't need to know which team they're talking to.",n:["phone:p_adv","phone:p_helprec","chat:w_helprec"]},
-  {id:"d_xfer",cat:"decided",t:"BAU can transfer to the team while it's open",d:"On phone and web chat, but only in the team's hours. The customer is asked first.",n:["phone:p_wants","chat:w_wants"],r:["FR4-21","FR4-N3"]},
-  {id:"d_cb",cat:"decided",t:"Callbacks in hours, voicemail out of hours",d:"The NewCo queue offers a callback while the team is open. Out of hours, the customer can leave a voicemail instead. Callback requests are checked against the shared routing table.",n:["phone:p_cb","phone:p_vm"],r:["FR2-N2","FR2-N3","FR2-N4"]},
-  {id:"d_dm",cat:"decided",t:"Demand management stays on the BAU queue",d:"The pilot is about 2% of customers. The callback offer is the relief if the NewCo queue gets long.",n:["phone:p_offered"],r:["FR3-N1"]},
-  {id:"d_once",cat:"decided",t:"Ask once, offer once",d:"The case reference is asked once per call and reused. The web chat text link is offered in the NewCo queue only if it wasn't offered earlier in the call.",n:["phone:p_ref","phone:p_offered"],r:["FR1-N8","FR1-N9","FR1-N10"]},
-  {id:"d_hang",cat:"decided",t:"Hanging up saves the voicemail",d:"“Press hash” stays in the instructions, but hanging up is an equally valid way to finish.",n:["phone:p_vm","phone:p_rec"],r:["FR2-09"]},
-  {id:"d_vmwording",cat:"decided",t:"Voicemail privacy wording",d:"“Your message will go to the team looking after your case.” The mailbox is shared across NewCo, so the script doesn't promise more than that.",n:["phone:p_vm"]},
-  {id:"d_wcmsg",cat:"decided",t:"Web chat doesn't take messages for the team",d:"When the team is closed, web chat offers an adviser now or coming back later.",n:["chat:w_tc"],r:["FR4-N1"]},
-  {id:"d_lorry",cat:"decided",t:"No lorry or bus licences",d:"First notifications about lorry or bus licences always go to BAU.",n:["phone:p_lorry"],r:["FR1-N1"]},
-  {id:"d_switch",cat:"decided",t:"First-notification routing can be switched off",d:"Controls how fast the cohort grows, since every first notification a NewCo agent takes joins the cohort.",n:["phone:p_sw"],r:["FR1-N5","FR1-N6","FR1-N7"]},
-  {id:"d_welsh",cat:"decided",t:"Welsh speakers are served by BAU",d:"Welsh-language callers stay on the Welsh journey, even if their case is in the cohort.",n:["phone:p_welsh"]},
-  {id:"d_outcomes",cat:"decided",t:"Routing outcomes are a requirement",d:"Every NewCo contact records how it ended, so the team can see whether the routing is creating unintended triage.",n:["phone:p_cant","phone:p_helprec","chat:w_helprec","chat:w_cant"],r:["FR6-N1","FR6-N2","FR6-N3","FR6-N4"]},
+  {id:"d_queue",cat:"decided",t:"While the team is open, cohort customers wait for it",d:"A NewCo reference goes to the NewCo queue while the team is open. BAU is offered only when the team is closed.",n:["phone:p_open2","phone:p_q","chat:w_open2","chat:w_q"],r:["FR2-02"]},
+  {id:"d_bau",cat:"decided",t:"BAU advisers can help NewCo customers",d:"They can do everything they do today. The contact is logged on the case so the team can follow up.",n:["phone:p_advend","phone:p_helprec","chat:w_helprec"]},
+  {id:"d_xfer",cat:"decided",t:"BAU can transfer to the team while it's open",d:"On phone and web chat, only in the team's hours.",n:["phone:p_open3","chat:w_open3"]},
+  {id:"d_cb",cat:"decided",t:"Callbacks while the team is open, voicemail when it's closed",d:"A callback request is checked against the NewCo table.",n:["phone:p_cbhrs","phone:p_doa"],r:["FR2-S1","FR2-S2"]},
+  {id:"d_once",cat:"decided",t:"Don't ask or offer the same thing twice",d:"The reference is reused once given. The web chat text isn't offered again in the NewCo queue.",n:["phone:p_hasref","phone:p_q"],r:["FR2-S1"]},
+  {id:"d_dm",cat:"decided",t:"Demand management stays on the BAU queue",d:"The pilot is about 2% of customers. The callback offer is the relief if the NewCo queue gets long.",n:["phone:p_q"]},
+  {id:"d_hang",cat:"decided",t:"Hanging up saves the voicemail",d:"",n:["phone:p_vm"],r:["FR2-09"]},
+  {id:"d_lorry",cat:"decided",t:"NewCo won't handle lorry or bus licences",d:"",n:["phone:p_lorrybau"]},
+  {id:"d_switch",cat:"decided",t:"First-notification routing can be switched off",d:"To control how fast the cohort grows.",n:["phone:p_sw"]},
+  {id:"d_welsh",cat:"decided",t:"Welsh speakers are served by BAU",d:"",n:["phone:p_welsh"]},
+  {id:"d_wcmsg",cat:"decided",t:"Web chat doesn't take messages for the team",d:"",n:["chat:w_tc"]},
+  {id:"d_outcomes",cat:"decided",t:"Routing outcomes are a requirement",d:"",n:["phone:p_cant","chat:w_cant"],r:["FR6-S1","FR6-S2"]},
 
-  {id:"t_timing",cat:"team",t:"How quickly NewCo calls back",d:"Deliberately left open for the team. Record the timing as a separate segment, so it can be dropped in or changed without re-recording whole messages.",who:"NewCo team",n:["phone:p_cb","phone:p_vmok"],r:["FR2-22"]},
-  {id:"t_hours",cat:"team",t:"NewCo operating hours",d:"Needed in the team-closed messages on both channels and in “coming back later”. The requirements give 5:00pm in one place and 8:30 to 4:30 in another.",who:"NewCo team",n:["phone:p_open2","phone:p_tc","chat:w_open2","chat:w_tc","chat:w_later"],r:["FR2-01"]},
-  {id:"t_review",cat:"team",t:"When to review waiting in the NewCo queue",d:"There's no cap on waiting, by design. Agree a review trigger now, for example abandonment in the NewCo queue going above BAU's. The routing outcomes will show it.",who:"NewCo team and Resourcing",n:["phone:p_offered","chat:w_q"],r:["FR6-N2"]},
-  {id:"t_outbound",cat:"team",t:"How customers know a callback is really DVLA",d:"Decide the number callbacks come from, and what the agent says before asking for personal details. Without it, people who follow DVLA's own scam advice will hang up.",who:"NewCo team",n:["phone:p_cbq","phone:p_vmok"]},
+  {id:"t_timing",cat:"team",t:"How quickly NewCo calls back",d:"Left open for the team. Scripts show a placeholder.",who:"NewCo team",n:["phone:p_cbok","phone:p_vmok"],r:["FR2-22"]},
+  {id:"t_hours",cat:"team",t:"NewCo operating hours",d:"The requirements give 5:00pm in one place and 8:30 to 4:30 in another.",who:"NewCo team",n:["phone:p_open2","chat:w_open2"],r:["FR2-01"]},
+  {id:"t_outbound",cat:"team",t:"How customers know a callback is really DVLA",d:"The number callbacks come from, and what the agent says before asking for details.",who:"NewCo team",n:["phone:p_cbq","phone:p_vmq"]},
 
-  {id:"c_label",cat:"confirm",t:"The reference label and format on letters",d:"Drives keypad entry, the format hint, the read-back and the web chat label. If the reference contains letters, keypad entry needs a different design.",who:"Letters and Dynamics",n:["phone:p_ref","chat:w_pre"],r:["FR1-17","FR4-08","FR7-03"]},
-  {id:"c_prompt",cat:"confirm",t:"DM's reference prompt is live on day one, before the BAU queue messages",d:"Without it there's no phone routing for existing cases. Moving it earlier changes the order for every existing-application caller.",who:"DM and BAU",n:["phone:p_ref"],r:["FR1-17"]},
-  {id:"c_memory",cat:"confirm",t:"The IVR can remember what's been asked and offered",d:"Needed to reuse the reference and to offer the text link only once. Also needed: checking team hours before a BAU transfer.",who:"Telecoms and SBT",n:["phone:p_offered","phone:p_wants"],r:["FR1-N8","FR1-N9","FR4-N3"]},
-  {id:"c_closed",cat:"confirm",t:"BAU's closed message plays before the NewCo branch",d:"Assumed, so no NewCo “everything closed” messages are needed. If a caller can reach the NewCo branch with everything closed, they would need one.",who:"Telecoms",n:["phone:p_closed","chat:w_closed"]},
-  {id:"c_table",cat:"confirm",t:"Routing-table update and Midas feasibility",d:"The table updates daily, so a case created today routes to BAU until the next update.",who:"FR5 owners",n:["phone:p_intable","chat:w_intable"],r:["FR5-01","FR5-09"]},
-  {id:"c_sms",cat:"confirm",t:"SMS cost assessment",d:"The text-link offer in the NewCo queue depends on it.",who:"Service owner",n:["phone:p_sms"],r:["FR3.1-01"]},
-  {id:"c_dpia",cat:"confirm",t:"DPIA for first notifications by phone",d:"In flight. NewCo agents can't take first notifications until it's done.",who:"Service owner",n:["phone:p_fnagent"]},
-  {id:"c_prec",cat:"confirm",t:"Precedence rules",d:"FR1 refers to rules for reference ranges against named owners. They haven't been written.",who:"FR1 owners",n:["phone:p_intable"],r:["FR1-28"]},
-  {id:"c_alt",cat:"confirm",t:"Alternative identifier",d:"FR1 allows “another agreed identifier” but doesn't name one. If there isn't one for day one, remove it.",who:"FR1 owners",n:["phone:p_ref"],r:["FR1-14","FR1-18"]}
+  {id:"c_label",cat:"confirm",t:"The name and format of the reference on letters",d:"Used by the phone prompt and the web chat field.",who:"Letters and Dynamics",n:["phone:p_ref","chat:w_ref"],r:["FR4-08","FR7-03"]},
+  {id:"c_closed",cat:"confirm",t:"BAU's closed message plays before the NewCo branch",d:"Assumed, so NewCo needs no “everything closed” message.",who:"Telecoms",n:["phone:p_closed","chat:w_closed"]},
+  {id:"c_reasons",cat:"confirm",t:"Which web chat reasons go to the NewCo check",d:"Assumed: every reason except notifying a new condition.",who:"Web chat owners",n:["chat:w_reason"]},
+  {id:"c_table",cat:"confirm",t:"How the routing table is updated",d:"Daily, so a case created today routes to BAU until the next update. Midas is being assessed.",who:"FR5 owners",n:["phone:p_intable","chat:w_intable"],r:["FR5-01"]},
+  {id:"c_dpia",cat:"confirm",t:"DPIA for first notifications by phone",d:"In flight.",who:"Service owner",n:["phone:p_fnagent"]},
+  {id:"c_prec",cat:"confirm",t:"Precedence rules and the alternative identifier",d:"FR1 refers to both but neither is written yet.",who:"FR1 owners",n:["phone:p_intable"],r:["FR1-14","FR1-28"]}
 ];
 const OICAT = {
-  decided:{h:"Decided",chip:"decided",p:"Agreed in review on 26 September. Each one is reflected in the map and in the recommended requirements."},
-  team:{h:"For the team to decide",chip:"team",p:"Decisions that belong to the NewCo team. The scripts leave a visible placeholder until they're made."},
-  confirm:{h:"To confirm",chip:"confirm",p:"Dependencies and facts to check with the people named."}
+  decided:{h:"Decided",p:"Agreed in the review on 26 September."},
+  team:{h:"For the team to decide",p:"The scripts leave a placeholder until these are made."},
+  confirm:{h:"To confirm",p:"Facts and dependencies to check with the people named."}
 };
 
 
-
 /* ====================================================================
-   The map. One lane per part of the journey, as in the Mural.
-   kind: today (existing BAU), req (in the requirements), prop (proposed)
+   The map. Follows the Mural. One lane per part of the journey.
+   kind: today (BAU as it is), req (NewCo, from the requirements or the
+   Mural), prop (suggested in the review, not agreed)
    type: step | q (question) | end | go (jump to another lane)
-   Every answer to a question is drawn as its own box on the map, so
-   every option a customer has is visible. Select an answer to follow it.
-   Edge: [from, to, answer label, what the customer does]
+   Every answer is drawn as its own box. Select one to follow it.
+   Edge: [from, to, answer]
    ==================================================================== */
 const PHONE = {
   key:"phone", name:"Phone", sys:"Phone line", start:"p_start",
   lanes:[
     {id:"p1",t:"Every call starts here",nodes:[
       {id:"p_start",type:"step",k:"today",l:"Customer calls the DVLA medical line",d:"One number for everyone.",r:["FR1-01"]},
-      {id:"p_open",type:"q",k:"today",l:"Are BAU phone lines open?",d:"The existing time-of-day check."},
-      {id:"p_closed",type:"end",k:"today",l:"Existing closed message. Call ends.",d:"We think this plays before any NewCo step, so NewCo needs no “everything closed” message. Telecoms to confirm."},
-      {id:"p_msgs",type:"step",k:"today",l:"Told about wait times and that web chat is quicker",d:"Existing message."},
-      {id:"p_welsh",type:"q",dflt:"Presses 2: no",k:"today",l:"Asked: do you want to speak Welsh?",d:"Welsh speakers are served by BAU during the pilot, even if their case is with NewCo."},
+      {id:"p_open",type:"q",k:"today",l:"Are BAU phone lines open?"},
+      {id:"p_closed",type:"end",k:"today",l:"Existing closed message. Call ends."},
+      {id:"p_msgs",type:"step",k:"today",l:"Told about wait times and that web chat is quicker"},
+      {id:"p_welsh",type:"q",k:"today",dflt:"Presses 2: no",l:"Asked: do you want to speak Welsh?",d:"Welsh speakers stay with BAU during the pilot."},
       {id:"p_welshend",type:"end",k:"today",l:"Welsh journey, as today"},
-      {id:"p_says",type:"step",k:"today",l:"Says out loud what they need help with",d:"Existing speech step."},
-      {id:"p_type",type:"q",k:"today",l:"Menu: existing application or new condition?",d:"The existing menu.",r:["FR1-01","FR1-02"]},
+      {id:"p_says",type:"step",k:"today",l:"Says out loud what they need help with"},
+      {id:"p_type",type:"q",k:"today",l:"Menu: existing application or new condition?",r:["FR1-01","FR1-02"]},
       {id:"p_go2",type:"go",to:"p_lorry",l:"Go to lane 2: New condition"},
-      {id:"p_go3",type:"go",to:"p_ref",l:"Go to lane 3: Find the case"}
+      {id:"p_go3",type:"go",to:"p_baumsg",l:"Go to lane 3: Existing application"}
     ],edges:[
       ["p_start","p_open"],["p_open","p_msgs","Yes"],["p_open","p_closed","No"],
       ["p_msgs","p_welsh"],["p_welsh","p_welshend","Presses 1: yes"],["p_welsh","p_says","Presses 2: no"],
       ["p_says","p_type"],["p_type","p_go3","Presses 1: already have an application"],["p_type","p_go2","Presses 2: reporting a new condition"]
     ]},
     {id:"p2",t:"New condition",nodes:[
-      {id:"p_lorry",type:"q",dflt:"Presses 2: any other vehicle",k:"today",l:"Menu: what type of licence is this about?",d:"Existing menu. Proposed: NewCo won't take lorry or bus licences.",r:["FR1-N1"]},
-      {id:"p_onl1",type:"q",dflt:"Presses 2: speak to an adviser",k:"today",l:"Told they can do this online. Text link or adviser?",d:"Existing offer."},
-      {id:"p_onl2",type:"q",dflt:"Presses 2: speak to an adviser",k:"today",l:"Told they can do this online. Text link or adviser?",d:"Existing offer."},
-      {id:"p_txt",type:"end",k:"today",l:"Text sent. Call ends.",d:"As today."},
-      {id:"p_sw",type:"q",k:"prop",l:"Is new-condition routing to NewCo switched on?",d:"The team can switch this off to control how fast the cohort grows.",r:["FR1-N2","FR1-N5","FR1-N6","FR1-N7"]},
-      {id:"p_free",type:"q",k:"req",l:"Is a NewCo agent free now?",d:"If not, the call goes straight to BAU. The caller never waits for NewCo. Outside NewCo hours, no agent is free.",r:["FR1-08","FR1-09","FR1-10","FR1-11","FR1-12"]},
-      {id:"p_fnagent",type:"step",k:"req",l:"NewCo agent takes the notification and gives the case reference",sc:["agent_ref"],d:"No NewCo message plays first.",r:["FR1-08","FR7-01","FR7-02"]},
+      {id:"p_lorry",type:"q",k:"today",dflt:"Presses 2: any other vehicle",l:"Menu: what type of licence is this about?"},
+      {id:"p_onl1",type:"q",k:"today",dflt:"Presses 2: speak to an adviser",l:"Told they can do this online. Text link or adviser?"},
+      {id:"p_onl2",type:"q",k:"today",dflt:"Presses 2: speak to an adviser",l:"Told they can do this online. Text link or adviser?"},
+      {id:"p_txt",type:"end",k:"today",l:"Text sent. Call ends."},
+      {id:"p_lorrybau",type:"end",k:"prop",l:"BAU queue. Not offered to NewCo.",d:"Suggested: NewCo won't handle lorry or bus licences."},
+      {id:"p_sw",type:"q",k:"prop",l:"Is first-notification routing to NewCo switched on?",d:"Suggested: a switch so the team can control how fast the cohort grows."},
+      {id:"p_free",type:"q",k:"req",l:"Is a NewCo agent free now?",d:"If not, the call goes straight to BAU. The caller never waits for NewCo.",r:["FR1-08","FR1-09","FR1-10","FR1-11","FR1-12"]},
+      {id:"p_fnconn",type:"step",k:"req",l:"Told they're being put through",sc:["connect_team"],r:["FR1-08"]},
+      {id:"p_fnagent",type:"step",k:"req",l:"NewCo agent takes the notification and gives the case reference",sc:["agent_ref"],r:["FR7-01","FR7-02"]},
       {id:"p_fnend",type:"end",k:"req",l:"Case joins the NewCo cohort",r:["FR1-21"]},
-      {id:"p_fnbau",type:"end",k:"today",l:"BAU queue, as today"},
-      {id:"p_lorrybau",type:"end",k:"prop",l:"BAU queue. Never offered to NewCo.",r:["FR1-N1"]}
+      {id:"p_fnbau",type:"end",k:"today",l:"BAU queue, as today",r:["FR1-09"]}
     ],edges:[
       ["p_lorry","p_onl1","Presses 1: lorry or bus"],["p_lorry","p_onl2","Presses 2: any other vehicle"],
       ["p_onl1","p_txt","Presses 1: send the text"],["p_onl1","p_lorrybau","Presses 2: speak to an adviser"],
       ["p_onl2","p_txt","Presses 1: send the text"],["p_onl2","p_sw","Presses 2: speak to an adviser"],
       ["p_sw","p_free","Yes"],["p_sw","p_fnbau","No"],
-      ["p_free","p_fnagent","Yes"],["p_free","p_fnbau","No"],["p_fnagent","p_fnend"]
+      ["p_free","p_fnconn","Yes"],["p_free","p_fnbau","No"],["p_fnconn","p_fnagent"],["p_fnagent","p_fnend"]
     ]},
-    {id:"p3",t:"Existing application: find the case",nodes:[
-      {id:"p_ref",type:"step",k:"prop",l:"Asked for the case reference",sc:["ref_prompt"],d:"Asked straight after the menu, before the BAU queue messages. Asked once, then reused for the rest of the call.",r:["FR1-17","FR1-N8"]},
-      {id:"p_refq",type:"q",k:"prop",l:"What does the caller do?",r:["FR1-05","FR1-06","FR1-19"]},
-      {id:"p_rb",type:"step",k:"prop",l:"Reference read back",sc:["ref_readback"],r:["FR1-N4"]},
-      {id:"p_rbq",type:"q",k:"prop",l:"Is the reference right?",r:["FR1-N4"]},
-      {id:"p_retry",type:"step",k:"prop",l:"Asked to enter it again",sc:["ref_format"],d:"Up to the agreed number of attempts.",r:["FR1-19"]},
+    {id:"p3",t:"Existing application",nodes:[
+      {id:"p_baumsg",type:"step",k:"today",l:"Existing messages: calls recorded, privacy, estimated wait"},
+      {id:"p_bauopt",type:"q",k:"today",dflt:"Waits",l:"Existing options: callback, web chat text, or wait"},
+      {id:"p_bautxt",type:"end",k:"today",l:"Text sent. Call ends."},
+      {id:"p_gocb",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"},
+      {id:"p_ref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"The Mural has the caller say it out loud.",r:["FR1-17"]},
+      {id:"p_refq",type:"q",k:"req",l:"What does the caller do?",r:["FR1-05","FR1-06","FR1-19"]},
+      {id:"p_retry",type:"step",k:"req",l:"Asked to try again",sc:["ref_format"],r:["FR1-19"]},
       {id:"p_retryq",type:"q",k:"req",l:"Right before the attempts run out?",r:["FR1-20"]},
-      {id:"p_intable",type:"q",k:"req",l:"Is the reference in the NewCo table?",d:"The shared table used by phone and web chat. It updates once a day.",r:["FR1-03","FR1-04","FR1-07","FR1-13","FR1-15","FR1-16"]},
-      {id:"p_notnc",type:"end",k:"today",l:"BAU queue, as today. No extra message.",d:"Most callers take this route.",r:["FR1-04","FR1-15"]},
-      {id:"p_cant",type:"end",k:"prop",l:"BAU queue. The failure is recorded.",r:["FR1-07","FR1-16","FR1-31","FR6-N3"]},
-      {id:"p_noref",type:"step",k:"prop",l:"Told they'll be put through to an adviser",sc:["ref_none"],d:"Most callers on this route are BAU customers, so the message is neutral.",r:["FR1-05","FR1-20"]},
-      {id:"p_go6",type:"go",to:"p_badv",l:"Go to lane 6: With a BAU adviser"},
-      {id:"p_open2",type:"q",k:"req",l:"Is the NewCo team open?",d:"Checked against the owning team's hours.",r:["FR2-01","FR2-03","FR1-N3"]},
+      {id:"p_intable",type:"q",k:"req",l:"Is it a NewCo reference?",d:"Checked against the shared table used by phone and web chat.",r:["FR1-03","FR1-04","FR1-07","FR1-13","FR1-15","FR1-16"]},
+      {id:"p_notnc",type:"end",k:"today",l:"BAU queue, as today",r:["FR1-04","FR1-15"]},
+      {id:"p_cant",type:"end",k:"req",l:"BAU queue",d:"The table couldn't be checked.",r:["FR1-07","FR1-16"]},
+      {id:"p_go6",type:"go",to:"p_bauq",l:"Go to lane 6: BAU queue"},
+      {id:"p_open2",type:"q",k:"req",l:"Is the NewCo team open?",d:"The Mural's time-of-day check.",r:["FR2-01","FR2-03"]},
       {id:"p_go4",type:"go",to:"p_connect",l:"Go to lane 4: Team open"},
       {id:"p_go5",type:"go",to:"p_tc",l:"Go to lane 5: Team closed"}
     ],edges:[
+      ["p_baumsg","p_bauopt"],
+      ["p_bauopt","p_gocb","Presses 1: callback"],["p_bauopt","p_bautxt","Presses 2: web chat text"],["p_bauopt","p_ref","Waits"],
       ["p_ref","p_refq"],
-      ["p_refq","p_rb","Enters a reference"],["p_refq","p_retry","Enters it in the wrong format"],["p_refq","p_noref","Presses star: doesn't have it"],
-      ["p_rb","p_rbq"],["p_rbq","p_intable","Presses 1: it's right"],["p_rbq","p_retry","Presses 2: enter it again"],
-      ["p_retry","p_retryq"],["p_retryq","p_intable","Yes"],["p_retryq","p_noref","No"],
-      ["p_intable","p_open2","Yes, a NewCo case"],["p_intable","p_notnc","Yes, not a NewCo case"],["p_intable","p_cant","Table can't be checked"],
-      ["p_noref","p_go6"],["p_open2","p_go4","Yes"],["p_open2","p_go5","No"]
+      ["p_refq","p_intable","Gives the reference"],["p_refq","p_retry","Wrong format"],["p_refq","p_go6","Can't give one"],
+      ["p_retry","p_retryq"],["p_retryq","p_intable","Yes"],["p_retryq","p_go6","No"],
+      ["p_intable","p_open2","Yes"],["p_intable","p_notnc","No"],["p_intable","p_cant","Can't be checked"],
+      ["p_open2","p_go4","Yes"],["p_open2","p_go5","No"]
     ]},
-    {id:"p4",t:"Team open: wait for the team",nodes:[
+    {id:"p4",t:"NewCo team open",nodes:[
       {id:"p_connect",type:"step",k:"req",l:"Told they're being put through to their team",sc:["connect_team"],r:["FR1-13"]},
-      {id:"p_offered",type:"q",k:"prop",l:"Offered the web chat text earlier in this call?",d:"Each offer is made once in a call.",r:["FR2-02","FR2-04","FR1-N9","FR1-N10","FR3-N1"]},
-      {id:"p_qa",type:"step",k:"prop",l:"Queue message: callback or text",sc:["queue_msg"]},
-      {id:"p_qb",type:"step",k:"prop",l:"Queue message: callback only",sc:["queue_msg_offered"]},
-      {id:"p_doa",type:"q",k:"prop",l:"What does the caller do?",r:["FR2-N2"]},
-      {id:"p_dob",type:"q",k:"prop",l:"What does the caller do?",r:["FR2-N2"]},
-      {id:"p_agent",type:"end",k:"req",l:"NewCo agent answers",d:"The NewCo satisfaction survey follows.",r:["FR2-03","FR6-01"]},
-      {id:"p_cbnum",type:"q",k:"today",l:"Which number should we call?",d:"The existing BAU callback steps.",r:["FR2-N2"]},
-      {id:"p_newnum",type:"step",k:"today",l:"Enters a different number"},
-      {id:"p_cb",type:"step",k:"prop",l:"Callback confirmed",sc:["callback_ok"],r:["FR2-N2"]},
-      {id:"p_cbq",type:"end",k:"req",l:"Team's callback work queue",r:["FR2-18","FR2-19","FR2-20","FR2-21","FR2-22","FR2-N1"]},
-      {id:"p_sms",type:"end",k:"prop",l:"Text sent. Call ends.",sc:["sms_sent"],r:["FR4-06","FR4-07","FR3.1-01"]}
+      {id:"p_q",type:"step",k:"prop",l:"Waits in the NewCo queue",sc:["queue_msg"],d:"Suggested: in hours the caller waits for their team rather than hearing the unavailable message.",r:["FR2-02","FR2-03"]},
+      {id:"p_doa",type:"q",k:"prop",dflt:"Waits",l:"What does the caller do?"},
+      {id:"p_agent",type:"end",k:"req",l:"NewCo agent answers",r:["FR2-03","FR6-01"]},
+      {id:"p_gocb2",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"}
     ],edges:[
-      ["p_connect","p_offered"],["p_offered","p_qa","No"],["p_offered","p_qb","Yes"],
-      ["p_qa","p_doa"],["p_qb","p_dob"],
-      ["p_doa","p_agent","Waits"],["p_doa","p_cbnum","Presses 1: callback"],["p_doa","p_sms","Presses 2: text link"],
-      ["p_dob","p_agent","Waits"],["p_dob","p_cbnum","Presses 1: callback"],
-      ["p_cbnum","p_cb","Presses 1: this number"],["p_cbnum","p_newnum","Presses 2: a different number"],["p_newnum","p_cb"],
-      ["p_cb","p_cbq"]
+      ["p_connect","p_q"],["p_q","p_doa"],["p_doa","p_agent","Waits"],["p_doa","p_gocb2","Presses 1: callback"]
     ]},
-    {id:"p5",t:"Team closed, BAU open",nodes:[
-      {id:"p_tc",type:"step",k:"req",l:"Told the team is closed: leave a message or speak to an adviser",sc:["team_closed"],r:["FR2-01","FR2-N3"]},
+    {id:"p5",t:"NewCo team closed, BAU open",nodes:[
+      {id:"p_tc",type:"step",k:"req",l:"Told the team is closed: leave a message or speak to an adviser",sc:["team_closed"],r:["FR2-01"]},
       {id:"p_ch",type:"q",k:"req",l:"What does the caller choose?",r:["FR2-01","FR2-07"]},
-      {id:"p_rep",type:"step",k:"prop",l:"Options repeated once",sc:["no_choice"],r:["FR2-07"]},
-      {id:"p_ch2",type:"q",k:"prop",l:"What does the caller choose now?",r:["FR2-07"]},
-      {id:"p_vm",type:"step",k:"prop",l:"Voicemail instructions",sc:["vm_instr"],d:"Asks for a callback number, because the caller's number isn't always available. Hanging up saves the message.",r:["FR2-08","FR2-14"]},
+      {id:"p_close",type:"end",k:"req",l:"Closing message. Call ends.",sc:["closing"],r:["FR2-07"]},
+      {id:"p_vm",type:"step",k:"req",l:"Voicemail instructions",sc:["vm_instr"],r:["FR2-08","FR2-14"]},
       {id:"p_rec",type:"q",k:"req",l:"Did the recording work?",r:["FR2-09","FR2-10","FR2-12"]},
       {id:"p_again",type:"step",k:"req",l:"Asked to try again",sc:["vm_nothing"],r:["FR2-10"]},
       {id:"p_rec2",type:"q",k:"req",l:"Recorded before the attempts run out?",r:["FR2-11"]},
-      {id:"p_vmok",type:"step",k:"prop",l:"Message received",sc:["vm_ok"],r:["FR2-09"]},
-      {id:"p_vmq",type:"end",k:"req",l:"Team's callback work queue",r:["FR2-13","FR2-15","FR2-16","FR2-17","FR2-18"]},
-      {id:"p_vmfail",type:"step",k:"prop",l:"Told a message can't be taken",sc:["vm_fail"],r:["FR2-11","FR2-12"]},
-      {id:"p_adv",type:"step",k:"prop",l:"Put through to an adviser",sc:["to_adviser"],r:["FR2-01"]},
-      {id:"p_advend",type:"end",k:"prop",l:"BAU adviser helps. Contact recorded on the case.",d:"BAU advisers can do everything they do today.",r:["FR6-N1","FR6-N3"]}
+      {id:"p_vmok",type:"step",k:"req",l:"Message received",sc:["vm_ok"],r:["FR2-09"]},
+      {id:"p_vmq",type:"end",k:"req",l:"NewCo mailbox: the team calls back",r:["FR2-13","FR2-18","FR2-19","FR2-20","FR2-21","FR2-22"]},
+      {id:"p_close2",type:"end",k:"req",l:"Closing message. Call ends.",sc:["closing"],r:["FR2-11"]},
+      {id:"p_vmdown",type:"end",k:"req",l:"Told voicemail isn't working. Call ends.",sc:["vm_unavail"],r:["FR2-12"]},
+      {id:"p_adv",type:"step",k:"req",l:"Put through to an adviser",sc:["to_adviser"],d:"From the team-closed script and the Mural (“return to the BAU queue”)."},
+      {id:"p_advend",type:"end",k:"req",l:"BAU adviser helps. Contact logged on the case.",d:"The Mural: log it on the record so the team can see and follow up."}
     ],edges:[
       ["p_tc","p_ch"],
-      ["p_ch","p_vm","Presses 1: leave a message"],["p_ch","p_adv","Presses 2: speak to an adviser"],["p_ch","p_rep","Presses nothing"],
-      ["p_rep","p_ch2"],["p_ch2","p_vm","Presses 1: leave a message"],["p_ch2","p_adv","Presses 2, or still nothing"],
+      ["p_ch","p_vm","Presses 1: leave a message"],["p_ch","p_adv","Presses 2: speak to an adviser"],["p_ch","p_close","Presses nothing"],
       ["p_vm","p_rec"],
-      ["p_rec","p_vmok","Yes: presses hash or hangs up"],["p_rec","p_again","Nothing recorded"],["p_rec","p_vmfail","Voicemail not working"],
-      ["p_again","p_rec2"],["p_rec2","p_vmok","Yes"],["p_rec2","p_vmfail","No"],
-      ["p_vmok","p_vmq"],["p_vmfail","p_adv"],["p_adv","p_advend"]
+      ["p_rec","p_vmok","Yes"],["p_rec","p_again","Nothing recorded"],["p_rec","p_vmdown","Voicemail not working"],
+      ["p_again","p_rec2"],["p_rec2","p_vmok","Yes"],["p_rec2","p_close2","No"],
+      ["p_vmok","p_vmq"],["p_adv","p_advend"]
     ]},
-    {id:"p6",t:"With a BAU adviser, no reference given",nodes:[
-      {id:"p_badv",type:"step",k:"today",l:"BAU adviser answers",d:"As today."},
-      {id:"p_marker",type:"q",k:"req",l:"NewCo marker on the case?",d:"The adviser sees it on the Dynamics front screen.",r:["FR4-17","FR4-18","FR4-20"]},
+    {id:"p6",t:"BAU queue",nodes:[
+      {id:"p_bauq",type:"step",k:"today",l:"Waits in the BAU queue, then a BAU adviser answers"},
+      {id:"p_marker",type:"q",k:"req",l:"NewCo marker on the case?",d:"Shown on the Dynamics front screen.",r:["FR4-17","FR4-18"]},
       {id:"p_asnow",type:"end",k:"today",l:"Adviser helps, as today"},
-      {id:"p_open3",type:"q",k:"prop",l:"Is the NewCo team open?",r:["FR4-N3","FR4-N5"]},
-      {id:"p_offer",type:"step",k:"prop",l:"Adviser offers a transfer",sc:["bau_offer"],r:["FR4-N3"]},
-      {id:"p_wants",type:"q",k:"prop",l:"What does the customer choose?",r:["FR4-N3","FR4-N4"]},
-      {id:"p_helprec",type:"end",k:"prop",l:"Adviser helps. Contact recorded on the case.",r:["FR4-N5","FR4-N6","FR6-N3"]},
-      {id:"p_go4b",type:"go",to:"p_offered",l:"Go to lane 4: joins the team's queue"}
+      {id:"p_open3",type:"q",k:"prop",l:"Is the NewCo team open?",d:"Suggested: transfer only while the team is open."},
+      {id:"p_xfer",type:"step",k:"prop",l:"Adviser transfers the caller to the team",d:"Suggested: the same transfer FR4 gives web chat.",r:["FR4-21"]},
+      {id:"p_helprec",type:"end",k:"req",l:"Adviser helps. Contact logged on the case."},
+      {id:"p_go4b",type:"go",to:"p_q",l:"Go to lane 4: NewCo queue"}
     ],edges:[
-      ["p_badv","p_marker"],["p_marker","p_open3","Yes"],["p_marker","p_asnow","No"],
-      ["p_open3","p_offer","Yes"],["p_open3","p_helprec","No"],
-      ["p_offer","p_wants"],["p_wants","p_go4b","Transfer to the team"],["p_wants","p_helprec","Stay with the adviser"]
+      ["p_bauq","p_marker"],["p_marker","p_open3","Yes"],["p_marker","p_asnow","No"],
+      ["p_open3","p_xfer","Yes"],["p_open3","p_helprec","No"],["p_xfer","p_go4b"]
     ]},
-    {id:"p7",t:"Callback asked for in the BAU queue",own:true,nodes:[
-      {id:"p_bq",type:"step",k:"today",l:"Caller waiting in the BAU queue",d:"Any caller in the BAU queue can reach this lane."},
-      {id:"p_bqq",type:"q",dflt:"Presses 1: callback",k:"today",l:"What does the caller do?",d:"The existing BAU queue options."},
-      {id:"p_bqwait",type:"end",k:"today",l:"BAU adviser answers, as today"},
-      {id:"p_bqsms",type:"end",k:"today",l:"Text sent. Call ends."},
-      {id:"p_bqnum",type:"q",k:"today",l:"Which number should we call?"},
-      {id:"p_bqnew",type:"step",k:"today",l:"Enters a different number"},
-      {id:"p_hasref",type:"q",k:"prop",l:"Case reference already given in this call?",r:["FR1-N8"]},
-      {id:"p_reuse",type:"step",k:"prop",l:"The reference is reused",r:["FR1-N8"]},
-      {id:"p_askref",type:"step",k:"prop",l:"Asked for the case reference",sc:["ref_prompt"]},
-      {id:"p_intable2",type:"q",k:"prop",l:"Is the reference in the NewCo table?",r:["FR2-N4"]},
-      {id:"p_cbq2",type:"end",k:"prop",l:"Team's callback work queue",r:["FR2-N4"]},
+    {id:"p7",t:"Callback",nodes:[
+      {id:"p_cbnum",type:"q",k:"today",l:"Which number should we call?",d:"The existing callback steps."},
+      {id:"p_newnum",type:"step",k:"today",l:"Enters a different number"},
+      {id:"p_hasref",type:"q",k:"prop",dflt:"No",l:"Reference already given in this call?",d:"Suggested: don't ask for it twice.",r:["FR2-S1"]},
+      {id:"p_askref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"From the Mural callback lane."},
+      {id:"p_intable2",type:"q",k:"req",l:"Is it a NewCo reference?",d:"From the Mural: triage callbacks between the BAU queue and a NewCo queue."},
+      {id:"p_cbhrs",type:"q",k:"req",l:"Is the NewCo team open?",d:"From the Mural: triage NewCo callbacks on operating hours.",r:["FR2-S1","FR2-S2"]},
+      {id:"p_cbok",type:"step",k:"req",l:"Callback confirmed",sc:["callback_ok"],r:["FR2-S1"]},
+      {id:"p_cbq",type:"end",k:"req",l:"NewCo callback queue: the team calls back",r:["FR2-S1"]},
+      {id:"p_go5b",type:"go",to:"p_tc",l:"Go to lane 5: Team closed"},
       {id:"p_baucb",type:"end",k:"today",l:"BAU callback, as today"}
     ],edges:[
-      ["p_bq","p_bqq"],["p_bqq","p_bqwait","Waits"],["p_bqq","p_bqnum","Presses 1: callback"],["p_bqq","p_bqsms","Presses 2: web chat text"],
-      ["p_bqnum","p_hasref","Presses 1: this number"],["p_bqnum","p_bqnew","Presses 2: a different number"],["p_bqnew","p_hasref"],
-      ["p_hasref","p_reuse","Yes"],["p_hasref","p_askref","No"],
-      ["p_reuse","p_intable2"],["p_askref","p_intable2"],
-      ["p_intable2","p_cbq2","Yes, a NewCo case"],["p_intable2","p_baucb","No"]
+      ["p_cbnum","p_hasref","Presses 1: this number"],["p_cbnum","p_newnum","Presses 2: a different number"],["p_newnum","p_hasref"],
+      ["p_hasref","p_askref","No"],["p_hasref","p_intable2","Yes"],["p_askref","p_intable2"],
+      ["p_intable2","p_cbhrs","Yes"],["p_intable2","p_baucb","No"],
+      ["p_cbhrs","p_cbok","Yes"],["p_cbhrs","p_go5b","No"],["p_cbok","p_cbq"]
     ]}
   ]
 };
@@ -4433,23 +4335,24 @@ const CHAT = {
   key:"chat", name:"Web chat", sys:"Web chat", start:"w_start",
   lanes:[
     {id:"w1",t:"Every chat starts here",nodes:[
-      {id:"w_start",type:"step",k:"today",l:"Customer opens the medical web chat",d:"The existing link. No separate NewCo link.",r:["FR4-01","FR4-04"]},
+      {id:"w_start",type:"step",k:"today",l:"Customer opens the medical web chat",d:"The existing link.",r:["FR4-01","FR4-04"]},
       {id:"w_open",type:"q",k:"today",l:"Is web chat open?"},
       {id:"w_closed",type:"end",k:"today",l:"Existing closed message"},
-      {id:"w_reason",type:"q",dflt:"I want to check the progress of my case",k:"today",l:"Which reason does the customer pick?",d:"The existing list of 6 reasons. Proposed: every reason except notifying a new condition goes on to the NewCo check. To confirm.",r:["FR4-03","FR4-N2"]},
-      {id:"w_fn",type:"end",k:"prop",l:"BAU web chat. New-condition routing is phone only.",r:["FR4-N2"]},
-      {id:"w_related",type:"step",k:"today",l:"Shown related questions for that reason",d:"Existing chatbot answers. The customer can stop here if one answers their question."},
-      {id:"w_dp",type:"step",k:"today",l:"Answers data protection questions",d:"Existing."},
-      {id:"w_name",type:"step",k:"today",l:"Enters name and email",d:"Existing. The Mural shows this after the reference; the order doesn't change the routing."},
-      {id:"w_pre",type:"step",k:"prop",l:"Asked for the case reference",sc:["w_ref_field"],d:"The field exists today. Only its label, hint and error change, to match the letters.",r:["FR4-08"]},
+      {id:"w_reason",type:"q",k:"today",dflt:"I want to check the progress of my case",l:"Which reason does the customer pick?",d:"The existing 6 reasons.",r:["FR4-03"]},
+      {id:"w_fn",type:"end",k:"today",l:"BAU web chat, as today",d:"First-notification routing to NewCo is phone only."},
+      {id:"w_related",type:"step",k:"today",l:"Shown related questions for that reason"},
+      {id:"w_dp",type:"step",k:"today",l:"Answers data protection questions"},
+      {id:"w_ref",type:"step",k:"today",l:"Enters medical reference number",d:"The existing field.",r:["FR4-08"]},
       {id:"w_refq",type:"q",k:"req",l:"What does the customer enter?",r:["FR4-09","FR4-10","FR4-11"]},
-      {id:"w_err",type:"step",k:"req",l:"Error shown: try again",d:"Up to the agreed number of attempts.",r:["FR4-10"]},
+      {id:"w_err",type:"step",k:"req",l:"Error shown: try again",r:["FR4-10"]},
       {id:"w_errq",type:"q",k:"req",l:"Right before the attempts run out?",r:["FR4-12"]},
-      {id:"w_intable",type:"q",k:"req",l:"Is the reference in the NewCo table?",d:"The same table as the phone line.",r:["FR4-02","FR4-09","FR1-23"]},
+      {id:"w_name",type:"step",k:"today",l:"Enters name and email, connects to the chatbot"},
+      {id:"w_name2",type:"step",k:"today",l:"Enters name and email, connects to the chatbot"},
+      {id:"w_intable",type:"q",k:"req",l:"Is it a NewCo reference?",d:"The same table as the phone line.",r:["FR4-02","FR4-09","FR1-23"]},
       {id:"w_notnc",type:"end",k:"today",l:"BAU web chat, as today",r:["FR4-03"]},
-      {id:"w_cant",type:"end",k:"req",l:"BAU web chat. The failure is recorded.",r:["FR4-14","FR4-15"]},
-      {id:"w_go4",type:"go",to:"w_badv",l:"Go to lane 4: With a BAU adviser"},
-      {id:"w_open2",type:"q",k:"prop",l:"Is the NewCo team open?",r:["FR4-02","FR4-N1"]},
+      {id:"w_cant",type:"end",k:"req",l:"BAU web chat. Routing failure recorded.",r:["FR4-14","FR4-15"]},
+      {id:"w_go4",type:"go",to:"w_badv",l:"Go to lane 4: BAU web chat"},
+      {id:"w_open2",type:"q",k:"req",l:"Is the NewCo team open?",d:"The Mural's operating-hours check."},
       {id:"w_go2",type:"go",to:"w_connect",l:"Go to lane 2: Team open"},
       {id:"w_go3",type:"go",to:"w_tc",l:"Go to lane 3: Team closed"}
     ],edges:[
@@ -4460,43 +4363,36 @@ const CHAT = {
       ["w_reason","w_related","Can I drive while my application is with DVLA?"],
       ["w_reason","w_related","I want to tell you about a change in details"],
       ["w_reason","w_related","Other enquiries"],
-      ["w_related","w_dp"],["w_dp","w_name"],["w_name","w_pre"],["w_pre","w_refq"],
-      ["w_refq","w_intable","A reference in the right format"],["w_refq","w_err","A reference in the wrong format"],["w_refq","w_go4","Leaves it blank"],
-      ["w_err","w_errq"],["w_errq","w_intable","Yes"],["w_errq","w_go4","No"],
-      ["w_intable","w_open2","Yes, a NewCo case"],["w_intable","w_notnc","Yes, not a NewCo case"],["w_intable","w_cant","Table can't be checked"],
+      ["w_related","w_dp"],["w_dp","w_ref"],["w_ref","w_refq"],
+      ["w_refq","w_name","A reference in the right format"],["w_refq","w_err","A reference in the wrong format"],["w_refq","w_name2","Leaves it blank"],
+      ["w_err","w_errq"],["w_errq","w_name","Yes"],["w_errq","w_name2","No"],
+      ["w_name","w_intable"],["w_name2","w_go4"],
+      ["w_intable","w_open2","Yes"],["w_intable","w_notnc","No"],["w_intable","w_cant","Can't be checked"],
       ["w_open2","w_go2","Yes"],["w_open2","w_go3","No"]
     ]},
-    {id:"w2",t:"Team open: wait for the team",nodes:[
+    {id:"w2",t:"NewCo team open",nodes:[
       {id:"w_connect",type:"step",k:"req",l:"Told they're being connected to their team",sc:["w_connect"],r:["FR4-01"]},
-      {id:"w_q",type:"step",k:"prop",l:"Queue message",sc:["w_queue"],r:["FR4-02"]},
-      {id:"w_agent",type:"end",k:"req",l:"NewCo agent chats with the customer",d:"Still to decide: which pre-chat answers count for ID&V, so the customer isn't asked twice.",r:["FR4-26"]}
+      {id:"w_q",type:"step",k:"req",l:"Waits in the NewCo queue",sc:["w_queue"],r:["FR4-02"]},
+      {id:"w_agent",type:"end",k:"req",l:"NewCo agent chats with the customer",r:["FR4-26"]}
     ],edges:[["w_connect","w_q"],["w_q","w_agent"]]},
-    {id:"w3",t:"Team closed, web chat open",nodes:[
-      {id:"w_tc",type:"step",k:"prop",l:"Told the team is closed: chat to an adviser or come back later",sc:["w_team_closed"],d:"Web chat doesn't take messages for the team.",r:["FR4-N1"]},
-      {id:"w_ch",type:"q",k:"prop",l:"Which button does the customer select?",r:["FR4-N1"]},
-      {id:"w_adv",type:"step",k:"prop",l:"Connected to an adviser",sc:["w_to_adviser"],r:["FR4-N1"]},
-      {id:"w_advend",type:"end",k:"prop",l:"BAU adviser helps. Contact recorded on the case.",r:["FR6-N1"]},
-      {id:"w_later",type:"end",k:"prop",l:"Chat ends with the team's opening hours",sc:["w_later"],r:["FR4-N1"]}
-    ],edges:[["w_tc","w_ch"],["w_ch","w_adv","Chat to an adviser now"],["w_ch","w_later","I'll come back later"],["w_adv","w_advend"]]},
-    {id:"w4",t:"With a BAU adviser, no reference given",nodes:[
-      {id:"w_badv",type:"step",k:"today",l:"BAU adviser answers the chat",d:"As today."},
-      {id:"w_marker",type:"q",k:"req",l:"NewCo marker on the case?",r:["FR4-17","FR4-18","FR4-20"]},
+    {id:"w3",t:"NewCo team closed",nodes:[
+      {id:"w_tc",type:"step",k:"req",l:"Told the team is closed, then connected to an adviser",sc:["w_team_closed"],d:"From the Mural: acknowledge the team is out of hours, then route to BAU."},
+      {id:"w_bau",type:"end",k:"req",l:"BAU adviser helps. Contact logged on the case."}
+    ],edges:[["w_tc","w_bau"]]},
+    {id:"w4",t:"BAU web chat",nodes:[
+      {id:"w_badv",type:"step",k:"today",l:"BAU adviser picks up the chat"},
+      {id:"w_marker",type:"q",k:"req",l:"NewCo marker on the case?",r:["FR4-17","FR4-18"]},
       {id:"w_asnow",type:"end",k:"today",l:"Adviser helps, as today"},
-      {id:"w_open3",type:"q",k:"prop",l:"Is the NewCo team open?",r:["FR4-21","FR4-25"]},
-      {id:"w_offer",type:"step",k:"prop",l:"Adviser offers a transfer",sc:["w_bau_offer"],r:["FR4-21"]},
-      {id:"w_wants",type:"q",k:"prop",l:"What does the customer choose?",r:["FR4-21","FR4-22","FR4-23","FR4-24"]},
-      {id:"w_helprec",type:"end",k:"prop",l:"Adviser helps. Contact recorded on the case.",r:["FR6-N1","FR6-N3"]},
-      {id:"w_go2b",type:"go",to:"w_q",l:"Go to lane 2: joins the team's queue"}
+      {id:"w_open3",type:"q",k:"prop",l:"Is the NewCo team open?",d:"Suggested: transfer only while the team is open.",r:["FR4-25"]},
+      {id:"w_xfer",type:"step",k:"req",l:"Adviser transfers the chat to the team",r:["FR4-21","FR4-22","FR4-23","FR4-24"]},
+      {id:"w_helprec",type:"end",k:"req",l:"Adviser helps. Contact logged on the case."},
+      {id:"w_go2b",type:"go",to:"w_q",l:"Go to lane 2: NewCo queue"}
     ],edges:[
       ["w_badv","w_marker"],["w_marker","w_open3","Yes"],["w_marker","w_asnow","No"],
-      ["w_open3","w_offer","Yes"],["w_open3","w_helprec","No"],
-      ["w_offer","w_wants"],["w_wants","w_go2b","Transfer to the team"],["w_wants","w_helprec","Stay with the adviser"]
+      ["w_open3","w_xfer","Yes"],["w_open3","w_helprec","No"],["w_xfer","w_go2b"]
     ]}
   ]
 };
-
-/* An open question the 6 reasons raise. Newly drafted 26 September. */
-OI.push({id:"c_reasons",cat:"confirm",t:"Which web chat reasons go to the NewCo check",d:"Assumed: every reason except “I need to notify DVLA of a medical condition” asks for the case reference and goes to the NewCo check. Confirm, especially for “Other enquiries”.",who:"Web chat owners",n:["chat:w_reason"],r:["FR4-N2"]});
 
 const CH = {phone:PHONE, chat:CHAT};
 for (const c of Object.values(CH)){
@@ -4521,23 +4417,20 @@ for (const c of Object.values(CH)){
 }
 
 /* ---------- indexes ---------- */
-const SC = {};
-REQS.forEach(fr=>fr.features.forEach(f=>f.sc.forEach(s=>{SC[s.id]={...s,fr:fr.code};})));
-Object.values(NEW_SC).forEach(arr=>arr.forEach(s=>{SC[s.id]={id:s.id,title:s.t.split("\n")[0].replace(/^Scenario:\s*/,""),t:s.t,why:s.why,isNew:true};}));
-Object.values(NEW_FEAT).forEach(arr=>arr.forEach(f=>f.sc.forEach(s=>{SC[s.id]={id:s.id,title:s.t.split("\n")[0].replace(/^Scenario:\s*/,""),t:s.t,why:f.why,isNew:true,feat:f.t};})));
-function status(id){ const s=SC[id]; if(!s) return null; if(s.isNew) return "new"; return REC[id]?REC[id].s:"same"; }
+const SC = {}, FEAT_OF = {}, FEAT_BY_ID = {};
+REQS.forEach(fr=>fr.features.forEach(f=>{ FEAT_BY_ID[f.id]=f; f.sc.forEach(s=>{SC[s.id]={...s,fr:fr.code}; FEAT_OF[s.id]=f.id;}); }));
+Object.values(NEW_FEAT).forEach(arr=>arr.forEach(f=>f.sc.forEach(s=>{SC[s.id]={id:s.id,title:s.t.split("\n")[0].replace(/^Scenario:\s*/,""),t:s.t,isNew:true,feat:f.t,why:f.why};})));
+function status(id){ const s=SC[id]; if(!s) return null; if(s.isNew) return "new"; return SUG[id]?"sug":"same"; }
 const STATUS = {
-  same:{t:"No change",c:"govuk-tag--grey"},
-  change:{t:"Change proposed",c:"govuk-tag--magenta"},
-  new:{t:"New, proposed",c:"govuk-tag--magenta"},
-  remove:{t:"Removal proposed",c:"govuk-tag--red"},
-  comment:{t:"Comment",c:"govuk-tag--blue"}
+  same:{t:"No suggestion",c:"govuk-tag--grey"},
+  sug:{t:"Suggestion",c:"govuk-tag--magenta"},
+  new:{t:"New, suggested",c:"govuk-tag--magenta"}
 };
 const STEPS_BY_SC = {};
 for (const c of Object.values(CH)) Object.values(c.byId).forEach(n=>(n.r||[]).forEach(id=>{(STEPS_BY_SC[id]=STEPS_BY_SC[id]||[]).push([c.key,n.id]);}));
 const OI_BY_NODE = {};
 OI.forEach(o=>(o.n||[]).forEach(k=>{(OI_BY_NODE[k]=OI_BY_NODE[k]||[]).push(o);}));
-const KIND = {today:{t:"Today",c:"govuk-tag--grey",long:"Happens today. Not changed."},req:{t:"In the requirements",c:"govuk-tag--blue",long:"Written in the requirements."},prop:{t:PROPOSED,c:"govuk-tag--magenta",long:"Proposed in the review on 26 September. Not agreed yet."}};
+const KIND = {today:{t:"Today",c:"govuk-tag--grey",long:"BAU as it is today. Not changed."},req:{t:"NewCo",c:"govuk-tag--blue",long:"NewCo, from the requirements or the Mural."},prop:{t:PROPOSED,c:"govuk-tag--magenta",long:"Suggested in the review on 26 September. Not agreed yet."}};
 
 /* ====================================================================
    State
@@ -4546,7 +4439,7 @@ const state = {};
 function resetState(){
   state.view="map"; state.ch="phone"; state.sel=null; state.tab="step";
   state.choice={phone:{},chat:{}}; state.start={phone:PHONE.start,chat:CHAT.start};
-  state.zoom={phone:null,chat:null}; state.list=false; state.reqFilter="all"; state.target=null;
+  state.zoom={}; state.list=false; state.mode="whole"; state.reqFilter="rec"; state.target=null;
 }
 resetState();
 
@@ -4583,29 +4476,38 @@ function size(n){
   if(n.type==="q"){ n.lines=wrap(n.l,20); return {w:210,h:Math.max(54,n.lines.length*18+18+(n.k==="prop"?14:0))}; }
   if(n.type==="end"){ n.lines=wrap(n.l,22); return {w:210,h:Math.max(40,n.lines.length*18+14)}; }
   if(n.type==="go"){ n.lines=wrap(n.l,22); return {w:200,h:n.lines.length*18+18}; }
-  if(n.type==="a"){ n.lines=wrap(n.l,24); return {w:200,h:n.lines.length*18+16}; }
+  if(n.type==="a"){ n.lines=wrap(n.l,18); return {w:150,h:n.lines.length*18+16}; }
   n.lines=wrap(n.l,22); return {w:190,h:n.lines.length*18+22+(n.k==="prop"?14:0)};
 }
-function drawLane(c,ln){
-  const g=new dagre.graphlib.Graph({multigraph:true});
-  g.setGraph({rankdir:"LR",nodesep:20,ranksep:46,marginx:24,marginy:22});
+function drawGraph(c,key,nodes,edges,label,clusters,tight){
+  const g=new dagre.graphlib.Graph({multigraph:true,compound:!!clusters});
+  g.setGraph({rankdir:"LR",nodesep:tight?14:20,ranksep:tight?28:46,marginx:24,marginy:22});
   g.setDefaultEdgeLabel(()=>({}));
-  ln.nodes.forEach(n=>{ const s=size(n); g.setNode(n.id,{width:s.w,height:s.h}); });
-  ln.edges.forEach((e,i)=>{ const o={}; if(e[2]){ o.label=e[2]; o.width=e[2].length*6.8+14; o.height=20; o.labelpos="c"; } g.setEdge(e[0],e[1],o,"e"+i); });
+  if(clusters) clusters.forEach(cl=>g.setNode("cl-"+cl.id,{}));
+  nodes.forEach(n=>{ const s=size(n); g.setNode(n.id,{width:s.w,height:s.h}); if(clusters) g.setParent(n.id,"cl-"+c.laneOf[n.id].id); });
+  edges.forEach(e=>g.setEdge(e.from,e.to,{},e.id));
   dagre.layout(g);
   const W=Math.ceil(g.graph().width), H=Math.ceil(g.graph().height);
-  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"group","aria-label":`Lane ${ln.n}: ${ln.t}`});
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"group","aria-label":label});
   svg.dataset.w=W; svg.dataset.h=H;
   const defs=el("defs",{},svg);
-  [["off","#8e9296"],["on","#1d70b8"]].forEach(([k,col])=>{ const m=el("marker",{id:`${ln.id}-${k}`,viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"},defs); el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m); });
+  [["off","#8e9296"],["on","#1d70b8"]].forEach(([k,col])=>{ const m=el("marker",{id:`${key}-${k}`,viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"},defs); el("path",{d:"M0,0 L10,5 L0,10 z",fill:col},m); });
+  if(clusters){
+    const cg=el("g",{},svg);
+    clusters.forEach(cl=>{ const p=g.node("cl-"+cl.id); if(!p||!p.width) return; const x=p.x-p.width/2-10, y=p.y-p.height/2-36, w=p.width+20, h=p.height+46;
+      el("rect",{class:"cluster",x,y,width:w,height:h},cg);
+      el("rect",{class:"clusterhead",x,y,width:w,height:28},cg);
+      const tx=el("text",{class:"clustertext",x:x+10,y:y+19},cg); tx.textContent=`Lane ${cl.n}: ${cl.t}`; });
+  }
+  const edgesIn=edges.map(e=>[e.from,e.to,"",e.id]);
   const eg=el("g",{},svg), ng=el("g",{},svg);
-  ln.edges.forEach((e,i)=>{
-    const ed=g.edge({v:e[0],w:e[1],name:"e"+i}), p=ed.points;
-    const gr=el("g",{class:"edge","data-e":ln.id+"-"+i},eg);
-    el("path",{d:"M"+p.map(q=>q.x+","+q.y).join(" L"),"marker-end":`url(#${ln.id}-off)`},gr);
+  edgesIn.forEach(e=>{
+    const ed=g.edge({v:e[0],w:e[1],name:e[3]}), p=ed.points;
+    const gr=el("g",{class:"edge","data-e":e[3],"data-m":key},eg);
+    el("path",{d:"M"+p.map(q=>q.x+","+q.y).join(" L"),"marker-end":`url(#${key}-off)`},gr);
     if(e[2]){ const tw=e[2].length*6.8+10; el("rect",{x:ed.x-tw/2,y:ed.y-10,width:tw,height:20},gr); const t=el("text",{x:ed.x,y:ed.y+5,"text-anchor":"middle"},gr); t.textContent=e[2]; }
   });
-  ln.nodes.forEach(n=>{
+  nodes.forEach(n=>{
     const p=g.node(n.id), x=p.x-p.width/2, y=p.y-p.height/2;
     const gr=el("g",{class:`node ${n.k||""} t-${n.type}`,"data-id":n.id,tabindex:"0",role:"button"},ng);
     const kindWord=n.type==="go"?"Link to another lane":(KIND[n.k]||{}).t;
@@ -4617,7 +4519,7 @@ function drawLane(c,ln){
       el("rect",{x,y,width:p.width,height:p.height,fill:"transparent"},gr);
       el("path",{class:"diamond",d:`M${cx},${cy-16} L${cx+16},${cy} L${cx},${cy+16} L${cx-16},${cy} Z`},gr);
       let ty=p.y-(n.lines.length*18)/2+13;
-      if(n.k==="prop"){ const tg=el("text",{class:"tag",x:x+44,y:ty-6},gr); tg.textContent="PROPOSED"; ty+=8; }
+      if(n.k==="prop"){ const tg=el("text",{class:"tag",x:x+44,y:ty-6},gr); tg.textContent="SUGGESTED"; ty+=8; }
       n.lines.forEach((ln2,i)=>{ const t=el("text",{class:"qtext",x:x+44,y:ty+i*18},gr); t.textContent=ln2; });
     } else if(n.type==="end"){
       el("rect",{class:"ringy",x:x-6,y:y-6,width:p.width+12,height:p.height+12},gr);
@@ -4639,7 +4541,7 @@ function drawLane(c,ln){
       el("rect",{class:"ring",x:x-3,y:y-3,width:p.width+6,height:p.height+6},gr);
       el("rect",{class:"box",x,y,width:p.width,height:p.height},gr);
       let ty=y+22;
-      if(n.k==="prop"){ const tg=el("text",{class:"tag",x:p.x,y:y+17,"text-anchor":"middle"},gr); tg.textContent="PROPOSED"; ty+=14; }
+      if(n.k==="prop"){ const tg=el("text",{class:"tag",x:p.x,y:y+17,"text-anchor":"middle"},gr); tg.textContent="SUGGESTED"; ty+=14; }
       n.lines.forEach((l2,i)=>{ const t=el("text",{x:p.x,y:ty+i*18,"text-anchor":"middle"},gr); t.textContent=l2; });
     }
     const open=(OI_BY_NODE[c.key+":"+n.id]||[]).filter(o=>o.cat!=="decided").length;
@@ -4649,7 +4551,17 @@ function drawLane(c,ln){
   });
   return svg;
 }
-const LANE_SVG={};
+function drawLane(c,ln){
+  return drawGraph(c,ln.id,ln.nodes,c.E.filter(e=>e.lane===ln.id),`Lane ${ln.n}: ${ln.t}`);
+}
+function drawWhole(c){
+  /* One graph for the whole channel. "Go to lane" links become the real
+     connections they stand for. */
+  const nodes=Object.values(c.byId).filter(n=>n.type!=="go");
+  const edges=c.E.filter(e=>c.byId[e.from].type!=="go").map(e=>{ const to=c.byId[e.to]; return {...e,to:to.type==="go"?to.to:e.to}; });
+  return drawGraph(c,"whole-"+c.key,nodes,edges,`${c.name}: the whole flow`,null,true);
+}
+const LANE_SVG={}, WHOLE_SVG={};
 function onNode(n){
   const c=CH[state.ch];
   if(n.type==="go"){ const t=c.byId[n.to]; select(t.id); scrollToNode(t.id); return; }
@@ -4668,17 +4580,19 @@ function renderMap(){
       <div class="toolbar">
         <div><span class="govuk-label" id="chan-l">Channel</span><div class="chan" role="group" aria-labelledby="chan-l">
           <button type="button" data-ch="phone" aria-pressed="${state.ch==="phone"}">Phone</button><button type="button" data-ch="chat" aria-pressed="${state.ch==="chat"}">Web chat</button></div></div>
+        <div><span class="govuk-label" id="view-l">View</span><div class="chan" role="group" aria-labelledby="view-l">
+          <button type="button" data-mode="whole" aria-pressed="${state.mode==="whole"}">Whole flow</button><button type="button" data-mode="lanes" aria-pressed="${state.mode==="lanes"}">Separate flows</button></div></div>
         <div class="links">
           <button type="button" class="linkbtn" id="reset">Reset the route</button>
           <button type="button" class="linkbtn" id="listbtn">${state.list?"Show as a map":"Show as a list"}</button>
-          <span class="zoom" ${state.list?"hidden":""}><button type="button" class="govuk-button govuk-button--secondary" id="zout" aria-label="Zoom out">−</button><button type="button" class="govuk-button govuk-button--secondary" id="zin" aria-label="Zoom in">+</button></span>
+          <span class="zoom" ${state.list?"hidden":""}><button type="button" class="govuk-button govuk-button--secondary" id="zout" aria-label="Zoom out">−</button><button type="button" class="govuk-button govuk-button--secondary" id="zfit">Fit</button><button type="button" class="govuk-button govuk-button--secondary" id="zin" aria-label="Zoom in">+</button></span>
         </div>
       </div>
       <div class="canvas" id="canvas"></div>
       <div class="key" aria-label="Key">
         <span><i class="sw today"></i>Today</span>
-        <span><i class="sw req"></i>In the requirements</span>
-        <span><i class="sw prop"></i>${PROPOSED}, not agreed yet</span>
+        <span><i class="sw req"></i>NewCo: requirements or Mural</span>
+        <span><i class="sw prop"></i>Suggested, not agreed</span>
         <span><i class="diam"></i>Question</span>
         <span><i class="sw ans"></i>Answer: select to follow</span>
         <span><i class="enddot"></i>End</span>
@@ -4693,13 +4607,25 @@ function renderMap(){
       <div class="sidebody" id="sidebody" role="tabpanel" tabindex="-1"></div>
     </aside>
   </main>`;
-  document.querySelectorAll(".chan button").forEach(b=>b.onclick=()=>go(`#/map/${b.dataset.ch}`));
+  document.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>go(`#/map/${b.dataset.ch}`));
+  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{ state.mode=b.dataset.mode; state.list=false; renderMap(); if(state.sel) requestAnimationFrame(()=>scrollToNode(state.sel)); });
   $("#reset").onclick=()=>{ state.choice[c.key]={}; state.start[c.key]=c.start; state.sel=null; state.tab="step"; history.replaceState(null,"",`#/map/${c.key}`); refresh(); };
   $("#listbtn").onclick=()=>{ state.list=!state.list; renderMap(); };
   $("#t-step").onclick=()=>{ state.tab="step"; renderSide(); };
   $("#t-route").onclick=()=>{ state.tab="route"; renderSide(); };
   const cv=$("#canvas");
   if(state.list){ renderList(); }
+  else if(state.mode==="whole"){
+    const w=document.createElement("div"); w.className="whole"; cv.appendChild(w);
+    if(!WHOLE_SVG[c.key]) WHOLE_SVG[c.key]=drawWhole(c);
+    w.appendChild(WHOLE_SVG[c.key]);
+    const zk=c.key+"-whole";
+    if(state.zoom[zk]==null) state.zoom[zk]=.75;
+    applyZoom();
+    $("#zin").onclick=()=>{ state.zoom[zk]=Math.min(1.6,state.zoom[zk]*1.15); applyZoom(); };
+    $("#zout").onclick=()=>{ state.zoom[zk]=Math.max(.1,state.zoom[zk]/1.15); applyZoom(); };
+    $("#zfit").onclick=()=>{ const s=WHOLE_SVG[c.key]; state.zoom[zk]=Math.min((cv.clientWidth-80)/s.dataset.w,(cv.clientHeight-60)/s.dataset.h,1); applyZoom(); };
+  }
   else {
     const wrapEl=document.createElement("div"); wrapEl.className="lanes"; cv.appendChild(wrapEl);
     c.lanes.forEach(ln=>{
@@ -4715,11 +4641,17 @@ function renderMap(){
     applyZoom();
     document.querySelectorAll(".lanestart").forEach(b=>b.onclick=()=>{ state.start[c.key]=b.dataset.start; state.tab="route"; refresh(); });
     $("#zin").onclick=()=>{ state.zoom[c.key]=Math.min(1.6,state.zoom[c.key]*1.15); applyZoom(); };
-    $("#zout").onclick=()=>{ state.zoom[c.key]=Math.max(.4,state.zoom[c.key]/1.15); applyZoom(); };
+    $("#zout").onclick=()=>{ state.zoom[c.key]=Math.max(.3,state.zoom[c.key]/1.15); applyZoom(); };
+    $("#zfit").onclick=()=>{ const maxW=Math.max(...c.lanes.map(l=>+LANE_SVG[l.id].dataset.w)); state.zoom[c.key]=Math.min(1,(cv.clientWidth-80)/maxW); applyZoom(); };
   }
   refresh();
 }
-function applyZoom(){ const c=CH[state.ch], z=state.zoom[c.key]; c.lanes.forEach(l=>{ const s=LANE_SVG[l.id]; s.setAttribute("width",Math.round(s.dataset.w*z)); s.setAttribute("height",Math.round(s.dataset.h*z)); }); }
+function applyZoom(){
+  const c=CH[state.ch];
+  const set=(s,z)=>{ s.setAttribute("width",Math.round(s.dataset.w*z)); s.setAttribute("height",Math.round(s.dataset.h*z)); };
+  if(state.mode==="whole"){ set(WHOLE_SVG[c.key],state.zoom[c.key+"-whole"]); return; }
+  c.lanes.forEach(l=>set(LANE_SVG[l.id],state.zoom[c.key]));
+}
 function scrollToNode(id){
   const n=document.querySelector(`.node[data-id="${id}"]`)||document.querySelector(`[data-sel="${id}"]`);
   if(n) n.scrollIntoView({block:"center",inline:"center",behavior:"smooth"});
@@ -4728,7 +4660,7 @@ function refresh(){
   const c=CH[state.ch], r=route(c); state.route=r;
   const on=new Set(r.nodes), eon=new Set(r.edges.map(e=>e.id));
   document.querySelectorAll(".node").forEach(g=>{ g.classList.toggle("on",on.has(g.dataset.id)); g.classList.toggle("sel",g.dataset.id===state.sel); });
-  document.querySelectorAll(".edge").forEach(g=>{ const lit=eon.has(g.dataset.e); g.classList.toggle("on",lit); const ln=g.dataset.e.split("-")[0]; g.querySelector("path").setAttribute("marker-end",`url(#${ln}-${lit?"on":"off"})`); if(lit) g.parentNode.appendChild(g); });
+  document.querySelectorAll(".edge").forEach(g=>{ const lit=eon.has(g.dataset.e); g.classList.toggle("on",lit); g.querySelector("path").setAttribute("marker-end",`url(#${g.dataset.m}-${lit?"on":"off"})`); if(lit) g.parentNode.appendChild(g); });
   if(state.list) renderList();
   renderSide();
 }
@@ -4751,20 +4683,22 @@ function select(id,keepFocus){
 /* ---------- sidebar ---------- */
 function scriptHTML(k){
   const s=SCRIPTS[k]; if(!s) return "";
-  const src=s.src==="req"?tag(`In the requirements, ${s.req}`,"govuk-tag--blue"):tag(PROPOSED,"govuk-tag--magenta");
+  const src=s.src==="req"?tag(`As written, ${s.req}`,"govuk-tag--blue"):tag("Suggested script","govuk-tag--magenta");
   return `<div class="script ${s.src==="req"?"":"prop"}"><p class="who">${esc(s.who?`${s.who} says`:s.form?"On screen":"Caller hears")} ${src}</p><p class="said">${said(s.t)}</p>${s.b?`<div class="btns">${s.b.map(x=>`<span>${esc(x)}</span>`).join("")}</div>`:""}${s.note?`<p class="note">${esc(s.note)}</p>`:""}</div>`;
+}
+function sugBlock(sg,label){
+  return `<div class="part prop"><span class="lab">${label}</span><p class="why" style="margin:0">${esc(sg.t)}</p>${sg.add?`<p class="lab" style="margin-top:8px">Lines you could add</p><p class="g">${esc(sg.add)}</p>`:""}</div>`;
 }
 function reqHTML(id,withLinks){
   const s=SC[id]; if(!s) return "";
-  const st=status(id), rec=REC[id], S=STATUS[st];
+  const st=status(id), S=STATUS[st];
   let body="";
   if(st==="new"){
-    body=`<div class="part prop"><span class="lab">${PROPOSED}: new${s.feat?`, in the new feature “${esc(s.feat)}”`:""}</span><p class="g">${esc(s.t)}</p>${s.why?`<p class="why"><strong>Why:</strong> ${esc(s.why)}</p>`:""}</div>`;
+    body=`<div class="part prop"><span class="lab">Suggested scenario, in the suggested feature “${esc(s.feat)}”</span><p class="g">${esc(s.t)}</p></div>`;
   } else {
     body=`<div class="part"><span class="lab">As written</span><p class="g">${esc(s.t)}</p>${s.script?`<p class="g" style="margin-top:8px"><strong>Script:</strong> ${said(s.script)}</p>`:""}</div>`;
-    if(st==="change") body+=`<div class="part prop"><span class="lab">${PROPOSED} wording</span><p class="g">${esc(rec.t)}</p>${rec.scr?`<p class="g" style="margin-top:8px"><strong>Script:</strong> ${said(rec.scr)}</p>`:""}<p class="why"><strong>Why:</strong> ${esc(rec.why)}</p></div>`;
-    if(st==="remove") body+=`<div class="part prop"><span class="lab">${PROPOSED}: remove this scenario</span><p class="why"><strong>Why:</strong> ${esc(rec.why)}</p></div>`;
-    if(st==="comment") body+=`<div class="part prop"><span class="lab">Comment</span><p class="why">${esc(rec.why)}</p></div>`;
+    if(SUG[id]) body+=sugBlock(SUG[id],"Suggestion");
+    const fs=FEAT_SUG[FEAT_OF[id]]; if(fs) body+=sugBlock(fs,`Suggestion on the feature “${esc(FEAT_BY_ID[FEAT_OF[id]].t)}”`);
   }
   return `<div class="req"><div class="head"><span class="id">${id}</span><strong>${esc(s.title)}</strong>${tag(S.t,S.c)}</div>${body}${withLinks?`<div class="part"><a href="#/reqs/${id}">Open in the requirements page</a></div>`:""}</div>`;
 }
@@ -4776,9 +4710,10 @@ function renderSide(){
   const n=state.sel&&c.byId[state.sel];
   if(!n){
     body.innerHTML=`<h2>How to use this map</h2>
-      <p>The map reads left to right, one lane per part of the journey, like the Mural.</p>
-      <ul class="govuk-list govuk-list--bullet"><li>Select any step to read its script and requirements here.</li><li>Every answer to a question is a white box. Select one to follow it: the route turns blue.</li><li>Lanes join with “Go to lane” links.</li></ul>
-      <p>Pink steps are ${PROPOSED.toLowerCase()}: suggested in the review on 26 September and not agreed yet. The requirements are shown as written, with any proposed wording beside them.</p>`;
+      <p>The map reads left to right. “Whole flow” shows everything at once. “Separate flows” splits it into lanes, like the Mural.</p>
+      <ul class="govuk-list govuk-list--bullet"><li>Select any step to read its script and requirements here.</li><li>Every answer to a question is a white box. Select one to follow it: the route turns blue.</li></ul>
+      <p>Grey steps are BAU as it is today. Blue steps are NewCo, from the requirements or the Mural. Pink steps are suggestions from the review on 26 September and aren't agreed.</p>
+      <p>The requirements are shown exactly as written. Any suggestion sits beside them and doesn't replace them.</p>`;
     return;
   }
   if(n.type==="a"){ state.sel=n.q; return renderSide(); }
@@ -4823,44 +4758,43 @@ function onMap(id){
   const st=STEPS_BY_SC[id]; if(!st) return `<p class="onmap">Not a step on the map.</p>`;
   return `<p class="onmap">On the map: ${st.map(([ch,nid])=>`<a href="#/map/${ch}/${nid}">${CH[ch].name}, ${esc(CH[ch].byId[nid].l)}</a>`).join("; ")}</p>`;
 }
+function sugCol(sg,label){
+  return `<div class="col prop"><span class="lab">${label}</span><p class="why" style="margin:0">${esc(sg.t)}</p>${sg.add?`<p class="lab" style="margin-top:10px">Lines you could add</p><p class="g">${esc(sg.add)}</p>`:""}</div>`;
+}
 function scenPage(s){
-  const st=status(s.id), rec=REC[s.id], S=STATUS[st];
-  const head=`<h4><span class="id">${s.id}</span> ${esc(s.title)} ${tag(S.t,S.c)}</h4>`;
+  const st=status(s.id), S=STATUS[st];
   const asw=`<div class="col asw"><span class="lab">As written</span><p class="g">${esc(s.t)}</p>${s.script?`<p class="g" style="margin-top:8px"><strong>Script:</strong> ${said(s.script)}</p>`:""}</div>`;
-  if(st==="same") return `<div class="scen" id="sc-${s.id}" data-st="same"><details class="govuk-details unch" style="margin:0"><summary class="govuk-details__summary"><span class="id">${s.id}</span> ${esc(s.title)} (no change)</summary><div class="pair one">${asw}</div>${onMap(s.id)}</details></div>`;
-  let right="";
-  if(st==="change") right=`<div class="col prop"><span class="lab">${PROPOSED} wording</span><p class="g">${esc(rec.t)}</p>${rec.scr?`<p class="g" style="margin-top:8px"><strong>Script:</strong> ${said(rec.scr)}</p>`:""}<p class="why"><strong>Why:</strong> ${esc(rec.why)}</p></div>`;
-  if(st==="remove") right=`<div class="col prop"><span class="lab">${PROPOSED}: remove this scenario</span><p class="why"><strong>Why:</strong> ${esc(rec.why)}</p></div>`;
-  if(st==="comment") right=`<div class="col prop"><span class="lab">Comment</span><p class="why">${esc(rec.why)}</p></div>`;
-  return `<div class="scen" id="sc-${s.id}" data-st="${st}">${head}<div class="pair">${asw}${right}</div>${onMap(s.id)}</div>`;
+  if(st==="same") return `<div class="scen" id="sc-${s.id}" data-st="same"><details class="govuk-details unch" style="margin:0"><summary class="govuk-details__summary"><span class="id">${s.id}</span> ${esc(s.title)}</summary><div class="pair one">${asw}</div>${onMap(s.id)}</details></div>`;
+  return `<div class="scen" id="sc-${s.id}" data-st="${st}"><h4><span class="id">${s.id}</span> ${esc(s.title)} ${tag(S.t,S.c)}</h4><div class="pair">${asw}${sugCol(SUG[s.id],"Suggestion")}</div>${onMap(s.id)}</div>`;
 }
 function newScenPage(s){
   const title=s.t.split("\n")[0].replace(/^Scenario:\s*/,"");
-  return `<div class="scen" id="sc-${s.id}" data-st="new"><h4><span class="id">${s.id}</span> ${esc(title)} ${tag(STATUS.new.t,STATUS.new.c)}</h4><div class="pair one"><div class="col prop"><span class="lab">${PROPOSED}: not in the original</span><p class="g">${esc(s.t)}</p>${s.why?`<p class="why"><strong>Why:</strong> ${esc(s.why)}</p>`:""}</div></div>${onMap(s.id)}</div>`;
+  return `<div class="scen" id="sc-${s.id}" data-st="new"><h4><span class="id">${s.id}</span> ${esc(title)} ${tag(STATUS.new.t,STATUS.new.c)}</h4><div class="pair one"><div class="col prop"><span class="lab">Suggested scenario</span><p class="g">${esc(s.t)}</p></div></div>${onMap(s.id)}</div>`;
 }
 function featHead(f){
-  const fr=FEAT_REC[f.id];
-  if(!fr) return `<h3>${esc(f.t)}</h3><p class="story">${esc(f.story)}</p>`;
-  return `<h3>${esc(f.t)}</h3><div class="pair" style="margin-bottom:15px"><div class="col asw"><span class="lab">As written</span><p class="g">${esc(f.story)}</p></div><div class="col prop"><span class="lab">${PROPOSED}</span>${fr.t?`<p class="g"><strong>Feature:</strong> ${esc(fr.t)}</p>`:""}${fr.story?`<p class="g">${esc(fr.story)}</p>`:""}<p class="why"><strong>Why:</strong> ${esc(fr.why)}</p></div></div>`;
+  const fs=FEAT_SUG[f.id];
+  if(!fs) return `<h3>${esc(f.t)}</h3><p class="story">${esc(f.story)}</p>`;
+  return `<h3>${esc(f.t)} ${tag("Suggestion","govuk-tag--magenta")}</h3><div class="pair" style="margin-bottom:15px"><div class="col asw"><span class="lab">As written</span><p class="g">${esc(f.story)}</p></div>${sugCol(fs,"Suggestion on this feature")}</div>`;
 }
 function renderReqs(){
   document.body.classList.remove("is-map");
-  const counts={same:0,change:0,remove:0,new:0,comment:0}; Object.keys(SC).forEach(id=>counts[status(id)]++);
+  const nSug=Object.keys(SUG).length+Object.keys(FEAT_SUG).length, nNew=Object.values(NEW_FEAT).reduce((a,x)=>a+x.length,0);
   const secs=REQS.map(fr=>`<section class="frsec" id="fr-${fr.code}" aria-labelledby="h-${fr.code}"><h2 id="h-${fr.code}" tabindex="-1">${fr.code}: ${esc(fr.title)}</h2>
-    ${fr.features.map(f=>`<div class="feature">${featHead(f)}${f.sc.map(scenPage).join("")}${(NEW_SC[f.id]||[]).map(newScenPage).join("")}</div>`).join("")}
-    ${(NEW_FEAT[fr.code]||[]).map(f=>`<div class="feature"><h3>${esc(f.t)} ${tag("New feature, proposed","govuk-tag--magenta")}</h3><div class="pair one"><div class="col prop"><span class="lab">${PROPOSED}: not in the original</span><p class="g">${esc(f.story)}</p><p class="why"><strong>Why:</strong> ${esc(f.why)}</p></div></div>${f.sc.map(newScenPage).join("")}</div>`).join("")}</section>`).join("");
+    ${fr.features.map(f=>`<div class="feature" data-sug="${FEAT_SUG[f.id]?1:0}">${featHead(f)}${f.sc.map(scenPage).join("")}</div>`).join("")}
+    ${(NEW_FEAT[fr.code]||[]).map(f=>`<div class="feature" data-sug="1"><h3>${esc(f.t)} ${tag("New feature, suggested","govuk-tag--magenta")}</h3><div class="pair one"><div class="col prop"><span class="lab">Suggested feature</span><p class="g">${esc(f.story)}</p><p class="why"><strong>Why:</strong> ${esc(f.why)}</p></div></div>${f.sc.map(newScenPage).join("")}</div>`).join("")}</section>`).join("");
   $("#main").outerHTML=`<main id="main" class="doc" tabindex="-1">
     <h1>Requirements</h1>
-    <p class="govuk-body-l lede">The user stories for IVR day 1 readiness, as the business architect wrote them. Where the review proposes a change, the proposed wording sits beside the original.</p>
-    <div class="govuk-inset-text">Nothing she wrote has been edited. Text marked “As written” is copied word for word from the Confluence export of 26 September 2026. Anything marked ${tag(PROPOSED,"govuk-tag--magenta")} is a suggestion and has not been agreed.</div>
-    <p class="govuk-body-s">${counts.change} changes, ${counts.new} new scenarios, ${counts.remove} removals and ${counts.comment} comments proposed. ${counts.same} scenarios have no change.</p>
+    <p class="govuk-body-l lede">The user stories for IVR day 1 readiness, exactly as the business architect wrote them, with a few suggestions beside them.</p>
+    <div class="govuk-inset-text">Nothing she wrote has been changed. Suggestions sit beside her text and are marked ${tag("Suggestion","govuk-tag--magenta")}. They aim to introduce NewCo with as little change to BAU as possible.</div>
+    <p class="govuk-body-s">${nSug} suggestions and ${nNew} suggested new features.</p>
     <div class="govuk-form-group filter"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend">Show</legend>
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="rf-rec" name="rf" type="radio" value="rec" ${state.reqFilter==="rec"?"checked":""}><label class="govuk-radios__label" for="rf-rec">Only where there's a suggestion</label></div>
       <div class="govuk-radios__item"><input class="govuk-radios__input" id="rf-all" name="rf" type="radio" value="all" ${state.reqFilter==="all"?"checked":""}><label class="govuk-radios__label" for="rf-all">Every scenario</label></div>
-      <div class="govuk-radios__item"><input class="govuk-radios__input" id="rf-rec" name="rf" type="radio" value="rec" ${state.reqFilter==="rec"?"checked":""}><label class="govuk-radios__label" for="rf-rec">Only scenarios with a proposal or comment</label></div>
     </fieldset></div>
     <h2 class="govuk-heading-m">Contents</h2>
     <ul class="toc">${REQS.map(fr=>`<li><a href="#/reqs/fr-${fr.code}">${fr.code}: ${esc(fr.title)}</a></li>`).join("")}</ul>
     ${secs}</main>`;
+  if(state.target){ state.reqFilter="all"; document.getElementById("rf-all").checked=true; }
   document.querySelectorAll('input[name="rf"]').forEach(r=>r.onchange=e=>{ state.reqFilter=e.target.value; filterReqs(); });
   filterReqs();
   const t=state.target;
@@ -4870,7 +4804,8 @@ function renderReqs(){
 function filterReqs(){
   const only=state.reqFilter==="rec";
   document.querySelectorAll(".scen").forEach(s=>s.hidden=only&&s.dataset.st==="same");
-  document.querySelectorAll(".feature").forEach(f=>f.hidden=only&&![...f.querySelectorAll(".scen")].some(s=>!s.hidden)&&!f.querySelector(".col.prop"));
+  document.querySelectorAll(".feature").forEach(f=>f.hidden=only&&f.dataset.sug!=="1"&&![...f.querySelectorAll(".scen")].some(s=>!s.hidden));
+  document.querySelectorAll(".frsec").forEach(s=>s.hidden=only&&![...s.querySelectorAll(".feature")].some(f=>!f.hidden));
 }
 
 /* ====================================================================
@@ -4879,7 +4814,7 @@ function filterReqs(){
 function renderOpen(target){
   document.body.classList.remove("is-map");
   const grp=cat=>`<h2 class="govuk-heading-l">${OICAT[cat].h}</h2><p>${esc(OICAT[cat].p)}</p><ul class="oi-list">${OI.filter(o=>o.cat===cat).map(o=>`<li id="oi-${o.id}" tabindex="-1"><h3>${esc(o.t)}</h3><p>${esc(o.d)}</p>${o.who?`<p class="meta">Who: ${esc(o.who)}</p>`:""}${(o.n||[]).length?`<p class="meta">On the map: ${o.n.map(k=>{const [ch,id]=k.split(":");return `<a href="#/map/${ch}/${id}">${CH[ch].name}, ${esc(CH[ch].byId[id].l)}</a>`;}).join("; ")}</p>`:""}${(o.r||[]).length?`<p class="meta">Requirements: ${o.r.map(id=>`<a href="#/reqs/${id}">${id}</a>`).join(", ")}</p>`:""}</li>`).join("")}</ul>`;
-  $("#main").outerHTML=`<main id="main" class="doc" tabindex="-1"><h1>Decisions and questions</h1><p class="govuk-body-l lede">From the review on 26 September 2026. Everything here is ${PROPOSED.toLowerCase()} until the business architect and the NewCo team agree it.</p>${grp("team")}${grp("confirm")}${grp("decided")}</main>`;
+  $("#main").outerHTML=`<main id="main" class="doc" tabindex="-1"><h1>Decisions and questions</h1><p class="govuk-body-l lede">From the review on 26 September 2026. “Decided” items were agreed in the review. The rest are open.</p>${grp("team")}${grp("confirm")}${grp("decided")}</main>`;
   if(target){ const t=document.getElementById("oi-"+target); if(t){ t.scrollIntoView({block:"start"}); t.focus({preventScroll:true}); } } else window.scrollTo(0,0);
 }
 
