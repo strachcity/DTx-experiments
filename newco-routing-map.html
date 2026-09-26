@@ -4100,16 +4100,15 @@ const REQS = [{"code": "FR1", "title": "IVR Call Routing and Cohort Identificati
 const PROPOSED = "Suggested";
 
 /* ====================================================================
-   Suggestions on the requirements. Kept few and short on purpose: the
-   requirements belong to the business architect, so these sit beside
-   her text as suggestions and never replace it. Each one traces to a
+   Suggestions on the requirements. Kept few and short on purpose: they
+   sit beside the requirements as written and never replace them. Each one traces to a
    decision made in the 26 September review, or to a risk to customers.
    ==================================================================== */
 
 /* On a feature as a whole */
 const FEAT_SUG = {
   "FR1-F3":{t:"Suggest two additions. Lorry and bus licences always go to BAU, because NewCo won't handle them. And the team can switch first-notification routing to NewCo on or off, to control how fast the cohort grows.",add:"And the licence is not for a lorry or bus\nAnd first-notification routing to NewCo is switched on"},
-  "FR2-F2":{t:"Your team-closed script (FR2-01) already offers an adviser with “press 2”. FR2-05, FR2-06 and FR2-07 say the caller must not be directed to BAU. Suggest bringing these in line with the script."},
+  "FR2-F2":{t:"The team-closed script (FR2-01) already offers an adviser with “press 2”. FR2-05, FR2-06 and FR2-07 say the caller must not be directed to BAU. Suggest bringing these in line with the script."},
   "FR3-F3":{t:"Suggest saying these responses apply to the BAU queue only, so a cohort caller waiting for their team is never cut off."},
   "FR4-F7":{t:"Suggest two additions. Transfer only while the NewCo team is open. And the same transfer for phone calls, since this feature covers web chat only.",add:"Given the NewCo team is within its operating hours"}
 };
@@ -4783,8 +4782,8 @@ function renderReqs(){
     ${(NEW_FEAT[fr.code]||[]).map(f=>`<div class="feature" data-sug="1"><h3>${esc(f.t)} ${tag("New feature, suggested","govuk-tag--magenta")}</h3><div class="pair one"><div class="col prop"><span class="lab">Suggested feature</span><p class="g">${esc(f.story)}</p><p class="why"><strong>Why:</strong> ${esc(f.why)}</p></div></div>${f.sc.map(newScenPage).join("")}</div>`).join("")}</section>`).join("");
   $("#main").outerHTML=`<main id="main" class="doc" tabindex="-1">
     <h1>Requirements</h1>
-    <p class="govuk-body-l lede">The user stories for IVR day 1 readiness, exactly as the business architect wrote them, with a few suggestions beside them.</p>
-    <div class="govuk-inset-text">Nothing she wrote has been changed. Suggestions sit beside her text and are marked ${tag("Suggestion","govuk-tag--magenta")}. They aim to introduce NewCo with as little change to BAU as possible.</div>
+    <p class="govuk-body-l lede">The user stories for IVR day 1 readiness, exactly as written, with a few suggestions beside them.</p>
+    <div class="govuk-inset-text">The requirements are shown unchanged. Suggestions sit beside them and are marked ${tag("Suggestion","govuk-tag--magenta")}. They aim to introduce NewCo with as little change to BAU as possible.</div>
     <p class="govuk-body-s">${nSug} suggestions and ${nNew} suggested new features.</p>
     <div class="govuk-form-group filter"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend">Show</legend>
       <div class="govuk-radios__item"><input class="govuk-radios__input" id="rf-rec" name="rf" type="radio" value="rec" ${state.reqFilter==="rec"?"checked":""}><label class="govuk-radios__label" for="rf-rec">Only where there's a suggestion</label></div>
