@@ -2,7 +2,7 @@
 <html lang="en" class="govuk-template">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=1280">
 <title>NewCo routing map</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
@@ -76,7 +76,9 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .govuk-footer__wrapper{max-width:960px;margin:0 auto;padding:0 15px}
 .govuk-footer__meta-item{font-size:16px;color:var(--dark-grey)}
 
-/* --- This prototype only. Everything below is specific to the routing
+/* Desktop only: this map is a workshop tool and is not built for phones.
+
+   --- This prototype only. Everything below is specific to the routing
        map and does not belong in components.html. --- */
 [hidden]{display:none!important}
 :focus-visible{outline:3px solid var(--focus);outline-offset:0}
@@ -93,7 +95,6 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .app{display:flex;flex-direction:column;min-height:100vh}
 body.is-map .app{height:100vh;height:100dvh;min-height:0}
 main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 460px}
-@media (max-width:1000px){ body.is-map .app{height:auto} main.map{display:block} }
 
 /* map column */
 .mapcol{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid var(--mid-grey)}
@@ -120,7 +121,6 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .diam{width:12px;height:12px;background:var(--black);transform:rotate(45deg);display:inline-block;margin:0 3px}
 .enddot{width:13px;height:13px;border-radius:50%;background:var(--black);display:inline-block}
 .canvas{flex:1;min-height:0;overflow:auto;background:var(--white)}
-@media (max-width:1000px){ .canvas{height:70vh;flex:none} }
 .lanes{display:flex;flex-direction:column;align-items:flex-start;gap:32px;padding:40px 40px 60px;width:max-content;margin:0 auto}
 .lane{background:var(--light-grey);border:1px solid #dfe5eb}
 .lane h2{margin:0;background:#505a5f;color:var(--white);font-size:16px;line-height:1.3;padding:8px 14px;scroll-margin-top:20px}
@@ -219,7 +219,6 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 /* document pages */
 .doc{max-width:1100px;margin:0 auto;padding:30px 20px 60px}
 .doc h1{font-size:48px}
-@media (max-width:640px){ .doc h1{font-size:32px} h2,.govuk-heading-l{font-size:27px} }
 .lede{max-width:40em}
 .filter{margin:0 0 30px}
 .filter .govuk-radios__item{margin-bottom:6px}
@@ -239,7 +238,6 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .scen h4 .govuk-tag{font-size:14px}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .pair.one{grid-template-columns:1fr}
-@media (max-width:760px){ .pair{grid-template-columns:1fr} }
 .col{padding:10px 15px;font-size:16px}
 .col.asw{border-left:5px solid var(--mid-grey)}
 .col.prop{border-left:5px dashed #651b3e;background:#fbeff5}
@@ -4548,7 +4546,7 @@ const state = {};
 function resetState(){
   state.view="map"; state.ch="phone"; state.sel=null; state.tab="step";
   state.choice={phone:{},chat:{}}; state.start={phone:PHONE.start,chat:CHAT.start};
-  state.zoom={phone:null,chat:null}; state.list=window.matchMedia("(max-width:640px)").matches; state.reqFilter="all"; state.target=null;
+  state.zoom={phone:null,chat:null}; state.list=false; state.reqFilter="all"; state.target=null;
 }
 resetState();
 
