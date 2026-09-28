@@ -255,6 +255,13 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .col .why{margin:10px 0 0;font-size:16px}
 .onmap{font-size:16px;margin:10px 0 0}
 details.unch summary{font-size:16px}
+.risk-list{list-style:none;margin:0;padding:0}
+.risk-list > li{border-top:2px solid var(--black);padding:20px 0 0;margin:0 0 30px;scroll-margin-top:20px}
+.risk-list h3{margin:0 0 15px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.risk-list h3 .id{color:var(--dark-grey);font-size:19px}
+.risk-list h3 .govuk-tag{font-size:16px}
+.risk-list .govuk-summary-list{font-size:16px;margin:0}
+.risk-list .govuk-summary-list__key{flex:0 0 22%}
 .oi-list{list-style:none;margin:0 0 40px;padding:0;border-top:1px solid var(--mid-grey)}
 .oi-list li{padding:15px 0;border-bottom:1px solid var(--mid-grey);scroll-margin-top:20px}
 .oi-list h3{font-size:19px;margin:0 0 6px}
@@ -274,6 +281,7 @@ details.unch summary{font-size:16px}
     <li><a class="service-nav__link" href="#/map/phone" data-view="map">Map</a></li>
     <li><a class="service-nav__link" href="#/reqs" data-view="reqs">Requirements</a></li>
     <li><a class="service-nav__link" href="#/open" data-view="open">Decisions and questions</a></li>
+    <li><a class="service-nav__link" href="#/risks" data-view="risks">Risks</a></li>
   </ul></nav>
 </div></div>
 <div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper">
@@ -4139,8 +4147,8 @@ const NEW_FEAT = {
   ],
   "FR6":[
     {id:"FR6-NF1",t:"Record the routing outcome of every NewCo contact",story:"As the NewCo service owner,\nI want to know how every NewCo customer's contact was routed,\nso that I can see whether the routing works and whether it sends anyone to the wrong place.",why:"Agreed on 26 September. CSAT only reaches contacts the NewCo queue handled, so it can't show this on its own.",sc:[
-      {id:"FR6-S1",t:"Scenario: Record the routing outcome\nGiven a call or web chat has been identified as a NewCo contact\nWhen the contact ends\nThen the outcome must be recorded: NewCo agent, NewCo callback, voicemail, BAU adviser by choice, transferred from BAU, handled by BAU, or abandoned in the NewCo queue"},
-      {id:"FR6-S2",t:"Scenario: Spot contacts that reached BAU by mistake\nGiven a BAU agent has handled a contact about a case with the NewCo marker\nWhen the contact ends\nThen it must be recorded as a NewCo contact handled by BAU, with the reason"}
+      {id:"FR6-S1",t:"Scenario: Record the routing outcome\nGiven a call or web chat has been identified as a NewCo contact\nWhen the contact ends\nThen the outcome must be recorded: NewCo agent, NewCo callback, voicemail, BAU adviser by choice, transferred from BAU, handled by BAU, or abandoned in the NewCo queue\nAnd the menu option chosen must be recorded: existing application or new condition"},
+      {id:"FR6-S2",t:"Scenario: Spot contacts that reached BAU by mistake\nGiven a BAU agent has handled a contact about a case with the NewCo marker\nWhen the contact ends\nThen it must be recorded as a NewCo contact handled by BAU\nAnd the reason must be recorded: no reference given, reference not recognised, team closed (out of hours), routing table not yet updated, or technical failure"}
     ]}
   ]
 };
@@ -4189,13 +4197,15 @@ const OI = [
   {id:"d_switch",cat:"decided",t:"First-notification routing can be switched off",d:"To control how fast the cohort grows.",n:["phone:p_sw"]},
   {id:"d_welsh",cat:"decided",t:"Welsh speakers are served by BAU",d:"",n:["phone:p_welsh"]},
   {id:"d_wcmsg",cat:"decided",t:"Web chat doesn't take messages for the team",d:"",n:["chat:w_tc"]},
-  {id:"d_outcomes",cat:"decided",t:"Routing outcomes are a requirement",d:"",n:["phone:p_cant","chat:w_cant"],r:["FR6-S1","FR6-S2"]},
+  {id:"d_outcomes",cat:"decided",t:"Routing outcomes are a requirement",d:"This also gives the reporting group what it asked for on 28 September: NewCo customers' calls that reach BAU, including out of hours, and calls split by reason.",n:["phone:p_cant","chat:w_cant"],r:["FR6-S1","FR6-S2"]},
   {id:"d_altid",cat:"decided",t:"No alternative identifier in the phone line",d:"Name, address and date of birth are checked by an agent through ID&V. A caller without the reference goes to BAU, where the adviser can find the case and transfer them.",n:["phone:p_ref","phone:p_marker"],r:["FR1-14"]},
 
   {id:"t_outbound",cat:"team",t:"How customers know a callback is really DVLA",d:"The number callbacks come from, and what the agent says before asking for details.",who:"NewCo team",n:["phone:p_cbq","phone:p_vmq"]},
 
   {id:"c_asis",cat:"confirm",t:"As-is scripts",d:"The map flags each BAU prompt whose current wording isn't captured yet, starting with \u201cSays out loud what they need help with\u201d.",who:"Telecoms",n:["phone:p_says","phone:p_msgs","phone:p_welsh","phone:p_type","phone:p_lorry","phone:p_baumsg","phone:p_bauopt"]},
   {id:"c_cbmove",cat:"confirm",t:"Can a callback move from the BAU queue to the NewCo queue?",d:"A callback asked for in the BAU options, before the reference, keeps the caller's place in the BAU queue. The Mural sends NewCo customers' callbacks to the NewCo team, which only works if the callback can be moved once the reference is checked. If it can't, a BAU adviser calls back and can transfer them if the team is open.",who:"Telecoms",n:["phone:p_intable2","phone:p_bauopt"],r:["FR2-S1"]},
+  {id:"c_vmmi",cat:"confirm",t:"Voicemail mailbox and reporting",d:"There's no reporting on voicemails today and it needs developer work, possibly about two weeks. Whether voicemails go to an email inbox, like the attendance line, is also to be checked. Both were actions from the reporting meeting on 28 September.",who:"Telecoms and developers",n:["phone:p_vm","phone:p_vmq"],r:["FR2-13","FR6-S1"]},
+  {id:"c_storm",cat:"confirm",t:"Storm access to set the NewCo queue threshold",d:"The callback offer in the NewCo queue depends on a wait threshold set through demand management in Storm/SBT. Licences are available but access isn't set up yet.",who:"Contact centre and SBT",n:["phone:p_qwait"],r:["FR3-01","FR2-S3"]},
   {id:"c_table",cat:"confirm",t:"The routing table",d:"Outstanding. As specified it updates daily, so a case created today routes to BAU until the next update. Midas is being assessed.",who:"FR5 owners",n:["phone:p_intable","chat:w_intable"],r:["FR5-01"]},
   {id:"c_dpia",cat:"confirm",t:"DPIA for first notifications by phone",d:"In flight. Access to the current DPIA is needed to identify what new information is asked for, assumed to be condition-specific medical information.",who:"Service owner",n:["phone:p_fnagent"]},
   {id:"c_prec",cat:"confirm",t:"Precedence rules",d:"FR1 refers to rules for reference ranges against named owners. They aren't written yet.",who:"FR1 owners",n:["phone:p_intable"],r:["FR1-28"]}
@@ -4205,6 +4215,23 @@ const OICAT = {
   team:{h:"For the team to decide",p:"The scripts leave a placeholder until these are made."},
   confirm:{h:"To confirm",p:"Facts and dependencies to check with the people named."}
 };
+
+/* ====================================================================
+   Risks log. Started 28 September 2026. Ratings are an initial view.
+   ==================================================================== */
+const RISKS = [
+  {id:"R1",t:"Voicemail isn't ready for day 1",d:"The NewCo mailbox and voicemail reporting need Telecoms and developer work, possibly about two weeks, and go-live could be 5 or 12 October.",impact:"Out-of-hours callers who choose to leave a message could have nowhere for it to go, or messages could arrive with no way to count them.",rating:"High",owner:"Telecoms and developers",mit:"Raise with the developers now. If it slips, decide before go-live whether the team-closed message offers voicemail at all.",n:["phone:p_vm","phone:p_vmq"],r:["FR2-13"]},
+  {id:"R2",t:"The routing table isn't in place, or lags a day",d:"The shared routing table is outstanding. As specified it updates daily.",impact:"With no table, no calls or chats reach NewCo. With a daily update, a case created today routes to BAU until tomorrow.",rating:"High",owner:"FR5 owners",mit:"Confirm the update method (Midas or manual). The agent line tells customers the reference works from the next working day.",n:["phone:p_intable","chat:w_intable"],r:["FR5-01","FR7-02"]},
+  {id:"R3",t:"Callbacks asked for before the reference stay with BAU",d:"A callback chosen in the BAU options keeps the caller's place in the BAU queue. It may not be possible to move it to the NewCo queue.",impact:"NewCo customers who ask for a callback early are called back by a BAU adviser.",rating:"Medium",owner:"Telecoms",mit:"Confirm with Telecoms. If it can't move, the BAU adviser can see the NewCo marker and transfer while the team is open.",n:["phone:p_bauopt","phone:p_intable2"],r:["FR2-S1"]},
+  {id:"R4",t:"Customers miss the automatic callback",d:"If the customer doesn't answer when the callback comes, it's up to them to call again.",impact:"Repeat calls, which are one of NewCo's own success measures, and frustration for the customer.",rating:"Medium",owner:"Contact centre",mit:"The callback script tells customers to keep their phone nearby and what happens if they miss it. Count missed callbacks in the routing outcomes.",n:["phone:p_cbans","phone:p_cbmiss"],r:["FR6-S1"]},
+  {id:"R5",t:"Voicemail callbacks take up the start of the day",d:"Voicemails left overnight all need calling back when the team opens.",impact:"The team is busy with callbacks at 6am while new calls queue, so NewCo waits are longest first thing.",rating:"Medium",owner:"NewCo team",mit:"Use voicemail volumes to plan shift patterns. Watch NewCo queue waits in the morning.",n:["phone:p_vmq","phone:p_qwait"]},
+  {id:"R6",t:"The NewCo queue callback threshold can't be set",d:"The threshold is set through Storm/SBT. Access isn't set up yet.",impact:"Without it, the callback offer never plays, and callers wait however long the NewCo queue takes.",rating:"Medium",owner:"Contact centre and SBT",mit:"Set up Storm access before go-live and agree the threshold, X, with demand management.",n:["phone:p_qwait"],r:["FR3-01","FR2-S3"]},
+  {id:"R7",t:"Customers don't have the reference to hand",d:"Routing depends on the 9-digit reference next to \u201cOur reference\u201d on the letter.",impact:"Customers without it go to BAU. They only reach the team if the adviser notices the NewCo marker and the team is open.",rating:"Medium",owner:"NewCo team",mit:"The reference prompt says where to find it. The NewCo agent gives it at first notification. Routing outcomes show how often this happens.",n:["phone:p_refq","phone:p_marker"],r:["FR7-02","FR6-S2"]},
+  {id:"R8",t:"Customers doubt a callback is really DVLA",d:"How customers can tell a callback is genuine is still open.",impact:"Customers who follow DVLA's own scam advice may hang up, especially on manual voicemail callbacks.",rating:"Medium",owner:"NewCo team",mit:"Decide the number callbacks come from and what the agent says before asking for details.",n:["phone:p_vmq"]},
+  {id:"R9",t:"The DPIA isn't complete by go-live",d:"Taking medical information by phone for first notifications needs a DPIA change. It's in flight, and the current DPIA is needed to see what's new.",impact:"NewCo agents can't take first notifications, so new-condition routing to NewCo stays switched off.",rating:"Medium",owner:"Service owner",mit:"Get access to the current DPIA. The on/off switch lets first-notification routing start later without other changes.",n:["phone:p_sw","phone:p_fnagent"]},
+  {id:"R10",t:"The cohort grows faster than the team",d:"Every first notification a NewCo agent takes joins the cohort.",impact:"More NewCo callers, longer NewCo queue waits, more callbacks.",rating:"Low",owner:"NewCo team",mit:"Switch first-notification routing off when needed. Watch cohort size and queue waits.",n:["phone:p_sw"]},
+  {id:"R11",t:"New scripts clash with BAU wording",d:"The as-is BAU scripts aren't captured yet.",impact:"NewCo messages could repeat or contradict what callers have just heard from the BAU menus.",rating:"Low",owner:"Telecoms",mit:"Capture the as-is scripts and check the NewCo scripts against them before recording.",n:["phone:p_says","phone:p_baumsg"]}
+];
 
 
 /* ====================================================================
@@ -4440,6 +4467,9 @@ const STATUS = {
 };
 const STEPS_BY_SC = {};
 for (const c of Object.values(CH)) Object.values(c.byId).forEach(n=>(n.r||[]).forEach(id=>{(STEPS_BY_SC[id]=STEPS_BY_SC[id]||[]).push([c.key,n.id]);}));
+const RISK_BY_NODE = {};
+RISKS.forEach(k=>(k.n||[]).forEach(id=>{(RISK_BY_NODE[id]=RISK_BY_NODE[id]||[]).push(k);}));
+const RATING = {High:"govuk-tag--red",Medium:"govuk-tag--yellow",Low:"govuk-tag--grey"};
 const OI_BY_NODE = {};
 OI.forEach(o=>(o.n||[]).forEach(k=>{(OI_BY_NODE[k]=OI_BY_NODE[k]||[]).push(o);}));
 const KIND = {today:{t:"Today",c:"govuk-tag--grey",long:"BAU as it is today. Not changed."},req:{t:"NewCo",c:"govuk-tag--blue",long:"NewCo, from the requirements or the Mural."},prop:{t:PROPOSED,c:"govuk-tag--magenta",long:"Suggested in the review on 26 September. Not agreed yet."}};
@@ -4795,6 +4825,7 @@ function renderSide(){
     ${q}
     ${scripts?`<h3>Script</h3>${scripts}`:""}
     ${reqs?`<h3>Requirements</h3>${reqs}`:""}
+    ${(RISK_BY_NODE[c.key+":"+n.id]||[]).length?`<h3>Risks</h3><ul class="govuk-list">${RISK_BY_NODE[c.key+":"+n.id].map(k=>`<li>${tag(k.rating,RATING[k.rating])} <a href="#/risks/${k.id}">${k.id}: ${esc(k.t)}</a></li>`).join("")}</ul>`:""}
     ${ois.length?`<h3>Decisions and questions</h3><ul class="govuk-list">${ois.map(o=>`<li>${tag(OICAT[o.cat].h,o.cat==="decided"?"govuk-tag--green":o.cat==="team"?"govuk-tag--yellow":"govuk-tag--grey")} <a href="#/open/${o.id}">${esc(o.t)}</a></li>`).join("")}</ul>`:""}`;
   body.querySelectorAll('[data-ans]').forEach(b=>b.onclick=()=>{ state.choice[c.key][n.id]=b.dataset.ans; refresh(); const k=body.querySelector(`[data-ans="${b.dataset.ans}"]`); if(k) k.focus(); });
 }
@@ -4880,14 +4911,29 @@ function renderOpen(target){
 }
 
 /* ====================================================================
+   Risks page
+   ==================================================================== */
+function renderRisks(target){
+  document.body.classList.remove("is-map");
+  const row=(k,v)=>`<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">${k}</dt><dd class="govuk-summary-list__value">${v}</dd></div>`;
+  const items=RISKS.map(k=>`<li id="risk-${k.id}" tabindex="-1"><h3><span class="id">${k.id}</span> ${esc(k.t)} ${tag(k.rating,RATING[k.rating])}</h3>
+    <dl class="govuk-summary-list">${row("What could happen",esc(k.d))}${row("Impact",esc(k.impact))}${row("Mitigation",esc(k.mit))}${row("Owner",esc(k.owner))}${row("Status","Open")}
+    ${(k.n||[]).length?row("On the map",k.n.map(x=>{const [ch,id]=x.split(":");return `<a href="#/map/${ch}/${id}">${CH[ch].name}, ${esc(CH[ch].byId[id].l)}</a>`;}).join("<br>")):""}
+    ${(k.r||[]).length?row("Requirements",k.r.map(id=>`<a href="#/reqs/${id}">${id}</a>`).join(", ")):""}</dl></li>`).join("");
+  $("#main").outerHTML=`<main id="main" class="doc" tabindex="-1"><h1>Risks</h1><p class="govuk-body-l lede">Risks to introducing NewCo routing on the phone line and web chat. Started 28 September 2026. Ratings are an initial view.</p><p>${RISKS.filter(k=>k.rating==="High").length} high, ${RISKS.filter(k=>k.rating==="Medium").length} medium and ${RISKS.filter(k=>k.rating==="Low").length} low.</p><ul class="risk-list">${items}</ul></main>`;
+  if(target){ const t=document.getElementById("risk-"+target); if(t){ t.scrollIntoView({block:"start"}); t.focus({preventScroll:true}); } } else window.scrollTo(0,0);
+}
+
+/* ====================================================================
    Hash router
    ==================================================================== */
 function go(h){ if(location.hash===h) router(); else location.hash=h; }
 function router(){
   const parts=(location.hash||"#/map/phone").replace(/^#\/?/,"").split("/");
-  const view=["reqs","open"].includes(parts[0])?parts[0]:"map";
+  const view=["reqs","open","risks"].includes(parts[0])?parts[0]:"map";
   document.querySelectorAll(".service-nav__link").forEach(a=>{ if(a.dataset.view===view) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
   if(view==="reqs"){ state.view=view; state.target=parts[1]||null; renderReqs(); document.title="Requirements – NewCo routing map"; return; }
+  if(view==="risks"){ state.view=view; renderRisks(parts[1]); document.title="Risks \u2013 NewCo routing map"; return; }
   if(view==="open"){ state.view=view; renderOpen(parts[1]); document.title="Decisions and questions – NewCo routing map"; return; }
   state.view="map";
   const ch=parts[1]==="chat"?"chat":"phone";
