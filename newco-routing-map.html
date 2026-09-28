@@ -4132,7 +4132,7 @@ const SUG = {
 const NEW_FEAT = {
   "FR2":[
     {id:"FR2-NF1",t:"Offer a callback to NewCo customers",story:"As a NewCo customer waiting for my team,\nI want to ask them to call me back,\nso that I don't have to stay on hold.",why:"Agreed on 26 September. It follows the callback lane in the Mural.",sc:[
-      {id:"FR2-S1",t:"Scenario: Customer asks for a callback while the team is open\nGiven the customer's reference matches an active NewCo cohort record\nAnd the owning team is within its operating hours\nWhen the customer asks for a callback\nThen a callback work item must be created for the owning team\nAnd the case reference must not be asked for again if it was given earlier in the call"},
+      {id:"FR2-S1",t:"Scenario: Customer asks for a callback while the team is open\nGiven the customer's reference matches an active NewCo cohort record\nAnd the owning team is within its operating hours\nWhen the customer asks for a callback\nThen the callback must keep the customer's place in the NewCo queue\nAnd the customer must be called back automatically when it's their turn\nAnd the case reference must not be asked for again if it was given earlier in the call"},
       {id:"FR2-S3",t:"Scenario: Offer a callback when the NewCo queue is long\nGiven the caller has joined the NewCo queue\nAnd the estimated wait is over the threshold set by demand management\nWhen the caller joins the queue\nThen the caller must be offered a callback from the team\nAnd the case reference must not be asked for again"},
       {id:"FR2-S2",t:"Scenario: Customer asks for a callback when the team is closed\nGiven the customer's reference matches an active NewCo cohort record\nAnd the owning team is outside its operating hours\nWhen the customer asks for a callback\nThen the customer must be offered the team-closed options in FR2-01"}
     ]}
@@ -4154,7 +4154,7 @@ const SCRIPTS = {
   connect_team:{n:"Connecting to a NewCo agent",src:"req",req:"FR1-08",t:"Thank you. We're putting you through to the team looking after your case."},
   queue_msg:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Estimated wait.]"},
   queue_cb:{n:"Callback offer in the NewCo queue",src:"sug",t:"You're waiting longer than usual. If you'd like the team looking after your case to call you back instead, press 1. Or stay on the line."},
-  callback_ok:{n:"Callback confirmed",src:"sug",t:"Thank you. The team looking after your case aims to call you back today. Please keep your phone nearby."},
+  callback_ok:{n:"Callback confirmed",src:"sug",t:"We'll keep your place in the queue and call you back when it's your turn. Please keep your phone nearby. If you miss the call, you'll need to call us again."},
   team_closed:{n:"Team closed, BAU open",src:"req",req:"FR2-01",note:"Working answer for [days and hours]: Monday to Friday, 6am to 4pm (provisional).",t:"The team looking after your case is closed at the moment. They're open [days and hours]. You can leave them a message and they'll call you back. Or an adviser can help you now.\nTo leave a message for your team, press 1. To speak to an adviser now, press 2."},
   closing:{n:"Closing message",src:"sug",t:"Thank you for calling. The team looking after your case is open Monday to Friday, 6am to 4pm. Please call back then, and have our reference number ready. Goodbye.",note:"Hours are provisional."},
   to_adviser:{n:"Putting the caller through to an adviser",src:"sug",t:"We'll put you through to an adviser now."},
@@ -4174,11 +4174,12 @@ const SCRIPTS = {
 const OI = [
   {id:"d_queue",cat:"decided",t:"While the team is open, cohort customers wait for it",d:"A NewCo reference goes to the NewCo queue while the team is open. BAU is offered only when the team is closed.",n:["phone:p_open2","phone:p_q","chat:w_open2","chat:w_q"],r:["FR2-02"]},
   {id:"d_queuecb",cat:"decided",t:"The NewCo queue offers a callback when the wait is long",d:"If the estimated wait is over X minutes when the caller joins the queue, they're offered a callback. X is set by demand management: BAU uses 2 minutes today, and it has been 10.",n:["phone:p_qwait"],r:["FR2-S3"]},
-  {id:"d_timing",cat:"decided",t:"NewCo aims to call back the same day",d:"Depending on demand. Scripts say \u201caims to call you back today\u201d, and \u201con the next working day\u201d for voicemails left after the team closes.",n:["phone:p_cbok","phone:p_vmok"],r:["FR2-22"]},
+  {id:"d_timing",cat:"decided",t:"Callbacks are automatic, in queue order, on the day",d:"The caller keeps their place in the queue and the phone line calls them back when it's their turn. There's no control over the exact time. If the customer misses it, they need to call again.",n:["phone:p_cbq","phone:p_cbans"],r:["FR2-S1"]},
+  {id:"d_vmtiming",cat:"decided",t:"Voicemails are called back by the team",d:"A separate, manual process. The script says the team aims to call back on the next working day.",n:["phone:p_vmok"],r:["FR2-22"]},
   {id:"d_hours",cat:"decided",t:"NewCo opening hours: Monday to Friday, 6am to 4pm",d:"Provisional, a working answer. BAU phone lines also open at 6am, so callers can reach NewCo from opening.",n:["phone:p_open2","chat:w_open2"],r:["FR2-01"]},
   {id:"d_bau",cat:"decided",t:"BAU advisers can help NewCo customers",d:"They can do everything they do today. The contact is logged on the case so the team can follow up.",n:["phone:p_advend","phone:p_helprec","chat:w_helprec"]},
   {id:"d_xfer",cat:"decided",t:"BAU can transfer to the team while it's open",d:"On phone and web chat, only in the team's hours.",n:["phone:p_open3","chat:w_open3"]},
-  {id:"d_cb",cat:"decided",t:"Callbacks while the team is open, voicemail when it's closed",d:"A callback request is checked against the NewCo table.",n:["phone:p_cbhrs"],r:["FR2-S1","FR2-S2"]},
+  {id:"d_cb",cat:"decided",t:"Callbacks while the team is open, voicemail when it's closed",d:"A callback request is checked against the NewCo table, as the Mural shows.",n:["phone:p_cbhrs"],r:["FR2-S1","FR2-S2"]},
   {id:"d_once",cat:"decided",t:"Don't ask for the reference twice",d:"The reference is reused once given.",n:["phone:p_hasref"],r:["FR2-S1"]},
   {id:"d_ref",cat:"decided",t:"The reference is 9 digits, next to \u201cOur reference\u201d on letters",d:"Some end in -MED. Callers only need to give the 9 digits.",n:["phone:p_ref","chat:w_ref"],r:["FR1-17","FR4-08","FR7-03"]},
   {id:"d_closed",cat:"decided",t:"BAU's closed message plays before the NewCo branch",d:"The call only branches to NewCo once the reference is asked for, so NewCo needs no \u201ceverything closed\u201d message.",n:["phone:p_closed","chat:w_closed"]},
@@ -4194,6 +4195,7 @@ const OI = [
   {id:"t_outbound",cat:"team",t:"How customers know a callback is really DVLA",d:"The number callbacks come from, and what the agent says before asking for details.",who:"NewCo team",n:["phone:p_cbq","phone:p_vmq"]},
 
   {id:"c_asis",cat:"confirm",t:"As-is scripts",d:"The map flags each BAU prompt whose current wording isn't captured yet, starting with \u201cSays out loud what they need help with\u201d.",who:"Telecoms",n:["phone:p_says","phone:p_msgs","phone:p_welsh","phone:p_type","phone:p_lorry","phone:p_baumsg","phone:p_bauopt"]},
+  {id:"c_cbmove",cat:"confirm",t:"Can a callback move from the BAU queue to the NewCo queue?",d:"A callback asked for in the BAU options, before the reference, keeps the caller's place in the BAU queue. The Mural sends NewCo customers' callbacks to the NewCo team, which only works if the callback can be moved once the reference is checked. If it can't, a BAU adviser calls back and can transfer them if the team is open.",who:"Telecoms",n:["phone:p_intable2","phone:p_bauopt"],r:["FR2-S1"]},
   {id:"c_table",cat:"confirm",t:"The routing table",d:"Outstanding. As specified it updates daily, so a case created today routes to BAU until the next update. Midas is being assessed.",who:"FR5 owners",n:["phone:p_intable","chat:w_intable"],r:["FR5-01"]},
   {id:"c_dpia",cat:"confirm",t:"DPIA for first notifications by phone",d:"In flight. Access to the current DPIA is needed to identify what new information is asked for, assumed to be condition-specific medical information.",who:"Service owner",n:["phone:p_fnagent"]},
   {id:"c_prec",cat:"confirm",t:"Precedence rules",d:"FR1 refers to rules for reference ranges against named owners. They aren't written yet.",who:"FR1 owners",n:["phone:p_intable"],r:["FR1-28"]}
@@ -4324,17 +4326,20 @@ const PHONE = {
       {id:"p_newnum",type:"step",k:"today",l:"Enters a different number"},
       {id:"p_hasref",type:"q",k:"prop",dflt:"No",seen:["p_ref","Yes"],l:"Reference already given in this call?",d:"Suggested: don't ask for it twice.",r:["FR2-S1"]},
       {id:"p_askref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"From the Mural callback lane."},
-      {id:"p_intable2",type:"q",k:"req",l:"Is it a NewCo reference?",d:"From the Mural: triage callbacks between the BAU queue and a NewCo queue."},
+      {id:"p_intable2",type:"q",k:"req",l:"Is it a NewCo reference?",d:"From the Mural: triage callbacks between the BAU queue and a NewCo queue. To confirm with Telecoms: whether an automatic callback asked for before the reference can move from the BAU queue to the NewCo queue."},
       {id:"p_cbhrs",type:"q",k:"req",l:"Is the NewCo team open?",d:"From the Mural: triage NewCo callbacks on operating hours.",r:["FR2-S1","FR2-S2"]},
       {id:"p_cbok",type:"step",k:"req",l:"Callback confirmed",sc:["callback_ok"],r:["FR2-S1"]},
-      {id:"p_cbq",type:"end",k:"req",l:"NewCo callback queue: the team calls back",r:["FR2-S1"]},
+      {id:"p_cbq",type:"step",k:"req",l:"Keeps their place in the NewCo queue. Called back automatically when it's their turn.",d:"As today for BAU: an automatic callback on the day, in queue order. There's no control over the exact time.",r:["FR2-S1"]},
+      {id:"p_cbans",type:"q",k:"today",l:"Does the customer answer?"},
+      {id:"p_cbagent",type:"end",k:"req",l:"Connected to a NewCo agent"},
+      {id:"p_cbmiss",type:"end",k:"today",l:"Call ends. The customer needs to call again.",d:"As today: if the customer misses the callback, it's up to them to call back."},
       {id:"p_go5b",type:"go",to:"p_tc",l:"Go to lane 5: Team closed"},
-      {id:"p_baucb",type:"end",k:"today",l:"BAU callback, as today"}
+      {id:"p_baucb",type:"end",k:"today",l:"BAU callback, as today: keeps their place in the BAU queue"}
     ],edges:[
       ["p_cbnum","p_hasref","Presses 1: this number"],["p_cbnum","p_newnum","Presses 2: a different number"],["p_newnum","p_hasref"],
       ["p_hasref","p_askref","No"],["p_hasref","p_intable2","Yes"],["p_askref","p_intable2"],
       ["p_intable2","p_cbhrs","Yes"],["p_intable2","p_baucb","No"],
-      ["p_cbhrs","p_cbok","Yes"],["p_cbhrs","p_go5b","No"],["p_cbok","p_cbq"]
+      ["p_cbhrs","p_cbok","Yes"],["p_cbhrs","p_go5b","No"],["p_cbok","p_cbq"],["p_cbq","p_cbans"],["p_cbans","p_cbagent","Yes"],["p_cbans","p_cbmiss","No"]
     ]}
   ]
 };
