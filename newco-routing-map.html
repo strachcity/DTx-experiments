@@ -197,6 +197,8 @@ main.map{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 46
 .sidebody .govuk-radios__item{margin-bottom:8px}
 .script{border-left:5px solid var(--blue);background:var(--light-grey);padding:12px 15px;margin:0 0 15px}
 .script.prop{border-left:5px dashed #651b3e;background:#fbeff5}
+.script.asis{border-left:5px solid #858686;background:#f3f3f3}
+.script.asis .said{font-size:16px;color:var(--dark-grey)}
 .script .who{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-weight:700;margin:0 0 6px;font-size:16px}
 .script .said{margin:0;font-size:17px;white-space:pre-line}
 .ph{background:var(--light-yellow);border-bottom:2px solid var(--yellow);padding:0 2px}
@@ -4111,17 +4113,18 @@ const PROPOSED = "Suggested";
 const FEAT_SUG = {
   "FR1-F3":{t:"Suggest two additions. Lorry and bus licences always go to BAU, because NewCo won't handle them. And the team can switch first-notification routing to NewCo on or off, to control how fast the cohort grows.",add:"And the licence is not for a lorry or bus\nAnd first-notification routing to NewCo is switched on"},
   "FR2-F2":{t:"The team-closed script (FR2-01) already offers an adviser with “press 2”. FR2-05, FR2-06 and FR2-07 say the caller must not be directed to BAU. Suggest bringing these in line with the script."},
-  "FR3-F3":{t:"Suggest saying these responses apply to the BAU queue only, so a cohort caller waiting for their team is never cut off."},
+  "FR3-F3":{t:"Suggest the queue-time threshold also sets when the NewCo queue offers a callback: if the estimated wait is over X minutes, the caller is offered a callback from the team. Otherwise these responses apply to the BAU queue only, so a cohort caller waiting for their team is never cut off."},
   "FR4-F7":{t:"Suggest two additions. Transfer only while the NewCo team is open. And the same transfer for phone calls, since this feature covers web chat only.",add:"Given the NewCo team is within its operating hours"}
 };
 
 /* On single scenarios */
 const SUG = {
   "FR1-08":{t:"The script says “the team looking after your case”, but a first-notification caller has no case yet. Consider no message here, or “We're putting you through to an adviser.”"},
-  "FR1-17":{t:"Consider keypad entry as well as saying the number out loud. Some customers' conditions affect their speech. This is the BAU prompt, so it's for DM to decide."},
+  "FR1-14":{t:"No alternative identifier is suggested for the phone line. Name, address and date of birth are checked by an agent through ID&V, which the phone line can't do. A caller without the reference goes to BAU, where the adviser can find the case and transfer them if the team is open."},
+  "FR1-17":{t:"Consider keypad entry as well as saying the number out loud. The reference is 9 digits, which suits a keypad, and some customers' conditions affect their speech. This is the BAU prompt, so it's for DM to decide."},
   "FR2-02":{t:"Suggest that while the team is open, cohort callers wait in the NewCo queue instead of hearing the unavailable message. This was agreed on 26 September.",add:"Then the call must join the NewCo queue for that team"},
   "FR2-09":{t:"Suggest that hanging up also saves the message. Most people hang up rather than press a key, and would otherwise lose their message without knowing.",add:"When the customer finishes the recording by pressing hash or by hanging up"},
-  "FR4-08":{t:"Suggest one name for the reference everywhere, matching the letters. It's currently “case reference number” here, “MRN” on the phone map and “medical reference number” in web chat."},
+  "FR4-08":{t:"Suggest using the wording on the letters, “Our reference”, everywhere. It's currently “case reference number” here, “MRN” on the phone map and “medical reference number” in web chat."},
   "FR7-02":{t:"Suggest adding when it starts working. The routing table updates once a day, so a reference given today routes to BAU until the next day.",add:"And explain that from the next working day, it will put them through to the team looking after their case"}
 };
 
@@ -4130,6 +4133,7 @@ const NEW_FEAT = {
   "FR2":[
     {id:"FR2-NF1",t:"Offer a callback to NewCo customers",story:"As a NewCo customer waiting for my team,\nI want to ask them to call me back,\nso that I don't have to stay on hold.",why:"Agreed on 26 September. It follows the callback lane in the Mural.",sc:[
       {id:"FR2-S1",t:"Scenario: Customer asks for a callback while the team is open\nGiven the customer's reference matches an active NewCo cohort record\nAnd the owning team is within its operating hours\nWhen the customer asks for a callback\nThen a callback work item must be created for the owning team\nAnd the case reference must not be asked for again if it was given earlier in the call"},
+      {id:"FR2-S3",t:"Scenario: Offer a callback when the NewCo queue is long\nGiven the caller has joined the NewCo queue\nAnd the estimated wait is over the threshold set by demand management\nWhen the caller joins the queue\nThen the caller must be offered a callback from the team\nAnd the case reference must not be asked for again"},
       {id:"FR2-S2",t:"Scenario: Customer asks for a callback when the team is closed\nGiven the customer's reference matches an active NewCo cohort record\nAnd the owning team is outside its operating hours\nWhen the customer asks for a callback\nThen the customer must be offered the team-closed options in FR2-01"}
     ]}
   ],
@@ -4145,22 +4149,23 @@ const NEW_FEAT = {
    Scripts. src "req": written in the requirements. "sug": suggested.
    ==================================================================== */
 const SCRIPTS = {
-  ref_prompt:{n:"Asking for the reference",src:"sug",t:"Please say your case reference number, or enter it using your keypad. You'll find it [where it appears on letters and emails]. If you don't have it, stay on the line."},
-  ref_format:{n:"Reference in the wrong format",src:"sug",t:"Sorry, that doesn't look like a case reference number. Please try again."},
+  ref_prompt:{n:"Asking for the reference",src:"sug",t:"Please say or enter the 9 digits of our reference number. It's at the top of every letter we send you, next to \u201cOur reference\u201d. You don't need to include the letters MED. If you don't have it, stay on the line."},
+  ref_format:{n:"Reference in the wrong format",src:"sug",t:"Sorry, we need the 9 digits next to \u201cOur reference\u201d at the top of your letter. Please try again."},
   connect_team:{n:"Connecting to a NewCo agent",src:"req",req:"FR1-08",t:"Thank you. We're putting you through to the team looking after your case."},
   queue_msg:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Estimated wait.]"},
-  callback_ok:{n:"Callback confirmed",src:"sug",t:"Thank you. The team looking after your case will call you back [timing: team to decide]. Please keep your phone nearby."},
-  team_closed:{n:"Team closed, BAU open",src:"req",req:"FR2-01",t:"The team looking after your case is closed at the moment. They're open [days and hours]. You can leave them a message and they'll call you back. Or an adviser can help you now.\nTo leave a message for your team, press 1. To speak to an adviser now, press 2."},
-  closing:{n:"Closing message",src:"sug",t:"Thank you for calling. The team looking after your case is open [days and hours]. Please call back then, and have your case reference number ready. Goodbye."},
+  queue_cb:{n:"Callback offer in the NewCo queue",src:"sug",t:"You're waiting longer than usual. If you'd like the team looking after your case to call you back instead, press 1. Or stay on the line."},
+  callback_ok:{n:"Callback confirmed",src:"sug",t:"Thank you. The team looking after your case aims to call you back today. Please keep your phone nearby."},
+  team_closed:{n:"Team closed, BAU open",src:"req",req:"FR2-01",note:"Working answer for [days and hours]: Monday to Friday, 6am to 4pm (provisional).",t:"The team looking after your case is closed at the moment. They're open [days and hours]. You can leave them a message and they'll call you back. Or an adviser can help you now.\nTo leave a message for your team, press 1. To speak to an adviser now, press 2."},
+  closing:{n:"Closing message",src:"sug",t:"Thank you for calling. The team looking after your case is open Monday to Friday, 6am to 4pm. Please call back then, and have our reference number ready. Goodbye.",note:"Hours are provisional."},
   to_adviser:{n:"Putting the caller through to an adviser",src:"sug",t:"We'll put you through to an adviser now."},
   vm_instr:{n:"Voicemail instructions",src:"sug",t:"After the tone, please say your name, your case reference number if you have it, and the best number to call you back on. Then tell us briefly how we can help. Your message will go to the team looking after your case. When you've finished, press hash or hang up."},
-  vm_ok:{n:"Voicemail received",src:"sug",t:"Thank you, we've got your message. The team looking after your case will call you back [timing: team to decide]. Goodbye."},
+  vm_ok:{n:"Voicemail received",src:"sug",t:"Thank you, we've got your message. The team looking after your case aims to call you back on the next working day. Goodbye."},
   vm_nothing:{n:"Nothing recorded",src:"sug",t:"Sorry, we didn't hear a message. Please try again after the tone."},
-  vm_unavail:{n:"Voicemail not working",src:"sug",t:"Sorry, we can't take a message at the moment. The team looking after your case is open [days and hours]. Please call back then. Goodbye."},
+  vm_unavail:{n:"Voicemail not working",src:"sug",t:"Sorry, we can't take a message at the moment. The team looking after your case is open Monday to Friday, 6am to 4pm. Please call back then. Goodbye.",note:"Hours are provisional."},
   agent_ref:{n:"NewCo agent, end of a first notification",src:"sug",who:"Agent",t:"Your case reference number is [number]. Please keep it safe, and have it ready whenever you contact us. From [the next working day], it will put you through to the team looking after your case."},
   w_connect:{n:"Connecting to the team",src:"req",req:"FR4-01",t:"You're being connected to the team looking after your case."},
   w_queue:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Position or estimated wait.]"},
-  w_team_closed:{n:"Team closed",src:"sug",t:"The team looking after your case is closed at the moment. They're open [days and hours]. We're connecting you to an adviser who can help."}
+  w_team_closed:{n:"Team closed",src:"sug",t:"The team looking after your case is closed at the moment. They're open Monday to Friday, 6am to 4pm. We're connecting you to an adviser who can help.",note:"Hours are provisional."}
 };
 
 /* ====================================================================
@@ -4168,29 +4173,30 @@ const SCRIPTS = {
    ==================================================================== */
 const OI = [
   {id:"d_queue",cat:"decided",t:"While the team is open, cohort customers wait for it",d:"A NewCo reference goes to the NewCo queue while the team is open. BAU is offered only when the team is closed.",n:["phone:p_open2","phone:p_q","chat:w_open2","chat:w_q"],r:["FR2-02"]},
+  {id:"d_queuecb",cat:"decided",t:"The NewCo queue offers a callback when the wait is long",d:"If the estimated wait is over X minutes when the caller joins the queue, they're offered a callback. X is set by demand management: BAU uses 2 minutes today, and it has been 10.",n:["phone:p_qwait"],r:["FR2-S3"]},
+  {id:"d_timing",cat:"decided",t:"NewCo aims to call back the same day",d:"Depending on demand. Scripts say \u201caims to call you back today\u201d, and \u201con the next working day\u201d for voicemails left after the team closes.",n:["phone:p_cbok","phone:p_vmok"],r:["FR2-22"]},
+  {id:"d_hours",cat:"decided",t:"NewCo opening hours: Monday to Friday, 6am to 4pm",d:"Provisional, a working answer. BAU phone lines also open at 6am, so callers can reach NewCo from opening.",n:["phone:p_open2","chat:w_open2"],r:["FR2-01"]},
   {id:"d_bau",cat:"decided",t:"BAU advisers can help NewCo customers",d:"They can do everything they do today. The contact is logged on the case so the team can follow up.",n:["phone:p_advend","phone:p_helprec","chat:w_helprec"]},
   {id:"d_xfer",cat:"decided",t:"BAU can transfer to the team while it's open",d:"On phone and web chat, only in the team's hours.",n:["phone:p_open3","chat:w_open3"]},
-  {id:"d_cb",cat:"decided",t:"Callbacks while the team is open, voicemail when it's closed",d:"A callback asked for in the BAU options is checked against the NewCo table.",n:["phone:p_cbhrs"],r:["FR2-S1","FR2-S2"]},
+  {id:"d_cb",cat:"decided",t:"Callbacks while the team is open, voicemail when it's closed",d:"A callback request is checked against the NewCo table.",n:["phone:p_cbhrs"],r:["FR2-S1","FR2-S2"]},
   {id:"d_once",cat:"decided",t:"Don't ask for the reference twice",d:"The reference is reused once given.",n:["phone:p_hasref"],r:["FR2-S1"]},
-  {id:"d_dm",cat:"decided",t:"Demand management stays on the BAU queue",d:"The pilot is about 2% of customers, so the NewCo queue isn't expected to get long.",n:["phone:p_q"]},
+  {id:"d_ref",cat:"decided",t:"The reference is 9 digits, next to \u201cOur reference\u201d on letters",d:"Some end in -MED. Callers only need to give the 9 digits.",n:["phone:p_ref","chat:w_ref"],r:["FR1-17","FR4-08","FR7-03"]},
+  {id:"d_closed",cat:"decided",t:"BAU's closed message plays before the NewCo branch",d:"The call only branches to NewCo once the reference is asked for, so NewCo needs no \u201ceverything closed\u201d message.",n:["phone:p_closed","chat:w_closed"]},
+  {id:"d_reasons",cat:"decided",t:"Every web chat reason goes to the reference check",d:"The reference decides the route, not the reason picked.",n:["chat:w_reason"]},
   {id:"d_hang",cat:"decided",t:"Hanging up saves the voicemail",d:"",n:["phone:p_vm"],r:["FR2-09"]},
-  {id:"d_lorry",cat:"decided",t:"NewCo won't handle lorry or bus licences",d:"",n:["phone:p_lorrybau"]},
+  {id:"d_lorry",cat:"decided",t:"Lorry and bus calls go to BAU",d:"As today, with no online offer: they can't be done online. NewCo doesn't handle them.",n:["phone:p_lorry"]},
   {id:"d_switch",cat:"decided",t:"First-notification routing can be switched off",d:"To control how fast the cohort grows.",n:["phone:p_sw"]},
   {id:"d_welsh",cat:"decided",t:"Welsh speakers are served by BAU",d:"",n:["phone:p_welsh"]},
   {id:"d_wcmsg",cat:"decided",t:"Web chat doesn't take messages for the team",d:"",n:["chat:w_tc"]},
   {id:"d_outcomes",cat:"decided",t:"Routing outcomes are a requirement",d:"",n:["phone:p_cant","chat:w_cant"],r:["FR6-S1","FR6-S2"]},
+  {id:"d_altid",cat:"decided",t:"No alternative identifier in the phone line",d:"Name, address and date of birth are checked by an agent through ID&V. A caller without the reference goes to BAU, where the adviser can find the case and transfer them.",n:["phone:p_ref","phone:p_marker"],r:["FR1-14"]},
 
-  {id:"t_queuecb",cat:"team",t:"Whether to offer a callback while waiting in the NewCo queue",d:"Not on the map for now. Callers can already ask for a callback in the BAU options before they give their reference. An offer in the NewCo queue would help if waits get long.",who:"NewCo team",n:["phone:p_q"]},
-  {id:"t_timing",cat:"team",t:"How quickly NewCo calls back",d:"Left open for the team. Scripts show a placeholder.",who:"NewCo team",n:["phone:p_cbok","phone:p_vmok"],r:["FR2-22"]},
-  {id:"t_hours",cat:"team",t:"NewCo operating hours",d:"The requirements give 5:00pm in one place and 8:30 to 4:30 in another.",who:"NewCo team",n:["phone:p_open2","chat:w_open2"],r:["FR2-01"]},
   {id:"t_outbound",cat:"team",t:"How customers know a callback is really DVLA",d:"The number callbacks come from, and what the agent says before asking for details.",who:"NewCo team",n:["phone:p_cbq","phone:p_vmq"]},
 
-  {id:"c_label",cat:"confirm",t:"The name and format of the reference on letters",d:"Used by the phone prompt and the web chat field.",who:"Letters and Dynamics",n:["phone:p_ref","chat:w_ref"],r:["FR4-08","FR7-03"]},
-  {id:"c_closed",cat:"confirm",t:"BAU's closed message plays before the NewCo branch",d:"Assumed, so NewCo needs no “everything closed” message.",who:"Telecoms",n:["phone:p_closed","chat:w_closed"]},
-  {id:"c_reasons",cat:"confirm",t:"Which web chat reasons go to the NewCo check",d:"Assumed: every reason except notifying a new condition.",who:"Web chat owners",n:["chat:w_reason"]},
-  {id:"c_table",cat:"confirm",t:"How the routing table is updated",d:"Daily, so a case created today routes to BAU until the next update. Midas is being assessed.",who:"FR5 owners",n:["phone:p_intable","chat:w_intable"],r:["FR5-01"]},
-  {id:"c_dpia",cat:"confirm",t:"DPIA for first notifications by phone",d:"In flight.",who:"Service owner",n:["phone:p_fnagent"]},
-  {id:"c_prec",cat:"confirm",t:"Precedence rules and the alternative identifier",d:"FR1 refers to both but neither is written yet.",who:"FR1 owners",n:["phone:p_intable"],r:["FR1-14","FR1-28"]}
+  {id:"c_asis",cat:"confirm",t:"As-is scripts",d:"The map flags each BAU prompt whose current wording isn't captured yet, starting with \u201cSays out loud what they need help with\u201d.",who:"Telecoms",n:["phone:p_says","phone:p_msgs","phone:p_welsh","phone:p_type","phone:p_lorry","phone:p_baumsg","phone:p_bauopt"]},
+  {id:"c_table",cat:"confirm",t:"The routing table",d:"Outstanding. As specified it updates daily, so a case created today routes to BAU until the next update. Midas is being assessed.",who:"FR5 owners",n:["phone:p_intable","chat:w_intable"],r:["FR5-01"]},
+  {id:"c_dpia",cat:"confirm",t:"DPIA for first notifications by phone",d:"In flight. Access to the current DPIA is needed to identify what new information is asked for, assumed to be condition-specific medical information.",who:"Service owner",n:["phone:p_fnagent"]},
+  {id:"c_prec",cat:"confirm",t:"Precedence rules",d:"FR1 refers to rules for reference ranges against named owners. They aren't written yet.",who:"FR1 owners",n:["phone:p_intable"],r:["FR1-28"]}
 ];
 const OICAT = {
   decided:{h:"Decided",p:"Agreed in the review on 26 September."},
@@ -4213,25 +4219,24 @@ const PHONE = {
     {id:"p1",t:"Every call starts here",nodes:[
       {id:"p_start",type:"step",k:"today",l:"Customer calls the DVLA medical line",d:"One number for everyone.",r:["FR1-01"]},
       {id:"p_open",type:"q",k:"today",l:"Are BAU phone lines open?"},
-      {id:"p_closed",type:"end",k:"today",l:"Existing closed message. Call ends."},
-      {id:"p_msgs",type:"step",k:"today",l:"Told about wait times and that web chat is quicker"},
-      {id:"p_welsh",type:"q",k:"today",dflt:"Presses 2: no",l:"Asked: do you want to speak Welsh?",d:"Welsh speakers stay with BAU during the pilot."},
+      {id:"p_closed",type:"end",k:"today",asis:true,l:"Existing closed message. Call ends.",d:"Plays before the NewCo branch: the call only branches to NewCo once the reference is asked for."},
+      {id:"p_waitq",type:"q",k:"today",l:"Is the estimated wait over X minutes?",d:"As-is: the phone line estimates the queue time and only plays the wait-time and web chat message when it's long."},
+      {id:"p_msgs",type:"step",k:"today",asis:true,l:"Told the wait time and that web chat is quicker"},
+      {id:"p_welsh",type:"q",k:"today",asis:true,dflt:"Presses 2: no",l:"Asked: do you want to speak Welsh?",d:"Welsh speakers stay with BAU during the pilot."},
       {id:"p_welshend",type:"end",k:"today",l:"Welsh journey, as today"},
-      {id:"p_says",type:"step",k:"today",l:"Says out loud what they need help with"},
-      {id:"p_type",type:"q",k:"today",l:"Menu: existing application or new condition?",r:["FR1-01","FR1-02"]},
+      {id:"p_says",type:"step",k:"today",asis:true,l:"Says out loud what they need help with"},
+      {id:"p_type",type:"q",k:"today",asis:true,l:"Menu: existing application or new condition?",r:["FR1-01","FR1-02"]},
       {id:"p_go2",type:"go",to:"p_lorry",l:"Go to lane 2: New condition"},
       {id:"p_go3",type:"go",to:"p_baumsg",l:"Go to lane 3: Existing application"}
     ],edges:[
-      ["p_start","p_open"],["p_open","p_msgs","Yes"],["p_open","p_closed","No"],
-      ["p_msgs","p_welsh"],["p_welsh","p_welshend","Presses 1: yes"],["p_welsh","p_says","Presses 2: no"],
+      ["p_start","p_open"],["p_open","p_waitq","Yes"],["p_open","p_closed","No"],
+      ["p_waitq","p_msgs","Yes"],["p_waitq","p_welsh","No"],["p_msgs","p_welsh"],["p_welsh","p_welshend","Presses 1: yes"],["p_welsh","p_says","Presses 2: no"],
       ["p_says","p_type"],["p_type","p_go3","Presses 1: already have an application"],["p_type","p_go2","Presses 2: reporting a new condition"]
     ]},
     {id:"p2",t:"New condition",nodes:[
-      {id:"p_lorry",type:"q",k:"today",dflt:"Presses 2: any other vehicle",l:"Menu: what type of licence is this about?"},
-      {id:"p_onl1",type:"q",k:"today",dflt:"Presses 2: speak to an adviser",l:"Told they can do this online. Text link or adviser?"},
-      {id:"p_onl2",type:"q",k:"today",dflt:"Presses 2: speak to an adviser",l:"Told they can do this online. Text link or adviser?"},
+      {id:"p_lorry",type:"q",k:"today",asis:true,dflt:"Presses 2: any other vehicle",l:"Menu: what type of licence is this about?",d:"As-is: lorry and bus notifications can't be done online, so they go straight to BAU. NewCo doesn't handle them."},
+      {id:"p_onl2",type:"q",k:"today",asis:true,dflt:"Presses 2: speak to an adviser",l:"Told they can do this online. Text link or adviser?"},
       {id:"p_txt",type:"end",k:"today",l:"Text sent. Call ends."},
-      {id:"p_lorrybau",type:"end",k:"prop",l:"BAU queue. Not offered to NewCo.",d:"Suggested: NewCo won't handle lorry or bus licences."},
       {id:"p_sw",type:"q",k:"prop",l:"Is first-notification routing to NewCo switched on?",d:"Suggested: a switch so the team can control how fast the cohort grows."},
       {id:"p_free",type:"q",k:"req",l:"Is a NewCo agent free now?",d:"If not, the call goes straight to BAU. The caller never waits for NewCo.",r:["FR1-08","FR1-09","FR1-10","FR1-11","FR1-12"]},
       {id:"p_fnconn",type:"step",k:"req",l:"Told they're being put through",sc:["connect_team"],r:["FR1-08"]},
@@ -4239,18 +4244,17 @@ const PHONE = {
       {id:"p_fnend",type:"end",k:"req",l:"Case joins the NewCo cohort",r:["FR1-21"]},
       {id:"p_fnbau",type:"end",k:"today",l:"BAU queue, as today",r:["FR1-09"]}
     ],edges:[
-      ["p_lorry","p_onl1","Presses 1: lorry or bus"],["p_lorry","p_onl2","Presses 2: any other vehicle"],
-      ["p_onl1","p_txt","Presses 1: send the text"],["p_onl1","p_lorrybau","Presses 2: speak to an adviser"],
+      ["p_lorry","p_fnbau","Presses 1: lorry or bus"],["p_lorry","p_onl2","Presses 2: any other vehicle"],
       ["p_onl2","p_txt","Presses 1: send the text"],["p_onl2","p_sw","Presses 2: speak to an adviser"],
       ["p_sw","p_free","Yes"],["p_sw","p_fnbau","No"],
       ["p_free","p_fnconn","Yes"],["p_free","p_fnbau","No"],["p_fnconn","p_fnagent"],["p_fnagent","p_fnend"]
     ]},
     {id:"p3",t:"Existing application",nodes:[
-      {id:"p_baumsg",type:"step",k:"today",l:"Existing messages: calls recorded, privacy, estimated wait"},
-      {id:"p_bauopt",type:"q",k:"today",dflt:"Waits",l:"Existing options: callback, web chat text, or wait"},
+      {id:"p_baumsg",type:"step",k:"today",asis:true,l:"Existing messages: calls recorded, privacy, estimated wait"},
+      {id:"p_bauopt",type:"q",k:"today",asis:true,dflt:"Waits",l:"Existing options: callback, web chat text, or wait"},
       {id:"p_bautxt",type:"end",k:"today",l:"Text sent. Call ends."},
       {id:"p_gocb",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"},
-      {id:"p_ref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"The Mural has the caller say it out loud.",r:["FR1-17"]},
+      {id:"p_ref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"The reference is 9 digits, shown next to “Our reference” at the top of every letter. Some end in -MED; callers only need the 9 digits. The Mural has the caller say it out loud.",r:["FR1-17","FR1-14"]},
       {id:"p_refq",type:"q",k:"req",l:"What does the caller do?",r:["FR1-05","FR1-06","FR1-19"]},
       {id:"p_retry",type:"step",k:"req",l:"Asked to try again",sc:["ref_format"],r:["FR1-19"]},
       {id:"p_retryq",type:"q",k:"req",l:"Right before the attempts run out?",r:["FR1-20"]},
@@ -4265,17 +4269,21 @@ const PHONE = {
       ["p_baumsg","p_bauopt"],
       ["p_bauopt","p_gocb","Presses 1: callback"],["p_bauopt","p_bautxt","Presses 2: web chat text"],["p_bauopt","p_ref","Waits"],
       ["p_ref","p_refq"],
-      ["p_refq","p_intable","Gives the reference"],["p_refq","p_retry","Wrong format"],["p_refq","p_go6","Can't give one"],
+      ["p_refq","p_intable","Gives the reference"],["p_refq","p_retry","Not 9 digits"],["p_refq","p_go6","Can't give one"],
       ["p_retry","p_retryq"],["p_retryq","p_intable","Yes"],["p_retryq","p_go6","No"],
       ["p_intable","p_open2","Yes"],["p_intable","p_notnc","No"],["p_intable","p_cant","Can't be checked"],
       ["p_open2","p_go4","Yes"],["p_open2","p_go5","No"]
     ]},
     {id:"p4",t:"NewCo team open",nodes:[
       {id:"p_connect",type:"step",k:"req",l:"Told they're being put through to their team",sc:["connect_team"],r:["FR1-13"]},
-      {id:"p_q",type:"step",k:"prop",l:"Waits in the NewCo queue",sc:["queue_msg"],d:"Suggested: in hours the caller waits for their team rather than hearing the unavailable message.",r:["FR2-02","FR2-03"]},
+      {id:"p_q",type:"step",k:"prop",l:"Joins the NewCo queue",sc:["queue_msg"],d:"Suggested: in hours the caller waits for their team rather than hearing the unavailable message.",r:["FR2-02","FR2-03"]},
+      {id:"p_qwait",type:"q",k:"prop",dflt:"No",l:"Is the estimated wait over X minutes?",d:"X is set by demand management. BAU uses 2 minutes today; it has been 10.",r:["FR2-S3","FR3-07"]},
+      {id:"p_qcb",type:"step",k:"prop",l:"Offered a callback from the team",sc:["queue_cb"],r:["FR2-S3"]},
+      {id:"p_qcbq",type:"q",k:"prop",dflt:"Stays on the line",l:"What does the caller do?",r:["FR2-S3"]},
+      {id:"p_gocb2",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"},
       {id:"p_agent",type:"end",k:"req",l:"NewCo agent answers",r:["FR2-03","FR6-01"]}
     ],edges:[
-      ["p_connect","p_q"],["p_q","p_agent"]
+      ["p_connect","p_q"],["p_q","p_qwait"],["p_qwait","p_qcb","Yes"],["p_qwait","p_agent","No"],["p_qcb","p_qcbq"],["p_qcbq","p_gocb2","Presses 1: callback"],["p_qcbq","p_agent","Stays on the line"]
     ]},
     {id:"p5",t:"NewCo team closed, BAU open",nodes:[
       {id:"p_tc",type:"step",k:"req",l:"Told the team is closed: leave a message or speak to an adviser",sc:["team_closed"],r:["FR2-01"]},
@@ -4312,9 +4320,9 @@ const PHONE = {
       ["p_open3","p_xfer","Yes"],["p_open3","p_helprec","No"],["p_xfer","p_go4b"]
     ]},
     {id:"p7",t:"Callback",nodes:[
-      {id:"p_cbnum",type:"q",k:"today",l:"Which number should we call?",d:"The existing callback steps."},
+      {id:"p_cbnum",type:"q",k:"today",asis:true,l:"Which number should we call?",d:"The existing callback steps."},
       {id:"p_newnum",type:"step",k:"today",l:"Enters a different number"},
-      {id:"p_hasref",type:"q",k:"prop",dflt:"No",l:"Reference already given in this call?",d:"Suggested: don't ask for it twice.",r:["FR2-S1"]},
+      {id:"p_hasref",type:"q",k:"prop",dflt:"No",seen:["p_ref","Yes"],l:"Reference already given in this call?",d:"Suggested: don't ask for it twice.",r:["FR2-S1"]},
       {id:"p_askref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"From the Mural callback lane."},
       {id:"p_intable2",type:"q",k:"req",l:"Is it a NewCo reference?",d:"From the Mural: triage callbacks between the BAU queue and a NewCo queue."},
       {id:"p_cbhrs",type:"q",k:"req",l:"Is the NewCo team open?",d:"From the Mural: triage NewCo callbacks on operating hours.",r:["FR2-S1","FR2-S2"]},
@@ -4337,12 +4345,11 @@ const CHAT = {
     {id:"w1",t:"Every chat starts here",nodes:[
       {id:"w_start",type:"step",k:"today",l:"Customer opens the medical web chat",d:"The existing link.",r:["FR4-01","FR4-04"]},
       {id:"w_open",type:"q",k:"today",l:"Is web chat open?"},
-      {id:"w_closed",type:"end",k:"today",l:"Existing closed message"},
-      {id:"w_reason",type:"q",k:"today",dflt:"I want to check the progress of my case",l:"Which reason does the customer pick?",d:"The existing 6 reasons.",r:["FR4-03"]},
-      {id:"w_fn",type:"end",k:"today",l:"BAU web chat, as today",d:"First-notification routing to NewCo is phone only."},
-      {id:"w_related",type:"step",k:"today",l:"Shown related questions for that reason"},
-      {id:"w_dp",type:"step",k:"today",l:"Answers data protection questions"},
-      {id:"w_ref",type:"step",k:"today",l:"Enters medical reference number",d:"The existing field.",r:["FR4-08"]},
+      {id:"w_closed",type:"end",k:"today",asis:true,l:"Existing closed message"},
+      {id:"w_reason",type:"q",k:"today",asis:true,dflt:"I want to check the progress of my case",l:"Which reason does the customer pick?",d:"The existing 6 reasons. All of them go on to the reference check: the reference decides the route.",r:["FR4-03"]},
+      {id:"w_related",type:"step",k:"today",asis:true,l:"Shown related questions for that reason"},
+      {id:"w_dp",type:"step",k:"today",asis:true,l:"Answers data protection questions"},
+      {id:"w_ref",type:"step",k:"today",asis:true,l:"Enters the reference number",d:"The existing field. The letter calls it “Our reference”: 9 digits, sometimes followed by -MED.",r:["FR4-08"]},
       {id:"w_refq",type:"q",k:"req",l:"What does the customer enter?",r:["FR4-09","FR4-10","FR4-11"]},
       {id:"w_err",type:"step",k:"req",l:"Error shown: try again",r:["FR4-10"]},
       {id:"w_errq",type:"q",k:"req",l:"Right before the attempts run out?",r:["FR4-12"]},
@@ -4357,14 +4364,14 @@ const CHAT = {
       {id:"w_go3",type:"go",to:"w_tc",l:"Go to lane 3: Team closed"}
     ],edges:[
       ["w_start","w_open"],["w_open","w_reason","Yes"],["w_open","w_closed","No"],
-      ["w_reason","w_fn","I need to notify DVLA of a medical condition"],
+      ["w_reason","w_related","I need to notify DVLA of a medical condition"],
       ["w_reason","w_related","I want to renew or reapply for a medical licence"],
       ["w_reason","w_related","I want to check the progress of my case"],
       ["w_reason","w_related","Can I drive while my application is with DVLA?"],
       ["w_reason","w_related","I want to tell you about a change in details"],
       ["w_reason","w_related","Other enquiries"],
       ["w_related","w_dp"],["w_dp","w_ref"],["w_ref","w_refq"],
-      ["w_refq","w_name","A reference in the right format"],["w_refq","w_err","A reference in the wrong format"],["w_refq","w_name2","Leaves it blank"],
+      ["w_refq","w_name","9 digits"],["w_refq","w_err","Not 9 digits"],["w_refq","w_name2","Leaves it blank"],
       ["w_err","w_errq"],["w_errq","w_name","Yes"],["w_errq","w_name2","No"],
       ["w_name","w_intable"],["w_name2","w_go4"],
       ["w_intable","w_open2","Yes"],["w_intable","w_notnc","No"],["w_intable","w_cant","Can't be checked"],
@@ -4451,7 +4458,14 @@ function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,
 function said(t){ return esc(t).replace(/\[([^\]]+)\]/g,'<span class="ph">[$1]</span>'); }
 function tag(t,c){ return `<strong class="govuk-tag ${c}">${esc(t)}</strong>`; }
 function outs(c,id){ return c.E.filter(e=>e.from===id); }
-function pick(c,id){ const q=c.byId[id]; return q.answers.find(a=>a.id===state.choice[c.key][id])||q.answers.find(a=>a.l===q.dflt)||q.answers[0]; }
+function pick(c,id,seen){
+  const q=c.byId[id], chosen=q.answers.find(a=>a.id===state.choice[c.key][id]);
+  if(chosen) return chosen;
+  /* A question can default to a different answer when an earlier step is on the route */
+  if(q.seen && seen && seen.has(q.seen[0])){ const a=q.answers.find(x=>x.l===q.seen[1]); if(a) return a; }
+  return q.answers.find(a=>a.l===q.dflt)||q.answers[0];
+}
+function followed(c,id){ const r=state.route, i=r?r.nodes.indexOf(id):-1; return i>=0&&r.nodes[i+1]?c.byId[r.nodes[i+1]]:pick(c,id); }
 
 function route(c){
   const nodes=[], edges=[]; let at=state.start[c.key], guard=80;
@@ -4460,7 +4474,7 @@ function route(c){
     const n=c.byId[at];
     if(n.type==="go"){ at=n.to; continue; }
     const o=outs(c,at); if(!o.length) break;
-    const e=n.type==="q"?o.find(x=>x.to===pick(c,at).id):o[0];
+    const e=n.type==="q"?o.find(x=>x.to===pick(c,at,new Set(nodes)).id):o[0];
     edges.push(e); at=e.to;
   }
   return {nodes,edges};
@@ -4711,7 +4725,7 @@ function renderList(){
   $("#canvas").innerHTML=`<div class="steplist"><p class="govuk-body-s">Every step, lane by lane. Steps on the route shown have a blue line.</p>${c.lanes.map(ln=>`<h2>Lane ${ln.n}: ${esc(ln.t)}</h2><ol>${ln.nodes.filter(n=>n.type!=="a").map(n=>{
     const o=n.type==="q"?n.answers.map(a=>({l:a.l,to:outs(c,a.id)[0].to,a})):outs(c,n.id);
     return `<li class="${on.has(n.id)?"on":""}"><button type="button" class="linkbtn" data-sel="${n.id}">${n.type==="q"?"Question: ":""}${esc(n.l)}</button> ${n.type==="go"?"":tag(KIND[n.k].t,KIND[n.k].c)}
-      ${o.length?`<ul class="next">${o.map(e=>`<li>${e.a?`<button type="button" class="linkbtn" data-sel="${e.a.id}">${esc(e.l)}</button>${pick(c,n.id)===e.a?" (followed)":""}, then: `:"Then: "}${esc(c.byId[e.to].l)}</li>`).join("")}</ul>`:""}</li>`;}).join("")}</ol>`).join("")}</div>`;
+      ${o.length?`<ul class="next">${o.map(e=>`<li>${e.a?`<button type="button" class="linkbtn" data-sel="${e.a.id}">${esc(e.l)}</button>${followed(c,n.id)===e.a?" (followed)":""}, then: `:"Then: "}${esc(c.byId[e.to].l)}</li>`).join("")}</ul>`:""}</li>`;}).join("")}</ol>`).join("")}</div>`;
   document.querySelectorAll("[data-sel]").forEach(b=>b.onclick=()=>onNode(c.byId[b.dataset.sel]));
 }
 function select(id,keepFocus){
@@ -4763,10 +4777,10 @@ function renderSide(){
   const ois=OI_BY_NODE[c.key+":"+n.id]||[];
   let q="";
   if(n.type==="q"){
-    const cur=pick(c,n.id);
+    const cur=followed(c,n.id);
     q=`<h3>Answers</h3><p class="govuk-body-s">Select an answer here or on the map to follow it.</p><ul class="govuk-list answers">${n.answers.map(a=>{ const nx=c.byId[outs(c,a.id)[0].to]; return `<li><button type="button" class="linkbtn" data-ans="${a.id}" aria-pressed="${a===cur}">${esc(a.l)}</button>${a===cur?` ${tag("Followed","govuk-tag--blue")}`:""}<br><span class="govuk-hint" style="margin:0">Then: ${esc(nx.l)}</span></li>`; }).join("")}</ul>`;
   }
-  const scripts=(n.sc||[]).map(scriptHTML).join("");
+  const scripts=(n.sc||[]).map(scriptHTML).join("")+(n.asis?`<div class="script asis"><p class="who">As-is script ${tag("Not captured yet","govuk-tag--grey")}</p><p class="said">The wording customers hear or see today isn't captured here yet.</p></div>`:"");
   const reqs=(n.r||[]).map(id=>reqHTML(id,true)).join("");
   body.innerHTML=`<span class="govuk-caption">Lane ${ln.n}: ${esc(ln.t)}</span>
     <h2>${n.type==="q"?"Question: ":""}${esc(n.l)}</h2>
@@ -4785,10 +4799,10 @@ function routeHTML(c){
     const n=c.byId[id];
     if(n.type==="a") return;
     if(n.type==="go"){ lines.push(`<li><span class="does">${esc(n.l)}</span></li>`); return; }
-    if(n.type==="q"){ const a=c.byId[r.nodes[i+1]]; lines.push(`<li><span class="does">${esc(n.l)}</span> <strong>${a?esc(a.l):""}</strong></li>`); return; }
+    if(n.type==="q"){ const a=c.byId[r.nodes[i+1]]; lines.push(`<li><span class="does">${esc(n.l)}${n.asis?" (as-is script not captured)":""}</span> <strong>${a?esc(a.l):""}</strong></li>`); return; }
     const ks=n.hear||n.sc||[];
     ks.forEach(k=>{ const s=SCRIPTS[k]; lines.push(`<li><span class="who">${esc(s.form?"On screen":(s.who||c.sys))}</span>${said(s.t)}</li>`); });
-    if(!ks.length) lines.push(`<li><span class="does">${esc(n.l)}</span></li>`);
+    if(!ks.length) lines.push(`<li><span class="does">${esc(n.l)}${n.asis?" (as-is script not captured)":""}</span></li>`);
   });
   return `<h2>The route shown</h2><p class="govuk-body-s">What the ${c.key==="phone"?"caller hears and chooses":"customer sees and chooses"}, in order. Change it by selecting a different answer on the map.</p><ol class="transcript">${lines.join("")}</ol>`;
 }
