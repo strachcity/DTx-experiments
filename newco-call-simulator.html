@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NewCo call simulator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+/* --- Palette and govuk-* layer: copied from components.html. --- */
+:root{--black:#0b0c0c;--white:#fff;--blue:#1d70b8;--link:#1a65a6;--link-hover:#0f385c;--dark-blue:#0f385c;--green:#0f7a52;--green-hover:#0b5c3e;--green-shade:#083d29;--yellow:#fd0;--light-yellow:#fff7bf;--light-grey:#f4f8fb;--mid-grey:#cecece;--dark-grey:#484949;--red:#ca3535;--red-shade:#651b1b;--purple:#54319f;--focus:#fd0;--focus-text:#0b0c0c}
+*,*::before,*::after{box-sizing:border-box}
+body{font-family:"GDS Transport","Inter",Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--black);background:var(--white);margin:0;padding:0;line-height:1.5;font-size:19px}
+
+/* --- Header --- */
+.govuk-header{background:var(--blue);color:var(--white);padding:10px 0}
+.govuk-header__container{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:10px}
+.govuk-header__homepage-link{display:inline-flex;align-items:center;color:var(--white);text-decoration:none}
+.govuk-header__homepage-link:hover{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
+.govuk-header__logotype{height:30px;width:162px;fill:currentcolor}
+.service-nav{border-bottom:1px solid var(--mid-grey);background:var(--white);padding:12px 0}
+.service-nav__wrapper{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.service-nav__name{font-weight:700;font-size:19px;color:var(--black);text-decoration:none}
+.govuk-phase-banner{border-bottom:1px solid var(--mid-grey);padding:10px 0}
+.govuk-phase-banner__wrapper{max-width:960px;margin:0 auto;padding:0 15px;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.govuk-phase-banner__tag{display:inline-block;background:var(--blue);color:var(--white);font-weight:700;font-size:14px;padding:2px 8px;text-transform:uppercase;letter-spacing:1px}
+.phase-actions{margin-left:auto;display:flex;gap:15px;align-items:center}
+.phase-actions a{font-size:16px;cursor:pointer}
+.prototype-warning{background:var(--light-yellow);border:4px solid var(--yellow);padding:15px 20px;margin-bottom:30px;font-size:16px;line-height:1.5}
+.prototype-warning strong{display:block;margin-bottom:4px}
+.govuk-width-container{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-main-wrapper{padding:30px 0 60px}
+.govuk-skip-link{position:absolute;left:-9999px;top:0;background:var(--yellow);color:var(--black);padding:10px 15px;font-weight:700;z-index:10}
+.govuk-skip-link:focus{left:0}
+
+/* --- Typography --- */
+h1,.govuk-heading-xl{font-size:48px;line-height:1.04;font-weight:700;margin:0 0 30px}
+h2,.govuk-heading-l{font-size:36px;line-height:1.11;font-weight:700;margin:30px 0 20px}
+h3,.govuk-heading-m{font-size:24px;line-height:1.25;font-weight:700;margin:20px 0 15px}
+h4,.govuk-heading-s{font-size:19px;line-height:1.3;font-weight:700;margin:15px 0 10px}
+p,.govuk-body{font-size:19px;margin:0 0 20px}
+.govuk-body-s{font-size:16px}
+.govuk-body-l{font-size:24px;line-height:1.25;margin:0 0 20px}
+.govuk-caption{font-size:24px;color:var(--dark-grey);display:block;margin-bottom:5px}
+a{color:var(--link)}a:hover{color:var(--link-hover)}
+a:visited{color:var(--purple)}
+a:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--focus-text);text-decoration:none}
+.govuk-list{margin:0 0 20px;padding:0;list-style:none}
+.govuk-list>li{margin-bottom:5px}
+.govuk-list--bullet{list-style:disc;padding-left:20px}
+.govuk-list--number{list-style:decimal;padding-left:20px}
+.govuk-visually-hidden{position:absolute!important;width:1px;height:1px;margin:0;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);border:0;white-space:nowrap}
+hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margin:30px 0}
+.govuk-back-link{display:inline-block;margin-bottom:15px;font-size:16px;color:var(--black);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.govuk-back-link::before{content:"\25c2 "}
+
+/* --- Buttons --- */
+.govuk-button{display:inline-block;padding:8px 20px;font-size:19px;font-weight:700;color:var(--white);background:var(--green);border:none;border-radius:0;border-bottom:2px solid var(--green-shade);cursor:pointer;text-decoration:none;line-height:1.2;-webkit-appearance:none;font-family:inherit}
+.govuk-button:hover{background:var(--green-hover);color:var(--white)}
+.govuk-button:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-button--secondary{background:#f3f3f3;color:var(--black);border-bottom-color:#858686}
+.govuk-button--secondary:hover{background:#dbdad9;color:var(--black)}
+.govuk-button-group{display:flex;gap:15px;flex-wrap:wrap;align-items:center;margin-top:20px}
+
+/* --- Forms --- */
+.govuk-form-group{margin-bottom:30px}
+.govuk-fieldset{border:0;margin:0;padding:0}
+.govuk-fieldset__legend{font-weight:700;font-size:19px;margin-bottom:10px;display:block}
+.govuk-checkboxes__item{display:flex;align-items:flex-start;margin-bottom:15px;gap:12px}
+.govuk-checkboxes__input{width:44px;height:44px;min-width:44px;margin:0;cursor:pointer;accent-color:var(--black)}
+.govuk-checkboxes__label{font-size:19px;padding-top:10px;cursor:pointer}
+.govuk-checkboxes__hint{font-size:16px;color:var(--dark-grey);margin-top:2px;display:block}
+.govuk-label{display:block;font-weight:700;margin-bottom:5px}
+.govuk-hint{font-size:16px;color:var(--dark-grey);margin-bottom:10px;display:block}
+.govuk-select{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);max-width:100%;background:var(--white)}
+.govuk-select:focus{outline:3px solid var(--focus);outline-offset:0}
+
+/* --- Summary list / table --- */
+.govuk-summary-list{border-top:1px solid var(--mid-grey);margin:0 0 30px}
+.govuk-summary-list__row{display:flex;border-bottom:1px solid var(--mid-grey);padding:12px 0;gap:15px}
+.govuk-summary-list__key{flex:0 0 40%;font-weight:700}
+.govuk-summary-list__value{flex:1}
+@media(max-width:640px){.govuk-summary-list__row{flex-direction:column;gap:4px}.govuk-summary-list__key{flex:auto}}
+.govuk-table{width:100%;border-collapse:collapse;margin-bottom:30px}
+.govuk-table th{text-align:left;font-weight:700;padding:10px 15px 10px 0;border-bottom:2px solid var(--black)}
+.govuk-table td{padding:10px 15px 10px 0;border-bottom:1px solid var(--mid-grey);vertical-align:top}
+
+/* --- Tags / panels / content --- */
+.govuk-tag{display:inline-block;font-size:19px;line-height:1.32;font-weight:700;padding:2px 8px 3px;border-radius:1px;max-width:160px;overflow-wrap:break-word;color:#0f385c;background:#d2e2f1}
+.govuk-tag--blue{color:#0f385c;background:#d2e2f1}
+.govuk-tag--green{color:#083d29;background:#cfe4dc}
+.govuk-tag--purple{color:#2a1950;background:#ddd6ec}
+.govuk-tag--red{color:#651b1b;background:#f4d7d7}
+.govuk-tag--orange{color:#7a3c1c;background:#fde4d7}
+.govuk-tag--teal{color:#0b4144;background:#d0e6e7}
+.govuk-tag--yellow{color:#7a3c1c;background:#ffee80}
+.govuk-tag--grey{color:#0b0c0c;background:#cecece}
+.govuk-inset-text{border-left:10px solid var(--mid-grey);padding:15px 20px;margin:0 0 30px}
+.govuk-details{margin-bottom:30px;display:block}
+.govuk-details__summary{color:var(--link);cursor:pointer;text-decoration:underline;font-size:19px;margin-bottom:5px}
+.govuk-details__summary:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--focus-text);text-decoration:none}
+.govuk-details__text{border-left:5px solid var(--mid-grey);padding:15px 20px;font-size:19px}
+.govuk-notification-banner{border:5px solid var(--blue);margin-bottom:30px}
+.govuk-notification-banner__header{background:var(--blue);color:var(--white);padding:8px 15px;font-size:19px;font-weight:700}
+.govuk-notification-banner__title{margin:0;font-size:19px}
+.govuk-notification-banner__content{padding:20px 15px;font-size:19px}
+.govuk-notification-banner__heading{font-size:24px;font-weight:700;margin:0 0 10px}
+
+/* --- Footer --- */
+.govuk-footer{background:var(--light-grey);border-top:10px solid var(--blue);padding:30px 0;margin-top:60px}
+.govuk-footer__wrapper{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-footer__meta-item{font-size:16px;color:var(--dark-grey)}
+
+/* --- Design notes. Prototype annotation, never service UI. --- */
+.design-note{border:2px dashed var(--purple);background:#f7f4fc;padding:15px 20px;margin:0 0 25px;font-size:16px}
+.design-note strong{display:block;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-size:14px;margin-bottom:6px}
+.design-note p{font-size:16px;margin:0 0 8px}
+.design-note p:last-child{margin:0}
+
+/* === Specific to this prototype. The phone, the scenario panel and the
+       call transcript. None of this belongs in components.html. === */
+.screen-index{list-style:none;margin:0 0 30px;padding:0}
+.screen-index li{margin-bottom:18px}
+.screen-index a{font-size:19px;font-weight:700}
+.screen-index p{margin:2px 0 0;font-size:16px;color:var(--dark-grey)}
+
+.sim{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+.sim__phone{flex:0 0 330px;max-width:100%;position:sticky;top:15px}
+.sim__side{flex:1 1 380px;min-width:0}
+@media(max-width:760px){.sim__phone{position:static;margin:0 auto}}
+
+.phone{background:#1c1d21;border-radius:44px;padding:16px 18px 24px;color:#fff;box-shadow:inset 0 0 0 3px #3a3b40;width:330px;max-width:100%}
+.phone.is-ringing .phone__screen{animation:buzz .5s linear infinite}
+@keyframes buzz{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media(prefers-reduced-motion:reduce){.phone.is-ringing .phone__screen{animation:none}.bars span{animation:none!important}}
+.phone__notch{width:90px;height:22px;background:#000;border-radius:12px;margin:0 auto 10px}
+.phone__screen{min-height:250px;text-align:center;padding:4px 4px 10px}
+.phone__name{font-size:22px;font-weight:700;margin:0;line-height:1.3}
+.phone__status{font-size:16px;color:#c8c9cc;margin:2px 0 10px;font-variant-numeric:tabular-nums}
+.phone__subs{background:rgba(255,255,255,.09);border-radius:12px;padding:10px 12px;font-size:16px;line-height:1.4;text-align:left;min-height:110px}
+.phone__subs p{font-size:16px;margin:0}
+.phone__who{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:#aeb0b5;margin-bottom:4px}
+.phone__subs mark.ph{background:#5a4d00;color:#fff;border-bottom-color:#fd0}
+.phone__digits{font-size:26px;letter-spacing:3px;min-height:38px;margin-top:8px;font-variant-numeric:tabular-nums;word-break:break-all}
+.phone__listen{font-size:14px;color:#c8c9cc;min-height:21px}
+.bars{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+.bars span{width:3px;background:#aeb0b5;height:4px;animation:bar 1s ease-in-out infinite}
+.bars span:nth-child(2){animation-delay:.2s}.bars span:nth-child(3){animation-delay:.4s}
+@keyframes bar{0%,100%{height:3px}50%{height:12px}}
+.keypad{display:grid;grid-template-columns:repeat(3,70px);gap:12px 22px;justify-content:center;margin:4px 0 14px}
+.key{width:70px;height:70px;border-radius:50%;border:none;background:#3a3b41;color:#fff;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:0}
+.key:hover{background:#4a4b52}
+.key:active,.key.is-pressed{background:#76777f}
+.key:focus-visible,.callbtn:focus-visible,.say:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.key__n{font-size:30px}
+.key__l{font-size:10px;letter-spacing:2px;margin-top:3px;color:#c8c9cc;min-height:10px}
+.phone__say{display:flex;flex-direction:column;gap:8px;margin:0 0 14px}
+.phone__say-label{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#aeb0b5;text-align:center}
+.say{background:transparent;color:#fff;border:2px solid #6b6c74;border-radius:22px;padding:7px 14px;font-family:inherit;font-size:16px;cursor:pointer;text-align:left}
+.say:hover{border-color:#fff}
+.phone__actions{display:flex;justify-content:center;gap:48px}
+.callbtn{width:70px;height:70px;border-radius:50%;border:none;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center}
+.callbtn svg{width:32px;height:32px;fill:currentcolor}
+.callbtn--go{background:var(--green)}.callbtn--go:hover{background:var(--green-hover)}
+.callbtn--end{background:var(--red)}.callbtn--end:hover{background:#a82b2b}
+.callbtn--end svg{transform:rotate(135deg)}
+.sim__controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:15px;min-height:44px}
+.sim__controls .govuk-button{font-size:16px;padding:7px 14px}
+.sim__hint{font-size:14px;color:var(--dark-grey);text-align:center;margin:10px 0 0}
+
+.scenario{border:1px solid var(--mid-grey);background:var(--light-grey);padding:20px 20px 5px;margin-bottom:30px}
+.scenario .govuk-form-group{margin-bottom:15px}
+.scenario .govuk-select{width:100%}
+.scenario h2{margin-top:0}
+.letter{background:var(--white);border:1px solid var(--mid-grey);padding:12px 15px;margin:0 0 20px;font-size:16px}
+.letter p{font-size:16px;margin:0}
+.letter__ref{font-size:24px;font-weight:700;letter-spacing:2px;font-variant-numeric:tabular-nums}
+.scenario .govuk-details__text{background:var(--white)}
+.scenario .govuk-checkboxes__label{font-size:16px}
+.changed-flag{font-size:16px;font-weight:700;color:#7a3c1c}
+
+.tag-key{list-style:none;margin:0 0 20px;padding:0;font-size:16px}
+.tag-key li{margin-bottom:8px}
+.log-tag{font-size:14px;max-width:none;padding:1px 6px;vertical-align:middle}
+.call-log{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--mid-grey);max-height:640px;overflow:auto}
+.log{display:flex;gap:12px;padding:10px 4px 10px 0;border-bottom:1px solid var(--mid-grey);font-size:16px}
+.log p{font-size:16px;margin:4px 0 0}
+.log__time{flex:0 0 52px;color:var(--dark-grey);font-variant-numeric:tabular-nums}
+.log__body{flex:1;min-width:0}
+.log__who{font-weight:700;margin-right:6px}
+.log__hint{color:var(--dark-grey);font-size:14px;margin-left:4px}
+.log--press .log__body{font-weight:700}
+.log--sys .log__body,.log--time .log__body{color:var(--dark-grey)}
+.log--gap .log__body{border-left:4px solid #7a3c1c;padding-left:10px}
+.log__meta{font-size:14px;color:var(--purple);margin-top:4px}
+.log__meta a{color:var(--purple)}
+.empty-log{font-size:16px;color:var(--dark-grey);padding:10px 0}
+mark.ph{background:var(--light-yellow);color:inherit;border-bottom:2px dotted #7a3c1c;padding:0 2px}
+</style>
+</head>
+<body>
+<a class="govuk-skip-link" href="#main">Skip to main content</a>
+<div id="app"></div>
+<footer class="govuk-footer" role="contentinfo">
+  <div class="govuk-footer__wrapper">
+    <p class="govuk-footer__meta-item">NewCo call simulator &mdash; Fictional, for workshop use only. Not a real GOV.UK service. Every caller, reference and phone number is invented.</p>
+  </div>
+</footer>
+
+<script>
+/* ================================================================
+   NEWCO CALL SIMULATOR
+   Plays the phone route from newco-routing-map.html as a call: the
+   phone line reads each prompt aloud, and the caller answers on a
+   keypad. The route and the NewCo scripts are copied from the map, so
+   the call follows exactly what the map says, gaps included.
+   ================================================================ */
+(function(){
+
+/* ====================================================================
+   COPIED FROM newco-routing-map.html at commit ffcda25 (28 September).
+   Do not edit here. When the map changes, paste its SCRIPTS and PHONE
+   consts over these two, unchanged.
+   ==================================================================== */
+const SCRIPTS = {
+  ref_prompt:{n:"Asking for the reference",src:"sug",note:"Keypad entry is new (FR1-NF3): the BAU phone line takes the reference by speech only today.",t:"Please say or enter the 9 digits of our reference number. It's at the top of every letter we send you, next to \u201cOur reference\u201d. You don't need to include the letters MED. If you don't have it, stay on the line."},
+  ref_format:{n:"Reference in the wrong format",src:"sug",t:"Sorry, we need the 9 digits next to \u201cOur reference\u201d at the top of your letter. Please try again."},
+  fn_connect:{n:"Connecting to a NewCo agent",src:"req",req:"FR1-08",t:"Thank you. We’re putting you through to an adviser."},
+  connect_team:{n:"Connecting to the team",src:"sug",t:"Thank you. We're putting you through to the team looking after your case."},
+  queue_msg:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Estimated wait.]"},
+  queue_cb:{n:"Callback offer in the NewCo queue",src:"sug",t:"You're waiting longer than usual. If you'd like the team looking after your case to call you back instead, press 1. Or stay on the line."},
+  callback_ok:{n:"Callback confirmed",src:"sug",t:"We'll keep your place in the queue and call you back when it's your turn. Please keep your phone nearby. If you miss the call, you'll need to call us again."},
+  team_closed:{n:"Team closed, BAU open",src:"req",req:"FR2-01",note:"Working answer for [days and hours]: Monday to Friday, 8am to 4pm (subject to approval).",t:"The team looking after your case is closed at the moment. They’re open [days and hours]. You can ask them to call you back. Or you can speak to another adviser now. They’re not part of your team, but they can help with most things.\nTo ask your team to call you back, press 1. To speak to another adviser now, press 2."},
+  closing:{n:"Closing message",src:"sug",t:"Thank you for calling. The team looking after your case is open Monday to Friday, 8am to 4pm. Please call back then, and have our reference number ready. Goodbye.",note:"Hours are provisional."},
+  to_adviser:{n:"Putting the caller through to another adviser",src:"sug",t:"We’re putting you through to another adviser. They’re not part of the team looking after your case, but they can help with most things."},
+  busy_msg:{n:"Team busy, no callback available",src:"sug",t:"The team looking after your case is busy helping other people right now. You can ask them to call you back, or stay on the line and keep your place.\nTo ask your team to call you back, press 1. Or stay on the line."},
+  cb_req_rb:{n:"Confirming the number for a callback request",src:"sug",t:"We’ll ask the team looking after your case to call you back on the number ending [last 3 digits]. If that’s right, press 1. To give a different number, press 2."},
+  cb_req_enter:{n:"Entering a number for a callback request",src:"sug",t:"Please enter the number we should call you back on, then press hash.",note:"Keypad entry is new (FR1-NF3)."},
+  cb_req_ok:{n:"Callback request sent",src:"sug",t:"Thank you. We’ve sent your request to the team looking after your case. They aim to call you back [by the end of the next working day]. Goodbye.",note:"How soon the team calls back is for the team to decide."},
+  cb_req_unavail:{n:"Callback request can’t be sent",src:"sug",t:"Sorry, we can’t send your request at the moment. We’re putting you through to another adviser instead. They’re not part of your team, but they can help with most things. The team looking after your case is open Monday to Friday, 8am to 4pm.",note:"Hours are provisional. Follows FR2-12."},
+  ref_where:{n:"No reference to hand",src:"sug",t:"Our reference is the 9-digit number at the top of every letter we send you. If you can't find it, stay on the line and an adviser will help you."},
+  agent_ref:{n:"NewCo agent, end of a first notification",src:"sug",who:"Agent",t:"Your case reference number is [number]. Please keep it safe, and have it ready whenever you contact us. From [the next working day], it will put you through to the team looking after your case."},
+  w_connect:{n:"Connecting to the team",src:"req",req:"FR4-01",t:"You're being connected to the team looking after your case."},
+  w_queue:{n:"Waiting in the NewCo queue",src:"sug",t:"You're in the queue for the team looking after your case. [Position or estimated wait.]"},
+  w_team_closed:{n:"Team closed",src:"sug",t:"The team looking after your case is closed at the moment. They’re open Monday to Friday, 8am to 4pm. We’re connecting you to another adviser. They’re not part of your team, but they can help with most things.",note:"Hours are provisional."}
+};
+
+const PHONE = {
+  key:"phone", name:"Phone", sys:"Phone line", start:"p_start",
+  lanes:[
+    {id:"p1",t:"Every call starts here",nodes:[
+      {id:"p_start",type:"step",k:"today",l:"Customer calls the DVLA medical line",d:"One number for everyone.",r:["FR1-01"]},
+      {id:"p_open",type:"q",k:"today",l:"Are BAU phone lines open?",d:"The phone line is open 8am to 7pm. Outside these hours it says it's closed, as it does today. Out-of-hours callback requests for NewCo customers are a future gap."},
+      {id:"p_closed",type:"end",k:"today",asis:true,l:"Existing closed message. Call ends.",d:"Plays before the NewCo branch: the call only branches to NewCo once the reference is asked for."},
+      {id:"p_waitq",type:"q",k:"today",l:"Is the estimated wait over X minutes?",d:"As-is: the phone line estimates the queue time and only plays the wait-time and web chat message when it's long. FR8-01 says the message plays on every call: to check."},
+      {id:"p_msgs",type:"step",k:"today",asis:true,l:"Told the wait time and that web chat may be quicker",d:"If web chat is closed, it isn't described as available.",r:["FR8-01","FR8-03"]},
+      {id:"p_wcq",type:"q",k:"today",dflt:"Carries on by phone",l:"Does the caller choose web chat?",r:["FR8-02","FR8-04"]},
+      {id:"p_wcend",type:"end",k:"today",l:"Sent a text with the web chat link. Not added to the queue.",d:"The text described in FR4-F2.",r:["FR8-02"]},
+      {id:"p_welsh",type:"q",k:"today",asis:true,dflt:"Presses 2: no",l:"Asked: do you want to speak Welsh?",d:"Welsh speakers stay with BAU on day 1, even if their case is with NewCo.",r:["FR8-05","FR8-06"]},
+      {id:"p_welshend",type:"end",k:"today",l:"Welsh journey, as today",d:"If the Welsh journey is unavailable, the caller hears a service-unavailable message and other ways to get in touch. They aren't put through to an English-only NewCo agent without agreeing.",r:["FR8-05","FR8-07"]},
+      {id:"p_says",type:"step",k:"today",asis:true,l:"Asked what the call is about: say it or use the keypad",r:["FR8-08","FR8-09","FR8-10","FR8-11"]},
+      {id:"p_type",type:"q",k:"today",asis:true,l:"What is the call about?",r:["FR1-01","FR1-02","FR8-08","FR8-09","FR8-10","FR8-11","FR8-12"]},
+      {id:"p_rep",type:"step",k:"today",l:"Options repeated. Can answer with the keypad.",r:["FR8-12"]},
+      {id:"p_type2",type:"q",k:"today",l:"Does the caller give a valid answer now?",r:["FR8-12","FR8-13"]},
+      {id:"p_typefail",type:"end",k:"today",l:"Standard BAU route. Not treated as NewCo.",r:["FR8-13"]},
+      {id:"p_go2",type:"go",to:"p_lorry",l:"Go to lane 2: New condition"},
+      {id:"p_go3",type:"go",to:"p_lic3",l:"Go to lane 3: Existing application"}
+    ],edges:[
+      ["p_start","p_open"],["p_open","p_waitq","Yes"],["p_open","p_closed","No"],
+      ["p_waitq","p_msgs","Yes"],["p_waitq","p_welsh","No"],["p_msgs","p_wcq"],
+      ["p_wcq","p_wcend","Chooses web chat"],["p_wcq","p_welsh","Carries on by phone"],
+      ["p_welsh","p_welshend","Presses 1: yes"],["p_welsh","p_says","Presses 2: no"],
+      ["p_says","p_type"],
+      ["p_type","p_go3","Existing application (says so or presses 1)"],["p_type","p_go2","New condition (says so or presses 2)"],["p_type","p_rep","Not recognised"],
+      ["p_rep","p_type2"],["p_type2","p_go3","Existing application"],["p_type2","p_go2","New condition"],["p_type2","p_typefail","Still no valid answer"]
+    ]},
+    {id:"p2",t:"New condition",nodes:[
+      {id:"p_lorry",type:"q",k:"today",asis:true,dflt:"Presses 2: any other vehicle",l:"Menu: what type of licence is this about?",d:"As-is: lorry and bus notifications can't be done online, so they go straight to BAU. NewCo doesn't handle them."},
+      {id:"p_onl2",type:"q",k:"today",asis:true,dflt:"Presses 2: speak to an adviser",l:"Told they can do this online. Text link or adviser?"},
+      {id:"p_txt",type:"end",k:"today",l:"Text sent. Call ends."},
+      {id:"p_sw",type:"q",k:"req",l:"Is first-notification routing to NewCo switched on?",d:"A switch so the team can control how fast the cohort grows.",r:["FR1-N2"]},
+      {id:"p_free",type:"q",k:"req",l:"Is a NewCo agent free now?",d:"If not, the call goes straight to BAU. The caller never waits for NewCo.",r:["FR1-08","FR1-09","FR1-10","FR1-11","FR1-12"]},
+      {id:"p_fnconn",type:"step",k:"req",l:"Told they're being put through",sc:["fn_connect"],r:["FR1-08"]},
+      {id:"p_fnagent",type:"step",k:"req",l:"NewCo agent takes the notification and gives the case reference",sc:["agent_ref"],r:["FR7-01","FR7-02"]},
+      {id:"p_fnend",type:"end",k:"req",l:"Case joins the NewCo cohort",r:["FR1-21"]},
+      {id:"p_fnbau",type:"end",k:"today",l:"BAU queue, as today",r:["FR1-09"]}
+    ],edges:[
+      ["p_lorry","p_fnbau","Presses 1: lorry or bus"],["p_lorry","p_onl2","Presses 2: any other vehicle"],
+      ["p_onl2","p_txt","Presses 1: send the text"],["p_onl2","p_sw","Presses 2: speak to an adviser"],
+      ["p_sw","p_free","Yes"],["p_sw","p_fnbau","No"],
+      ["p_free","p_fnconn","Yes"],["p_free","p_fnbau","No"],["p_fnconn","p_fnagent"],["p_fnagent","p_fnend"]
+    ]},
+    {id:"p3",t:"Existing application",nodes:[
+      {id:"p_lic3",type:"q",k:"today",asis:true,dflt:"Another vehicle",l:"What type of licence is the application for?",r:["FR8-14","FR8-15"]},
+      {id:"p_lic3bau",type:"end",k:"today",l:"BAU journey. Not NewCo.",d:"Lorry and bus applications are outside NewCo's day 1 scope.",r:["FR8-14"]},
+      {id:"p_baumsg",type:"step",k:"today",asis:true,l:"Told an adviser may not be able to say more if there's no update on the case",d:"Clashes with NewCo: NewCo advisers aim to give updates on cases. One to solve later.",r:["FR8-16"]},
+      {id:"p_cbavail",type:"q",k:"today",dflt:"Yes",l:"Are callbacks available now?",d:"Callbacks are offered only in the callback operating hours and while there's capacity.",r:["FR8-20","FR8-21","FR8-22","FR8-23"]},
+      {id:"p_bauopt",type:"q",k:"today",asis:true,dflt:"Waits",l:"Options: callback, text link, or wait",r:["FR8-17","FR8-20"]},
+      {id:"p_bauopt2",type:"q",k:"today",asis:true,dflt:"Waits",l:"Options: text link or wait",d:"Callbacks aren't offered. The caller hears the out-of-hours information.",r:["FR8-21","FR8-22"]},
+      {id:"p_bautxt",type:"end",k:"today",l:"Mobile number confirmed, text sent with a link. Call ends.",d:"A link to the online service (FR8-18).",r:["FR8-18"]},
+      {id:"p_priv",type:"step",k:"today",asis:true,l:"Privacy, call recording and queue information",r:["FR8-19"]},
+      {id:"p_privcb",type:"step",k:"today",asis:true,l:"Privacy and call recording information",r:["FR8-19"]},
+      {id:"p_gocb",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"},
+      {id:"p_whereref",type:"step",k:"req",l:"Told where to find the reference",sc:["ref_where"],d:"May already be a BAU user story and script: to confirm.",r:["FR8-26"]},
+      {id:"p_ref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"The reference is 9 digits, shown next to “Our reference” at the top of every letter. Some end in -MED; callers only need the 9 digits. The Mural and FR8-24 have the caller say it out loud. Keypad entry is new: the BAU phone line takes the reference by speech only today.",r:["FR1-N5","FR1-17","FR1-14","FR8-24","FR8-25"]},
+      {id:"p_refq",type:"q",k:"req",l:"What does the caller do?",r:["FR1-05","FR1-06","FR1-19"]},
+      {id:"p_retry",type:"step",k:"req",l:"Asked to try again",sc:["ref_format"],d:"May already be a BAU user story and script: to confirm.",r:["FR1-19"]},
+      {id:"p_retryq",type:"q",k:"req",l:"Right before the attempts run out?",r:["FR1-20"]},
+      {id:"p_intable",type:"q",k:"req",l:"Is it a NewCo reference?",d:"Checked against the shared table used by phone and web chat. The reference is kept with the call where possible.",r:["FR1-03","FR1-04","FR1-07","FR1-13","FR1-15","FR1-16","FR8-24","FR8-25"]},
+      {id:"p_notnc",type:"end",k:"today",l:"BAU queue, as today",r:["FR1-04","FR1-15","FR8-25"]},
+      {id:"p_cant",type:"end",k:"req",l:"BAU queue",d:"The table couldn't be checked.",r:["FR1-07","FR1-16"]},
+      {id:"p_go6",type:"go",to:"p_bauq",l:"Go to lane 6: BAU queue"},
+      {id:"p_open2",type:"q",k:"req",l:"Is the NewCo team open?",d:"The Mural's time-of-day check.",r:["FR2-01","FR2-02"]},
+      {id:"p_go4",type:"go",to:"p_connect",l:"Go to lane 4: Team open"},
+      {id:"p_go5",type:"go",to:"p_tc",l:"Go to lane 5: Team closed"}
+    ],edges:[
+      ["p_lic3","p_lic3bau","Lorry or bus"],["p_lic3","p_baumsg","Another vehicle"],
+      ["p_baumsg","p_cbavail"],["p_cbavail","p_bauopt","Yes"],["p_cbavail","p_bauopt2","No"],
+      ["p_bauopt","p_privcb","Presses 1: callback"],["p_bauopt","p_bautxt","Presses 2: text link"],["p_bauopt","p_priv","Waits"],
+      ["p_bauopt2","p_bautxt","Presses 2: text link"],["p_bauopt2","p_priv","Waits"],
+      ["p_privcb","p_gocb"],["p_priv","p_ref"],
+      ["p_ref","p_refq"],
+      ["p_refq","p_intable","Gives the reference"],["p_refq","p_retry","Not 9 digits"],["p_refq","p_whereref","Doesn't have it"],["p_whereref","p_go6"],
+      ["p_retry","p_retryq"],["p_retryq","p_intable","Yes"],["p_retryq","p_go6","No"],
+      ["p_intable","p_open2","Yes"],["p_intable","p_notnc","No"],["p_intable","p_cant","Can't be checked"],
+      ["p_open2","p_go4","Yes"],["p_open2","p_go5","No"]
+    ]},
+    {id:"p4",t:"NewCo team open",nodes:[
+      {id:"p_connect",type:"step",k:"req",l:"Told they're being put through to their team",sc:["connect_team"],r:["FR1-13"]},
+      {id:"p_q",type:"step",k:"req",l:"Joins the NewCo queue",sc:["queue_msg"],d:"While the team is open, the caller waits for their team, whether or not an agent is free.",r:["FR2-02","FR8-24"]},
+      {id:"p_qwait",type:"q",k:"req",dflt:"No",l:"Is the estimated wait over X minutes?",d:"X is set by demand management. BAU uses 2 minutes today; it has been 10.",r:["FR8-N2","FR3-07"]},
+      {id:"p_cbres",type:"q",k:"req",dflt:"Yes",l:"Is there enough resource for a callback?",d:"Demand management checks this before a callback is offered (confirmed by the developers on 28 September).",r:["FR8-N2","FR8-N4"]},
+      {id:"p_busy",type:"step",k:"req",l:"Told the team is busy: ask for a callback or keep waiting",sc:["busy_msg"],r:["FR8-N4"]},
+      {id:"p_busyq",type:"q",k:"req",dflt:"Stays on the line",l:"What does the caller do?",r:["FR8-N4"]},
+      {id:"p_gomb",type:"go",to:"p_mbnum",l:"Go to lane 5: Callback request"},
+      {id:"p_qcb",type:"step",k:"req",l:"Offered a callback from the team",sc:["queue_cb"],r:["FR8-N2"]},
+      {id:"p_qcbq",type:"q",k:"req",dflt:"Stays on the line",l:"What does the caller do?",r:["FR8-N2"]},
+      {id:"p_gocb2",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"},
+      {id:"p_agent",type:"end",k:"req",l:"NewCo agent answers",r:["FR2-02","FR6-01"]}
+    ],edges:[
+      ["p_connect","p_q"],["p_q","p_qwait"],["p_qwait","p_cbres","Yes"],["p_qwait","p_agent","No"],["p_cbres","p_qcb","Yes"],["p_cbres","p_busy","No"],["p_busy","p_busyq"],["p_busyq","p_gomb","Presses 1: callback request"],["p_busyq","p_agent","Stays on the line"],["p_qcb","p_qcbq"],["p_qcbq","p_gocb2","Presses 1: callback"],["p_qcbq","p_agent","Stays on the line"]
+    ]},
+    {id:"p5",t:"NewCo team closed, or a callback request",nodes:[
+      {id:"p_tc",type:"step",k:"req",l:"Told the team is closed: ask for a callback or speak to another adviser",sc:["team_closed"],d:"Between 4pm and 7pm: the NewCo team (8am to 4pm) is closed, but the phone line (8am to 7pm) is open.",r:["FR2-01"]},
+      {id:"p_ch",type:"q",k:"req",l:"What does the caller choose?",d:"Press 2 is to be confirmed on 29 September. Outside the phone line's hours (8am to 7pm), callers hear the closed message instead.",r:["FR2-01","FR2-07"]},
+      {id:"p_close",type:"end",k:"req",l:"Closing message. Call ends.",sc:["closing"],r:["FR2-07"]},
+      {id:"p_mbnum",type:"q",k:"req",dflt:"Number shown",l:"Is the caller's number shown?",d:"The reference was given earlier in the call, so it isn't asked for again. No voice message is recorded.",r:["FR2-08","FR1-N7","FR1-N8"]},
+      {id:"p_mbrb",type:"step",k:"req",l:"Number read back to confirm",sc:["cb_req_rb"],r:["FR2-08"]},
+      {id:"p_mbrbq",type:"q",k:"req",dflt:"Right: presses 1",l:"Is the number right?",r:["FR2-08","FR2-09"]},
+      {id:"p_mbent",type:"step",k:"req",l:"Asked to enter a number on the keypad",sc:["cb_req_enter"],d:"Keypad entry is new: the BAU phone line doesn't take it today.",r:["FR2-09","FR1-N6"]},
+      {id:"p_mbentq",type:"q",k:"req",dflt:"Yes",l:"Number confirmed before the attempts run out?",r:["FR2-09","FR2-11"]},
+      {id:"p_mbsend",type:"q",k:"req",dflt:"Yes",l:"Did the request send?",r:["FR2-10","FR2-12"]},
+      {id:"p_mbok",type:"step",k:"req",l:"Told the team will call back",sc:["cb_req_ok"],r:["FR2-10"]},
+      {id:"p_vmq",type:"end",k:"req",l:"Emailed to the NewCo mailbox: the team calls back",r:["FR2-13","FR2-14","FR2-18","FR2-19","FR2-20","FR2-21","FR2-22"]},
+      {id:"p_close2",type:"end",k:"req",l:"Closing message. Call ends.",sc:["closing"],r:["FR2-11"]},
+      {id:"p_vmdown",type:"step",k:"req",l:"Told the request couldn't be sent, and offered another adviser",sc:["cb_req_unavail"],r:["FR2-12"]},
+      {id:"p_adv",type:"step",k:"req",l:"Put through to another adviser in the BAU queue",sc:["to_adviser"],d:"To be confirmed on 29 September: whether BAU advisers answer NewCo customers here.",r:["FR2-01"]},
+      {id:"p_advend",type:"end",k:"req",l:"BAU adviser helps. Contact logged on the case.",d:"The Mural: log it on the record so the team can see and follow up. To be confirmed on 29 September: whether BAU advisers answer NewCo customers here."}
+    ],edges:[
+      ["p_tc","p_ch"],
+      ["p_ch","p_mbnum","Presses 1: callback request"],["p_ch","p_adv","Presses 2: another adviser"],["p_ch","p_close","Presses nothing"],
+      ["p_mbnum","p_mbrb","Number shown"],["p_mbnum","p_mbent","Withheld"],["p_mbrb","p_mbrbq"],
+      ["p_mbrbq","p_mbsend","Right: presses 1"],["p_mbrbq","p_mbent","Wrong: presses 2"],
+      ["p_mbent","p_mbentq"],["p_mbentq","p_mbsend","Yes"],["p_mbentq","p_close2","No"],
+      ["p_mbsend","p_mbok","Yes"],["p_mbsend","p_vmdown","No: mailbox not working"],
+      ["p_mbok","p_vmq"],["p_vmdown","p_adv"],["p_adv","p_advend"]
+    ]},
+    {id:"p6",t:"BAU queue",nodes:[
+      {id:"p_bauq",type:"step",k:"today",l:"Waits in the BAU queue, then a BAU adviser answers"},
+      {id:"p_marker",type:"q",k:"req",l:"NewCo marker on the case?",d:"Shown on the Dynamics front screen.",r:["FR4-17","FR4-18"]},
+      {id:"p_asnow",type:"end",k:"today",l:"Adviser helps, as today"},
+      {id:"p_open3",type:"q",k:"req",l:"Is the NewCo team open?",d:"Transfer only while the team is open.",r:["FR1-N3","FR1-N4"]},
+      {id:"p_xfer",type:"step",k:"req",l:"Adviser transfers the caller to the team",d:"The same transfer FR4 gives web chat. Information already given goes with the call.",r:["FR1-N3","FR1-N9"]},
+      {id:"p_helprec",type:"end",k:"req",l:"Adviser helps. Contact logged on the case."},
+      {id:"p_go4b",type:"go",to:"p_q",l:"Go to lane 4: NewCo queue"}
+    ],edges:[
+      ["p_bauq","p_marker"],["p_marker","p_open3","Yes"],["p_marker","p_asnow","No"],
+      ["p_open3","p_xfer","Yes"],["p_open3","p_helprec","No"],["p_xfer","p_go4b"]
+    ]},
+    {id:"p7",t:"Callback",nodes:[
+      {id:"p_cbnum",type:"q",k:"today",asis:true,l:"Which number should we call?",d:"The existing callback steps.",r:["FR8-27","FR8-29"]},
+      {id:"p_newnum",type:"step",k:"today",l:"Enters a different number",r:["FR8-29"]},
+      {id:"p_numrb",type:"step",k:"req",l:"Number checked and read back to confirm",d:"Invalid details are asked for again, up to the agreed number of tries.",r:["FR8-29","FR8-31"]},
+      {id:"p_hasref",type:"q",k:"req",dflt:"No",seen:["p_ref","Yes"],l:"Reference already given in this call?",d:"Don't ask for it twice: a general principle (FR1-NF2).",r:["FR8-N1"]},
+      {id:"p_askref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"From the Mural callback lane and FR8-27.",r:["FR8-27","FR8-30","FR8-31"]},
+      {id:"p_intable2",type:"q",k:"req",l:"Is it a NewCo reference?",d:"FR8-30 and the Mural use the reference check to decide where the callback goes. To confirm with Telecoms: whether an automatic callback asked for before the reference can move from the BAU queue to the NewCo queue.",r:["FR8-30"]},
+      {id:"p_cbhrs",type:"q",k:"req",l:"Is the NewCo team open?",d:"From the Mural: triage NewCo callbacks on operating hours.",r:["FR8-N1","FR8-N3"]},
+      {id:"p_cbok",type:"step",k:"req",l:"Callback confirmed. Call ends.",sc:["callback_ok"],r:["FR8-28","FR8-N1"]},
+      {id:"p_cbq",type:"step",k:"req",l:"Keeps their place in the NewCo queue. Called back automatically when it's their turn.",d:"As today for BAU: an automatic callback on the day, in queue order. There's no control over the exact time.",r:["FR8-N1"]},
+      {id:"p_cbans",type:"q",k:"today",l:"Does the customer answer?"},
+      {id:"p_cbagent",type:"end",k:"req",l:"Connected to a NewCo agent"},
+      {id:"p_cbmiss",type:"end",k:"today",l:"Call ends. The customer needs to call again.",d:"As today: if the customer misses the callback, it's up to them to call back."},
+      {id:"p_go5b",type:"go",to:"p_tc",l:"Go to lane 5: Team closed"},
+      {id:"p_baucb",type:"end",k:"today",l:"BAU callback, as today: keeps their place in the BAU queue"}
+    ],edges:[
+      ["p_cbnum","p_numrb","Presses 1: this number"],["p_cbnum","p_newnum","Presses 2: a different number"],["p_newnum","p_numrb"],["p_numrb","p_hasref"],
+      ["p_hasref","p_askref","No"],["p_hasref","p_intable2","Yes"],["p_askref","p_intable2"],
+      ["p_intable2","p_cbhrs","Yes"],["p_intable2","p_baucb","No"],
+      ["p_cbhrs","p_cbok","Yes"],["p_cbhrs","p_go5b","No"],["p_cbok","p_cbq"],["p_cbq","p_cbans"],["p_cbans","p_cbagent","Yes"],["p_cbans","p_cbmiss","No"]
+    ]}
+  ]
+};
+/* ==================== end of the copy from the map ==================== */
+
+
+/* ====================================================================
+   FICTIONAL DATA. Invented. Phone numbers are from Ofcom's range kept
+   for drama (07700 900xxx), and no reference below belongs to anyone.
+   ==================================================================== */
+const CUSTOMERS = {
+  newco:{name:"Dana Whitlow", ref:"604318927", phone:"07700900417", newco:true,
+         about:"Told DVLA about epilepsy in June. Their case is with the NewCo team."},
+  bau:  {name:"Rhys Okafor", ref:"512077384", phone:"07700900862", newco:false,
+         about:"Applied to renew after a heart condition. Their case isn't with the NewCo team."},
+  first:{name:"Morag Tennant", ref:null, phone:"07700900153", newco:false,
+         about:"Diagnosed with diabetes last week. Calling to tell DVLA for the first time, so has no letter."}
+};
+/* The fictional lookup table: references the phone line treats as NewCo. */
+const NEWCO_REFS = ["604318927","604318955","604319012","604319140"];
+/* The reference a NewCo agent gives at the end of a first notification. */
+const NEW_REF = "604331786";
+
+/* Made-up values for the placeholders in the scripts. */
+const TIMES = {
+  morning:{t:"Tuesday 29 September, 10:20am", line:true,  team:true},
+  late:   {t:"Tuesday 29 September, 5:15pm",  line:true,  team:false},
+  night:  {t:"Tuesday 29 September, 8:05pm",  line:false, team:false}
+};
+const WAITS = {bauLong:25, bauShort:6, newcoLong:18, newcoShort:3};  /* minutes */
+const X_MINUTES = 10;           /* the callback threshold: "X is set by demand management" */
+const MAX_TRIES = 3;            /* "the agreed number of tries": not agreed, so 3 */
+const TEAM_HOURS = "Monday to Friday, 8am to 4pm";
+const BAU_CALLBACK_HOURS = "Monday to Friday, 8am to 5pm";
+const NEXT_WORKING_DAY = "tomorrow, Wednesday 30 September";
+const ADVISERS = {newco:"Leah", bau:"Sam"};
+
+/* Timings for the simulation itself, in real milliseconds. */
+const NO_INPUT_MS = 6000, INTERDIGIT_MS = 4000, HOLD_MS = 5000, RING_MS = 15000;
+
+/* What the phone system decides, and the scenarios that set it. */
+const CONDS = [
+  ["bauWaitLong",  "The main queue's wait is over X minutes", "The caller hears the wait time and the web chat message first."],
+  ["webChatOpen",  "Web chat is open", "If not, the wait-time message doesn't offer it."],
+  ["bauCallbacks", "Main-line callbacks are available", "Inside callback hours and with capacity."],
+  ["lookupWorks",  "The reference check is working", "If not, a NewCo reference can't be recognised."],
+  ["newcoWaitLong","The NewCo queue's wait is over X minutes", "X is "+X_MINUTES+" here. Triggers the callback offer."],
+  ["cbResource",   "There's enough resource for a NewCo callback", "Checked by demand management before the offer."],
+  ["numberShown",  "The caller's number is shown", "Not withheld."],
+  ["mailboxWorks", "Callback requests reach the NewCo mailbox", ""],
+  ["fnSwitch",     "First-notification routing to NewCo is switched on", ""],
+  ["agentFree",    "A NewCo agent is free for a first notification", ""]
+];
+const BASE = {time:"morning", bauWaitLong:false, webChatOpen:true, bauCallbacks:true, lookupWorks:true,
+  newcoWaitLong:false, cbResource:true, numberShown:true, mailboxWorks:true, fnSwitch:true, agentFree:true};
+
+const PLAY_TO_REF = ["Press 2 to carry on in English.","Press 1, or use “Say: my application”.","Press 2: not a lorry or bus.","When offered a callback or a text, stay on the line."];
+const SCENARIOS = [
+  {id:"team-open", t:"NewCo customer, team open", who:"newco", c:{},
+   blurb:"The route the design is for. A NewCo customer calls in the morning and is put through to their team.",
+   play:[...PLAY_TO_REF,"Enter 604 318 927, or use “Say the reference”.","Wait for the team to answer."]},
+  {id:"long-queue", t:"NewCo customer, long queue, callback offered", who:"newco", c:{bauWaitLong:true,newcoWaitLong:true},
+   blurb:"A busy morning. Both queues are long, and the team offers a callback.",
+   play:["Stay on the line after the web chat offer.",...PLAY_TO_REF,"Enter the reference.","When the team offers a callback, press 1.","Press 1 to use this number.","Answer when the phone rings."]},
+  {id:"team-busy", t:"NewCo customer, team busy, no callback slot", who:"newco", c:{newcoWaitLong:true,cbResource:false},
+   blurb:"The team's queue is long and there's no resource for a callback, so the caller can only ask the team to call back.",
+   play:[...PLAY_TO_REF,"Enter the reference.","When told the team is busy, press 1.","Press 1: the number is right."]},
+  {id:"after-4pm", t:"NewCo customer calls after 4pm", who:"newco", c:{time:"late"},
+   blurb:"The phone line is open until 7pm, but the NewCo team closes at 4pm.",
+   play:[...PLAY_TO_REF,"Enter the reference.","When told the team is closed, press 1 to ask for a callback, 2 for another adviser, or nothing."]},
+  {id:"mailbox-down", t:"After 4pm, callback request can't be sent", who:"newco", c:{time:"late",mailboxWorks:false},
+   blurb:"The caller asks the team to call back, but the request can't reach the mailbox.",
+   play:[...PLAY_TO_REF,"Enter the reference.","Press 1 to ask for a callback.","Press 1: the number is right."]},
+  {id:"no-reference", t:"NewCo customer without their reference", who:"newco", c:{},
+   blurb:"The caller can't find their letter. They go to the main queue, then get transferred to the team.",
+   play:[...PLAY_TO_REF,"When asked for the reference, press nothing, or use “Say: I don't have it”.","Wait: the call goes through two queues."]},
+  {id:"not-newco", t:"Customer whose case isn't with NewCo", who:"bau", c:{},
+   blurb:"Everything as today. The reference check says no, and the caller joins the main queue.",
+   play:[...PLAY_TO_REF,"Enter 512 077 384, or use “Say the reference”."]},
+  {id:"first-notification", t:"First notification of a new condition", who:"first", c:{},
+   blurb:"Someone telling DVLA about a condition for the first time. With an agent free, NewCo takes the call and gives a reference.",
+   play:["Press 2 to carry on in English.","Press 2, or use “Say: a new medical condition”.","Press 2: not a lorry or bus.","Press 2 to speak to an adviser."]},
+  {id:"line-closed", t:"Calling after the line closes", who:"newco", c:{time:"night"},
+   blurb:"After 7pm the caller hears today's closed message. Out-of-hours callback requests are a known gap.",
+   play:["Just listen."]}
+];
+const SC_BY_ID = {}; SCENARIOS.forEach(s=>SC_BY_ID[s.id]=s);
+/* Which scenario a lane opens with, when a step is opened directly. */
+const LANE_SC = {p1:"team-open",p2:"first-notification",p3:"team-open",p4:"long-queue",p5:"after-4pm",p6:"no-reference",p7:"long-queue"};
+
+
+/* ====================================================================
+   WORDING THE MAP DOESN'T HAVE
+   ASIS: today's steps. Stand-ins until the real scripts arrive. No change
+   required, so these are labelled "TBC script (as-is)".
+   GAP: NewCo steps with no script in the map. Also stand-ins.
+   HUMAN: what an adviser might say. Illustrative only.
+   Placeholders in [square brackets] are filled by phValue().
+   ==================================================================== */
+const ASIS = {
+  p_start:"Thank you for calling DVLA, Drivers Medical.",
+  p_closed:"Our lines are now closed. We're open Monday to Friday, 8am to 7pm. You can find out about medical conditions and driving on GOV.UK. Goodbye.",
+  p_msgs:()=>C().webChatOpen
+    ? "We're very busy at the moment, and you may wait about [bau wait] to speak to an adviser. You may get help more quickly using web chat. To get a text with a link to web chat, press 1. Or stay on the line."
+    : "We're very busy at the moment, and you may wait about [bau wait] to speak to an adviser. Please stay on the line.",
+  p_wcend:"Thank you. We've sent a text with a link to web chat to the mobile you're calling from. Goodbye.",
+  p_welsh:"For the Welsh language service, press 1. To carry on in English, press 2.",
+  p_says:"Please tell me in a few words what your call is about. If you're calling about an application you've already made, press 1. If you want to tell us about a new medical condition, press 2.",
+  p_rep:"Sorry, I didn't catch that. If you're calling about an application you've already made, press 1. If you want to tell us about a new medical condition, press 2.",
+  p_typefail:"Please hold, and we'll put you through to an adviser.",
+  p_lorry:"Is this about a lorry or bus licence? If it is, press 1. For a car, motorcycle or any other vehicle, press 2.",
+  p_onl2:"You can tell us about a medical condition online. It's usually quicker than calling. To get a text with a link to the online service, press 1. To speak to an adviser, press 2.",
+  p_txt:"Thank you. We've sent a text with the link to the mobile you're calling from. Goodbye.",
+  p_fnbau:"Please hold, and we'll put you through to an adviser.",
+  p_lic3:"Is your application for a lorry or bus licence? If it is, press 1. For a car, motorcycle or any other vehicle, press 2.",
+  p_lic3bau:"Please hold, and we'll put you through to an adviser.",
+  p_baumsg:"If nothing has changed on your application recently, our advisers may not be able to tell you any more than we've already told you in writing.",
+  p_bauopt:"You can ask us to call you back when an adviser is free, instead of waiting on the line. To ask for a callback, press 1. To get a text with a link to check your application online, press 2. Or stay on the line.",
+  p_bauopt2:"We can't offer callbacks at the moment. Callbacks are available [callback hours]. To get a text with a link to check your application online, press 2. Or stay on the line.",
+  p_bautxt:"We'll send the text to the mobile ending [last 3 digits]. Thank you. Goodbye.",
+  p_priv:"Calls are recorded for training and quality purposes. To find out how DVLA uses your information, search for DVLA privacy notice on GOV.UK. You're in a queue, and an adviser will be with you as soon as they can.",
+  p_privcb:"Calls are recorded for training and quality purposes. To find out how DVLA uses your information, search for DVLA privacy notice on GOV.UK.",
+  p_cbnum:()=>C().numberShown
+    ? "We'll call you back on the number ending [last 3 digits]. To use this number, press 1. To give a different number, press 2."
+    : "We can't see the number you're calling from. To give the number we should call you back on, press 2.",
+  p_newnum:"Please enter the number we should call you back on, then press hash.",
+  p_baucb:"Thank you. We'll call you back when an adviser is free. Please keep your phone nearby. Goodbye."
+};
+const GAP = {
+  p_numrb:"Thank you. We'll call you back on [caller number]."
+};
+const HUMAN = {
+  newco:{who:"newco", t:"Hello, you're through to the team looking after your case. My name's [adviser]. Can I check your name, please?"},
+  newcoCb:{who:"newco", t:"Hello, this is DVLA calling you back. You're through to the team looking after your case. My name's [adviser]. Can I check your name, please?"},
+  newcoFn:{who:"newco", t:"Hello, my name's [adviser]. I can help you tell us about a medical condition. Can I start with your name, please?"},
+  bau:{who:"bau", t:"Hello, DVLA Drivers Medical, you're speaking to [adviser]. Can I start with your reference number, please?"},
+  xfer:{who:"bau", t:"Thanks. I can see your case is with a team who are looking after it, and they're open now, so I'm going to put you through to them. Please hold."}
+};
+/* Where a person speaks, and which queue the caller waits in first. */
+const PERSON = {
+  p_agent:{hold:"newco", human:"newco"},
+  p_cbagent:{human:"newcoCb"},
+  p_fnagent:{human:"newcoFn"},
+  p_bauq:{hold:"bau", human:"bau"},
+  p_xfer:{human:"xfer"},
+  p_notnc:{hold:"bau", human:"bau"}, p_cant:{hold:"bau", human:"bau"}, p_fnbau:{hold:"bau", human:"bau"},
+  p_typefail:{hold:"bau", human:"bau"}, p_lic3bau:{hold:"bau", human:"bau"}, p_advend:{hold:"bau", human:"bau"}
+};
+
+const KINDS = {
+  req:  {t:"From the requirements", c:"govuk-tag--blue",   hint:"Script written in the requirements."},
+  sug:  {t:"Draft script",          c:"govuk-tag--purple", hint:"Suggested in the routing map. Not agreed."},
+  asis: {t:"TBC script (as-is)",    c:"govuk-tag--grey",   hint:"No change required. Stand-in wording until we have today's script."},
+  gap:  {t:"No script yet",         c:"govuk-tag--orange", hint:"A NewCo step the map has no script for. Stand-in wording."},
+  human:{t:"Adviser, not scripted", c:"govuk-tag--teal",   hint:"Illustrative. The conversation itself isn't simulated."}
+};
+const WHO = {ivr:"Phone line", newco:"NewCo agent", bau:"Adviser"};
+
+
+/* ====================================================================
+   The route, indexed
+   ==================================================================== */
+const NODE = {}, OUT = {}, LANE = {};
+PHONE.lanes.forEach(ln=>ln.nodes.forEach(n=>{ NODE[n.id]=n; LANE[n.id]=ln; OUT[n.id]=[]; }));
+PHONE.lanes.forEach(ln=>ln.edges.forEach(e=>OUT[e[0]].push({to:e[1], l:e[2]||""})));
+function next(id, label){
+  const o = OUT[id], e = label==null ? o[0] : o.find(x=>x.l===label);
+  if(!e) throw new Error("The map has no route from "+id+" for “"+label+"”");
+  return e.to;
+}
+
+
+/* ====================================================================
+   State
+   ==================================================================== */
+const state = {};
+function resetState(){
+  state.screen = "all-screens";
+  state.showNotes = false;
+  state.showSys = true;
+  state.sound = true;
+  state.sc = "team-open";
+  state.startAt = null;
+  state.cond = {...BASE};
+  state.changed = false;
+  state.call = null;
+}
+resetState();
+function C(){ return state.cond; }
+function CUST(){ return CUSTOMERS[SC_BY_ID[state.sc].who]; }
+function newCall(){
+  return {phase:"idle", sim:0, log:[], route:[], turn:0, listen:null, buffer:"",
+    ref:null, refGiven:false, cbNumber:null, tries:{}, repeats:{},
+    speaking:null, hold:null, humanAt:null, prompts:0, presses:0, gaps:0, outcome:null, endId:null};
+}
+
+
+/* ====================================================================
+   Helpers
+   ==================================================================== */
+const $ = s=>document.querySelector(s);
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function note(title, body){
+  if(!state.showNotes) return "";
+  return '<div class="design-note"><strong>Design note — '+esc(title)+'</strong>'+body+'</div>';
+}
+function tag(kind){ const k=KINDS[kind]; return '<strong class="govuk-tag log-tag '+k.c+'">'+esc(k.t)+'</strong>'; }
+function clock(s){ const m=Math.floor(s/60), r=s%60; return m+":"+String(r).padStart(2,"0"); }
+function dur(s){ const m=Math.floor(s/60), r=s%60; return (m? m+" min ":"")+r+" sec"; }
+function spacedRef(r){ return r.replace(/(\d{3})(\d{3})(\d{3})/,"$1 $2 $3"); }
+function spacedPhone(p){ return p.replace(/^(\d{5})(\d{3})(\d+)$/,"$1 $2 $3"); }
+function sayDigits(d){ return d.split("").join(" ").replace(/(\d \d \d) /g,"$1, "); }
+function mapLink(id){ return 'newco-routing-map.html#/map/phone/'+id; }
+function words(t){ return t.split(/\s+/).filter(Boolean).length; }
+
+
+/* ====================================================================
+   Prompts: which wording a step has, and its placeholders filled in
+   ==================================================================== */
+function promptOf(id){
+  const n = NODE[id];
+  if(n.sc && n.sc.length){ const s=SCRIPTS[n.sc[0]]; return {text:s.t, kind:s.src, who:s.who==="Agent"?"newco":"ivr", sc:n.sc[0]}; }
+  if(ASIS[id]) return {text:typeof ASIS[id]==="function"?ASIS[id]():ASIS[id], kind:"asis", who:"ivr"};
+  if(GAP[id])  return {text:GAP[id], kind:"gap", who:"ivr"};
+  return null;
+}
+function phValue(key){
+  const call = state.call || {}, cust = CUST();
+  const num = call.cbNumber || cust.phone;
+  switch(key){
+    case "Estimated wait.": { const w=C().newcoWaitLong?WAITS.newcoLong:WAITS.newcoShort; return {show:"Your estimated wait is about "+w+" minutes.", say:"Your estimated wait is about "+w+" minutes."}; }
+    case "bau wait": { const w=C().bauWaitLong?WAITS.bauLong:WAITS.bauShort; return {show:w+" minutes", say:w+" minutes"}; }
+    case "last 3 digits": return {show:num.slice(-3), say:sayDigits(num.slice(-3))};
+    case "caller number": return {show:spacedPhone(num), say:sayDigits(num)};
+    case "days and hours": return {show:TEAM_HOURS, say:TEAM_HOURS};
+    case "callback hours": return {show:BAU_CALLBACK_HOURS, say:BAU_CALLBACK_HOURS};
+    case "by the end of the next working day": return {show:"by the end of the next working day", say:"by the end of the next working day"};
+    case "number": return {show:spacedRef(NEW_REF), say:sayDigits(NEW_REF)};
+    case "the next working day": return {show:NEXT_WORKING_DAY, say:NEXT_WORKING_DAY};
+    case "adviser": return null;
+  }
+  return null;
+}
+/* One sentence at a time, so subtitles keep pace and long prompts don't
+   hit the browser's cut-off for long utterances. */
+function segments(text, who){
+  return text.split(/\n+|(?<=[.?!])\s+(?=[A-Z“])/).filter(s=>s.trim()).map(s=>{
+    let show="", say="", last=0;
+    s.replace(/\[([^\]]+)\]/g,(m,key,i)=>{
+      show += esc(s.slice(last,i)); say += s.slice(last,i);
+      if(key==="adviser"){ const nm=ADVISERS[who==="bau"?"bau":"newco"]; show+=esc(nm); say+=nm; }
+      else {
+        const v = phValue(key);
+        if(v){ show += '<mark class="ph" title="Placeholder in the script: ['+esc(key)+']. Made-up value.">'+esc(v.show)+'</mark>'; say += v.say; }
+        else { show += '<mark class="ph">['+esc(key)+']</mark>'; say += key; }
+      }
+      last = i+m.length; return m;
+    });
+    show += esc(s.slice(last)); say += s.slice(last);
+    return {show, say};
+  });
+}
+
+
+/* ====================================================================
+   Sound: voice, keypad tones, ringing, hold music. All made in the
+   browser, nothing loaded.
+   ==================================================================== */
+const canSpeak = "speechSynthesis" in window;
+let VOICES = [];
+function loadVoices(){
+  if(!canSpeak) return;
+  const all = speechSynthesis.getVoices();
+  VOICES = all.filter(v=>/^en[-_]GB/i.test(v.lang));
+  if(!VOICES.length) VOICES = all.filter(v=>/^en/i.test(v.lang));
+}
+if(canSpeak){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function voiceFor(who){ if(!VOICES.length) return null; return who==="ivr" ? VOICES[0] : (VOICES[1]||VOICES[0]); }
+
+let AC = null;
+function ac(){
+  if(!AC){ const A = window.AudioContext||window.webkitAudioContext; if(A) AC = new A(); }
+  if(AC && AC.state==="suspended") AC.resume();
+  return AC;
+}
+function tone(freqs, start, ms, vol, type){
+  const a = ac(); if(!a || !state.sound) return;
+  const g = a.createGain(); g.gain.value = vol||0.06; g.connect(a.destination);
+  const t = a.currentTime + (start||0);
+  freqs.forEach(f=>{ const o=a.createOscillator(); o.type=type||"sine"; o.frequency.value=f; o.connect(g); o.start(t); o.stop(t+ms/1000); });
+}
+const DTMF = {"1":[697,1209],"2":[697,1336],"3":[697,1477],"4":[770,1209],"5":[770,1336],"6":[770,1477],
+  "7":[852,1209],"8":[852,1336],"9":[852,1477],"*":[941,1209],"0":[941,1336],"#":[941,1477]};
+function ringCycle(){ tone([400,450],0,400,.05); tone([400,450],.6,400,.05); }  /* the UK double ring */
+let MUSIC = null;
+function startMusic(){
+  stopMusic(); if(!state.sound) return;
+  const notes=[523,659,784,659,587,698,880,698], i={n:0};
+  MUSIC = setInterval(()=>{ tone([notes[i.n++%notes.length]],0,380,.03,"triangle"); }, 420);
+}
+function stopMusic(){ if(MUSIC){ clearInterval(MUSIC); MUSIC=null; } }
+let RINGER = null;
+function stopRinger(){ if(RINGER){ clearInterval(RINGER); RINGER=null; } }
+
+
+/* ====================================================================
+   The call engine
+   Every step bumps call.turn. Anything waiting on speech, a timer or a
+   hold checks its turn when it resumes, and stops if the call has moved
+   on (a key cut the prompt off, or the caller hung up).
+   ==================================================================== */
+const T = {noInput:null, digit:null, auto:null, tick:null, hold:null};
+function clearTimers(){ clearTimeout(T.noInput); clearTimeout(T.digit); clearTimeout(T.auto); clearTimeout(T.hold); T.noInput=T.digit=T.auto=T.hold=null; }
+
+function log(e){ const call=state.call; e.at=call.sim; call.log.push(e); renderLog(); }
+function gap(text){ state.call.gaps++; log({t:"gap", text}); }
+
+function cutSpeech(){
+  const sp = state.call && state.call.speaking;
+  if(!sp) return;
+  sp.cut = true;
+  if(canSpeak) speechSynthesis.cancel();
+  clearTimeout(T.auto);
+  sp.resolve(false);
+}
+
+/* Speak a prompt. Resolves true when it finishes, false if cut off. */
+function say(p, nodeId){
+  const call = state.call;
+  const segs = segments(p.text, p.who);
+  call.prompts++;
+  if(p.who!=="ivr" && call.humanAt==null){ call.humanAt = call.sim; }
+  log({t:"say", who:p.who, kind:p.kind, html:segs.map(s=>s.show).join(" "), node:nodeId, sc:p.sc});
+  return new Promise(resolve=>{
+    let done=false, i=0;
+    const sp = {cut:false, resolve:v=>{ if(!done){ done=true; call.speaking=null; renderPhone(); resolve(v); } }};
+    call.speaking = sp; call.subs = {who:p.who, html:""};
+    const step = ()=>{
+      if(sp.cut || done) return;
+      if(i>=segs.length){ sp.resolve(true); return; }
+      const s = segs[i++];
+      call.subs = {who:p.who, html:s.show}; renderPhone();
+      if(state.sound && canSpeak && speechSynthesis.getVoices().length){
+        const u = new SpeechSynthesisUtterance(s.say);
+        u.voice = voiceFor(p.who); u.lang = "en-GB"; u.rate = 1;
+        u.pitch = p.who==="ivr" ? 1 : (p.who==="newco" ? 1.15 : .85);
+        u.onend = step; u.onerror = step;
+        sp.utter = u;   /* kept, so the browser doesn't drop it mid-sentence */
+        speechSynthesis.speak(u);
+      } else {
+        T.auto = setTimeout(step, Math.max(1500, words(s.say)*380));
+      }
+    };
+    step();
+  });
+}
+
+function startCall(){
+  ac();   /* audio can only start from the click */
+  hangUpQuietly();
+  state.call = newCall();
+  const call = state.call;
+  call.phase = "dialling";
+  if(state.startAt){
+    const lane = LANE[state.startAt].id;
+    if(lane==="p4"||lane==="p5"){ call.ref = CUST().ref; call.refGiven = !!call.ref; }
+    log({t:"sys", text:"Started part-way through, at “"+NODE[state.startAt].l+"”."+(call.refGiven?" Treated as if the reference was already given.":"")});
+  }
+  renderAll();
+  T.tick = setInterval(()=>{ const c=state.call; if(c && ["dialling","live","hold","waiting","ringing"].includes(c.phase)){ c.sim++; renderClock(); } }, 1000);
+  ringCycle(); setTimeout(ringCycle, 3000);
+  const my = ++call.turn;
+  T.auto = setTimeout(()=>{ if(state.call!==call || my!==call.turn) return; call.phase="live"; go(state.startAt||PHONE.start); }, 5200);
+}
+
+async function go(id){
+  const call = state.call, my = ++call.turn;
+  clearTimers();
+  const n = NODE[id];
+  /* Digits typed while the step before was still talking belong to this question: keep them. */
+  if(!(call.listen && call.listen.q===id && n.type==="q")){ call.listen = null; call.buffer = ""; }
+  call.at = id; call.route.push(id);
+  if(n.type==="go") return go(n.to);
+
+  if(n.type==="q"){
+    if(SYSTEM[id]){
+      const r = SYSTEM[id]();
+      if(r.gap) gap(r.gap);
+      log({t:"sys", node:id, text:n.l+" "+r.a+(r.why?" ("+r.why+")":"")});
+      return go(next(id, r.a));
+    }
+    return ask(id);
+  }
+
+  /* A step or an end */
+  const person = PERSON[id];
+  if(id==="p_cbq"){
+    log({t:"sys", node:id, text:n.l});
+    call.phase = "waiting";
+    await hold(C().newcoWaitLong?WAITS.newcoLong:WAITS.newcoShort, "Waiting for the callback", false);
+    if(my!==call.turn) return;
+    return go(next(id));
+  }
+  const p = promptOf(id);
+  const ahead = aheadQ(id);
+  if(ahead) listen(ahead, id);
+  else if(INPUT[id]) listen(id, id);
+  const personSpeaks = async ()=>{
+    const h = HUMAN[person.human];
+    await say({text:h.t, kind:"human", who:h.who}, id);
+    if(my===call.turn && (n.type==="end" || id==="p_fnagent")) log({t:"sys", text:"The conversation with the adviser isn't simulated."});
+  };
+  if(person && person.hold){
+    /* "Please hold" plays first, then the queue, then a person answers */
+    if(p){ await say(p, id); if(my!==call.turn) return; }
+    const mins = person.hold==="newco" ? (C().newcoWaitLong?WAITS.newcoLong:WAITS.newcoShort) : (C().bauWaitLong?WAITS.bauLong:WAITS.bauShort);
+    await hold(mins, person.hold==="newco"?"In the NewCo queue":"In the main queue", true);
+    if(my!==call.turn) return;
+    await personSpeaks(); if(my!==call.turn) return;
+  } else {
+    if(person && person.human){ await personSpeaks(); if(my!==call.turn) return; }
+    if(p){ await say(p, id); if(my!==call.turn) return; }
+    else if(!person && n.type==="step"){ log({t:"sys", node:id, text:n.l}); }
+  }
+
+  if(n.type==="end") return finish(id);
+  if(INPUT[id]) return waitForInput(my);
+  return go(next(id));
+}
+
+/* The caller question straight after a step, if there is one: keys pressed
+   while the step is still talking count as the answer to it. */
+function aheadQ(id){
+  const o = OUT[id]; if(o.length!==1) return null;
+  const q = NODE[o[0].to], spec = INPUT[q.id];
+  if(q.type!=="q" || !spec) return null;
+  if(spec.auto && spec.auto()) return null;
+  return q.id;
+}
+
+async function ask(qid){
+  const call = state.call, my = call.turn, spec = INPUT[qid];
+  if(!spec) throw new Error("No input set up for "+qid);
+  if(spec.auto){
+    const a = spec.auto();
+    if(a){ log({t:"sys", node:qid, text:NODE[qid].l+" "+a+" (automatically)"}); return go(next(qid,a)); }
+  }
+  if(spec.ring) return ring(qid);
+  if(qid==="p_cbnum" && !C().numberShown) gap("The map's callback lane doesn't cover a withheld number. The simulator only offers to take a different number.");
+  if(!call.listen || call.listen.q!==qid) listen(qid, qid);
+  const p = promptOf(qid);
+  if(p){ await say(p, qid); if(my!==call.turn) return; }
+  waitForInput(my);
+}
+
+function listen(q, replay){ const call=state.call; call.listen = {q, spec:INPUT[q], replay}; call.buffer = ""; renderPhone(); }
+
+function waitForInput(my){
+  const call = state.call;
+  if(!call.listen || my!==call.turn) return;
+  clearTimeout(T.noInput); clearTimeout(T.digit);
+  if(call.buffer){ T.digit = setTimeout(()=>{ if(my===call.turn) complete(); }, INTERDIGIT_MS); }
+  else {
+    call.waitUntil = Date.now()+NO_INPUT_MS; renderPhone();
+    T.noInput = setTimeout(()=>{ if(my===call.turn) noInput(); }, NO_INPUT_MS);
+  }
+}
+
+function noInput(){
+  const call = state.call, L = call.listen, spec = L.spec;
+  log({t:"press", text:"Pressed nothing"});
+  if(spec.none!==undefined){
+    const r = typeof spec.none==="function" ? spec.none() : spec.none;
+    return resolveAnswer(r);
+  }
+  replayOrGiveUp("pressed nothing");
+}
+
+function replayOrGiveUp(why){
+  const call = state.call, L = call.listen;
+  call.repeats[L.q] = (call.repeats[L.q]||0)+1;
+  if(call.repeats[L.q] <= 2){
+    gap("The map doesn't say what happens when the caller "+why+" here. The simulator plays the prompt again.");
+    call.listen = null; call.buffer = "";
+    if(L.replay===L.q){ clearTimers(); call.turn++; return ask(L.q); }
+    return go(L.replay);
+  }
+  const q = NODE[L.q], a = q.dflt || OUT[L.q][0].l;
+  gap("Still no answer. The map doesn't say what happens next, so the simulator takes “"+a+"”.");
+  return go(next(L.q, a));
+}
+
+/* An answer is a label on the map, or RETRY, or NEXT for a step that
+   collects digits and then carries on. */
+const RETRY = {retry:true}, NEXT = {next:true};
+function resolveAnswer(r){
+  const call = state.call, L = call.listen;
+  if(r===NEXT) return go(next(L.q));
+  if(r===RETRY){
+    /* The first try at the reference happened at p_refq, before p_retryq */
+    call.tries[L.q] = (call.tries[L.q]||0)+1;
+    const used = call.tries[L.q] + (L.q==="p_retryq"?1:0);
+    if(used < MAX_TRIES){ call.listen = null; call.buffer = ""; return go(L.replay); }
+    if(L.spec.fail===NEXT){ gap("Out of tries. The map doesn't say what happens now, so the call carries on."); return go(next(L.q)); }
+    return go(next(L.q, L.spec.fail));
+  }
+  return go(next(L.q, r));
+}
+
+function complete(){
+  const call = state.call, L = call.listen; if(!L) return;
+  const b = call.buffer;
+  log({t:"press", text:"Entered "+(b||"nothing")});
+  return resolveAnswer(L.spec.done(b));
+}
+
+/* The caller presses a key */
+function press(k){
+  const call = state.call;
+  tone(DTMF[k], 0, 160, .06);
+  flashKey(k);
+  if(!call || !["live"].includes(call.phase)) return;
+  call.presses++;
+  const L = call.listen;
+  if(!L){ log({t:"press", text:"Pressed "+k+" (nothing is listening)"}); return; }
+  const spec = L.spec;
+  if(spec.collect){
+    cutSpeech();
+    clearTimeout(T.noInput);
+    if(k==="#"){ return complete(); }
+    if(k==="*") return;
+    call.buffer += k; renderPhone();
+    if(call.buffer.length>=spec.collect && !spec.hash) return complete();
+    if(call.buffer.length>=spec.collect+4) return complete();
+    if(!call.speaking){ clearTimeout(T.digit); const my=call.turn; T.digit=setTimeout(()=>{ if(my===call.turn) complete(); }, INTERDIGIT_MS); }
+    return;
+  }
+  cutSpeech();
+  log({t:"press", text:"Pressed "+k});
+  const keys = typeof spec.keys==="function" ? spec.keys() : spec.keys;
+  if(keys && keys[k]) return resolveAnswer(keys[k]);
+  if(spec.other) return resolveAnswer(spec.other);
+  replayOrGiveUp("presses a key that isn't an option");
+}
+
+/* The caller says something, where the phone line takes speech */
+function speak(i){
+  const call = state.call, L = call && call.listen; if(!L || call.phase!=="live") return;
+  const o = L.spec.say[i];
+  cutSpeech();
+  if(o.ref){
+    const ref = CUST().ref;
+    if(!ref){ log({t:"press", text:"Said “I don't have a reference”"}); return resolveAnswer(L.spec.none!==undefined ? (typeof L.spec.none==="function"?L.spec.none():L.spec.none) : RETRY); }
+    log({t:"press", text:"Said “"+spacedRef(ref)+"”"});
+    call.buffer = ref;
+    return resolveAnswer(L.spec.done(ref));
+  }
+  log({t:"press", text:"Said “"+o.heard+"”"});
+  return resolveAnswer(o.a);
+}
+
+function hold(mins, label, music){
+  const call = state.call, my = call.turn;
+  return new Promise(resolve=>{
+    if(call.phase!=="waiting") call.phase = "hold";
+    call.hold = {mins, label, done:()=>{
+      if(!call.hold) return;
+      clearTimeout(T.hold); stopMusic();
+      call.hold = null; call.sim += mins*60;
+      if(call.phase==="hold") call.phase = "live";
+      log({t:"time", text:label+": "+mins+" minutes pass"});
+      renderAll(); resolve();
+    }};
+    if(music) startMusic();
+    renderAll();
+    T.hold = setTimeout(()=>{ if(my===call.turn && call.hold) call.hold.done(); }, HOLD_MS);
+  });
+}
+
+function ring(qid){
+  const call = state.call, my = call.turn;
+  call.phase = "ringing"; call.listen = {q:qid, spec:INPUT[qid], replay:qid};
+  ringCycle(); RINGER = setInterval(ringCycle, 3000);
+  renderAll();
+  T.noInput = setTimeout(()=>{ if(my===call.turn){ stopRinger(); call.phase="live"; log({t:"press", text:"Didn't answer"}); go(next(qid, INPUT[qid].none)); } }, RING_MS);
+}
+function answerRing(yes){
+  const call = state.call; if(!call || call.phase!=="ringing") return;
+  stopRinger(); clearTimeout(T.noInput);
+  call.phase = "live";
+  log({t:"press", text:yes?"Answered the callback":"Declined the callback"});
+  go(next(call.listen.q, yes?INPUT[call.listen.q].answer:INPUT[call.listen.q].none));
+}
+
+function finish(id){
+  const call = state.call;
+  call.phase = "ended"; call.endId = id; call.outcome = NODE[id].l;
+  call.listen = null; call.turn++;
+  clearTimers(); clearInterval(T.tick); stopMusic(); stopRinger();
+  renderAll();
+}
+function hangUp(){
+  const call = state.call; if(!call || ["idle","ended"].includes(call.phase)) return;
+  cutSpeech(); log({t:"press", text:"Hung up"});
+  call.phase = "ended"; call.outcome = "The caller hung up"; call.endId = null;
+  call.listen = null; call.turn++;
+  clearTimers(); clearInterval(T.tick); stopMusic(); stopRinger();
+  if(canSpeak) speechSynthesis.cancel();
+  renderAll();
+}
+function hangUpQuietly(){
+  if(state.call){ state.call.turn++; cutSpeech(); }
+  clearTimers(); clearInterval(T.tick); stopMusic(); stopRinger();
+  if(canSpeak) speechSynthesis.cancel();
+}
+
+
+/* ====================================================================
+   What the phone system decides. Set by the scenario panel.
+   ==================================================================== */
+function newcoRef(r){ return NEWCO_REFS.includes(r); }
+const yn = b=>b?"Yes":"No";
+const SYSTEM = {
+  p_open:   ()=>({a:yn(TIMES[C().time].line), why:TIMES[C().time].t}),
+  p_waitq:  ()=>({a:yn(C().bauWaitLong), why:"estimated "+(C().bauWaitLong?WAITS.bauLong:WAITS.bauShort)+" minutes, X is "+X_MINUTES}),
+  p_sw:     ()=>({a:yn(C().fnSwitch)}),
+  p_free:   ()=>({a:yn(C().agentFree)}),
+  p_cbavail:()=>({a:yn(C().bauCallbacks)}),
+  p_intable:()=>{ const r=state.call.ref;
+    if(!C().lookupWorks) return {a:"Can't be checked"};
+    return {a:yn(newcoRef(r)), why:spacedRef(r)+(newcoRef(r)?" is":" isn't")+" in the table"}; },
+  p_open2:  ()=>({a:yn(TIMES[C().time].team), why:TIMES[C().time].t}),
+  p_open3:  ()=>({a:yn(TIMES[C().time].team), why:TIMES[C().time].t}),
+  p_cbhrs:  ()=>({a:yn(TIMES[C().time].team), why:TIMES[C().time].t}),
+  p_qwait:  ()=>({a:yn(C().newcoWaitLong), why:"estimated "+(C().newcoWaitLong?WAITS.newcoLong:WAITS.newcoShort)+" minutes, X is "+X_MINUTES}),
+  p_cbres:  ()=>({a:yn(C().cbResource)}),
+  p_mbnum:  ()=>({a:C().numberShown?"Number shown":"Withheld"}),
+  p_mbsend: ()=>({a:C().mailboxWorks?"Yes":"No: mailbox not working"}),
+  p_marker: ()=>({a:yn(CUST().newco), why:CUST().newco?"the case is with NewCo":"the case isn't with NewCo"}),
+  p_hasref: ()=>({a:yn(state.call.refGiven)}),
+  p_intable2:()=>{ const r=state.call.ref;
+    if(!r) return {a:"No", why:"no reference", gap:"No reference was given, and the map doesn't say what the check does then. The simulator treats it as not NewCo."};
+    if(!C().lookupWorks) return {a:"No", why:"the check isn't working", gap:"The map has no “can't be checked” branch for callbacks. The simulator treats it as not NewCo."};
+    return {a:yn(newcoRef(r)), why:spacedRef(r)+(newcoRef(r)?" is":" isn't")+" in the table"}; }
+};
+
+/* ====================================================================
+   What the caller can do at each question. Labels are the map's own.
+   ==================================================================== */
+function setRef(b){ state.call.ref=b; state.call.refGiven=true; }
+function validPhone(b){ return /^0\d{9,10}$/.test(b); }
+const SAY_TYPE = [
+  {label:"Say: my application", heard:"I'm calling about my application"},
+  {label:"Say: a new medical condition", heard:"I want to tell you about a new medical condition"},
+  {label:"Say something it won't recognise", heard:"Erm, it's about my letter"}
+];
+const INPUT = {
+  p_wcq:  {auto:()=>C().webChatOpen?null:"Carries on by phone", keys:{"1":"Chooses web chat"}, none:"Carries on by phone"},
+  p_welsh:{keys:{"1":"Presses 1: yes","2":"Presses 2: no"}},
+  p_type: {keys:{"1":"Existing application (says so or presses 1)","2":"New condition (says so or presses 2)"}, other:"Not recognised", none:"Not recognised",
+           say:SAY_TYPE.map((s,i)=>({...s, a:["Existing application (says so or presses 1)","New condition (says so or presses 2)","Not recognised"][i]}))},
+  p_type2:{keys:{"1":"Existing application","2":"New condition"}, other:"Still no valid answer", none:"Still no valid answer",
+           say:SAY_TYPE.map((s,i)=>({...s, a:["Existing application","New condition","Still no valid answer"][i]}))},
+  p_lorry:{keys:{"1":"Presses 1: lorry or bus","2":"Presses 2: any other vehicle"}},
+  p_onl2: {keys:{"1":"Presses 1: send the text","2":"Presses 2: speak to an adviser"}},
+  p_lic3: {keys:{"1":"Lorry or bus","2":"Another vehicle"}},
+  p_bauopt: {keys:{"1":"Presses 1: callback","2":"Presses 2: text link"}, none:"Waits"},
+  p_bauopt2:{keys:{"2":"Presses 2: text link"}, none:"Waits"},
+  p_refq: {collect:9, done:b=>b.length===9?(setRef(b),"Gives the reference"):"Not 9 digits", none:"Doesn't have it",
+           say:[{label:"Say the reference", ref:true},{label:"Say: I don't have it", heard:"I don't have it", a:"Doesn't have it"}]},
+  p_retryq:{collect:9, done:b=>b.length===9?(setRef(b),"Yes"):RETRY, none:()=>RETRY, fail:"No", say:[{label:"Say the reference", ref:true}]},
+  p_busyq:{keys:{"1":"Presses 1: callback request"}, none:"Stays on the line"},
+  p_qcbq: {keys:{"1":"Presses 1: callback"}, none:"Stays on the line"},
+  p_ch:   {keys:{"1":"Presses 1: callback request","2":"Presses 2: another adviser"}, none:"Presses nothing"},
+  p_mbrbq:{keys:{"1":"Right: presses 1","2":"Wrong: presses 2"}},
+  p_mbentq:{collect:11, hash:true, done:b=>validPhone(b)?(state.call.cbNumber=b,"Yes"):RETRY, none:()=>RETRY, fail:"No"},
+  p_cbnum:{keys:()=>C().numberShown ? {"1":"Presses 1: this number","2":"Presses 2: a different number"} : {"2":"Presses 2: a different number"}},
+  p_newnum:{collect:11, hash:true, done:b=>validPhone(b)?(state.call.cbNumber=b,NEXT):RETRY, none:()=>RETRY, fail:NEXT},
+  p_askref:{collect:9, done:b=>{ if(b.length===9) setRef(b); return NEXT; }, none:()=>NEXT, say:[{label:"Say the reference", ref:true}]},
+  p_cbans:{ring:true, answer:"Yes", none:"No"}
+};
+
+
+/* ====================================================================
+   Rendering: the phone
+   ==================================================================== */
+const HANDSET = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>';
+const KEYS = [["1",""],["2","ABC"],["3","DEF"],["4","GHI"],["5","JKL"],["6","MNO"],["7","PQRS"],["8","TUV"],["9","WXYZ"],["*",""],["0","+"],["#",""]];
+
+function phoneShell(){
+  return '<div class="phone" id="phone"><div class="phone__notch"></div>'
+    +'<div class="phone__screen" id="phone-screen"></div>'
+    +'<div class="keypad" role="group" aria-label="Keypad">'
+    + KEYS.map(k=>'<button type="button" class="key" data-key="'+k[0]+'" aria-label="'+(k[0]==="*"?"star":k[0]==="#"?"hash":k[0])+'"><span class="key__n" aria-hidden="true">'+k[0]+'</span><span class="key__l" aria-hidden="true">'+k[1]+'</span></button>').join("")
+    +'</div>'
+    +'<div class="phone__say" id="phone-say"></div>'
+    +'<div class="phone__actions" id="phone-actions"></div>'
+    +'</div>'
+    +'<div class="sim__controls" id="sim-controls"></div>'
+    +'<p class="sim__hint">You can also type 0 to 9, * and # on your keyboard.</p>';
+}
+
+function renderPhone(){
+  const el = $("#phone-screen"); if(!el) return;
+  const call = state.call || newCall();
+  const ph = call.phase;
+  let name = "DVLA medical line", status = "", body = "";
+  if(ph==="idle"){ status = "Ready to call"; body = '<div class="phone__subs"><p>Press the green button to call.</p><p style="margin-top:8px">'+esc(TIMES[C().time].t)+'</p></div>'; }
+  else if(ph==="dialling"){ status = "Calling… "+clock(call.sim); }
+  else if(ph==="ringing"){ name = "Incoming call"; status = "DVLA"; body = '<div class="phone__subs"><p>The phone line is calling you back.</p></div>'; }
+  else if(ph==="ended"){ status = "Call ended · "+clock(call.sim); body = '<div class="phone__subs"><p>'+esc(call.outcome)+'</p></div>'; }
+  else if(ph==="waiting"){ name = "No call"; status = clock(call.sim);
+    body = '<div class="phone__subs"><span class="phone__who">Waiting</span><p>'+esc(call.hold?call.hold.label+": about "+call.hold.mins+" minutes":"")+'</p></div>'; }
+  else if(ph==="hold"){ status = "On hold · "+clock(call.sim);
+    body = '<div class="phone__subs"><span class="phone__who">♫ Hold music</span><p>'+esc(call.hold?call.hold.label+": about "+call.hold.mins+" minutes":"")+'</p></div>'; }
+  else {
+    status = clock(call.sim);
+    const s = call.subs;
+    body = '<div class="phone__subs" aria-live="polite">'
+      + (s ? '<span class="phone__who">'+(call.speaking?'<span class="bars" aria-hidden="true"><span></span><span></span><span></span></span>':'')+esc(WHO[s.who])+'</span><p>'+s.html+'</p>' : '')
+      + '</div>';
+  }
+  const listening = call.listen && ph==="live" && !call.speaking;
+  el.innerHTML = '<p class="phone__name">'+esc(name)+'</p><p class="phone__status" id="phone-clock">'+esc(status)+'</p>'+body
+    + '<div class="phone__digits" aria-live="polite">'+esc(call.buffer||"")+'</div>'
+    + '<div class="phone__listen">'+(listening ? "Listening for your answer…" : "")+'</div>';
+  $("#phone").classList.toggle("is-ringing", ph==="ringing");
+
+  const sayEl = $("#phone-say");
+  const opts = ph==="live" && call.listen && call.listen.spec.say;
+  sayEl.innerHTML = opts ? '<span class="phone__say-label">Speak instead</span>'+opts.map((o,i)=>'<button type="button" class="say" data-say="'+i+'">'+esc(o.ref?"Say the reference ("+(CUST().ref?spacedRef(CUST().ref):"you don't have one")+")":o.label)+'</button>').join("") : "";
+
+  const act = $("#phone-actions");
+  if(ph==="idle"||ph==="ended") act.innerHTML = '<button type="button" class="callbtn callbtn--go" id="btn-call">'+HANDSET+'<span class="govuk-visually-hidden">'+(ph==="ended"?"Call again":"Call the DVLA medical line")+'</span></button>';
+  else if(ph==="ringing") act.innerHTML = '<button type="button" class="callbtn callbtn--end" id="btn-decline">'+HANDSET+'<span class="govuk-visually-hidden">Decline</span></button><button type="button" class="callbtn callbtn--go" id="btn-answer">'+HANDSET+'<span class="govuk-visually-hidden">Answer</span></button>';
+  else if(ph==="waiting") act.innerHTML = "";
+  else act.innerHTML = '<button type="button" class="callbtn callbtn--end" id="btn-end">'+HANDSET+'<span class="govuk-visually-hidden">End call</span></button>';
+
+  const ctl = $("#sim-controls"); let c = "";
+  if(call.speaking) c += '<button type="button" class="govuk-button govuk-button--secondary" id="btn-skip">Skip this message</button>';
+  if(call.hold) c += '<button type="button" class="govuk-button govuk-button--secondary" id="btn-wait">Skip the wait</button>';
+  ctl.innerHTML = c;
+}
+function renderClock(){
+  const call = state.call, el = $("#phone-clock"); if(!el || !call) return;
+  const ph = call.phase;
+  el.textContent = ph==="dialling" ? "Calling… "+clock(call.sim) : ph==="hold" ? "On hold · "+clock(call.sim) : clock(call.sim);
+}
+function flashKey(k){ const b=document.querySelector('.key[data-key="'+k+'"]'); if(b){ b.classList.add("is-pressed"); setTimeout(()=>b.classList.remove("is-pressed"),150); } }
+
+
+/* ====================================================================
+   Rendering: the transcript and the end-of-call summary
+   ==================================================================== */
+function renderLog(){
+  const el = $("#call-log"); if(!el) return;
+  const call = state.call;
+  if(!call || !call.log.length){ el.innerHTML = '<li class="empty-log">Nothing yet. What the caller hears and does appears here as the call goes.</li>'; return; }
+  el.innerHTML = call.log.filter(e=>state.showSys || (e.t!=="sys" && e.t!=="time")).map(e=>{
+    let body = "";
+    if(e.t==="say"){
+      body = '<span class="log__who">'+esc(WHO[e.who])+'</span>'+tag(e.kind)+(e.kind==="asis"?'<span class="log__hint">No change required</span>':'')+'<p>'+e.html+'</p>';
+      if(state.showNotes && e.node){
+        const n = NODE[e.node];
+        body += '<div class="log__meta"><a href="'+mapLink(e.node)+'">'+esc(e.node)+' on the map</a>'+(n.r?' · '+esc(n.r.join(", ")):'')+(e.sc?' · script '+esc(e.sc):'')+(n.d?'<br>'+esc(n.d):'')+(e.sc&&SCRIPTS[e.sc].note?'<br>'+esc(SCRIPTS[e.sc].note):'')+'</div>';
+      }
+    }
+    else if(e.t==="sys") body = '<span class="log__who">Behind the scenes</span>'+esc(e.text);
+    else if(e.t==="gap") body = '<span class="log__who">Not in the map</span>'+esc(e.text);
+    else body = esc(e.text);
+    return '<li class="log log--'+e.t+'"><span class="log__time">'+clock(e.at)+'</span><div class="log__body">'+body+'</div></li>';
+  }).join("");
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderSummary(){
+  const el = $("#call-summary"); if(!el) return;
+  const call = state.call;
+  if(!call || call.phase!=="ended"){ el.innerHTML = ""; return; }
+  const human = call.humanAt==null ? "Didn't reach a person" : clock(call.humanAt)+" ("+dur(call.humanAt)+")";
+  const rows = [
+    ["Where the call ended", call.outcome],
+    ["Time to reach a person", human],
+    ["Total time", dur(call.sim)],
+    ["Messages heard", String(call.prompts)],
+    ["Keys pressed", String(call.presses)],
+    ["Gaps in the map", call.gaps ? call.gaps+" – marked “Not in the map” below" : "None on this route"]
+  ];
+  const steps = call.route.filter((id,i,a)=>NODE[id].type!=="go" && a.indexOf(id)===i);
+  el.innerHTML = '<div class="govuk-notification-banner" role="region" aria-labelledby="sum-title">'
+    +'<div class="govuk-notification-banner__header"><h2 class="govuk-notification-banner__title" id="sum-title">Call ended</h2></div>'
+    +'<div class="govuk-notification-banner__content">'
+    +'<p class="govuk-notification-banner__heading">'+esc(call.outcome)+'</p>'
+    +'<dl class="govuk-summary-list">'+rows.map(r=>'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">'+esc(r[0])+'</dt><dd class="govuk-summary-list__value">'+esc(r[1])+'</dd></div>').join("")+'</dl>'
+    +'<details class="govuk-details"><summary class="govuk-details__summary">The route on the map</summary><div class="govuk-details__text"><ol class="govuk-list govuk-list--number govuk-body-s">'
+    + steps.map(id=>'<li><a href="'+mapLink(id)+'">'+esc(NODE[id].l)+'</a></li>').join("")
+    +'</ol></div></details>'
+    +'<div class="govuk-button-group" style="margin-top:0"><button type="button" class="govuk-button" id="btn-again">Call again</button><a class="govuk-link" href="#/all-screens">Choose another scenario</a></div>'
+    +'</div></div>';
+}
+
+function renderAll(){ renderPhone(); renderLog(); renderSummary(); }
+
+
+/* ====================================================================
+   Screens
+   ==================================================================== */
+function renderAllScreens(){
+  const lanes = PHONE.lanes.map(ln=>{
+    const items = ln.nodes.filter(n=>n.type!=="go" && (promptOf(n.id) || INPUT[n.id] || PERSON[n.id]));
+    return '<details class="govuk-details"><summary class="govuk-details__summary">Lane '+(PHONE.lanes.indexOf(ln)+1)+': '+esc(ln.t)+'</summary><div class="govuk-details__text"><ul class="govuk-list govuk-body-s">'
+      + items.map(n=>'<li><a href="#/call/'+LANE_SC[ln.id]+'/'+n.id+'">'+esc(n.l)+'</a></li>').join("")
+      +'</ul></div></details>';
+  }).join("");
+  return '<h1 class="govuk-heading-xl">NewCo call simulator</h1>'
+    +'<p class="govuk-body-l">Call the DVLA medical line as a customer would. The phone line reads the prompts aloud and you answer on the keypad, following the phone route in the NewCo routing map.</p>'
+    + note("What this is for",
+        '<p>The routing map shows which way a call goes. It can\'t show how long it takes to get there, or how much a caller sits through before anyone asks for the thing that routes them. Hearing it makes both obvious, and time to a person is the number to argue about.</p>'
+       +'<p>The route and the NewCo scripts are copied from the map unchanged. The map has no wording for today\'s steps, so those are stand-ins marked “TBC script (as-is)” until the real scripts arrive.</p>')
+    +'<div class="govuk-inset-text">Turn your sound on. The voice is your browser\'s own, so it sounds different on different laptops. Subtitles show on the phone either way.</div>'
+    +'<h2 class="govuk-heading-l">Scenarios</h2>'
+    +'<p class="govuk-body">Each one sets up who is calling, the time of day and what the phone system will decide, and says which keys to press to follow the route.</p>'
+    +'<ul class="screen-index">'+SCENARIOS.map(s=>'<li><a href="#/call/'+s.id+'">'+esc(s.t)+'</a><p>'+esc(s.blurb)+'</p></li>').join("")+'</ul>'
+    +'<h2 class="govuk-heading-l">Start at any step</h2>'
+    +'<p class="govuk-body">Open the call part-way through, to play one part of the route in a workshop.</p>'
+    + lanes
+    +'<h2 class="govuk-heading-l">Every prompt</h2>'
+    +'<p class="govuk-body"><a class="govuk-link" href="#/prompts">Read every prompt the phone line can play</a>, with where its wording comes from.</p>';
+}
+
+function renderPrompts(){
+  const rows = PHONE.lanes.map(ln=>{
+    const r = ln.nodes.map(n=>({n, p:promptOf(n.id)})).filter(x=>x.p);
+    if(!r.length) return "";
+    return '<h2 class="govuk-heading-m">'+esc(ln.t)+'</h2><table class="govuk-table"><thead><tr><th scope="col" style="width:30%">Step</th><th scope="col">What the caller hears</th><th scope="col" style="width:14%">About</th></tr></thead><tbody>'
+      + r.map(x=>'<tr><td><a href="'+mapLink(x.n.id)+'">'+esc(x.n.l)+'</a><br>'+tag(x.p.kind)+'</td><td>'+segments(x.p.text, x.p.who).map(s=>s.show).join(" ")+'</td><td>'+Math.round(words(x.p.text)/2.6)+' sec</td></tr>').join("")
+      +'</tbody></table>';
+  }).join("");
+  return '<h1 class="govuk-heading-xl">Every prompt</h1>'
+    +'<p class="govuk-body">Everything the phone line can say, lane by lane, with where the wording comes from. Values in highlighted text are made up for the prototype.</p>'
+    + note("Why this list exists",
+        '<p>Read end to end, this is the script the team would sign off. Timings are at about 2.6 words a second, a typical pace for recorded prompts, and they add up quickly before a caller is asked for their reference.</p>')
+    + tagKey() + rows;
+}
+
+function tagKey(){
+  return '<ul class="tag-key">'+Object.keys(KINDS).map(k=>'<li>'+tag(k)+' '+esc(KINDS[k].hint)+'</li>').join("")+'</ul>';
+}
+
+function renderCallScreen(){
+  const s = SC_BY_ID[state.sc], cust = CUST();
+  const conds = '<div class="govuk-form-group"><label class="govuk-label" for="cond-time">Time of the call</label>'
+    +'<select class="govuk-select" id="cond-time">'+Object.keys(TIMES).map(k=>'<option value="'+k+'"'+(C().time===k?" selected":"")+'>'+esc(TIMES[k].t)+'</option>').join("")+'</select></div>'
+    +'<div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend">The phone system finds that</legend>'
+    + CONDS.map(c=>'<div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" type="checkbox" id="cond-'+c[0]+'" data-cond="'+c[0]+'"'+(C()[c[0]]?" checked":"")+'><label class="govuk-checkboxes__label" for="cond-'+c[0]+'">'+esc(c[1].replace("X minutes",X_MINUTES+" minutes"))+(c[2]?'<span class="govuk-checkboxes__hint">'+esc(c[2])+'</span>':'')+'</label></div>').join("")
+    +'</fieldset></div>';
+  const started = state.startAt ? '<p class="govuk-body-s">Starts part-way through, at <strong>'+esc(NODE[state.startAt].l)+'</strong>. <a href="#/call/'+s.id+'">Start from the beginning</a>.</p>' : "";
+  return '<span class="govuk-caption">'+esc(s.t)+'</span><h1 class="govuk-heading-xl">Call the DVLA medical line</h1>'
+    + note("The argument",
+        '<p>Time to a person is the measure. Play the same scenario twice, once listening to everything and once pressing keys as soon as you know the answer, and compare. Keys cut a prompt off, as on the real line.</p>'
+       +'<p>On the existing-application route the caller is offered a callback and a text before anyone asks for the reference that would send them to their team. Hearing it in order makes that easier to see than it is on the map.</p>')
+    +'<div class="sim"><div class="sim__phone">'+phoneShell()+'</div><div class="sim__side">'
+    +'<div class="scenario"><h2 class="govuk-heading-m">Scenario</h2>'
+    +'<div class="govuk-form-group"><label class="govuk-label" for="scn">Who is calling, and when</label><select class="govuk-select" id="scn">'
+    + SCENARIOS.map(x=>'<option value="'+x.id+'"'+(x.id===s.id?" selected":"")+'>'+esc(x.t)+'</option>').join("")+'</select></div>'
+    +'<p class="govuk-body-s">'+esc(s.blurb)+'</p>'+started
+    +'<div class="letter"><p><strong>'+esc(cust.name)+'</strong>, calling from '+esc(spacedPhone(cust.phone))+'</p><p>'+esc(cust.about)+'</p>'
+    +(cust.ref ? '<p style="margin-top:8px">Their letter says: Our reference <span class="letter__ref">'+esc(spacedRef(cust.ref))+'</span></p>' : '<p style="margin-top:8px">No letter, so no reference.</p>')+'</div>'
+    +(state.startAt ? '' : '<h3 class="govuk-heading-s">To follow this route</h3><ol class="govuk-list govuk-list--number govuk-body-s">'+s.play.map(p=>'<li>'+esc(p)+'</li>').join("")+'</ol>')
+    +'<details class="govuk-details"><summary class="govuk-details__summary">Change what the phone system decides'+(state.changed?' <span class="changed-flag">(changed)</span>':'')+'</summary><div class="govuk-details__text">'
+    +'<p class="govuk-body-s">Changes apply from the next decision, so you can steer a call while it\'s going.</p>'+conds+'</div></details>'
+    +'<div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" type="checkbox" id="opt-sound"'+(state.sound?" checked":"")+'><label class="govuk-checkboxes__label" for="opt-sound">Play sound<span class="govuk-checkboxes__hint">'+(canSpeak?"The voice, keypad tones and hold music.":"This browser can't read aloud. Subtitles only.")+'</span></label></div>'
+    +'</div>'
+    +'<div id="call-summary"></div>'
+    +'<h2 class="govuk-heading-m">What the caller hears</h2>'
+    +'<details class="govuk-details"><summary class="govuk-details__summary">What the labels mean</summary><div class="govuk-details__text">'+tagKey()+'</div></details>'
+    +'<div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" type="checkbox" id="opt-sys"'+(state.showSys?" checked":"")+'><label class="govuk-checkboxes__label" for="opt-sys">Show what the phone system decides</label></div>'
+    +'<ol class="call-log" id="call-log" aria-live="polite"></ol>'
+    +'</div></div>';
+}
+
+const RENDER = {"all-screens":renderAllScreens, "prompts":renderPrompts, "call":renderCallScreen};
+const TITLES = {"all-screens":"NewCo call simulator", "prompts":"Every prompt – NewCo call simulator", "call":"Call – NewCo call simulator"};
+
+function warn(){
+  return '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>'
+    +'This simulates a phone line for a workshop. It is not a real DVLA phone line or service and makes no real decisions. Every caller, reference and phone number is invented, and today\'s wording is stand-in text until the real scripts arrive.</div>';
+}
+const LOGO = '<svg focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 324 60" height="30" width="162" fill="currentcolor" class="govuk-header__logotype" aria-label="GOV.UK"><title>GOV.UK</title><g><circle cx="20" cy="17.6" r="3.7"/><circle cx="10.2" cy="23.5" r="3.7"/><circle cx="3.7" cy="33.2" r="3.7"/><circle cx="31.7" cy="30.6" r="3.7"/><circle cx="43.3" cy="17.6" r="3.7"/><circle cx="53.2" cy="23.5" r="3.7"/><circle cx="59.7" cy="33.2" r="3.7"/><circle cx="31.7" cy="30.6" r="3.7"/><path d="M33.1,9.8c.2-.1.3-.3.5-.5l4.6,2.4v-6.8l-4.6,1.5c-.1-.2-.3-.3-.5-.5l1.9-5.9h-6.7l1.9,5.9c-.2.1-.3.3-.5.5l-4.6-1.5v6.8l4.6-2.4c.1.2.3.3.5.5l-2.6,8c-.9,2.8,1.2,5.7,4.1,5.7h0c3,0,5.1-2.9,4.1-5.7l-2.6-8ZM37,37.9s-3.4,3.8-4.1,6.1c2.2,0,4.2-.5,6.4-2.8l-.7,8.5c-2-2.8-4.4-4.1-5.7-3.8.1,3.1.5,6.7,5.8,7.2,3.7.3,6.7-1.5,7-3.8.4-2.6-2-4.3-3.7-1.6-1.4-4.5,2.4-6.1,4.9-3.2-1.9-4.5-1.8-7.7,2.4-10.9,3,4,2.6,7.3-1.2,11.1,2.4-1.3,6.2,0,4,4.6-1.2-2.8-3.7-2.2-4.2.2-.3,1.7.7,3.7,3,4.2,1.9.3,4.7-.9,7-5.9-1.3,0-2.4.7-3.9,1.7l2.4-8c.6,2.3,1.4,3.7,2.2,4.5.6-1.6.5-2.8,0-5.3l5,1.8c-2.6,3.6-5.2,8.7-7.3,17.5-7.4-1.1-15.7-1.7-24.5-1.7h0c-8.8,0-17.1.6-24.5,1.7-2.1-8.9-4.7-13.9-7.3-17.5l5-1.8c-.5,2.5-.6,3.7,0,5.3.8-.8,1.6-2.3,2.2-4.5l2.4,8c-1.5-1-2.6-1.7-3.9-1.7,2.3,5,5.2,6.2,7,5.9,2.3-.4,3.3-2.4,3-4.2-.5-2.4-3-3.1-4.2-.2-2.2-4.6,1.6-6,4-4.6-3.7-3.7-4.2-7.1-1.2-11.1,4.2,3.2,4.3,6.4,2.4,10.9,2.5-2.8,6.3-1.3,4.9,3.2-1.8-2.7-4.1-1-3.7,1.6.3,2.3,3.3,4.1,7,3.8,5.4-.5,5.7-4.2,5.8-7.2-1.3-.2-3.7,1-5.7,3.8l-.7-8.5c2.2,2.3,4.2,2.7,6.4,2.8-.7-2.3-4.1-6.1-4.1-6.1h10.6,0Z"/></g><circle class="govuk-logo-dot" cx="226" cy="36" r="7.3"/><path d="M93.94 41.25c.4 1.81 1.2 3.21 2.21 4.62 1 1.4 2.21 2.41 3.61 3.21s3.21 1.2 5.22 1.2 3.61-.4 4.82-1c1.4-.6 2.41-1.4 3.21-2.41.8-1 1.4-2.01 1.61-3.01s.4-2.01.4-3.01v.14h-10.86v-7.02h20.07v24.08h-8.03v-5.56c-.6.8-1.38 1.61-2.19 2.41-.8.8-1.81 1.2-2.81 1.81-1 .4-2.21.8-3.41 1.2s-2.41.4-3.81.4a18.56 18.56 0 0 1-14.65-6.63c-1.6-2.01-3.01-4.41-3.81-7.02s-1.4-5.62-1.4-8.83.4-6.02 1.4-8.83a20.45 20.45 0 0 1 19.46-13.65c3.21 0 4.01.2 5.82.8 1.81.4 3.61 1.2 5.02 2.01 1.61.8 2.81 2.01 4.01 3.21s2.21 2.61 2.81 4.21l-7.63 4.41c-.4-1-1-1.81-1.61-2.61-.6-.8-1.4-1.4-2.21-2.01-.8-.6-1.81-1-2.81-1.4-1-.4-2.21-.4-3.61-.4-2.01 0-3.81.4-5.22 1.2-1.4.8-2.61 1.81-3.61 3.21s-1.61 2.81-2.21 4.62c-.4 1.81-.6 3.71-.6 5.42s.8 5.22.8 5.22Zm57.8-27.9c3.21 0 6.22.6 8.63 1.81 2.41 1.2 4.82 2.81 6.62 4.82S170.2 24.39 171 27s1.4 5.62 1.4 8.83-.4 6.02-1.4 8.83-2.41 5.02-4.01 7.02-4.01 3.61-6.62 4.82-5.42 1.81-8.63 1.81-6.22-.6-8.63-1.81-4.82-2.81-6.42-4.82-3.21-4.41-4.01-7.02-1.4-5.62-1.4-8.83.4-6.02 1.4-8.83 2.41-5.02 4.01-7.02 4.01-3.61 6.42-4.82 5.42-1.81 8.63-1.81Zm0 36.73c1.81 0 3.61-.4 5.02-1s2.61-1.81 3.61-3.01 1.81-2.81 2.21-4.41c.4-1.81.8-3.61.8-5.62 0-2.21-.2-4.21-.8-6.02s-1.2-3.21-2.21-4.62c-1-1.2-2.21-2.21-3.61-3.01s-3.21-1-5.02-1-3.61.4-5.02 1c-1.4.8-2.61 1.81-3.61 3.01s-1.81 2.81-2.21 4.62c-.4 1.81-.8 3.61-.8 5.62 0 2.41.2 4.21.8 6.02.4 1.81 1.2 3.21 2.21 4.41s2.21 2.21 3.61 3.01c1.4.8 3.21 1 5.02 1Zm36.32 7.96-12.24-44.15h9.83l8.43 32.77h.4l8.23-32.77h9.83L200.3 58.04h-12.24Zm74.14-7.96c2.18 0 3.51-.6 3.51-.6 1.2-.6 2.01-1 2.81-1.81s1.4-1.81 1.81-2.81a13 13 0 0 0 .8-4.01V13.9h8.63v28.15c0 2.41-.4 4.62-1.4 6.62-.8 2.01-2.21 3.61-3.61 5.02s-3.41 2.41-5.62 3.21-4.62 1.2-7.02 1.2-5.02-.4-7.02-1.2c-2.21-.8-4.01-1.81-5.62-3.21s-2.81-3.01-3.61-5.02-1.4-4.21-1.4-6.62V13.9h8.63v26.95c0 1.61.2 3.01.8 4.01.4 1.2 1.2 2.21 2.01 2.81.8.8 1.81 1.4 2.81 1.81 0 0 1.34.6 3.51.6Zm34.22-36.18v18.92l15.65-18.92h10.82l-15.03 17.32 16.03 26.83h-10.21l-11.44-20.21-5.62 6.22v13.99h-8.83V13.9"/></svg>';
+
+function renderChrome(inner){
+  return '<header class="govuk-header" role="banner"><div class="govuk-header__container"><a href="#/all-screens" class="govuk-header__homepage-link">'+LOGO+'</a></div></header>'
+    +'<div class="service-nav"><div class="service-nav__wrapper"><a class="service-nav__name" href="#/all-screens">NewCo call simulator</a><a href="newco-routing-map.html" style="font-size:16px">Routing map</a></div></div>'
+    +'<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper"><span class="govuk-phase-banner__tag">Prototype</span><span>This is not a real service.</span>'
+    +'<span class="phase-actions"><a href="#" id="toggle-notes">'+(state.showNotes?"Hide":"Show")+' design notes</a><a href="#/all-screens">All screens</a></span></div></div>'
+    +'<div class="govuk-width-container"><main class="govuk-main-wrapper" id="main">'+warn()
+    +(state.screen!=="all-screens" ? '<a class="govuk-back-link" href="#/all-screens">Back to all screens</a>' : '')
+    + inner +'</main></div>';
+}
+
+let lastKey = null;
+function router(){
+  const parts = (location.hash||"#/all-screens").replace(/^#\/?/,"").split("/");
+  let screen = RENDER[parts[0]] ? parts[0] : "all-screens";
+  const key = parts.join("/");
+  if(key!==lastKey){
+    hangUpQuietly();
+    if(screen==="call"){
+      state.sc = SC_BY_ID[parts[1]] ? parts[1] : "team-open";
+      state.startAt = parts[2] && NODE[parts[2]] ? parts[2] : null;
+      state.cond = {...BASE, ...SC_BY_ID[state.sc].c};
+      state.changed = false;
+      state.call = newCall();
+    } else state.call = null;
+    lastKey = key;
+    window.scrollTo(0,0);
+  }
+  state.screen = screen;
+  $("#app").innerHTML = renderChrome(RENDER[screen]());
+  document.title = TITLES[screen];
+  if(screen==="call") renderAll();
+}
+function go_(h){ if(location.hash===h) router(); else location.hash=h; }
+
+/* One listener for the whole page, so re-rendering never loses handlers. */
+document.addEventListener("click", e=>{
+  const t = e.target.closest("button, a"); if(!t) return;
+  if(t.id==="toggle-notes"){ e.preventDefault(); state.showNotes=!state.showNotes; router(); return; }
+  if(t.dataset.key){ press(t.dataset.key); return; }
+  if(t.dataset.say!==undefined){ speak(+t.dataset.say); return; }
+  if(t.id==="btn-call"||t.id==="btn-again") return startCall();
+  if(t.id==="btn-end") return hangUp();
+  if(t.id==="btn-answer") return answerRing(true);
+  if(t.id==="btn-decline") return answerRing(false);
+  if(t.id==="btn-skip") return cutSpeech();
+  if(t.id==="btn-wait"){ const c=state.call; if(c&&c.hold) c.hold.done(); return; }
+});
+document.addEventListener("change", e=>{
+  const t = e.target;
+  if(t.id==="scn") return go_("#/call/"+t.value);
+  if(t.id==="opt-sound"){ state.sound=t.checked; if(!t.checked){ stopMusic(); if(canSpeak) speechSynthesis.cancel(); } return; }
+  if(t.id==="opt-sys"){ state.showSys=t.checked; renderLog(); return; }
+  if(t.id==="cond-time"||t.dataset.cond){
+    if(t.id==="cond-time") state.cond.time = t.value; else state.cond[t.dataset.cond] = t.checked;
+    state.changed = true;
+    const flag = document.querySelector(".scenario summary");
+    if(flag && !flag.querySelector(".changed-flag")) flag.insertAdjacentHTML("beforeend",' <span class="changed-flag">(changed)</span>');
+    if(state.call && !["idle","ended"].includes(state.call.phase)){
+      const what = t.id==="cond-time" ? "Time of the call: "+TIMES[t.value].t : CONDS.find(c=>c[0]===t.dataset.cond)[1].replace("X minutes",X_MINUTES+" minutes")+": "+(t.checked?"yes":"no");
+      log({t:"sys", text:"Facilitator changed – "+what});
+    } else renderPhone();
+  }
+});
+document.addEventListener("keydown", e=>{
+  if(state.screen!=="call" || e.ctrlKey || e.metaKey || e.altKey) return;
+  if(/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if(/^[0-9*#]$/.test(e.key)){ e.preventDefault(); press(e.key); }
+});
+
+window.addEventListener("hashchange", router);
+router();
+})();
+</script>
+</body>
+</html>
