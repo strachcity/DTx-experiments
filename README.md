@@ -15,6 +15,8 @@ Each prototype is one self-contained HTML file. Open it from GitHub Pages or str
 - `components.html`: the component reference. Every `govuk-*` component the other prototypes draw on, with the markup beside it. Start here if you are building a new one.
 - `case-status-tracker.html`: where is my case, what happens next, and can I drive. Over half of all inbound calls to the contact centre ask the first of those.
 - `Futurestatevisionprototypecustomer.html` and `3-Futurestatevisionprototypecustomer.html`: earlier walkthroughs of a future-state customer journey. The second carries no health data, to show what that version costs.
+- `newco-routing-map.html`: the NewCo routing map for phone and web chat, with the requirements, decisions, open questions and risks behind it.
+- `newco-call-simulator.html`: the phone route from the routing map played as a call. The phone line reads each prompt aloud and you answer on a keypad, so a room can hear how long it takes to reach a person. The route and NewCo scripts are copied from the map; today's steps use stand-in wording marked "TBC script (as-is)" until the real scripts arrive.
 - `future-state-service-blueprint.html`: the Drivers Medical target state as a whole-service blueprint, stage by stage from finding out to renewal. A working draft, and a single wide canvas rather than a clickable prototype, so it has no screen index or design notes.
 
 Every prototype has an "All screens" index, so any single screen can be opened directly in a workshop, and a design-notes toggle that shows the argument each screen is making.
