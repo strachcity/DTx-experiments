@@ -21,7 +21,9 @@ Each prototype is one self-contained HTML file. Open it from GitHub Pages or str
 `service-vision/`
 
 - `future-state-service-blueprint.html`: the Drivers Medical target state as a whole-service blueprint, stage by stage from finding out to renewal. A working draft, and a single wide canvas rather than a clickable prototype, so it has no screen index or design notes.
-- `whole-service-map-CX.html`: the next iteration of that blueprint, from the customer's side. The tasks row is reworked against the service model workstream epics, with each task tagged with its epic and gaps marked "No epic yet". It leaves out the future operating team.
+- `whole-service-map.html`: the next iteration of that blueprint, as two maps in one page, switched with a CX / NewCo toggle in the top corner. `#cx` and `#newco` open either one directly.
+  - CX: the service from the customer's side. The tasks row is reworked against the service model workstream epics, with each task tagged with its epic and gaps marked "No epic yet". It leaves out the future operating team.
+  - NewCo: the future operation, organised around its own work stages from a workshop whiteboard. Data modelling and awareness are greyed as upstream of NewCo, the decision stage is open between automated, AI-assisted and human, and each task is tagged with the operating-model hypothesis it tests.
 
 `prototypes/`
 
