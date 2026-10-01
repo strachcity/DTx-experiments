@@ -13,6 +13,8 @@ The step illustrations for `../whole-service-map.html`. One image per step, name
 
 ## Still needed
 
+Some of these steps show a reused image as a stand-in until their own arrives: cx-17, cx-19, cx-21, cx-22, cx-23, cx-24, newco-05, newco-13 and newco-16. The rest are still empty.
+
 ### CX map (customer)
 
 - **cx-17** Understand the decision: in his garden, reading a letter carefully, thoughtful.
