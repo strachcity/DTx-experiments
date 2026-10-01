@@ -22,7 +22,7 @@ Each prototype is one self-contained HTML file. Open it from GitHub Pages or str
 
 - `future-state-service-blueprint.html`: the Drivers Medical target state as a whole-service blueprint, stage by stage from finding out to renewal. A working draft, and a single wide canvas rather than a clickable prototype, so it has no screen index or design notes.
 - `whole-service-map.html`: the next iteration of that blueprint, as two maps in one page, switched with a CX / NewCo toggle in the top corner. `#cx` and `#newco` open either one directly. Step illustrations are AI-generated (ChatGPT) and live in `illustrations/`, one WebP per step; boxes still marked "[Illustration]" are waiting for theirs.
-  - CX: the service from the customer's side. Each stage carries a service outcome and the business outcome DVLA gets from it. The tasks row is reworked against the service model workstream epics, with each task tagged with its epic and gaps marked "No epic yet". It leaves out the future operating team.
+  - CX: the service from the customer's side. Each stage has its service outcome with the measures that show it is working. The tasks row is reworked against the service model workstream epics, with each task tagged with its epic and gaps marked "No epic yet". It leaves out the future operating team.
   - NewCo: the future operation, organised around its own work stages from a workshop whiteboard. Its outcome row is operational, with the measures underneath. Data modelling and awareness are greyed as upstream of NewCo, the decision stage is open between automated, AI-assisted and human, and each task is tagged with the operating-model hypothesis it tests.
 
 `prototypes/`
