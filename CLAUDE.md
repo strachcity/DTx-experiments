@@ -4,7 +4,7 @@ HTML prototypes for service design work, built to GOV.UK patterns. These are wor
 
 Each project has its own folder at the root, and `components.html` stays at the root because it is shared. Inside a project folder, prototypes are grouped by the kind of work they are. For Drivers Medical (`drivers-medical/`) that is:
 
-- `service-vision/`: the future-state service blueprint.
+- `service-vision/`: the future-state service blueprint and whole-service map. These are canvases, not prototypes, so they are exempt from the self-contained rule: the map keeps its step illustrations as WebP files in `service-vision/illustrations/`, named by map and step (`cx-01.webp`, `newco-17.webp`).
 - `prototypes/`: customer-facing prototypes.
 - `ivr/`: NewCo routing maps and phone or web chat prototypes.
 
