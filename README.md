@@ -21,6 +21,7 @@ Each prototype is one self-contained HTML file. Open it from GitHub Pages or str
 `service-vision/`
 
 - `future-state-service-blueprint.html`: the Drivers Medical target state as a whole-service blueprint, stage by stage from finding out to renewal. A working draft, and a single wide canvas rather than a clickable prototype, so it has no screen index or design notes.
+- `whole-service-map-CX.html`: the next iteration of that blueprint, from the customer's side. The tasks row is reworked against the service model workstream epics, with each task tagged with its epic and gaps marked "No epic yet". It leaves out the future operating team.
 
 `prototypes/`
 
