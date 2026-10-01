@@ -2,13 +2,19 @@
 
 HTML prototypes for service design work, built to GOV.UK patterns. These are workshop artefacts used to make service design arguments visible, and to develop concepts and draw out requirements. They are not an attempt at final UI design, and they get thrown away and rebuilt often.
 
-The repo holds more than one project. Prototypes sit flat at the root while there are few enough for that to be readable; when that stops being true they move into a folder per project, and `components.html` stays at the root because it is shared. Do not create that structure before it is needed.
+Each project has its own folder at the root, and `components.html` stays at the root because it is shared. Inside a project folder, prototypes are grouped by the kind of work they are. For Drivers Medical (`drivers-medical/`) that is:
 
-For anything affecting what a screen looks like or says, follow `DESIGN.md`. It is scoped to the DVLA Drivers Medical prototypes, so a new project needs its own design judgement rather than inheriting that one.
+- `service-vision/`: the future-state service blueprint.
+- `prototypes/`: customer-facing prototypes.
+- `ivr/`: NewCo routing maps and phone or web chat prototypes.
+
+Put a new file in the group it belongs to. Do not invent a new group without asking. Links between prototypes are relative, so files that link to each other move together.
+
+For anything affecting what a screen looks like or says, follow `drivers-medical/DESIGN.md`. It is scoped to the DVLA Drivers Medical prototypes, so a new project needs its own design judgement rather than inheriting that one.
 
 ## Conventions
 
-Every prototype is one self-contained HTML file at the repo root, named for what it shows. No numbers, no version suffixes.
+Every prototype is one self-contained HTML file in its project folder, named for what it shows. No numbers, no version suffixes.
 
 - No build step, no npm, no framework, no bundler.
 - No CDN dependencies beyond the Google Fonts import already in use.
