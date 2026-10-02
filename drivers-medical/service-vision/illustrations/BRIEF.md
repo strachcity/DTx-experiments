@@ -26,8 +26,6 @@ Some of these steps show a reused image as a stand-in until their own arrives: c
 
 ### NewCo map (operations)
 
-- **newco-01** Model risk: an analyst at a desk with simple charts on two screens.
-- **newco-02** Set policy: two colleagues at a meeting table reviewing a printed document together.
 - **newco-03** Set expectations: a printed leaflet and a phone showing a simple step-by-step guide, side by side on a table.
 - **newco-05** Customer notifies or renews: a screen where cards arrive from a phone, a laptop and an envelope into one queue.
 - **newco-08** DMI: a post-room worker feeding paper documents into a scanner.
