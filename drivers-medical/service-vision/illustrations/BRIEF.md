@@ -28,7 +28,6 @@ Some of these steps show a reused image as a stand-in until their own arrives: c
 
 - **newco-03** Set expectations: a printed leaflet and a phone showing a simple step-by-step guide, side by side on a table.
 - **newco-05** Customer notifies or renews: a screen where cards arrive from a phone, a laptop and an envelope into one queue.
-- **newco-08** DMI: a post-room worker feeding paper documents into a scanner.
 - **newco-09** AI and tech: a computer screen sorting case cards into tidy groups.
 - **newco-10** Payments: a doctor's receptionist seeing a payment arrive on screen, paper invoices set aside.
 - **newco-11** Individual evidence: the agent attaching an uploaded document to a case on screen.
