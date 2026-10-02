@@ -13,7 +13,7 @@ The step illustrations for `../whole-service-map.html`. One image per step, name
 
 ## Still needed
 
-Some of these steps show a reused image as a stand-in until their own arrives: cx-17, cx-19, cx-21, cx-22, cx-23, cx-24, newco-05, newco-09 and newco-16.
+Some of these steps show a reused image as a stand-in until their own arrives: cx-17, cx-19, cx-21, cx-22, cx-23, cx-24, newco-05 and newco-16.
 
 ### CX map (customer)
 
@@ -27,5 +27,4 @@ Some of these steps show a reused image as a stand-in until their own arrives: c
 ### NewCo map (operations)
 
 - **newco-05** Customer notifies or renews: a screen where cards arrive from a phone, a laptop and an envelope into one queue.
-- **newco-09** AI and tech: a computer screen sorting case cards into tidy groups.
 - **newco-16** Proactive: outbound: the agent at her computer sending updates that fly out to several phones.
