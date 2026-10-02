@@ -13,7 +13,7 @@ The step illustrations for `../whole-service-map.html`. One image per step, name
 
 ## Still needed
 
-Some of these steps show a reused image as a stand-in until their own arrives: cx-17, cx-19, cx-21, cx-22, cx-23, cx-24, newco-05, newco-13 and newco-16. The rest are still empty.
+Some of these steps show a reused image as a stand-in until their own arrives: cx-17, cx-19, cx-21, cx-22, cx-23, cx-24, newco-05, newco-09, newco-15 and newco-16. The rest are still empty.
 
 ### CX map (customer)
 
@@ -30,8 +30,5 @@ Some of these steps show a reused image as a stand-in until their own arrives: c
 - **newco-05** Customer notifies or renews: a screen where cards arrive from a phone, a laptop and an envelope into one queue.
 - **newco-09** AI and tech: a computer screen sorting case cards into tidy groups.
 - **newco-10** Payments: a doctor's receptionist seeing a payment arrive on screen, paper invoices set aside.
-- **newco-13** Interpret the evidence: the agent reading a medical report on screen while a clinician colleague leans in to help.
-- **newco-14** Decide: the agent and a clinician looking at a case together, a computer suggesting an option on screen.
 - **newco-15** Issue the decision: the agent on the phone, explaining a decision, a letter on her desk.
 - **newco-16** Proactive: outbound: the agent at her computer sending updates that fly out to several phones.
-- **newco-18** Appeals and complaints: the agent and a colleague carefully reviewing a paper case file.
