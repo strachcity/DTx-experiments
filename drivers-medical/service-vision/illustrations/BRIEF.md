@@ -19,7 +19,6 @@ Some of these steps show a reused image as a stand-in until their own arrives: c
 
 - **cx-17** Understand the decision: in his garden, reading a letter carefully, thoughtful.
 - **cx-19** Challenge the decision: at the kitchen counter writing a short letter, a medical report beside him, determined.
-- **cx-20** Appeal: walking up the steps of a small, plain court building with a folder. No signs or crests on the building.
 - **cx-21** Get a renewal reminder: on the bus, glancing at a reminder notification on his phone.
 - **cx-22** Renew: leaning on the kitchen counter completing a short form on his phone, relaxed.
 - **cx-23** Report a change: in a GP waiting room, updating his details on his phone.
