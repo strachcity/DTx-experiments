@@ -8,7 +8,7 @@ The step illustrations for `../whole-service-map.html`. One image per step, name
 - Portrait, 4:5.
 - No text, numbers, logos or crowns anywhere. Never show a GOV.UK page, a DVLA sign or a real brand. Screens, letters and cards show simple shapes only.
 - **CX map:** the customer is always the same man: messy brown hair, green jumper, navy trousers. Vary where he is (kitchen, garden, bus, street, waiting room). He fits this around his life rather than sitting at a desk.
-- **NewCo map:** the agent is a woman with a ponytail, a headset and a blue top. Other staff and customers can vary.
+- **NewCo map:** the agent is a woman with a ponytail, a headset and a blue top. Other staff and customers can vary, but nobody on the NewCo map wears the CX customer's green jumper.
 - Every step is one moment. Don't show the outcome of a decision unless the step is about that outcome.
 
 ## Still needed
