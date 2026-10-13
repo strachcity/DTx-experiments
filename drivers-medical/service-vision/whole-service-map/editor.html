@@ -1,0 +1,691 @@
+<title>Whole-service map editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="map.css">
+<style>
+/* Layout: a toolbar over the map canvas, with an edit drawer on the right that becomes a bottom sheet on phones.
+   Deliberately one light GOV.UK look, matching the map itself. */
+:root{
+  color-scheme:light;
+  --ink:#0b0c0c; --muted:#505a5f; --line:#b1b4b6; --wash:#f3f2f1; --paper:#ffffff;
+  --link:#1d70b8; --focus:#ffdd00; --danger:#d4351c; --go:#00703c;
+  --body:"Public Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+html,body{height:100%}
+body{background:var(--wash);color:var(--ink);font-family:var(--body);font-size:14px;display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:0}
+
+.tb{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding-block:8px;padding-inline:16px;background:var(--ink);color:var(--paper)}
+.tb-name{font-weight:700;margin-right:8px}
+.tabs{display:flex;flex-wrap:wrap;border:1px solid #6f777b}
+.tabs button{border:0;background:transparent;color:var(--paper);padding:5px 12px;font-weight:700;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+.tb label{font-weight:700;font-size:13px}
+.tb select{background:var(--paper);color:var(--ink);border:0;padding:4px 6px}
+.tb .btn{background:transparent;color:var(--paper);border:1px solid #6f777b;padding:4px 10px;font-weight:700;cursor:pointer}
+.tb .btn:hover{background:#383f43}
+.tb .btn[disabled]{opacity:.45;cursor:default}
+.tb-group{display:flex;align-items:center;gap:6px}
+.tb-spacer{flex:1}
+.save{font-size:13px;color:#dfe1e2;min-width:9em;text-align:right}
+.save.is-error{color:#f6b8ad}
+
+.work{flex:1;min-height:0;display:flex}
+.canvas{flex:1;min-width:0;overflow:auto;background:var(--paper)}
+.canvas .sm-canvas{zoom:var(--zoom,1)}
+.empty{max-width:34rem;margin:48px auto;padding-inline:16px;line-height:1.5}
+.empty h1{font-size:24px;margin:0 0 8px}
+
+.drawer{width:380px;flex-shrink:0;overflow:auto;background:var(--paper);border-left:1px solid var(--line);padding-block:16px;padding-inline:16px;display:flex;flex-direction:column;gap:16px}
+.drawer[hidden]{display:none}
+.d-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.d-kind{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.d-title{margin:2px 0 0;font-size:19px;line-height:1.25;text-wrap:balance}
+.x{border:0;background:transparent;color:var(--link);font-weight:700;cursor:pointer;padding:4px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field>label,.field>.lbl{font-weight:700;font-size:13px}
+.hint{font-size:12px;color:var(--muted);line-height:1.4}
+.field input[type=text],.field textarea,.field select{border:2px solid var(--ink);padding:5px 6px;background:var(--paper);width:100%;box-sizing:border-box}
+.field textarea{min-height:4.5em;resize:vertical;line-height:1.4}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14px}
+.check input{width:18px;height:18px;margin:1px 0 0;flex-shrink:0}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.b{border:1px solid var(--ink);background:var(--paper);padding:5px 10px;font-weight:700;cursor:pointer}
+.b:hover{background:var(--wash)}
+.b[disabled]{opacity:.4;cursor:default}
+.b--go{background:var(--go);border-color:var(--go);color:var(--paper)}
+.b--go:hover{background:#005a30}
+.b--danger{color:var(--danger);border-color:var(--danger)}
+.b--danger.is-armed{background:var(--danger);color:var(--paper)}
+.section{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.section h3{margin:0;font-size:15px}
+.picker{border:1px solid var(--line);max-height:260px;overflow:auto;display:flex;flex-direction:column}
+.pick{display:flex;align-items:center;gap:8px;padding:5px 8px;border-bottom:1px solid #e5e6e7;font-size:13px;cursor:pointer}
+.pick:last-child{border-bottom:0}
+.pick input{width:16px;height:16px;margin:0}
+.pick .sm-tag{margin-left:auto}
+.inline-add{display:flex;gap:6px}
+.inline-add input{flex:1;min-width:0;border:2px solid var(--ink);padding:4px 6px}
+.reg{display:flex;flex-direction:column;gap:10px}
+.reg-item{border:1px solid var(--line);padding:8px;display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center}
+.reg-item input[type=text]{border:1px solid var(--line);padding:4px 6px;min-width:0}
+.reg-item select{border:1px solid var(--line);padding:3px 4px}
+.reg-item .full{grid-column:1/-1}
+.reg-meta{font-size:12px;color:var(--muted)}
+.role-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.role-item input[type=color]{width:36px;height:28px;padding:0;border:1px solid var(--line)}
+.role-item input[type=text]{border:1px solid var(--line);padding:4px 6px;min-width:0}
+.notice{font-size:13px;background:#fff4d6;border-left:4px solid #d9a200;padding:8px 10px}
+
+@media (max-width:760px){
+  .work{flex-direction:column}
+  .drawer{width:auto;border-left:0;border-top:2px solid var(--ink);max-height:60vh;order:2}
+  .tb-name{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="tb">
+  <span class="tb-name">Whole-service map</span>
+  <div class="tabs" id="tabs" role="group" aria-label="Maps"></div>
+  <button type="button" class="btn" id="newMap">New map</button>
+  <div class="tb-group"><label for="highlight">Highlight</label><select id="highlight"></select></div>
+  <div class="tb-group"><label for="zoom">Zoom</label><select id="zoom"><option value="1">100%</option><option value="0.75">75%</option><option value="0.5">50%</option><option value="0.35">35%</option></select></div>
+  <button type="button" class="btn" id="openComponents">Components</button>
+  <button type="button" class="btn" id="undo" disabled>Undo</button>
+  <span class="tb-spacer"></span>
+  <span class="save" id="save" role="status" aria-live="polite">Connecting…</span>
+</header>
+<div class="work">
+  <main class="canvas" id="canvas">
+    <div class="empty"><h1>Loading the map</h1><p>The maps are saved with this page. They appear here once they load.</p></div>
+  </main>
+  <aside class="drawer" id="drawer" hidden aria-label="Edit"></aside>
+</div>
+
+<script src="map.js"></script>
+<script>
+// Editor for the whole-service maps. Content lives in this artifact's database:
+//   maps/<id>            one document per map
+//   registry/components  the shared component register, with status
+// Claude reads these back into the repo's data/*.js files as snapshots.
+var state = {
+  maps: {}, components: [], current: null, selected: null,
+  highlight: "", zoom: 1, panel: null, armed: null, readOnly: false, loaded: { maps: false, components: false }
+};
+var db = null, undoStack = [], saved = {}, saving = false, saveTimer = null, drawTimer = null, undoArmed = true;
+var IMAGE_BASE = "illustrations/";
+
+function $(id) { return document.getElementById(id); }
+function E(s) { return SM.esc(s); }
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function rid(prefix) { return prefix + Math.random().toString(36).slice(2, 8); }
+function map() { return state.maps[state.current]; }
+function mapList() {
+  return Object.keys(state.maps).map(function (k) { return state.maps[k]; })
+    .sort(function (a, b) { return (a.order || 0) - (b.order || 0) || a.id.localeCompare(b.id); });
+}
+function compById() { var o = {}; state.components.forEach(function (c) { o[c.id] = c; }); return o; }
+
+// ---------- finding things in the current map ----------
+function findPhase(id) {
+  var m = map(); var i = m.phases.findIndex(function (p) { return p.id === id; });
+  return i < 0 ? null : { phase: m.phases[i], pi: i };
+}
+function findStep(id) {
+  var m = map();
+  for (var pi = 0; pi < m.phases.length; pi++) {
+    var si = m.phases[pi].steps.findIndex(function (s) { return s.id === id; });
+    if (si >= 0) return { phase: m.phases[pi], pi: pi, step: m.phases[pi].steps[si], si: si };
+  }
+  return null;
+}
+function findTask(id) {
+  var m = map();
+  for (var pi = 0; pi < m.phases.length; pi++) for (var si = 0; si < m.phases[pi].steps.length; si++) {
+    var st = m.phases[pi].steps[si]; var ti = st.tasks.findIndex(function (t) { return t.id === id; });
+    if (ti >= 0) return { phase: m.phases[pi], pi: pi, step: st, si: si, task: st.tasks[ti], ti: ti };
+  }
+  return null;
+}
+function phaseNumber(m, pi) {
+  var n = 0;
+  for (var i = 0; i <= pi; i++) if (!m.phases[i].number) n++;
+  return m.phases[pi].number || String(n).padStart(2, "0");
+}
+function usage(cid) {
+  var n = 0;
+  mapList().forEach(function (m) { m.phases.forEach(function (p) { p.steps.forEach(function (s) {
+    if (s.channels.indexOf(cid) >= 0) n++;
+    s.tasks.forEach(function (t) { if ((t.components || []).indexOf(cid) >= 0) n++; });
+  }); }); });
+  return n;
+}
+
+// ---------- undo and saving ----------
+function snapshot() { return JSON.stringify({ maps: state.maps, components: state.components }); }
+function pushUndo() {
+  undoStack.push(snapshot());
+  if (undoStack.length > 60) undoStack.shift();
+  $("undo").disabled = false;
+}
+function edit(fn, structural) {
+  if (state.readOnly) return;
+  if (structural || undoArmed) { pushUndo(); undoArmed = !!structural; }
+  fn();
+  scheduleSave();
+  if (structural) { drawAll(); } else { scheduleDraw(); }
+}
+function undo() {
+  if (!undoStack.length) return;
+  var s = JSON.parse(undoStack.pop());
+  state.maps = s.maps; state.components = s.components;
+  if (!state.maps[state.current]) state.current = (mapList()[0] || {}).id || null;
+  $("undo").disabled = !undoStack.length;
+  state.armed = null; undoArmed = true;
+  validateSelection(); scheduleSave(); drawAll();
+}
+function docs() {
+  var out = { "registry/components": { items: state.components } };
+  mapList().forEach(function (m) { out["maps/" + m.id] = m; });
+  return out;
+}
+function setSave(text, err) { var el = $("save"); el.textContent = text; el.classList.toggle("is-error", !!err); }
+function scheduleSave() {
+  setSave("Saving…");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flush, 600);
+}
+async function flush() {
+  if (!db || saving) { if (saving) { clearTimeout(saveTimer); saveTimer = setTimeout(flush, 400); } return; }
+  saving = true;
+  try {
+    var want = docs();
+    for (var path in want) {
+      var json = JSON.stringify(want[path]);
+      if (saved[path] === json) continue;
+      await db.doc(path).set(JSON.parse(json));
+      saved[path] = json;
+    }
+    for (var p in saved) {
+      if (p.indexOf("maps/") === 0 && !want[p]) { await db.doc(p).delete(); delete saved[p]; }
+    }
+    setSave("All changes saved");
+  } catch (e) {
+    if (e && (e.code === "invalid_argument" || e.code === "not_granted")) {
+      state.readOnly = true; setSave("View only: you can't change this map", true);
+    } else if (e && e.code === "quota_exceeded") {
+      setSave("Not saved: the map's storage is full", true);
+    } else {
+      setSave("Not saved. Check your connection; changes save on your next edit.", true);
+    }
+  } finally { saving = false; }
+}
+function dirty(path, obj) { return saved[path] !== undefined && saved[path] !== JSON.stringify(obj); }
+
+// ---------- drawing ----------
+function scheduleDraw() { clearTimeout(drawTimer); drawTimer = setTimeout(drawCanvas, 120); }
+function drawAll() { drawTabs(); drawCanvas(); drawDrawer(); }
+function drawTabs() {
+  $("tabs").innerHTML = mapList().map(function (m) {
+    return '<button type="button" data-map="' + E(m.id) + '" aria-pressed="' + (m.id === state.current) + '">' + E(m.tab || m.id) + "</button>";
+  }).join("");
+}
+function drawCanvas() {
+  var c = $("canvas"), m = map();
+  if (!m) {
+    var ready = state.loaded.maps;
+    c.innerHTML = '<div class="empty"><h1>' + (ready ? "No maps saved yet" : "Loading the map") + "</h1><p>" +
+      (ready ? "Ask Claude to load the CX and NewCo maps from the repo, or start one with New map." : "The maps are saved with this page. They appear here once they load.") + "</p></div>";
+    return;
+  }
+  var left = c.scrollLeft, top = c.scrollTop;
+  c.innerHTML = SM.render(m, state.components, { imageBase: IMAGE_BASE, editable: !state.readOnly, highlight: state.highlight, selected: state.selected });
+  c.style.setProperty("--zoom", state.zoom);
+  c.scrollLeft = left; c.scrollTop = top;
+}
+function validateSelection() {
+  var s = state.selected; if (!s || !map()) { state.selected = null; return; }
+  var k = s.split(":")[0], id = s.slice(k.length + 1);
+  var ok = k === "map" || k === "roles" || k === "components" || k === "panel" ||
+    (k === "phase" && findPhase(id)) || (k === "step" && findStep(id)) || (k === "task" && findTask(id));
+  if (!ok) state.selected = null;
+}
+
+// ---------- the drawer ----------
+function head(kind, title) {
+  return '<div class="d-head"><div><div class="d-kind">' + E(kind) + '</div><h2 class="d-title">' + E(title) + '</h2></div><button type="button" class="x" data-act="close">Close</button></div>';
+}
+function text(label, bind, value, hint, area) {
+  var id = "f-" + bind.replace(/[^a-z0-9]/gi, "-");
+  return '<div class="field"><label for="' + id + '">' + E(label) + "</label>" + (hint ? '<span class="hint">' + E(hint) + "</span>" : "") +
+    (area ? '<textarea id="' + id + '" data-bind="' + E(bind) + '">' + E(value) + "</textarea>"
+          : '<input type="text" id="' + id + '" data-bind="' + E(bind) + '" value="' + E(value) + '">') + "</div>";
+}
+function check(label, bind, value) {
+  var id = "f-" + bind;
+  return '<label class="check" for="' + id + '"><input type="checkbox" id="' + id + '" data-bind="' + E(bind) + '"' + (value ? " checked" : "") + ">" + E(label) + "</label>";
+}
+function roleSelect(value, allowDefault) {
+  var opts = (allowDefault ? '<option value="">Default (green)</option>' : "") + map().roles.map(function (r) {
+    return '<option value="' + E(r.id) + '"' + (r.id === value ? " selected" : "") + ">" + E(r.label) + "</option>";
+  }).join("");
+  return '<select id="f-role" data-bind="' + (allowDefault ? "owner" : "role") + '">' + opts + "</select>";
+}
+function danger(act, label) {
+  var armed = state.armed === act;
+  return '<button type="button" class="b b--danger' + (armed ? " is-armed" : "") + '" data-act="' + E(act) + '">' + E(armed ? "Select again to confirm" : label) + "</button>";
+}
+function picker(list, chosen, title, hint) {
+  var byId = compById();
+  var q = (state.pickerFilter || "").toLowerCase();
+  var items = state.components.filter(function (c) { return !q || c.name.toLowerCase().indexOf(q) >= 0 || chosen.indexOf(c.id) >= 0; });
+  return '<div class="section"><h3>' + E(title) + '</h3><span class="hint">' + E(hint) + "</span>" +
+    '<div class="field"><label for="f-filter">Find a component</label><input type="text" id="f-filter" data-act-input="filter" value="' + E(state.pickerFilter || "") + '"></div>' +
+    '<div class="picker">' + items.map(function (c) {
+      var on = chosen.indexOf(c.id) >= 0;
+      return '<label class="pick"><input type="checkbox" data-pick="' + E(list) + '" value="' + E(c.id) + '"' + (on ? " checked" : "") + ">" + E(c.name) +
+        '<span class="sm-tag s-' + (c.status || "unset") + '">' + E(SM.statusLabel(c.status)) + "</span></label>";
+    }).join("") + "</div>" +
+    '<div class="inline-add"><input type="text" id="f-newcomp" aria-label="New component name" placeholder="New component name"><button type="button" class="b" data-act="addcomp:' + E(list) + '">Add</button></div>' +
+    (chosen.length ? '<span class="hint">Selected: ' + chosen.map(function (id) { return E((byId[id] || { name: id }).name); }).join(", ") + "</span>" : "") +
+    "</div>";
+}
+function stepOptions(currentId) {
+  var m = map();
+  return m.phases.map(function (p, pi) {
+    return '<optgroup label="' + E(phaseNumber(m, pi) + " " + p.name) + '">' + p.steps.map(function (s) {
+      return '<option value="' + E(s.id) + '"' + (s.id === currentId ? " selected" : "") + ">" + E(s.title || "Untitled step") + "</option>";
+    }).join("") + "</optgroup>";
+  }).join("");
+}
+
+function drawDrawer() {
+  var d = $("drawer"), s = state.selected, m = map();
+  if (!s || !m) { d.hidden = true; d.innerHTML = ""; return; }
+  d.hidden = false;
+  var k = s.split(":")[0], id = s.slice(k.length + 1), h = "";
+  if (state.readOnly) h += '<p class="notice">You can view this map but not change it.</p>';
+
+  if (k === "task") {
+    var f = findTask(id), t = f.task;
+    h += head("Epic", t.title || "Untitled epic");
+    h += text("Title", "title", t.title, "The outcome a user achieves in this step.");
+    h += text("Description", "description", t.description, "", true);
+    h += '<div class="field"><label for="f-role">Who does it</label>' + roleSelect(t.role) + "</div>";
+    h += check("Unresolved: scope not yet agreed", "unresolved", t.unresolved);
+    h += picker("components", t.components || [], "What is behind it", "The components this epic depends on. Their status shows on the card.");
+    h += '<div class="section"><h3>Position</h3><div class="field"><label for="f-move">Step</label><select id="f-move" data-act-change="movetask">' + stepOptions(f.step.id) + "</select></div>";
+    h += '<div class="row"><button type="button" class="b" data-act="taskup"' + (f.ti === 0 ? " disabled" : "") + '>Move up</button><button type="button" class="b" data-act="taskdown"' + (f.ti === f.step.tasks.length - 1 ? " disabled" : "") + ">Move down</button></div>";
+    h += '<span class="hint">You can also drag a card onto another card or into another step.</span></div>';
+    h += '<div class="section row"><button type="button" class="b" data-act="duptask">Duplicate</button>' + danger("deltask", "Delete epic") + "</div>";
+  } else if (k === "step") {
+    var g = findStep(id), st = g.step;
+    h += head("Step", st.title || "Untitled step");
+    h += text("Step", "title", st.title);
+    h += text("Objective", "quote", st.quote, "In the user's words, without quotation marks.", true);
+    h += text("Illustration", "image", st.image || "", "File name in illustrations/, without .webp. Leave blank for a placeholder.");
+    h += picker("channels", st.channels, "Channels and services", "Shown above the illustration, coloured by status.");
+    h += '<div class="section"><h3>Position</h3><div class="row">' +
+      '<button type="button" class="b" data-act="stepleft"' + (g.pi === 0 && g.si === 0 ? " disabled" : "") + ">Move left</button>" +
+      '<button type="button" class="b" data-act="stepright"' + (g.pi === m.phases.length - 1 && g.si === g.phase.steps.length - 1 ? " disabled" : "") + ">Move right</button></div>" +
+      '<span class="hint">Moving past the end of a stage carries the step into the next one.</span></div>';
+    h += '<div class="section row"><button type="button" class="b b--go" data-act="addstepafter">Add a step after</button><button type="button" class="b" data-act="addtaskhere">Add an epic</button>' +
+      danger("delstep", "Delete step" + (st.tasks.length ? " and its " + st.tasks.length + " epic" + (st.tasks.length > 1 ? "s" : "") : "")) + "</div>";
+  } else if (k === "phase") {
+    var q = findPhase(id), p = q.phase;
+    h += head("Stage " + phaseNumber(m, q.pi), p.name || "Untitled stage");
+    h += text("Stage", "name", p.name);
+    h += text("Second line", "sub", p.sub, (m.rows.stage || []).slice(1).join(" / "));
+    h += text("Number", "number", p.number || "", "Leave blank to number automatically. Use ∞ for a stage that runs across the service.");
+    h += '<div class="field"><label for="f-role">Colour by</label>' + roleSelect(p.owner, true) + "</div>";
+    h += check("Unresolved: stage not yet agreed", "unresolved", p.unresolved);
+    h += check("Grey out (outside this operation)", "muted", p.muted);
+    h += text(m.rows.outcome || "Outcome", "outcome", p.outcome, "", true);
+    if (m.rows.measures) h += text(m.rows.measures, "measures", p.measures, "Separate with ·");
+    h += text(m.rows.footer || "Footer", "footer", p.footer, "", true);
+    h += '<div class="section"><h3>Position</h3><div class="row"><button type="button" class="b" data-act="phaseleft"' + (q.pi === 0 ? " disabled" : "") + '>Move left</button><button type="button" class="b" data-act="phaseright"' + (q.pi === m.phases.length - 1 ? " disabled" : "") + ">Move right</button></div></div>";
+    h += '<div class="section row"><button type="button" class="b b--go" data-act="addphaseafter">Add a stage after</button><button type="button" class="b" data-act="addstepend">Add a step</button>' +
+      danger("delphase", "Delete stage") + "</div>";
+  } else if (k === "map" || k === "panel") {
+    h += head("Map", m.tab);
+    h += text("Tab name", "m.tab", m.tab);
+    h += text("Title", "m.title", m.title);
+    h += text("Subtitle", "m.subtitle", m.subtitle);
+    h += text("Note", "m.note", m.note, "", true);
+    h += '<div class="section"><h3>Row labels</h3>';
+    (m.rows.stage || []).forEach(function (v, i) { h += text("Stage label " + (i + 1), "r.stage." + i, v); });
+    [["outcome", "Outcomes"], ["channels", "Channels"], ["objective", "Objective"], ["steps", "Steps"], ["tasks", "Epics"], ["footer", "Footer"]].forEach(function (r) {
+      h += text(r[1] + " row", "r." + r[0], m.rows[r[0]] || "");
+    });
+    h += '<label class="check" for="f-measures"><input type="checkbox" id="f-measures" data-act-change="measures"' + (m.rows.measures ? " checked" : "") + ">Show a measures row</label>";
+    if (m.rows.measures) h += text("Measures row", "r.measures", m.rows.measures);
+    h += "</div>";
+    h += '<div class="section"><h3>Panels</h3><span class="hint">One line per point. Wrap a bold lead in **double stars**.</span>';
+    (m.panels || []).forEach(function (p, i) {
+      h += text("Panel " + (i + 1) + " heading", "p." + i + ".heading", p.heading);
+      h += '<div class="field"><label for="f-panel-' + i + '">Panel ' + (i + 1) + ' points</label><textarea id="f-panel-' + i + '" data-panel="' + i + '" rows="5">' +
+        E((p.items || []).map(function (it) { return (it.lead ? "**" + it.lead + "** " : "") + it.text; }).join("\n")) + "</textarea></div>";
+      h += '<div class="row">' + danger("delpanel:" + i, "Remove panel " + (i + 1)) + "</div>";
+    });
+    h += '<div class="row"><button type="button" class="b" data-act="addpanel">Add a panel</button></div></div>';
+    h += '<div class="section"><h3>This map</h3><div class="row"><button type="button" class="b" data-act="mapleft">Move tab left</button><button type="button" class="b" data-act="mapright">Move tab right</button></div>' +
+      '<div class="row"><button type="button" class="b" data-act="dupmap">Duplicate as a new version</button>' + danger("delmap", "Delete map") + "</div></div>";
+  } else if (k === "roles") {
+    h += head("Key", "Who does the task");
+    h += '<div class="reg">' + m.roles.map(function (r, i) {
+      var used = m.phases.some(function (p) { return p.owner === r.id || p.steps.some(function (s) { return s.tasks.some(function (t) { return t.role === r.id; }); }); });
+      return '<div class="role-item"><input type="color" aria-label="Colour for ' + E(r.label) + '" data-role="' + i + '|colour" value="' + E(r.colour) + '">' +
+        '<input type="text" aria-label="Label" data-role="' + i + '|label" value="' + E(r.label) + '">' +
+        (used ? '<span class="hint">In use</span>' : danger("delrole:" + i, "Remove")) + "</div>";
+    }).join("") + "</div>";
+    h += '<div class="row"><button type="button" class="b" data-act="addrole">Add a role</button></div>';
+  } else if (k === "components") {
+    var q2 = (state.regFilter || "").toLowerCase();
+    h += head("Register", "Components and their status");
+    h += '<span class="hint">One list shared by every map. Status belongs to the component, so a change here shows on every card that uses it.</span>';
+    h += '<div class="field"><label for="f-regfilter">Find</label><input type="text" id="f-regfilter" data-act-input="regfilter" value="' + E(state.regFilter || "") + '"></div>';
+    h += '<div class="inline-add"><input type="text" id="f-newcomp" aria-label="New component name" placeholder="New component name"><button type="button" class="b b--go" data-act="addcomp:">Add</button></div>';
+    h += '<div class="reg">' + state.components.filter(function (c) { return !q2 || c.name.toLowerCase().indexOf(q2) >= 0; }).map(function (c) {
+      var n = usage(c.id);
+      return '<div class="reg-item"><input type="text" aria-label="Name" data-comp="' + E(c.id) + '|name" value="' + E(c.name) + '">' +
+        '<select aria-label="Status of ' + E(c.name) + '" data-comp="' + E(c.id) + '|status"><option value="">Not set</option>' + SM.STATUSES.map(function (st) {
+          return '<option value="' + st.id + '"' + (c.status === st.id ? " selected" : "") + ">" + E(st.label) + "</option>";
+        }).join("") + "</select>" +
+        '<input type="text" class="full" aria-label="Note on ' + E(c.name) + '" placeholder="Note" data-comp="' + E(c.id) + '|note" value="' + E(c.note || "") + '">' +
+        '<span class="reg-meta">Used ' + n + " time" + (n === 1 ? "" : "s") + "</span>" + danger("delcomp:" + c.id, n ? "Delete and unlink" : "Delete") + "</div>";
+    }).join("") + "</div>";
+  }
+  d.innerHTML = h;
+}
+
+// ---------- structural edits ----------
+function blankTask(roleId) { return { id: rid(state.current + "-t"), title: "New epic", description: "", role: roleId, unresolved: false, components: [] }; }
+function blankStep() { return { id: rid(state.current + "-s"), image: null, channels: [], quote: "", title: "New step", tasks: [] }; }
+function blankPhase() { return { id: rid(state.current + "-p"), number: null, name: "New stage", sub: "", owner: null, unresolved: false, muted: false, outcome: "", measures: "", footer: "", steps: [blankStep()] }; }
+function moveTask(taskId, toStepId, beforeTaskId) {
+  var f = findTask(taskId); if (!f) return;
+  var t = f.step.tasks.splice(f.ti, 1)[0];
+  var dest = findStep(toStepId).step;
+  var at = beforeTaskId ? dest.tasks.findIndex(function (x) { return x.id === beforeTaskId; }) : -1;
+  if (at < 0) dest.tasks.push(t); else dest.tasks.splice(at, 0, t);
+}
+function addComponent(name) {
+  name = name.trim(); if (!name) return null;
+  var existing = state.components.find(function (c) { return c.name.toLowerCase() === name.toLowerCase(); });
+  if (existing) return existing.id;
+  var base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "component", id = base, n = 2;
+  while (state.components.some(function (c) { return c.id === id; })) id = base + "-" + n++;
+  state.components.push({ id: id, name: name, status: null, note: "" });
+  return id;
+}
+
+function act(a) {
+  var k = (state.selected || "").split(":")[0], id = (state.selected || "").slice(k.length + 1), m = map();
+  var arm = function (key, fn) { if (state.armed === key) { state.armed = null; edit(fn, true); } else { state.armed = key; drawDrawer(); } };
+  if (a === "close") { state.selected = null; state.armed = null; drawCanvas(); drawDrawer(); return; }
+  if (a.indexOf("del") !== 0) state.armed = null;
+  var f;
+  switch (a.split(":")[0]) {
+    case "taskup": case "taskdown":
+      f = findTask(id); edit(function () { var j = f.ti + (a === "taskup" ? -1 : 1); f.step.tasks.splice(j, 0, f.step.tasks.splice(f.ti, 1)[0]); }, true); break;
+    case "duptask":
+      f = findTask(id); edit(function () { var c = clone(f.task); c.id = rid(state.current + "-t"); f.step.tasks.splice(f.ti + 1, 0, c); state.selected = "task:" + c.id; }, true); break;
+    case "deltask":
+      f = findTask(id); arm(a, function () { f.step.tasks.splice(f.ti, 1); state.selected = null; }); break;
+    case "stepleft": case "stepright":
+      f = findStep(id); edit(function () {
+        var s = f.phase.steps.splice(f.si, 1)[0];
+        if (a === "stepleft") { if (f.si > 0) f.phase.steps.splice(f.si - 1, 0, s); else m.phases[f.pi - 1].steps.push(s); }
+        else { if (f.si < f.phase.steps.length) f.phase.steps.splice(f.si + 1, 0, s); else m.phases[f.pi + 1].steps.unshift(s); }
+      }, true); break;
+    case "addstepafter":
+      f = findStep(id); edit(function () { var s = blankStep(); f.phase.steps.splice(f.si + 1, 0, s); state.selected = "step:" + s.id; }, true); break;
+    case "addtaskhere":
+      f = findStep(id); edit(function () { var t = blankTask(m.roles[0] && m.roles[0].id); f.step.tasks.push(t); state.selected = "task:" + t.id; }, true); break;
+    case "delstep":
+      f = findStep(id); arm(a, function () { f.phase.steps.splice(f.si, 1); state.selected = null; }); break;
+    case "phaseleft": case "phaseright":
+      f = findPhase(id); edit(function () { var j = f.pi + (a === "phaseleft" ? -1 : 1); m.phases.splice(j, 0, m.phases.splice(f.pi, 1)[0]); }, true); break;
+    case "addphaseafter":
+      f = findPhase(id); edit(function () { var p = blankPhase(); m.phases.splice(f.pi + 1, 0, p); state.selected = "phase:" + p.id; }, true); break;
+    case "addstepend":
+      f = findPhase(id); edit(function () { var s = blankStep(); f.phase.steps.push(s); state.selected = "step:" + s.id; }, true); break;
+    case "delphase":
+      f = findPhase(id); arm(a, function () { m.phases.splice(f.pi, 1); state.selected = null; }); break;
+    case "addpanel":
+      edit(function () { m.panels = m.panels || []; m.panels.push({ heading: "New panel", tone: "plain", items: [] }); }, true); break;
+    case "delpanel":
+      arm(a, function () { m.panels.splice(+a.split(":")[1], 1); }); break;
+    case "mapleft": case "mapright":
+      edit(function () {
+        var list = mapList(), i = list.indexOf(m), j = i + (a === "mapleft" ? -1 : 1);
+        if (j < 0 || j >= list.length) return;
+        list.splice(j, 0, list.splice(i, 1)[0]);
+        list.forEach(function (x, n) { x.order = n + 1; });
+      }, true); break;
+    case "dupmap":
+      edit(function () {
+        var c = clone(m), n = 2;
+        while (state.maps[m.id + "-v" + n]) n++;
+        c.id = m.id + "-v" + n; c.tab = (m.tab || m.id) + " v" + n; c.order = mapList().length + 1;
+        state.maps[c.id] = c; state.current = c.id; state.selected = "map";
+      }, true); break;
+    case "delmap":
+      arm(a, function () { delete state.maps[m.id]; state.current = (mapList()[0] || {}).id || null; state.selected = null; }); break;
+    case "addrole":
+      edit(function () { m.roles.push({ id: rid("role-"), label: "New role", colour: "#505a5f" }); }, true); break;
+    case "delrole":
+      arm(a, function () { m.roles.splice(+a.split(":")[1], 1); }); break;
+    case "addcomp": {
+      var input = $("f-newcomp"), list2 = a.split(":")[1];
+      if (!input || !input.value.trim()) { if (input) input.focus(); return; }
+      edit(function () {
+        var cid = addComponent(input.value);
+        if (list2 === "components") { f = findTask(id); if (f.task.components.indexOf(cid) < 0) f.task.components.push(cid); }
+        if (list2 === "channels") { f = findStep(id); if (f.step.channels.indexOf(cid) < 0) f.step.channels.push(cid); }
+      }, true);
+      setTimeout(function () { var i = $("f-newcomp"); if (i) i.focus(); }, 0);
+      break;
+    }
+    case "delcomp": {
+      var cid2 = a.slice("delcomp:".length);
+      arm(a, function () {
+        state.components = state.components.filter(function (c) { return c.id !== cid2; });
+        mapList().forEach(function (x) { x.phases.forEach(function (p) { p.steps.forEach(function (s) {
+          s.channels = s.channels.filter(function (v) { return v !== cid2; });
+          s.tasks.forEach(function (t) { t.components = (t.components || []).filter(function (v) { return v !== cid2; }); });
+        }); }); });
+      });
+      break;
+    }
+  }
+}
+
+function newMap() {
+  var base = map();
+  edit(function () {
+    var n = 1; while (state.maps["map" + n]) n++;
+    var id = "map" + n;
+    state.maps[id] = {
+      id: id, tab: "New map", order: mapList().length + 1,
+      title: base ? base.title : "Drive with a medical condition", subtitle: "New map", note: "Working draft.",
+      panels: [],
+      roles: base ? clone(base.roles) : [{ id: "user", label: "User does it", colour: "#1d3d6b" }],
+      rows: base ? clone(base.rows) : { stage: ["Stage", "Action", "Provision"], outcome: "Outcomes", measures: "Measures", channels: "Channels and services", objective: "Objective", steps: "Steps", tasks: "Epics", footer: "Behind the scenes" },
+      phases: []
+    };
+    state.current = id;
+    state.maps[id].phases.push(blankPhase());
+    state.selected = "map";
+  }, true);
+}
+
+// ---------- events ----------
+$("tabs").addEventListener("click", function (e) {
+  var b = e.target.closest("button[data-map]"); if (!b) return;
+  state.current = b.dataset.map; state.selected = null; state.armed = null; drawAll();
+  $("canvas").scrollLeft = 0;
+});
+$("newMap").addEventListener("click", newMap);
+$("undo").addEventListener("click", undo);
+$("openComponents").addEventListener("click", function () { state.selected = "components"; drawCanvas(); drawDrawer(); });
+$("highlight").innerHTML = '<option value="">Nothing</option>' + SM.STATUSES.concat([{ id: "unset", label: "Not set" }]).map(function (s) {
+  return '<option value="' + s.id + '">' + E(s.label) + "</option>";
+}).join("");
+$("highlight").addEventListener("change", function (e) { state.highlight = e.target.value; drawCanvas(); });
+$("zoom").addEventListener("change", function (e) { state.zoom = +e.target.value; $("canvas").style.setProperty("--zoom", state.zoom); });
+
+$("canvas").addEventListener("click", function (e) {
+  var add = e.target.closest("[data-add]");
+  if (add && !state.readOnly) {
+    var parts = add.dataset.add.split(":"), m = map();
+    if (parts[0] === "task") edit(function () { var t = blankTask(m.roles[0] && m.roles[0].id); findStep(parts[1]).step.tasks.push(t); state.selected = "task:" + t.id; }, true);
+    if (parts[0] === "step") edit(function () { var s = blankStep(); findPhase(parts[1]).phase.steps.push(s); state.selected = "step:" + s.id; }, true);
+    if (parts[0] === "phase") edit(function () { var p = blankPhase(); m.phases.push(p); state.selected = "phase:" + p.id; }, true);
+    return;
+  }
+  var el = e.target.closest("[data-ref]"); if (!el) return;
+  state.selected = el.dataset.ref; state.armed = null; state.pickerFilter = "";
+  drawCanvas(); drawDrawer();
+});
+
+var dragId = null;
+$("canvas").addEventListener("dragstart", function (e) {
+  var c = e.target.closest(".sm-card[data-task]"); if (!c || state.readOnly) return;
+  dragId = c.dataset.task; c.classList.add("sm-dragging");
+  e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", dragId);
+});
+function clearDrop() { document.querySelectorAll(".sm-drop-before,.sm-drop-into").forEach(function (x) { x.classList.remove("sm-drop-before", "sm-drop-into"); }); }
+$("canvas").addEventListener("dragover", function (e) {
+  if (!dragId) return;
+  var card = e.target.closest(".sm-card[data-task]"), list = e.target.closest(".sm-tasks");
+  if (!list) return;
+  e.preventDefault(); clearDrop();
+  if (card && card.dataset.task !== dragId) card.classList.add("sm-drop-before"); else if (!card) list.classList.add("sm-drop-into");
+});
+$("canvas").addEventListener("drop", function (e) {
+  if (!dragId) return;
+  var card = e.target.closest(".sm-card[data-task]"), list = e.target.closest(".sm-tasks");
+  e.preventDefault(); clearDrop();
+  var id = dragId; dragId = null;
+  if (!list || (card && card.dataset.task === id)) { drawCanvas(); return; }
+  edit(function () { moveTask(id, list.dataset.step, card ? card.dataset.task : null); }, true);
+});
+$("canvas").addEventListener("dragend", function () { dragId = null; clearDrop(); document.querySelectorAll(".sm-dragging").forEach(function (x) { x.classList.remove("sm-dragging"); }); });
+
+var drawer = $("drawer");
+drawer.addEventListener("focusin", function () { undoArmed = true; });
+drawer.addEventListener("click", function (e) {
+  var b = e.target.closest("[data-act]"); if (b && !b.disabled) act(b.dataset.act);
+});
+drawer.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && e.target.id === "f-newcomp") { e.preventDefault(); var b = drawer.querySelector('[data-act^="addcomp"]'); if (b) act(b.dataset.act); }
+});
+drawer.addEventListener("input", function (e) {
+  var el = e.target, m = map();
+  var k = (state.selected || "").split(":")[0], id = (state.selected || "").slice(k.length + 1);
+  if (el.dataset.actInput === "filter") { state.pickerFilter = el.value; refreshPicker(); return; }
+  if (el.dataset.actInput === "regfilter") { state.regFilter = el.value; var pos = el.selectionStart; drawDrawer(); var r = $("f-regfilter"); r.focus(); r.setSelectionRange(pos, pos); return; }
+  if (el.dataset.bind) {
+    var bind = el.dataset.bind, v = el.type === "checkbox" ? el.checked : el.value;
+    edit(function () {
+      if (bind.indexOf("m.") === 0) { m[bind.slice(2)] = v; if (bind === "m.tab") drawTabs(); return; }
+      if (bind.indexOf("r.") === 0) { var path = bind.slice(2).split("."); if (path.length === 2) m.rows[path[0]][+path[1]] = v; else m.rows[path[0]] = v; return; }
+      if (bind.indexOf("p.") === 0) { var pp = bind.split("."); m.panels[+pp[1]][pp[2]] = v; return; }
+      var target = k === "task" ? findTask(id).task : k === "step" ? findStep(id).step : findPhase(id).phase;
+      if (bind === "number" || bind === "owner" || bind === "image") v = v === "" ? null : v;
+      target[bind] = v;
+    }, el.type === "checkbox" || el.tagName === "SELECT");
+    if (el.type === "checkbox" || el.tagName === "SELECT") { var keep = el.id; setTimeout(function () { var x = $(keep); if (x) x.focus(); }, 0); }
+    return;
+  }
+  if (el.dataset.panel) {
+    var lines = el.value.split("\n").filter(function (l) { return l.trim(); });
+    edit(function () {
+      m.panels[+el.dataset.panel].items = lines.map(function (l) {
+        var mm = l.match(/^\*\*(.+?)\*\*\s*(.*)$/);
+        return mm ? { lead: mm[1], text: mm[2] } : { lead: "", text: l.trim() };
+      });
+    });
+    return;
+  }
+  if (el.dataset.role) {
+    var rp = el.dataset.role.split("|");
+    edit(function () { m.roles[+rp[0]][rp[1]] = el.value; });
+    return;
+  }
+  if (el.dataset.comp) {
+    var cp = el.dataset.comp.split("|"), sel = el.tagName === "SELECT";
+    edit(function () { var c = state.components.find(function (x) { return x.id === cp[0]; }); c[cp[1]] = sel ? (el.value || null) : el.value; }, sel);
+    if (sel) { var keepId = el.getAttribute("data-comp"); setTimeout(function () { var x = drawer.querySelector('[data-comp="' + keepId + '"]'); if (x) x.focus(); }, 0); }
+    return;
+  }
+});
+drawer.addEventListener("change", function (e) {
+  var el = e.target, m = map();
+  var k = (state.selected || "").split(":")[0], id = (state.selected || "").slice(k.length + 1);
+  if (el.dataset.actChange === "movetask") { edit(function () { moveTask(id, el.value, null); }, true); return; }
+  if (el.dataset.actChange === "measures") { edit(function () { m.rows.measures = el.checked ? "Measures" : null; }, true); return; }
+  if (el.dataset.pick) {
+    var list = el.dataset.pick;
+    edit(function () {
+      var arr = list === "components" ? findTask(id).task.components : findStep(id).step.channels;
+      var i = arr.indexOf(el.value);
+      if (el.checked && i < 0) arr.push(el.value);
+      if (!el.checked && i >= 0) arr.splice(i, 1);
+    }, true);
+    var val = el.value; setTimeout(function () { var x = drawer.querySelector('[data-pick][value="' + val + '"]'); if (x) x.focus(); }, 0);
+  }
+});
+function refreshPicker() {
+  var pos = $("f-filter").selectionStart;
+  drawDrawer();
+  var f = $("f-filter"); f.focus(); f.setSelectionRange(pos, pos);
+}
+document.addEventListener("keydown", function (e) {
+  var typing = /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || "");
+  if (e.key === "Escape" && state.selected) { state.selected = null; state.armed = null; drawCanvas(); drawDrawer(); }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !e.shiftKey && !typing) { e.preventDefault(); undo(); }
+});
+
+// ---------- loading ----------
+async function start() {
+  drawCanvas();
+  if (!window.claude || !claude.use) { setSave("Open this on claude.ai to save changes", true); state.readOnly = true; state.loaded.maps = true; drawCanvas(); return; }
+  db = await claude.use("db");
+  if (!db) { setSave("Can't reach the saved maps", true); state.readOnly = true; state.loaded.maps = true; drawCanvas(); return; }
+  try {
+    var user = await claude.use("user");
+    if (user && user.can && (await user.can("data.write")) === false) { state.readOnly = true; setSave("View only"); }
+  } catch (e) { /* keep editing on; a refused write sets read-only */ }
+  db.collection("maps").onSnapshot(function (snap) {
+    var changed = false;
+    snap.docs.forEach(function (d) {
+      var path = "maps/" + d.id, body = d.data(), json = JSON.stringify(body);
+      if (state.maps[d.id] && dirty(path, state.maps[d.id])) return; // local edits win until saved
+      if (saved[path] === json) return;
+      saved[path] = json; state.maps[d.id] = JSON.parse(json); changed = true;
+    });
+    var live = snap.docs.map(function (d) { return d.id; });
+    Object.keys(state.maps).forEach(function (id) {
+      if (live.indexOf(id) < 0 && saved["maps/" + id] !== undefined) { delete state.maps[id]; delete saved["maps/" + id]; changed = true; }
+    });
+    state.loaded.maps = true;
+    if (!state.current || !state.maps[state.current]) { var want = location.hash.slice(1); state.current = state.maps[want] ? want : (mapList()[0] || {}).id || null; changed = true; }
+    if (changed) { validateSelection(); drawAll(); }
+    if (!saveTimer && !saving) setSave(state.readOnly ? "View only" : "All changes saved");
+  }, function () { setSave("Lost the connection to the saved maps. Reload to reconnect.", true); });
+  db.doc("registry/components").onSnapshot(function (d) {
+    state.loaded.components = true;
+    if (!d.exists) return;
+    var json = JSON.stringify(d.data());
+    if (dirty("registry/components", { items: state.components })) return;
+    if (saved["registry/components"] === json) return;
+    saved["registry/components"] = json; state.components = JSON.parse(json).items || [];
+    drawCanvas(); if (state.selected === "components") drawDrawer();
+  }, function () {});
+}
+start();
+</script>

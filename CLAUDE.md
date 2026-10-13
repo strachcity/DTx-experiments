@@ -2,9 +2,11 @@
 
 HTML prototypes for service design work, built to GOV.UK patterns. These are workshop artefacts used to make service design arguments visible, and to develop concepts and draw out requirements. They are not an attempt at final UI design, and they get thrown away and rebuilt often.
 
+The rules in this file are defaults, not gates. If one is in the way of a better approach, say so and propose the change rather than working around it or refusing.
+
 Each project has its own folder at the root, and `components.html` stays at the root because it is shared. Inside a project folder, prototypes are grouped by the kind of work they are. For Drivers Medical (`drivers-medical/`) that is:
 
-- `service-vision/`: the future-state service blueprint and whole-service map. These are canvases, not prototypes, so they are exempt from the self-contained rule: the map keeps its step illustrations as WebP files in `service-vision/illustrations/`, named by map and step (`cx-01.webp`, `newco-17.webp`).
+- `service-vision/`: the whole-service maps, plus the older blueprint and the hand-built first version of the map. These are canvases, not prototypes, so the prototype conventions below do not apply to them. See "Whole-service map" below.
 - `prototypes/`: customer-facing prototypes.
 - `ivr/`: NewCo routing maps and phone or web chat prototypes.
 
@@ -12,7 +14,20 @@ Put a new file in the group it belongs to. Do not invent a new group without ask
 
 For anything affecting what a screen looks like or says, follow `drivers-medical/DESIGN.md`. It is scoped to the DVLA Drivers Medical prototypes, so a new project needs its own design judgement rather than inheriting that one.
 
+## Whole-service map
+
+`service-vision/whole-service-map/` draws every map (CX, NewCo, and any added later, such as healthcare professionals) from data, with one shared renderer.
+
+- The content is edited in the map editor artifact, https://claude.ai/artifact/QXGoryDQP2AnYbf77dDaqA, which keeps it in its database: `maps/<id>` and `registry/components`. That database is the working copy. Do not rebuild map HTML by hand to change content.
+- `data/*.js` in the repo is a snapshot of it. To save a version, read `maps` and `registry` out with ArtifactData (`out_dir`), run `python3 write-data.py <that folder>`, check `index.html`, and commit.
+- `map.js` and `map.css` are the renderer, shared by `index.html` and `editor.html`. A change to them means republishing `editor.html` to the artifact URL above, with `map.js`, `map.css` and `illustrations/*.webp` as its files.
+- Epics are the user outcomes in each step. Status (exists, planned, building, BAU, unresolved) belongs to the components behind an epic, in one register shared by every map. "Unresolved" is the same thing the maps used to call "tbc".
+- Step illustrations live in `service-vision/illustrations/`, named by the step's `image` field. Step ids are stable and do not change when steps are reordered, so the file names stay put.
+- `whole-service-map.html` is the hand-built first version, kept as it was. `future-state-service-blueprint.html` is older still.
+
 ## Conventions
+
+These apply to the prototypes in `prototypes/` and `ivr/`.
 
 Every prototype is one self-contained HTML file in its project folder, named for what it shows. No numbers, no version suffixes.
 

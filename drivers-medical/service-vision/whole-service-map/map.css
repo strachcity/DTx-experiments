@@ -1,0 +1,84 @@
+/* Whole-service map renderer. Shared by index.html and the editor.
+   A single light canvas in the GOV.UK palette, so colours are literal on purpose. */
+
+.sm-canvas{width:max-content;box-sizing:border-box;padding:48px;background:#ffffff;color:#0b0c0c;font-family:"Public Sans","Helvetica Neue",Helvetica,Arial,sans-serif;line-height:1.4}
+.sm-canvas *{box-sizing:border-box}
+
+/* Header: title on the left, panels and keys on the right */
+.sm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:32px;padding-left:176px;margin-bottom:24px}
+.sm-titles{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.sm-titles h1{margin:0;font-size:40px;font-weight:700;line-height:1.1}
+.sm-titles h2{margin:0;font-size:26px;font-weight:700;line-height:1.2}
+.sm-titles p{margin:0;font-size:14px;color:#505a5f}
+.sm-boxes{display:flex;gap:24px;align-items:flex-start}
+.sm-box{padding:12px 16px;border:1px solid #b1b4b6;display:flex;flex-direction:column;gap:4px;max-width:420px}
+.sm-box--principle{border:0;border-left:6px solid #d4351c;background:#f8f8f7;gap:6px}
+.sm-box h3{margin:0 0 2px;font-size:15px;font-weight:700}
+.sm-box p{margin:0;font-size:13px}
+.sm-box--plain p{font-size:12px}
+.sm-key-row{display:flex;align-items:center;gap:8px;font-size:13px}
+.sm-swatch{width:22px;height:14px;border:1px solid #b1b4b6;flex-shrink:0}
+
+/* The grid. Columns and rows are set inline from the data. */
+.sm-grid{display:grid;align-items:stretch}
+.sm-gutter{text-align:right;font-size:13px;font-weight:700;color:#00703c;line-height:1.3;display:flex;flex-direction:column;align-items:flex-end}
+.sm-gutter--stage{line-height:1.35}
+.sm-gutter--stage span+span{margin-top:0}
+.sm-gutter--stage span:nth-child(2){margin-top:6px}
+.sm-gutter--steps{justify-content:center}
+
+.sm-stage{min-height:84px;display:flex;flex-direction:column;line-height:1.35;position:relative}
+.sm-num{font-size:13px;font-weight:700}
+.sm-name{margin-top:6px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sm-sub{font-size:15px;font-weight:700}
+.sm-bar{height:4px;margin:10px 0;background:#505a5f}
+.sm-bar--owner{margin:10px 0 12px}
+.sm-outcome{min-height:38px;font-size:13px}
+.sm-outcome--measured{min-height:56px}
+.sm-measures{min-height:18px;margin-top:4px;font-size:12px;color:#505a5f}
+
+.sm-channels{min-height:52px;margin-bottom:10px;display:flex;flex-direction:column;gap:4px}
+.sm-channel{padding:5px 6px;font-size:11px;font-weight:700;text-align:center;border:1px solid #b1b4b6;background:#f3f2f1;color:#0b0c0c}
+.sm-image{display:block;width:196px;height:245px;margin-bottom:10px;object-fit:cover}
+.sm-image--none{display:flex;align-items:center;justify-content:center;background:#f3f2f1;border:1px dashed #b1b4b6;font-size:12px;color:#505a5f}
+.sm-quote{min-height:50px;margin-bottom:8px;font-size:12px;font-style:italic;color:#00703c;text-align:center}
+.sm-step{min-height:56px;margin-bottom:10px;padding:8px;background:#f3f2f1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;font-weight:700}
+
+.sm-tasks{display:flex;flex-direction:column;gap:10px}
+.sm-card{border:1px solid #b1b4b6;background:#ffffff}
+.sm-card-title{padding:5px 8px;font-size:12px;font-weight:700;color:#ffffff;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sm-card-desc{padding:7px 8px 9px;font-size:12px}
+.sm-comps{list-style:none;margin:0;padding:6px 8px 7px;border-top:1px solid #e5e6e7;display:flex;flex-wrap:wrap;gap:4px}
+.sm-comps .sm-tag{font-size:10px;padding:1px 5px}
+
+.sm-footer{min-height:72px;margin-top:12px;padding:10px 12px;border:1px solid #505a5f;background:#ffffff;font-size:12px;line-height:1.45}
+.sm-footer--empty{border-style:dashed;color:#6f777b}
+
+/* Tags. Unresolved keeps the yellow the maps already used for tbc. */
+.sm-tag{display:inline-block;font-size:11px;font-weight:700;line-height:1.3;padding:2px 6px;border:1px solid transparent;border-radius:3px;white-space:nowrap}
+.sm-unresolved{display:inline-block;font-size:10px;font-weight:700;line-height:1.3;padding:1px 5px;color:#6f4a00;background:#fff4d6;border:1px solid #d9a200;border-radius:3px}
+.s-exists{background:#cce2d8;color:#005a30;border-color:#85b9a0}
+.s-planned{background:#e8e1f5;color:#3d2375;border-color:#b4a5d6}
+.s-building{background:#d2e2f1;color:#0c2d4a;border-color:#8fb3d6}
+.s-bau{background:#e5e6e7;color:#383f43;border-color:#a9adb0}
+.s-unresolved{background:#fff4d6;color:#6f4a00;border-color:#d9a200}
+.s-unset{background:#ffffff;color:#505a5f;border:1px dashed #b1b4b6}
+.sm-channel.s-exists,.sm-channel.s-planned,.sm-channel.s-building,.sm-channel.s-bau,.sm-channel.s-unresolved{border-radius:0}
+.sm-channel.s-unset{background:#f3f2f1;color:#0b0c0c;border:1px solid #b1b4b6}
+
+/* Highlighting by status */
+.sm-dim{opacity:.18}
+.sm-card,.sm-channel{transition:opacity .15s}
+@media (prefers-reduced-motion:reduce){.sm-card,.sm-channel{transition:none}}
+
+/* Edit affordances, only present when rendered with editable:true */
+.sm-editable [data-ref]{cursor:pointer}
+.sm-editable [data-ref]:hover{outline:2px solid #1d70b8;outline-offset:1px}
+.sm-editable .sm-selected{outline:3px solid #ffdd00 !important;outline-offset:1px;box-shadow:0 0 0 5px #0b0c0c}
+.sm-add{font:inherit;font-size:12px;font-weight:700;color:#1d70b8;background:#ffffff;border:1px dashed #1d70b8;padding:6px 8px;cursor:pointer;text-align:center}
+.sm-add:hover{background:#f3f8fc}
+.sm-add:focus-visible{outline:3px solid #ffdd00;outline-offset:0}
+.sm-card[draggable="true"]{cursor:grab}
+.sm-drop-before{box-shadow:0 -4px 0 0 #1d70b8}
+.sm-drop-into{background:#f3f8fc;outline:2px dashed #1d70b8;outline-offset:2px}
+.sm-dragging{opacity:.4}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Drivers Medical whole-service map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="map.css">
+<style>
+body{margin:0;overflow-x:auto;background:#ffffff;color:#0b0c0c;font-family:"Public Sans","Helvetica Neue",Helvetica,Arial,sans-serif}
+.bar{position:fixed;top:12px;left:12px;z-index:10;display:flex;gap:8px;font-size:13px}
+.bar-group{display:flex;border:1px solid #b1b4b6;background:#ffffff}
+.bar button{font:inherit;font-weight:700;padding:4px 12px;border:0;background:#ffffff;color:#1d70b8;cursor:pointer}
+.bar button[aria-pressed="true"]{background:#0b0c0c;color:#ffffff}
+.bar button:focus-visible{outline:3px solid #ffdd00;outline-offset:0}
+.bar label{display:flex;align-items:center;gap:6px;padding:0 8px;font-weight:700}
+.bar select{font:inherit}
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Map controls">
+  <div class="bar-group" id="tabs"></div>
+  <div class="bar-group"><label for="highlight">Highlight</label><select id="highlight"></select></div>
+</nav>
+<main id="map"></main>
+
+<!-- data -->
+<script src="data/components.js"></script>
+<script src="data/cx.js"></script>
+<script src="data/newco.js"></script>
+<!-- /data -->
+<script src="map.js"></script>
+<script>
+// Content lives in data/*.js; the editor artifact is where it gets changed.
+var state = { map: null, highlight: "" };
+var maps = Object.keys(SM.maps).map(function (k) { return SM.maps[k]; })
+  .sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+
+function draw() {
+  document.getElementById("map").innerHTML = SM.render(SM.maps[state.map], SM.components, {
+    imageBase: "../illustrations/", highlight: state.highlight
+  });
+  document.querySelectorAll("#tabs button").forEach(function (b) {
+    b.setAttribute("aria-pressed", String(b.dataset.map === state.map));
+  });
+}
+
+document.getElementById("tabs").innerHTML = maps.map(function (m) {
+  return '<button type="button" data-map="' + SM.esc(m.id) + '">' + SM.esc(m.tab) + "</button>";
+}).join("");
+document.getElementById("tabs").addEventListener("click", function (e) {
+  var b = e.target.closest("button[data-map]");
+  if (b) { location.hash = b.dataset.map; }
+});
+var hl = document.getElementById("highlight");
+hl.innerHTML = '<option value="">Nothing</option>' + SM.STATUSES.concat([{ id: "unset", label: "Not set" }]).map(function (s) {
+  return '<option value="' + s.id + '">' + SM.esc(s.label) + "</option>";
+}).join("");
+hl.addEventListener("change", function () { state.highlight = hl.value; draw(); });
+
+function route() {
+  var id = location.hash.slice(1);
+  state.map = SM.maps[id] ? id : maps[0].id;
+  draw();
+}
+window.addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>
