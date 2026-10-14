@@ -233,7 +233,7 @@ const SCRIPTS = {
   team_closed:{n:"Team closed, BAU open",src:"req",req:"FR2-01",note:"Working answer for [days and hours]: Monday to Friday, 8am to 4pm (subject to approval).",t:"The team looking after your case is closed at the moment. They’re open [days and hours]. You can ask them to call you back. Or you can speak to another adviser now. They’re not part of your team, but they can help with most things.\nTo ask your team to call you back, press 1. To speak to another adviser now, press 2."},
   closing:{n:"Closing message",src:"sug",t:"Thank you for calling. The team looking after your case is open Monday to Friday, 8am to 4pm. Please call back then, and have our reference number ready. Goodbye.",note:"Hours are provisional."},
   to_adviser:{n:"Putting the caller through to another adviser",src:"sug",t:"We’re putting you through to another adviser. They’re not part of the team looking after your case, but they can help with most things."},
-  busy_msg:{n:"Team busy, no callback available",src:"sug",t:"The team looking after your case is busy helping other people right now. You can ask them to call you back, or stay on the line and keep your place.\nTo ask your team to call you back, press 1. Or stay on the line."},
+  busy_msg:{n:"Team busy, no callback available",src:"sug",t:"The team looking after your case is busy helping other people right now, so you may have a long wait. You can stay on the line and keep your place, or call back later."},
   cb_req_rb:{n:"Confirming the number for a callback request",src:"sug",t:"We’ll ask the team looking after your case to call you back on the number ending [last 3 digits]. If that’s right, press 1. To give a different number, press 2."},
   cb_req_enter:{n:"Entering a number for a callback request",src:"sug",t:"Please enter the number we should call you back on, then press hash.",note:"Keypad entry is new (FR1-NF3)."},
   cb_req_ok:{n:"Callback request sent",src:"sug",t:"Thank you. We’ve sent your request to the team looking after your case. They aim to call you back [by the end of the next working day]. Goodbye.",note:"How soon the team calls back is for the team to decide."},
@@ -330,15 +330,13 @@ const PHONE = {
       {id:"p_q",type:"step",k:"req",l:"Joins the NewCo queue",sc:["queue_msg"],d:"While the team is open, the caller waits for their team, whether or not an agent is free.",r:["FR2-02","FR8-24"]},
       {id:"p_qwait",type:"q",k:"req",dflt:"No",l:"Is the estimated wait over X minutes?",d:"X is set by demand management. BAU uses 2 minutes today; it has been 10.",r:["FR8-N2","FR3-07"]},
       {id:"p_cbres",type:"q",k:"req",dflt:"Yes",l:"Is there enough resource for a callback?",d:"Demand management checks this before a callback is offered (confirmed by the developers on 28 September).",r:["FR8-N2","FR8-N4"]},
-      {id:"p_busy",type:"step",k:"req",l:"Told the team is busy: ask for a callback or keep waiting",sc:["busy_msg"],r:["FR8-N4"]},
-      {id:"p_busyq",type:"q",k:"req",dflt:"Stays on the line",l:"What does the caller do?",r:["FR8-N4"]},
-      {id:"p_gomb",type:"go",to:"p_mbnum",l:"Go to lane 5: Callback request"},
+      {id:"p_busy",type:"step",k:"req",l:"Told the team is busy: call back later, or stay on the line and keep their place",sc:["busy_msg"],r:["FR8-N4"]},
       {id:"p_qcb",type:"step",k:"req",l:"Offered a callback from the team",sc:["queue_cb"],r:["FR8-N2"]},
       {id:"p_qcbq",type:"q",k:"req",dflt:"Stays on the line",l:"What does the caller do?",r:["FR8-N2"]},
       {id:"p_gocb2",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"},
       {id:"p_agent",type:"end",k:"req",l:"NewCo agent answers",r:["FR2-02","FR6-01"]}
     ],edges:[
-      ["p_connect","p_q"],["p_q","p_qwait"],["p_qwait","p_cbres","Yes"],["p_qwait","p_agent","No"],["p_cbres","p_qcb","Yes"],["p_cbres","p_busy","No"],["p_busy","p_busyq"],["p_busyq","p_gomb","Presses 1: callback request"],["p_busyq","p_agent","Stays on the line"],["p_qcb","p_qcbq"],["p_qcbq","p_gocb2","Presses 1: callback"],["p_qcbq","p_agent","Stays on the line"]
+      ["p_connect","p_q"],["p_q","p_qwait"],["p_qwait","p_cbres","Yes"],["p_qwait","p_agent","No"],["p_cbres","p_qcb","Yes"],["p_cbres","p_busy","No"],["p_busy","p_agent","Stays on the line"],["p_qcb","p_qcbq"],["p_qcbq","p_gocb2","Presses 1: callback"],["p_qcbq","p_agent","Stays on the line"]
     ]},
     {id:"p5",t:"NewCo team closed, or a callback request",nodes:[
       {id:"p_tc",type:"step",k:"req",l:"Told the team is closed: ask for a callback or speak to another adviser",sc:["team_closed"],d:"Between 4pm and 7pm: the NewCo team (8am to 4pm) is closed, but the phone line (8am to 7pm) is open.",r:["FR2-01"]},
@@ -462,8 +460,8 @@ const SCENARIOS = [
    blurb:"A busy morning. Both queues are long, and the team offers a callback.",
    play:["Stay on the line after the web chat offer.",...PLAY_TO_REF,"Enter the reference.","When the team offers a callback, press 1.","Press 1 to use this number.","Answer when the phone rings."]},
   {id:"team-busy", t:"NewCo customer, team busy, no callback slot", who:"newco", c:{newcoWaitLong:true,cbResource:false},
-   blurb:"The team's queue is long and there's no resource for a callback, so the caller can only ask the team to call back.",
-   play:[...PLAY_TO_REF,"Enter the reference.","When told the team is busy, press 1.","Press 1: the number is right."]},
+   blurb:"The team's queue is long and there's no resource for a callback, so the caller is asked to call back later, or can stay on the line.",
+   play:[...PLAY_TO_REF,"Enter the reference.","When told the team is busy, stay on the line."]},
   {id:"after-4pm", t:"NewCo customer calls after 4pm", who:"newco", c:{time:"late"},
    blurb:"The phone line is open until 7pm, but the NewCo team closes at 4pm.",
    play:[...PLAY_TO_REF,"Enter the reference.","When told the team is closed, press 1 to ask for a callback, 2 for another adviser, or nothing."]},
@@ -1068,7 +1066,6 @@ const INPUT = {
   p_refq: {collect:9, done:b=>b.length===9?(setRef(b),"Gives the reference"):"Not 9 digits", none:"Doesn't have it",
            say:[{label:"Say the reference", ref:true},{label:"Say: I don't have it", heard:"I don't have it", a:"Doesn't have it"}]},
   p_retryq:{collect:9, done:b=>b.length===9?(setRef(b),"Yes"):RETRY, none:()=>RETRY, fail:"No", say:[{label:"Say the reference", ref:true}]},
-  p_busyq:{keys:{"1":"Presses 1: callback request"}, none:"Stays on the line"},
   p_qcbq: {keys:{"1":"Presses 1: callback"}, none:"Stays on the line"},
   p_ch:   {keys:{"1":"Presses 1: callback request","2":"Presses 2: another adviser"}, none:"Presses nothing"},
   p_mbrbq:{keys:{"1":"Right: presses 1","2":"Wrong: presses 2"}},
