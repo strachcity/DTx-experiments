@@ -302,7 +302,7 @@ const PHONE = {
       {id:"p_privcb",type:"step",k:"today",asis:true,l:"Privacy and call recording information",r:["FR8-19"]},
       {id:"p_gocb",type:"go",to:"p_cbnum",l:"Go to lane 7: Callback"},
       {id:"p_whereref",type:"step",k:"req",l:"Told where to find the reference",sc:["ref_where"],d:"May already be a BAU user story and script: to confirm.",r:["FR8-26"]},
-      {id:"p_ref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"The reference is 9 digits, shown next to “Our reference” at the top of every letter. Some end in -MED; callers only need the 9 digits. The Mural and FR8-24 have the caller say it out loud. Keypad entry is new: the BAU phone line takes the reference by speech only today.",r:["FR1-N5","FR1-17","FR1-14","FR8-24","FR8-25"]},
+      {id:"p_ref",type:"step",k:"req",l:"Asked for the reference number",sc:["ref_prompt"],d:"The reference is 9 digits, shown next to “Our reference” at the top of every letter. Some end in -MED; callers only need the 9 digits. The Mural and FR8-24 have the caller say it out loud. Keypad entry is new: the BAU phone line takes the reference by speech only today.",r:["FR1-N5","FR1-17","FR8-24","FR8-25"]},
       {id:"p_refq",type:"q",k:"req",l:"What does the caller do?",r:["FR1-05","FR1-06","FR1-19"]},
       {id:"p_retry",type:"step",k:"req",l:"Asked to try again",sc:["ref_format"],d:"May already be a BAU user story and script: to confirm.",r:["FR1-19"]},
       {id:"p_retryq",type:"q",k:"req",l:"Right before the attempts run out?",r:["FR1-20"]},
