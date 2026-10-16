@@ -32,7 +32,7 @@ Each prototype is one self-contained HTML file. Open it from GitHub Pages or str
 
 `secure-messages/`
 
-- The one exception to "nothing to install": a GOV.UK Prototype Kit app, built that way because it is a step towards production. It shows an authenticated, two-way channel where customers read the letters DVLA posts them and reply to a driver questionnaire, by GOV.UK One Login or by a code printed on the paper letter. GitHub Pages cannot run it. See its own `README.md` for `npm install` and `npm run dev`.
+- The one exception to "nothing to install": a GOV.UK Prototype Kit app, built that way because it is a step towards production. It shows an authenticated, two-way channel where customers read the letters DVLA posts them and reply to a driver questionnaire, by GOV.UK One Login or by a code printed on the paper letter. A GitHub Action builds a browser-only version of it for GitHub Pages from the same routes and templates. See its own `README.md` for running the kit locally with `npm install` and `npm run dev`.
 
 `ivr/`
 

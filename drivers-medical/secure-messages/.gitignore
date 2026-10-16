@@ -9,3 +9,6 @@ migrate.log
 # General ignores
 .DS_Store
 .idea
+
+# Static build for GitHub Pages
+dist/

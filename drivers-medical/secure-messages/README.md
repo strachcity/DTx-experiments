@@ -24,9 +24,17 @@ npm run dev
 
 Then open http://localhost:3000. The index is the "All screens" page.
 
-GitHub Pages cannot run the kit, so this prototype is not on the repo's Pages site. Where to host it for workshops is an open question.
+## On GitHub Pages
 
-Dependencies are only GOV.UK Prototype Kit 14.0.0 and GOV.UK Frontend 6.6.0, plus `@govuk-prototype-kit/common-templates`, which the kit installs as part of its own default setup.
+https://strachcity.github.io/DTx-experiments/drivers-medical/secure-messages/
+
+Pages only serves files, so it cannot run the kit's server. Instead, `npm run build` builds a browser-only version into `dist/`. It is not a copy: it runs the same `app/routes.js`, `app/filters.js`, session data defaults and templates in the browser, through a small stand-in for the kit (`static/`). Change the app, and the Pages version changes with it.
+
+`.github/workflows/pages.yml` runs the build on every push to `main` and publishes the whole repo, with this folder replaced by `dist/`. Screens live in the URL hash (`#/messages`), so any screen can still be linked to directly. State is in memory and resets on reload, like the other prototypes in this repo.
+
+To check the Pages version locally, run `npm run build`, then serve `dist/` with any static file server.
+
+Dependencies are GOV.UK Prototype Kit 14.0.0 and GOV.UK Frontend 6.6.0, plus `@govuk-prototype-kit/common-templates`, which the kit installs as part of its own default setup. The Pages build adds two development dependencies: `esbuild` to bundle it, and `nunjucks` 3.2.4, the same version the kit uses, to render the templates in the browser.
 
 ## Where things are
 
@@ -35,8 +43,9 @@ Dependencies are only GOV.UK Prototype Kit 14.0.0 and GOV.UK Frontend 6.6.0, plu
 - `app/filters.js`: date formats and labels.
 - `app/views/`: one template per screen, built from GOV.UK Frontend macros.
 - `app/assets/sass/application.scss`: only what Frontend does not provide: the design notes, prototype controls and the phone and email mock-ups.
+- `static/`: the Pages build. `build.js` collects the templates, bundles `main.js` and compiles the CSS with the kit's own Sass pipeline. `kit-shim.js` stands in for the kit's router and filters, so `routes.js` runs unchanged.
 
-All state is in the kit's session data. Nothing uses localStorage. There is no research log yet. If one is added, it is the one thing that should outlive a session and could go in localStorage.
+All state is in the kit's session data, or in memory on Pages. Nothing uses localStorage. There is no research log yet. If one is added, it is the one thing that should outlive a session and could go in localStorage.
 
 ## Route map
 

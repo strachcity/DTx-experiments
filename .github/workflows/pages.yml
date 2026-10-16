@@ -1,0 +1,66 @@
+# Publishes the repo to GitHub Pages.
+#
+# Every prototype except one is a self-contained HTML file and is
+# published as it is. drivers-medical/secure-messages/ is a Prototype Kit
+# app, so it is built first (npm run build) and its folder on the site is
+# replaced with the built, browser-only version.
+#
+# Needs Settings > Pages > Build and deployment > Source set to
+# "GitHub Actions".
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: drivers-medical/secure-messages/package-lock.json
+
+      - name: Build secure messages
+        working-directory: drivers-medical/secure-messages
+        run: |
+          npm ci
+          npm run build
+
+      - name: Assemble the site
+        run: |
+          mkdir _site
+          git ls-files \
+            | grep -v -e '^\.github/' -e '^drivers-medical/secure-messages/' \
+            | xargs -d '\n' cp --parents -t _site
+          mkdir -p _site/drivers-medical/secure-messages
+          cp -r drivers-medical/secure-messages/dist/. _site/drivers-medical/secure-messages/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
