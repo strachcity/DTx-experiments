@@ -1,0 +1,62 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set pageName = "Enter the code from your letter" %}
+{% if errors.code or errors.dateOfBirth %}{% set pageName = "Error: " + pageName %}{% endif %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back", href: "/start" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    {% set errorList = [] %}
+    {% if errors.code %}{% set errorList = (errorList.push({ text: errors.code, href: "#code" }), errorList) %}{% endif %}
+    {% if errors.dateOfBirth %}{% set errorList = (errorList.push({ text: errors.dateOfBirth, href: "#dob-day" }), errorList) %}{% endif %}
+    {% if errorList.length %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: errorList }) }}
+    {% endif %}
+
+    <h1 class="govuk-heading-l">Enter the code from your letter</h1>
+
+    <p class="govuk-body">The code is printed in a box at the top of the letter, under “Reply online”. It lets you reply to that letter only.</p>
+
+    {{ govukInsetText({
+      html: "Prototype only. Use code <strong>HX7K 9MPQ</strong> and date of birth <strong>14 6 1979</strong>. Never enter real details."
+    }) }}
+
+    <form method="post" novalidate>
+      {{ govukInput({
+        id: "code",
+        name: "_code",
+        label: { text: "Code", classes: "govuk-label--s" },
+        hint: { text: "8 letters and numbers, for example HX7K 9MPQ" },
+        classes: "govuk-input--width-10",
+        spellcheck: false,
+        autocomplete: "off",
+        value: values.code,
+        errorMessage: { text: errors.code } if errors.code
+      }) }}
+
+      {{ govukDateInput({
+        id: "dob",
+        fieldset: { legend: { text: "Date of birth", classes: "govuk-fieldset__legend--s" } },
+        hint: { text: "For example, 27 3 1985" },
+        errorMessage: { text: errors.dateOfBirth } if errors.dateOfBirth,
+        items: [
+          { id: "dob-day", name: "_dobDay", label: "Day", classes: "govuk-input--width-2" + (" govuk-input--error" if errors.dateOfBirth), value: values.day, autocomplete: "bday-day" },
+          { id: "dob-month", name: "_dobMonth", label: "Month", classes: "govuk-input--width-2" + (" govuk-input--error" if errors.dateOfBirth), value: values.month, autocomplete: "bday-month" },
+          { id: "dob-year", name: "_dobYear", label: "Year", classes: "govuk-input--width-4" + (" govuk-input--error" if errors.dateOfBirth), value: values.year, autocomplete: "bday-year" }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    {{ designNote("Two things together: something you hold (the letter) and something you know (your date of birth). A wrong code and a wrong date of birth get the same message, so the page does not help anyone guessing.") }}
+    {{ openQuestion("IAG", "What is the assurance floor for the paper code? Single-use or reusable, how long it lasts, how many wrong attempts before it locks, and what happens if the letter is lost. This prototype makes the code single-use once a reply is sent, and has no lockout.") }}
+  </div>
+</div>
+{% endblock %}

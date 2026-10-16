@@ -1,0 +1,127 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set pageName = "All screens" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Drivers Medical prototype</span>
+    <h1 class="govuk-heading-xl">Secure messages: all screens</h1>
+
+    <p class="govuk-body-l">Today, anything with medical content goes to Drivers Medical customers by second-class post. Secure messages is an authenticated, two-way channel where customers read those letters and act on them, bound to their case record.</p>
+    <p class="govuk-body">GOV.UK Notify is the doorbell. Secure messages is the room behind the door.</p>
+
+    {{ designNote("Four rules every screen respects. Notify pings, secure messages holds the content. Sign-in is the gate for reading, downloading and replying. Every interaction is an event on the case. Channel choice is the customer’s, but the record is single.") }}
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-l">Scenario</h2>
+
+    {{ govukSummaryList({
+      card: { title: { text: "Now running: " + scenario.name } },
+      rows: [
+        { key: { text: "Who" }, value: { text: scenario.description } },
+        { key: { text: "Start here" }, value: { html: '<a class="govuk-link" href="/jump?_as=nobody&_to=' + scenario.startUrl + '">Start the scenario<span class="govuk-visually-hidden">: ' + scenario.name + '</span></a>' } }
+      ]
+    }) }}
+
+    <form method="post" action="/scenario" novalidate>
+      {% set scenarioItems = [] %}
+      {% for key, s in scenarios %}
+        {% set scenarioItems = (scenarioItems.push({ value: key, text: s.name, hint: { text: s.description } }), scenarioItems) %}
+      {% endfor %}
+      {{ govukRadios({
+        name: "_scenario",
+        idPrefix: "scenario",
+        fieldset: { legend: { text: "Switch scenario", classes: "govuk-fieldset__legend--m" } },
+        hint: { text: "Switching resets all data, including any replies and events." },
+        value: data.scenario,
+        items: scenarioItems
+      }) }}
+      <div class="govuk-button-group">
+        {{ govukButton({ text: "Switch scenario" }) }}
+        <a class="govuk-link" href="/reset">Reset data<span class="govuk-visually-hidden"> for this scenario</span></a>
+      </div>
+    </form>
+
+    <h2 class="govuk-heading-m">Legal layer</h2>
+    <p class="govuk-body">The serving notice is a state, not a journey. Switch between the paper posted and the paper delivered, then look at <a class="govuk-link" href="/jump?_as=oneLogin&_to=/messages">your messages</a> and the <a class="govuk-link" href="/staff/case">staff view</a>.</p>
+    <p class="govuk-body">
+      Now: <strong>{{ "Delivered. The secure copy is available" if noticeDelivered else "Posted, not yet delivered" }}</strong>.
+      {% if noticeDelivered %}
+        <a class="govuk-link" href="/legal-layer/posted">Go back to posted, not yet delivered</a>
+      {% else %}
+        <a class="govuk-link" href="/legal-layer/delivered">Move to after delivery</a>
+      {% endif %}
+    </p>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-l">Screens</h2>
+    <p class="govuk-body">Each link opens one screen directly. Links that need sign-in or a code grant it without writing an event, because nothing happened on the case.</p>
+
+    <h3 class="govuk-heading-m">Slice 1: secure view</h3>
+    <ul class="govuk-list govuk-list--number">
+      <li><a class="govuk-link" href="/notification">The notification</a> (text message and email)</li>
+      <li><a class="govuk-link" href="/jump?_as=nobody&_to=/start">You have a secure message from DVLA</a> (start)</li>
+      <li><a class="govuk-link" href="/sign-in">Sign in with GOV.UK One Login</a> (simulated)</li>
+      <li><a class="govuk-link" href="/sign-in/problem">We could not confirm who you are</a> (failed sign-in)</li>
+      <li><a class="govuk-link" href="/jump?_as=oneLogin&_to=/messages">Your messages</a>, with the driving status card</li>
+      <li>A message:
+        <ul class="govuk-list govuk-list--bullet">
+          {% for message in data.messages %}
+            {% if message.letterType != "servingNotice" or noticeDelivered %}
+              <li><a class="govuk-link" href="/jump?_as=oneLogin&_to=/messages/{{ message.id }}">{{ message.title }}</a> ({{ message.tag.text }})</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </li>
+      <li><a class="govuk-link" href="/jump?_as=oneLogin&_to=/messages/msg-004/pdf">Download a letter as a PDF</a> (placeholder)</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Slice 2: secure action</h3>
+    <p class="govuk-body">Replying to the driver questionnaire. Signed in with One Login:</p>
+    <ul class="govuk-list govuk-list--number">
+      <li><a class="govuk-link" href="/jump?_as=oneLogin&_to=/reply/msg-004/severe-hypos">How many severe hypos</a></li>
+      <li><a class="govuk-link" href="/jump?_as=oneLogin&_to=/reply/msg-004/most-recent-severe-hypo">When was the most recent</a> (only asked if more than 0)</li>
+      <li><a class="govuk-link" href="/jump?_as=oneLogin&_to=/reply/msg-004/warning-signs">Warning signs before a hypo</a></li>
+      <li><a class="govuk-link" href="/jump?_as=oneLogin&_to=/reply/msg-004/glucose-checks">How you check your blood glucose</a></li>
+      <li><a class="govuk-link" href="/jump?_as=oneLogin&_fill=yes&_to=/reply/msg-004/check">Check your answers</a>, filled with example answers</li>
+      <li><a class="govuk-link" href="/reply/msg-004/confirmation?_preview=oneLogin">Answers sent</a> (a preview: nothing is sent or recorded)</li>
+    </ul>
+
+    <p class="govuk-body">By the code from the paper letter:</p>
+    <ul class="govuk-list govuk-list--number">
+      <li><a class="govuk-link" href="/jump?_as=nobody&_to=/code">Enter the code from your letter</a></li>
+      <li><a class="govuk-link" href="/jump?_as=nobody&_to=/code?_example=errors">Enter the code, with errors</a></li>
+      <li><a class="govuk-link" href="/jump?_as=code&_to=/code/letter">You are replying to this letter</a></li>
+      <li>The same questions and check your answers as above, then <a class="govuk-link" href="/reply/msg-004/confirmation?_preview=code">answers sent</a> with no way into the message list (a preview: nothing is sent or recorded)</li>
+      <li><a class="govuk-link" href="/code/already-used">You have already replied to this letter</a> (a used code)</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Staff</h3>
+    <ul class="govuk-list govuk-list--number">
+      <li><a class="govuk-link" href="/staff/case">Case correspondence</a>, with the event log and suggested wording</li>
+    </ul>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-l">Open questions</h2>
+    <p class="govuk-body">Each one also appears on the screen it affects, when design notes are on.</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Legal (Keya):</strong> which letters serve a notice, what counts as served, and does a secure copy alongside paper raise any issue?</li>
+      <li><strong>IAG:</strong> the assurance floor for the paper code (single-use or reusable, expiry, what happens if it is lost), and retention if messages never expire.</li>
+      <li><strong>Content:</strong> the rule for what is safe for Notify and what must go through secure messages.</li>
+      <li><strong>Which letters first:</strong> waiting on volumes per template. Driver questionnaires are the leading candidate.</li>
+      <li><strong>Where it lives:</strong> the Dynamics customer account, or GOV.UK App Mailbox.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

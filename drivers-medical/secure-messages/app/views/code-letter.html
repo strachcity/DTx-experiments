@@ -1,0 +1,34 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set pageName = "You are replying to this letter" %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back", href: "/code" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">You are replying to this letter</h1>
+
+    {{ govukSummaryList({
+      rows: [
+        { key: { text: "Letter" }, value: { text: message.title } },
+        { key: { text: "Posted to you on" }, value: { text: message.paperPostedDate | longDate } },
+        { key: { text: "Reply by" }, value: { text: message.replyBy | longDate } }
+      ]
+    }) }}
+
+    <p class="govuk-body">There are 4 short questions about your hypos and how you check your blood glucose. It takes about 5 minutes.</p>
+    <p class="govuk-body">If this is not the letter you have, <a class="govuk-link" href="/code">check the code and try again</a>.</p>
+
+    {{ govukButton({
+      text: "Answer the questions",
+      href: "/reply/" + message.id + "/severe-hypos"
+    }) }}
+
+    {{ designNote("A code user sees which letter the code matched, and nothing else about the case. The paper they are holding is their copy of the letter, so the screen only has to confirm it is the right one.") }}
+  </div>
+</div>
+{% endblock %}

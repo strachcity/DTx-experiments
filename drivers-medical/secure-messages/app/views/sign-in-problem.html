@@ -1,0 +1,29 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set pageName = "We could not confirm who you are" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">We could not confirm who you are</h1>
+
+    <p class="govuk-body">GOV.UK One Login could not confirm your identity, so you cannot see your messages online yet.</p>
+    <p class="govuk-body">You can still reply to our letter. Use the code printed on the paper copy we posted to you.</p>
+
+    {{ govukButton({
+      text: "Use the code from your letter",
+      href: "/code"
+    }) }}
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/sign-in/begin">Try signing in again</a>
+    </p>
+
+    <p class="govuk-body">If you have not received the paper letter yet, it should arrive within 2 working days of the date on your text or email.</p>
+
+    {{ designNote("A failed sign-in is not a dead end. The customer still has a way to do the thing they came to do, and the reply lands on the same record as if they had signed in.") }}
+    {{ openQuestion("Data model", "There is no signInFailed event, so the staff view shows this as a sign-in that started and never completed. Is that enough for an agent, or does a failed identity check need its own event?") }}
+  </div>
+</div>
+{% endblock %}

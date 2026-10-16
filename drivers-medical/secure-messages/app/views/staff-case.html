@@ -1,0 +1,94 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set serviceName = "Drivers Medical case view (staff)" %}
+{% set pageName = "Case correspondence" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <span class="govuk-caption-l">{{ data.customer.name }}, born {{ data.customer.dateOfBirth | longDate }}</span>
+    <h1 class="govuk-heading-l">Case correspondence</h1>
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% set prefs = { "email": "Email", "sms": "Text message", "both": "Email and text message", "none": "None. Post only" } %}
+    {{ govukSummaryList({
+      rows: [
+        { key: { text: "Notifications by" }, value: { text: prefs[data.customer.contactPreference] } },
+        { key: { text: "Has signed in with GOV.UK One Login" }, value: { text: "Yes" if hasSignedIn else "No" } }
+      ]
+    }) }}
+
+    <h2 class="govuk-heading-m">Suggested wording</h2>
+    {{ govukInsetText({ text: "“" + agentWording + "”" }) }}
+
+    {{ designNote("The agent sees the same record the customer acted on, in a sentence they can say. The call this most often prevents is the one that asks: did you get my reply? This answers it without the agent reading an event log aloud.") }}
+    {{ designNote("Deliberately not styled as Dynamics. The argument is about what the record holds, not where it is shown.") }}
+  </div>
+</div>
+
+<h2 class="govuk-heading-m">Letters</h2>
+
+{% for message in messages %}
+  {% if not message.available %}
+    {% set secureCopy = "Not available yet. Appears from " + (message.availableFrom | longDate) + ", when the notice is treated as delivered" %}
+  {% elif message.openedAt %}
+    {% set secureCopy = "Opened " + (message.openedAt | longDateTime) %}
+  {% else %}
+    {% set secureCopy = "Not opened" %}
+  {% endif %}
+
+  {% if message.reply %}
+    {% set howNames = { "oneLogin": "secure message, signed in with GOV.UK One Login", "code": "secure message, using the code from the paper letter", "post": "post" } %}
+    {% set replyText = "Received " + (message.reply.submittedAt | longDateTime) + " by " + howNames[message.reply.route] %}
+  {% elif message.requiresAction %}
+    {% set replyText = "Not received yet. Reply by " + (message.replyBy | longDate) %}
+  {% else %}
+    {% set replyText = "No reply needed" %}
+  {% endif %}
+
+  {% set rows = [
+    { key: { text: "Type" }, value: { text: message.letterType | letterTypeName } },
+    { key: { text: "Posted" }, value: { text: message.paperPostedDate | longDate } },
+    { key: { text: "Secure copy" }, value: { text: secureCopy } },
+    { key: { text: "Reply" }, value: { text: replyText } }
+  ] %}
+
+  {{ govukSummaryList({
+    card: { title: { text: message.title } },
+    rows: rows
+  }) }}
+{% endfor %}
+
+{{ designNote("Each letter answers four questions an agent is asked: did we post it, could they read it online, did they read it, and did they reply, and how. The reply route is recorded because the record is single, whichever door the customer came through.") }}
+
+<h2 class="govuk-heading-m">Event log</h2>
+
+{% set eventRows = [] %}
+{% for event in events %}
+  {% set eventRows = (eventRows.push([
+    { text: event.timestamp | longDateTime },
+    { text: event.type | eventType },
+    { text: event.letterTitle or "Not tied to one letter" },
+    { text: (event.route | routeName) if event.route else (event.channel | channelName) }
+  ]), eventRows) %}
+{% endfor %}
+
+{{ govukTable({
+  caption: "Newest first",
+  captionClasses: "govuk-table__caption--s",
+  firstCellIsHeader: false,
+  head: [{ text: "When" }, { text: "Event" }, { text: "Letter" }, { text: "Route or channel" }],
+  rows: eventRows
+}) }}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ openQuestion("Data model", "Notified events have a channel (email or text message) rather than a route, because a Notify ping is not a way in. Sign-in events belong to the session, not to a letter. Both are guesses at the model, made explicit here so they can be argued with.") }}
+    {{ openQuestion("Where it lives", "Is this view in Dynamics, next to the case, or somewhere else? The agent needs it during the call, not after.") }}
+  </div>
+</div>
+{% endblock %}

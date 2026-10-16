@@ -1,0 +1,45 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set question = "When was your most recent severe hypo while you were awake?" %}
+{% set pageName = ("Error: " if errors.hypoDate) + question %}
+{% set date = data.reply.hypoDate or {} %}
+{% set errorClass = " govuk-input--error" if errors.hypoDate else "" %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back", href: backLink }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errors.hypoDate %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: errors.hypoDate, href: "#hypo-date-day" }] }) }}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {{ govukDateInput({
+        id: "hypo-date",
+        fieldset: {
+          legend: {
+            text: question,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        hint: { text: "If you do not know the exact day, give your best guess. For example, 27 7 2026" },
+        errorMessage: { text: errors.hypoDate } if errors.hypoDate,
+        items: [
+          { id: "hypo-date-day", name: "reply[hypoDate][day]", label: "Day", classes: "govuk-input--width-2" + errorClass, value: date.day },
+          { id: "hypo-date-month", name: "reply[hypoDate][month]", label: "Month", classes: "govuk-input--width-2" + errorClass, value: date.month },
+          { id: "hypo-date-year", name: "reply[hypoDate][year]", label: "Year", classes: "govuk-input--width-4" + errorClass, value: date.year }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    {{ designNote("Only asked if the answer to the last question was more than 0. A date for something that did not happen is a question the customer cannot answer.") }}
+  </div>
+</div>
+{% endblock %}
