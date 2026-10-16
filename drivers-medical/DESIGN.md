@@ -23,6 +23,7 @@ This service exists to remove the reason to phone. Prominence goes to whatever a
 - Never an empty panel. If there is nothing in a section, say what that absence means in a sentence.
 - Never soften a long wait or a bad outcome into vagueness. Plainly stated bad news is kinder than an ambiguous screen, and it generates fewer calls.
 - Never a status label presented as if it came from the real case management system. Prototype labels are flagged in a comment as needing mapping.
+- Never a status that shows the outcome of a letter serving a legal notice before that notice is served. Until then, the status card, the message title and any notification stay silent about what the letter decides, or they serve the notice ahead of the paper.
 
 ## Content
 
