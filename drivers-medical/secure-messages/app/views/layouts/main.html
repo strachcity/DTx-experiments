@@ -1,0 +1,35 @@
+{#
+  Every page: the prototype phase banner, the fictional-prototype
+  warning, and the prototype controls (All screens, design notes).
+  None of that is service UI.
+#}
+
+{% extends "govuk-prototype-kit/layouts/govuk-branded.njk" %}
+
+{% block beforeContent %}
+  {{ govukPhaseBanner({
+    tag: { text: "Prototype" },
+    text: "This is not a real service."
+  }) }}
+
+  <div class="app-prototype-controls">
+    {{ govukWarningText({
+      text: "Fictional prototype. Not a real DVLA or GOV.UK service. It makes no licensing decisions, and every person, case and letter in it is invented.",
+      iconFallbackText: "Warning",
+      classes: "govuk-!-margin-bottom-2"
+    }) }}
+    <p class="govuk-body-s govuk-!-margin-bottom-0">
+      <a class="govuk-link" href="/">All screens</a>
+      <span aria-hidden="true">·</span>
+      {% if showNotes %}
+        <a class="govuk-link" href="{{ currentPath }}?notes=off">Hide design notes</a>
+      {% else %}
+        <a class="govuk-link" href="{{ currentPath }}?notes=on">Show design notes</a>
+      {% endif %}
+      <span aria-hidden="true">·</span>
+      <a class="govuk-link" href="/staff/case">Staff view</a>
+    </p>
+  </div>
+
+  {% block backLink %}{% endblock %}
+{% endblock %}

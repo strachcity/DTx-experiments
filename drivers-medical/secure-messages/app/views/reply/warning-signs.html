@@ -1,0 +1,45 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set question = "Do you get warning signs before a hypo?" %}
+{% set pageName = ("Error: " if errors.warningSigns) + question %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back", href: backLink }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errors.warningSigns %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: errors.warningSigns, href: "#warning-signs" }] }) }}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {{ govukRadios({
+        idPrefix: "warning-signs",
+        name: "reply[warningSigns]",
+        fieldset: {
+          legend: {
+            text: question,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        hint: { text: "For example, shaking, sweating, feeling hungry or finding it hard to concentrate." },
+        errorMessage: { text: errors.warningSigns } if errors.warningSigns,
+        value: data.reply.warningSigns,
+        items: [
+          { value: "always", text: "Yes, always" },
+          { value: "sometimes", text: "Sometimes" },
+          { value: "never", text: "No, never" }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    {{ designNote("Three plain answers rather than a clinical scale. Whether someone has lost hypo awareness is a medical judgement for a DVLA doctor, so the form asks what the customer notices and leaves the judgement where it belongs.") }}
+  </div>
+</div>
+{% endblock %}

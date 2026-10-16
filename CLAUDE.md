@@ -8,6 +8,8 @@ Each project has its own folder at the root, and `components.html` stays at the 
 - `prototypes/`: customer-facing prototypes.
 - `ivr/`: NewCo routing maps and phone or web chat prototypes.
 
+One exception: `drivers-medical/secure-messages/` is a GOV.UK Prototype Kit app, not a single HTML file. It is being handed over as a step towards production, so it uses GOV.UK Frontend through npm, Nunjucks macros, routes and session data that developers can read as a spec. Inside that folder the self-contained, no-build, hand-rolled CSS and hash-router rules below do not apply. Everything else does: the banners, design notes, the "All screens" index, dummy data, the journey structure and `DESIGN.md`. Its own `README.md` says how to run it.
+
 Put a new file in the group it belongs to. Do not invent a new group without asking. Links between prototypes are relative, so files that link to each other move together.
 
 For anything affecting what a screen looks like or says, follow `drivers-medical/DESIGN.md`. It is scoped to the DVLA Drivers Medical prototypes, so a new project needs its own design judgement rather than inheriting that one.

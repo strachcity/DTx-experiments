@@ -1,0 +1,68 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set pageName = "The notification" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">What arrives on the customer’s phone and in their inbox</span>
+    <h1 class="govuk-heading-l">The notification</h1>
+
+    {{ designNote("Notify is the doorbell, not the room. Nothing in the text or the email names a condition, an outcome or a case type, so a shared phone, a work inbox or a lock screen gives nothing away. The content is behind sign-in.") }}
+    {{ openQuestion("Content", "What is the rule for what is safe to put in a Notify message, and what must only go through secure messages? These two messages are the most cautious version. A rule is needed before any template is written.") }}
+
+    {% if data.customer.contactPreference == "none" %}
+      {{ govukInsetText({
+        text: "In this scenario the customer has given DVLA no email address or mobile number, so nothing arrives here. They have only the paper letter."
+      }) }}
+    {% endif %}
+  </div>
+</div>
+
+{% set pref = data.customer.contactPreference %}
+<div class="govuk-grid-row">
+  {% if pref == "sms" or pref == "both" %}
+  <div class="govuk-grid-column-one-third">
+    <h2 class="govuk-heading-s">Text message</h2>
+    <div class="app-phone">
+      <p class="app-phone__time" aria-hidden="true">08:14</p>
+      <div class="app-phone__notification">
+        <p class="app-phone__sender">DVLA</p>
+        <p class="app-phone__text">DVLA: You have a new secure message about your driving licence. Sign in to read it at <a class="govuk-link" href="/start">[link]</a>. We will never ask for bank details by text.</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if pref == "email" or pref == "both" %}
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-s">Email</h2>
+    <div class="app-email">
+      <div class="app-email__header">
+        <p><strong>From:</strong> DVLA</p>
+        <p><strong>To:</strong> {{ data.customer.email }}</p>
+        <p><strong>Subject:</strong> You have a new secure message from DVLA</p>
+      </div>
+      <div class="app-email__body">
+        <p class="govuk-body">Dear {{ data.customer.name }},</p>
+        <p class="govuk-body">You have a new secure message about your driving licence.</p>
+        <p class="govuk-body">Sign in to read it: <a class="govuk-link" href="/start">[link]</a></p>
+        <p class="govuk-body">We have also posted you a copy.</p>
+        <p class="govuk-body">We will never ask for your bank details by email. If you are not sure this email is from us, do not use the link. Go to GOV.UK and search for “DVLA secure messages” instead.</p>
+        <p class="govuk-body govuk-!-margin-bottom-0">DVLA</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ designNote("The email uses the customer’s name and the text does not, because a text shows on a lock screen. Both say a copy has been posted, so nobody is left wondering whether they will also get the paper.") }}
+    <p class="govuk-body">
+      <a class="govuk-link" href="/start">Follow the link</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{
+  "name": "drivers-medical-secure-messages",
+  "private": true,
+  "description": "Fictional prototype: secure messages for DVLA Drivers Medical. Not a real service.",
+  "scripts": {
+    "dev": "govuk-prototype-kit dev",
+    "serve": "govuk-prototype-kit serve",
+    "start": "govuk-prototype-kit start"
+  },
+  "dependencies": {
+    "@govuk-prototype-kit/common-templates": "3.0.1",
+    "govuk-frontend": "6.6.0",
+    "govuk-prototype-kit": "14.0.0"
+  }
+}

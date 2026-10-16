@@ -1,0 +1,82 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set pageName = "Your messages" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">{{ data.customer.name }}</span>
+    <h1 class="govuk-heading-l">Your messages</h1>
+
+    {#
+      The driving status card. The pattern comes from the case status
+      tracker: can I drive, what happens next, roughly when. Rebuilt as
+      a Frontend summary card rather than copied.
+    #}
+    {% set status = data.drivingStatus %}
+    {% set statusRows = [
+      {
+        key: { text: "Can I drive?" },
+        value: { html: "<strong>" + status.answer + "</strong><br>" + status.detail }
+      }
+    ] %}
+    {% if noticeAvailable %}
+      {% set statusRows = (statusRows.push({
+        key: { text: "Lorries and buses" },
+        value: { html: "<strong>" + status.servedOnly.answer + "</strong><br>" + status.servedOnly.detail }
+      }), statusRows) %}
+    {% endif %}
+    {% set statusRows = (statusRows.push(
+      { key: { text: "What happens next" }, value: { text: status.whatHappensNext } },
+      { key: { text: "Roughly when" }, value: { text: status.roughlyWhen } }
+    ), statusRows) %}
+
+    {{ govukSummaryList({
+      card: { title: { text: "Your driving licence" } },
+      rows: statusRows
+    }) }}
+
+    {{ designNote("The status card comes before the letters, because whether I can still drive is what people open this to find out, and what they would otherwise phone to ask. A message list on its own makes the customer read every letter to work out where they stand.") }}
+
+    {% if not noticeAvailable %}
+      {{ designNote("The card says nothing about the lorry and bus decision until the serving notice has been delivered. If the card changed first, the card would be serving the notice.") }}
+      {{ openQuestion("Legal (Keya)", "Is it enough that the card stays silent until the notice is served? And does even listing a letter as posted, before it arrives, raise any issue?") }}
+    {% endif %}
+
+    <h2 class="govuk-heading-m">Messages</h2>
+
+    {% set items = [] %}
+    {% for message in messages %}
+      {% if message.available %}
+        {% set hint = "Sent " + (message.sentDate | longDate) %}
+        {% if message.requiresAction and message.replyBy %}
+          {% set hint = hint + ". Reply by " + (message.replyBy | longDate) %}
+        {% endif %}
+        {% if not message.openedAt %}
+          {% set hint = hint + ". Not opened yet" %}
+        {% endif %}
+        {% set items = (items.push({
+          title: { text: message.title },
+          href: "/messages/" + message.id,
+          hint: { text: hint + "." },
+          status: { tag: { text: message.tag.text, classes: message.tag.colour | tagClass } }
+        }), items) %}
+      {% else %}
+        {% set items = (items.push({
+          title: { text: message.titleBeforeAvailable },
+          hint: { text: "Posted to you on " + (message.paperPostedDate | longDate) + ". A copy will appear here once it has been delivered." },
+          status: { tag: { text: "Posted", classes: "govuk-tag--grey" } }
+        }), items) %}
+      {% endif %}
+    {% endfor %}
+
+    {{ govukTaskList({ idPrefix: "messages", items: items }) }}
+
+    {{ designNote("Each message carries one text tag, so its meaning never rests on colour. The reply-by date is a real deadline printed on the paper letter, not a prediction, so it is shown as a date. There is no countdown in days.") }}
+    {{ openQuestion("Legal (Keya)", "Which letters serve a legal notice, and what counts as served? This prototype treats a letter as served two working days after it is posted second class, and only then shows the secure copy. Does a secure copy alongside the paper raise any issue?") }}
+    {{ openQuestion("Which letters first", "Waiting on volumes per template. Driver questionnaires (for example D1V1) are the leading candidate, because they are where a reply is needed and a delay costs the customer their licence.") }}
+    {{ openQuestion("IAG", "If messages never expire, how long are they kept? The 2023 letter here has been backfilled. Should a secure copy exist for letters sent before the service started?") }}
+  </div>
+</div>
+{% endblock %}

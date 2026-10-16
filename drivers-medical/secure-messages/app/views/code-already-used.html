@@ -1,0 +1,19 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set pageName = "You have already replied to this letter" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">You have already replied to this letter</h1>
+
+    <p class="govuk-body">{% if message.reply %}We received your answers on {{ message.reply.submittedAt | longDate }}.{% else %}We have received your answers.{% endif %} The code on your letter cannot be used again.</p>
+    <p class="govuk-body">We will write to you when we have decided, usually within 2 to 4 weeks of getting your answers. You do not need to do anything else.</p>
+    <p class="govuk-body">If you think something in your answers is wrong, contact Drivers Medical. The phone number is on your letter.</p>
+
+    {{ designNote("This screen exists to make the code’s rules visible in the room. Once a reply is in, the code stops working, and the customer is told the reply is safe rather than just that the code failed.") }}
+    {{ openQuestion("IAG", "Should a used code still let the customer see that their reply arrived? And how does someone correct an answer they got wrong, if not by phone?") }}
+  </div>
+</div>
+{% endblock %}
