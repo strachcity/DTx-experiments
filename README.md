@@ -10,7 +10,7 @@ Nothing here is a real service. Every prototype carries a fictional-prototype wa
 
 ## What is in here
 
-Each prototype is one self-contained HTML file. Open it from GitHub Pages or straight from disk. Nothing to install, nothing to run.
+Each prototype is one self-contained HTML file. Open it from GitHub Pages or straight from disk. Nothing to install, nothing to run. The one exception is `drivers-medical/secure-messages/`, below.
 
 - `components.html`: the component reference. Every `govuk-*` component the other prototypes draw on, with the markup beside it. Start here if you are building a new one.
 
@@ -29,6 +29,10 @@ Each prototype is one self-contained HTML file. Open it from GitHub Pages or str
 
 - `case-status-tracker.html`: where is my case, what happens next, and can I drive. Over half of all inbound calls to the contact centre ask the first of those.
 - `Futurestatevisionprototypecustomer.html` and `3-Futurestatevisionprototypecustomer.html`: earlier walkthroughs of a future-state customer journey. The second carries no health data, to show what that version costs.
+
+`secure-messages/`
+
+- The one exception to "nothing to install": a GOV.UK Prototype Kit app, built that way because it is a step towards production. It shows an authenticated, two-way channel where customers read the letters DVLA posts them and reply to a driver questionnaire, by GOV.UK One Login or by a code printed on the paper letter. GitHub Pages cannot run it. See its own `README.md` for `npm install` and `npm run dev`.
 
 `ivr/`
 
