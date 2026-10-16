@@ -8,7 +8,7 @@ Each project has its own folder at the root, and `components.html` stays at the 
 - `prototypes/`: customer-facing prototypes.
 - `ivr/`: NewCo routing maps and phone or web chat prototypes.
 
-One exception: `drivers-medical/secure-messages/` is a GOV.UK Prototype Kit app, not a single HTML file. It is being handed over as a step towards production, so it uses GOV.UK Frontend through npm, Nunjucks macros, routes and session data that developers can read as a spec. Inside that folder the self-contained, no-build, hand-rolled CSS and hash-router rules below do not apply. Everything else does: the banners, design notes, the "All screens" index, dummy data, the journey structure and `DESIGN.md`. Its own `README.md` says how to run it.
+One exception: `drivers-medical/secure-messages/` is a GOV.UK Prototype Kit app, not a single HTML file. It is being handed over as a step towards production, so it uses GOV.UK Frontend through npm, Nunjucks macros, routes and session data that developers can read as a spec. Inside that folder the self-contained, no-build, hand-rolled CSS and hash-router rules below do not apply. Everything else does: the banners, design notes, the "All screens" index, dummy data, the journey structure and `DESIGN.md`. Its own `README.md` says how to run it. GitHub Pages gets a browser-only build of it, made by `.github/workflows/pages.yml` from the same routes and templates, so change the app rather than the build.
 
 Put a new file in the group it belongs to. Do not invent a new group without asking. Links between prototypes are relative, so files that link to each other move together.
 
