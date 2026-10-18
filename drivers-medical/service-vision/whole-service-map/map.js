@@ -1,6 +1,7 @@
 // Whole-service map renderer. Draws a map from its data; shared by index.html and the editor.
 // SM.render(map, components, opts) returns an HTML string.
-// opts: imageBase, editable, highlight (a status id, or "unset"), selected (a data-ref)
+// opts: imageBase, editable, highlight (a status id, or "unset"), selected (a data-ref),
+//       thread (a thread object: marks each epic with its assessment against that thread)
 window.SM = window.SM || { maps: {} };
 
 SM.STATUSES = [
@@ -10,6 +11,18 @@ SM.STATUSES = [
   { id: "bau", label: "BAU" },
   { id: "unresolved", label: "Unresolved" }
 ];
+
+// How an epic stands against a thread, such as AI agents acting for someone.
+SM.MARKS = [
+  { id: "opportunity", label: "Opportunity" },
+  { id: "both", label: "Opportunity and risk" },
+  { id: "risk", label: "Risk" },
+  { id: "none", label: "Not relevant" }
+];
+SM.markLabel = function (id) {
+  var m = SM.MARKS.find(function (x) { return x.id === id; });
+  return m ? m.label : "Not assessed";
+};
 
 SM.esc = function (s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -70,7 +83,16 @@ SM.render = function (map, components, opts) {
   SM.STATUSES.concat([{ id: "unset", label: "Not set" }]).forEach(function (s) {
     h += '<div class="sm-key-row"><span class="sm-tag s-' + s.id + '">' + E(s.label) + "</span></div>";
   });
-  h += "</div></div></div>";
+  h += "</div>";
+  var th = opts.thread;
+  if (th) {
+    h += '<div class="sm-box"><h3>Key: ' + E(th.name) + "</h3>";
+    SM.MARKS.concat([{ id: "unassessed", label: "Not assessed" }]).forEach(function (m) {
+      h += '<div class="sm-key-row"><span class="sm-tag m-' + m.id + '">' + E(m.label) + "</span></div>";
+    });
+    h += "</div>";
+  }
+  h += "</div></div>";
 
   // Grid columns: gutter, then each phase's steps, then an add-phase column when editing
   var cols = ["160px", "16px"], col = 3, layout = [];
@@ -144,7 +166,8 @@ SM.render = function (map, components, opts) {
       (s.tasks || []).forEach(function (t) {
         var role = roles[t.role] || { colour: "#505a5f" };
         var tref = "task:" + t.id;
-        var dim = hl && !SM.taskMatches(t, byId, hl);
+        var a = th ? (t.threads || {})[th.id] : null;
+        var dim = (hl && !SM.taskMatches(t, byId, hl)) || (a && a.mark === "none");
         h += '<div class="sm-card' + (dim ? " sm-dim" : "") + sel(tref) + '"' + ref(tref) + (ed ? ' draggable="true" data-task="' + E(t.id) + '"' : "") + ">";
         h += '<div class="sm-card-title" style="background:' + E(role.colour) + ";color:" + SM.textOn(role.colour) + '">' + E(t.title) + (t.unresolved ? " " + unresolved : "") + "</div>";
         if (t.description) h += '<div class="sm-card-desc">' + E(t.description) + "</div>";
@@ -153,6 +176,12 @@ SM.render = function (map, components, opts) {
           h += '<ul class="sm-comps">' + comps.map(function (cp) {
             return '<li class="sm-tag s-' + (cp.status || "unset") + '" title="' + E(SM.statusLabel(cp.status)) + '">' + E(cp.name) + "</li>";
           }).join("") + "</ul>";
+        }
+        if (th) {
+          var mk = a && a.mark ? a.mark : "unassessed", n = a && a.angles ? a.angles.length : 0;
+          h += '<div class="sm-thread m-' + mk + '"><strong>' + E(SM.markLabel(a && a.mark)) + "</strong>" +
+            (n ? '<span class="sm-thread-n">' + n + " angle" + (n === 1 ? "" : "s") + "</span>" : "") +
+            (a && a.draft ? '<span class="sm-thread-draft">draft</span>' : "") + "</div>";
         }
         h += "</div>";
       });

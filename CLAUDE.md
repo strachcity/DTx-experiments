@@ -22,6 +22,7 @@ For anything affecting what a screen looks like or says, follow `drivers-medical
 - `data/*.js` in the repo is a snapshot of it. To save a version, read `maps` and `registry` out with ArtifactData (`out_dir`), run `python3 write-data.py <that folder>`, check `index.html`, and commit.
 - `map.js` and `map.css` are the renderer, shared by `index.html` and `editor.html`. A change to them means republishing `editor.html` to the artifact URL above, with `map.js`, `map.css` and `illustrations/*.webp` as its files.
 - Epics are the user outcomes in each step. Status (exists, planned, building, BAU, unresolved) belongs to the components behind an epic, in one register shared by every map. "Unresolved" is the same thing the maps used to call "tbc".
+- Threads are lenses across every map, kept in `registry/threads`. Each defines angles, whose agent, and kinds of interaction, plus steps no map has yet. Each epic carries its assessment against a thread (`threads.<id>`: mark, type, parties, angles, note). `draft: true` marks Claude's first pass until the user edits it. The first thread is AI agents acting for someone. "Agent" on the NewCo map and the CX key means a NewCo staff member; keep the two apart.
 - Step illustrations live in `service-vision/illustrations/`, named by the step's `image` field. Step ids are stable and do not change when steps are reordered, so the file names stay put.
 - `whole-service-map.html` is the hand-built first version, kept as it was. `future-state-service-blueprint.html` is older still.
 

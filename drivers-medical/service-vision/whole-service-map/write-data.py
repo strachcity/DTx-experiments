@@ -1,6 +1,7 @@
 """Write a snapshot of the editor's database into data/*.js.
 
-The editor artifact keeps the maps in its database (maps/<id>, registry/components).
+The editor artifact keeps the maps in its database (maps/<id>, registry/components,
+registry/threads).
 Claude reads those documents out as JSON, then runs:
 
     python3 write-data.py <folder holding maps/*.json and registry/components.json>
@@ -31,9 +32,14 @@ def main(src):
     DATA.mkdir(exist_ok=True)
     comps = json.loads((src / "registry" / "components.json").read_text())
     write("components", "SM.components", comps.get("items", []))
+    names = ["components.js"]
+    threads_file = src / "registry" / "threads.json"
+    if threads_file.exists():
+        write("threads", "SM.threads", json.loads(threads_file.read_text()).get("items", []))
+        names.append("threads.js")
     maps = [json.loads(p.read_text()) for p in sorted((src / "maps").glob("*.json"))]
     maps.sort(key=lambda m: (m.get("order") or 0, m["id"]))
-    keep = {"components.js"}
+    keep = set(names)
     for m in maps:
         if not re.fullmatch(r"[A-Za-z0-9_-]+", m["id"]):
             sys.exit(f"Unexpected map id: {m['id']!r}")
@@ -42,7 +48,7 @@ def main(src):
     for old in DATA.glob("*.js"):
         if old.name not in keep:
             old.unlink()
-    tags = "\n".join(f'<script src="data/{n}"></script>' for n in ["components.js"] + [f"{m['id']}.js" for m in maps])
+    tags = "\n".join(f'<script src="data/{n}"></script>' for n in names + [f"{m['id']}.js" for m in maps])
     index = HERE / "index.html"
     html = index.read_text()
     html, n = re.subn(r"<!-- data -->.*?<!-- /data -->", f"<!-- data -->\n{tags}\n<!-- /data -->", html, flags=re.S)

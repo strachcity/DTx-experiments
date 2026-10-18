@@ -82,3 +82,14 @@
 .sm-drop-before{box-shadow:0 -4px 0 0 #1d70b8}
 .sm-drop-into{background:#f3f8fc;outline:2px dashed #1d70b8;outline-offset:2px}
 .sm-dragging{opacity:.4}
+
+/* Threads: how each epic stands against a cross-cutting question, such as AI agents */
+.m-opportunity{background:#d4ecea;color:#10403c;border-color:#28a197}
+.m-both{background:#fbe4cc;color:#6e3619;border-color:#f47738}
+.m-risk{background:#f6d7d2;color:#942514;border-color:#d4351c}
+.m-none{background:#f3f2f1;color:#505a5f;border-color:#b1b4b6}
+.m-unassessed{background:#ffffff;color:#505a5f;border:1px dashed #b1b4b6}
+.sm-thread{display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:10px;line-height:1.3;border-top:1px solid;border-left:0;border-right:0;border-bottom:0}
+.sm-thread strong{font-weight:700}
+.sm-thread-n{margin-left:auto}
+.sm-thread-draft{font-style:italic}

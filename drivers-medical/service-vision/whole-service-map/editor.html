@@ -78,6 +78,31 @@ button,input,select,textarea{font:inherit;color:inherit}
 .role-item input[type=text]{border:1px solid var(--line);padding:4px 6px;min-width:0}
 .notice{font-size:13px;background:#fff4d6;border-left:4px solid #d9a200;padding:8px 10px}
 
+.tv{max-width:1180px;padding-block:24px;padding-inline:24px;display:flex;flex-direction:column;gap:20px;color:var(--ink)}
+.tv h1{margin:0;font-size:28px;text-wrap:balance}
+.tv h2{margin:0;font-size:20px}
+.tv p{margin:0;max-width:70ch;line-height:1.5}
+.tv-sum{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tv-filters{display:flex;flex-wrap:wrap;gap:6px}
+.tv-chip{font:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--paper);padding:3px 8px;cursor:pointer}
+.tv-chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tv-scroll{overflow-x:auto}
+.tv table{border-collapse:collapse;width:100%;min-width:900px;font-size:13px}
+.tv th{text-align:left;font-size:12px;color:var(--muted);border-bottom:2px solid var(--ink);padding:6px 8px;vertical-align:bottom}
+.tv td{border-bottom:1px solid #e5e6e7;padding:8px;vertical-align:top;line-height:1.4}
+.tv tr[data-goto]{cursor:pointer}
+.tv tr[data-goto]:hover td{background:#f3f8fc}
+.tv .where{color:var(--muted);font-size:12px}
+.tv .angles{display:flex;flex-wrap:wrap;gap:3px}
+.tv .angles span{font-size:11px;background:var(--wash);padding:1px 5px}
+.tv .gap{border-left:4px solid var(--ink);padding:6px 12px}
+.tv .gap strong{display:block}
+.chk-list{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+.chk-list label{display:flex;gap:6px;align-items:flex-start;font-size:13px;line-height:1.3}
+.chk-list input{margin:1px 0 0;width:15px;height:15px;flex-shrink:0}
+.angle-item{border:1px solid var(--line);padding:8px;display:flex;flex-direction:column;gap:6px}
+.angle-item input,.angle-item textarea{border:1px solid var(--line);padding:4px 6px;width:100%;box-sizing:border-box;font-size:13px}
+
 @media (max-width:760px){
   .work{flex-direction:column}
   .drawer{width:auto;border-left:0;border-top:2px solid var(--ink);max-height:60vh;order:2}
@@ -91,6 +116,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   <div class="tabs" id="tabs" role="group" aria-label="Maps"></div>
   <button type="button" class="btn" id="newMap">New map</button>
   <div class="tb-group"><label for="highlight">Highlight</label><select id="highlight"></select></div>
+  <div class="tb-group"><label for="thread">Thread</label><select id="thread"><option value="">None</option></select><button type="button" class="btn" id="threadView" disabled aria-pressed="false">List</button></div>
   <div class="tb-group"><label for="zoom">Zoom</label><select id="zoom"><option value="1">100%</option><option value="0.75">75%</option><option value="0.5">50%</option><option value="0.35">35%</option></select></div>
   <button type="button" class="btn" id="openComponents">Components</button>
   <button type="button" class="btn" id="undo" disabled>Undo</button>
@@ -112,7 +138,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 // Claude reads these back into the repo's data/*.js files as snapshots.
 var state = {
   maps: {}, components: [], current: null, selected: null,
-  highlight: "", zoom: 1, panel: null, armed: null, readOnly: false, loaded: { maps: false, components: false }
+  highlight: "", zoom: 1, panel: null, threads: [], thread: "", view: "map", tvAngle: "", tvMark: "", armed: null, readOnly: false, loaded: { maps: false, components: false }
 };
 var db = null, undoStack = [], saved = {}, saving = false, saveTimer = null, drawTimer = null, undoArmed = true;
 var IMAGE_BASE = "illustrations/";
@@ -126,6 +152,7 @@ function mapList() {
   return Object.keys(state.maps).map(function (k) { return state.maps[k]; })
     .sort(function (a, b) { return (a.order || 0) - (b.order || 0) || a.id.localeCompare(b.id); });
 }
+function activeThread() { return state.threads.find(function (t) { return t.id === state.thread; }) || null; }
 function compById() { var o = {}; state.components.forEach(function (c) { o[c.id] = c; }); return o; }
 
 // ---------- finding things in the current map ----------
@@ -164,7 +191,7 @@ function usage(cid) {
 }
 
 // ---------- undo and saving ----------
-function snapshot() { return JSON.stringify({ maps: state.maps, components: state.components }); }
+function snapshot() { return JSON.stringify({ maps: state.maps, components: state.components, threads: state.threads }); }
 function pushUndo() {
   undoStack.push(snapshot());
   if (undoStack.length > 60) undoStack.shift();
@@ -180,7 +207,7 @@ function edit(fn, structural) {
 function undo() {
   if (!undoStack.length) return;
   var s = JSON.parse(undoStack.pop());
-  state.maps = s.maps; state.components = s.components;
+  state.maps = s.maps; state.components = s.components; state.threads = s.threads || state.threads;
   if (!state.maps[state.current]) state.current = (mapList()[0] || {}).id || null;
   $("undo").disabled = !undoStack.length;
   state.armed = null; undoArmed = true;
@@ -188,6 +215,7 @@ function undo() {
 }
 function docs() {
   var out = { "registry/components": { items: state.components } };
+  if (state.threads.length || saved["registry/threads"] !== undefined) out["registry/threads"] = { items: state.threads };
   mapList().forEach(function (m) { out["maps/" + m.id] = m; });
   return out;
 }
@@ -226,7 +254,17 @@ function dirty(path, obj) { return saved[path] !== undefined && saved[path] !== 
 
 // ---------- drawing ----------
 function scheduleDraw() { clearTimeout(drawTimer); drawTimer = setTimeout(drawCanvas, 120); }
-function drawAll() { drawTabs(); drawCanvas(); drawDrawer(); }
+function drawAll() { drawTabs(); drawThreadSelect(); drawCanvas(); drawDrawer(); }
+function drawThreadSelect() {
+  var sel = $("thread");
+  sel.innerHTML = '<option value="">None</option>' + state.threads.map(function (t) {
+    return '<option value="' + E(t.id) + '"' + (t.id === state.thread ? " selected" : "") + ">" + E(t.name) + "</option>";
+  }).join("");
+  if (!activeThread()) { state.thread = ""; state.view = "map"; }
+  $("threadView").disabled = !state.thread;
+  $("threadView").setAttribute("aria-pressed", String(state.view === "thread"));
+  $("threadView").textContent = state.view === "thread" ? "Map" : "List";
+}
 function drawTabs() {
   $("tabs").innerHTML = mapList().map(function (m) {
     return '<button type="button" data-map="' + E(m.id) + '" aria-pressed="' + (m.id === state.current) + '">' + E(m.tab || m.id) + "</button>";
@@ -240,8 +278,9 @@ function drawCanvas() {
       (ready ? "Ask Claude to load the CX and NewCo maps from the repo, or start one with New map." : "The maps are saved with this page. They appear here once they load.") + "</p></div>";
     return;
   }
+  if (state.view === "thread" && activeThread()) { c.innerHTML = threadView(activeThread()); return; }
   var left = c.scrollLeft, top = c.scrollTop;
-  c.innerHTML = SM.render(m, state.components, { imageBase: IMAGE_BASE, editable: !state.readOnly, highlight: state.highlight, selected: state.selected });
+  c.innerHTML = SM.render(m, state.components, { imageBase: IMAGE_BASE, editable: !state.readOnly, highlight: state.highlight, selected: state.selected, thread: activeThread() });
   c.style.setProperty("--zoom", state.zoom);
   c.scrollLeft = left; c.scrollTop = top;
 }
@@ -249,8 +288,64 @@ function validateSelection() {
   var s = state.selected; if (!s || !map()) { state.selected = null; return; }
   var k = s.split(":")[0], id = s.slice(k.length + 1);
   var ok = k === "map" || k === "roles" || k === "components" || k === "panel" ||
+    (k === "thread" && state.threads.some(function (t) { return t.id === id; })) ||
     (k === "phase" && findPhase(id)) || (k === "step" && findStep(id)) || (k === "task" && findTask(id));
   if (!ok) state.selected = null;
+}
+
+// ---------- thread list view ----------
+function threadView(th) {
+  var all = [], h = "";
+  mapList().forEach(function (m) {
+    m.phases.forEach(function (p, pi) { p.steps.forEach(function (s) { s.tasks.forEach(function (t) {
+      all.push({ map: m, phase: p, num: phaseNumber(m, pi), step: s, task: t, a: (t.threads || {})[th.id] || null });
+    }); }); });
+  });
+  var assessed = all.filter(function (r) { return r.a && r.a.mark; });
+  var count = function (mark) { return all.filter(function (r) { return (r.a && r.a.mark ? r.a.mark : "unassessed") === mark; }).length; };
+  var drafts = all.filter(function (r) { return r.a && r.a.draft; }).length;
+  h += '<div class="tv"><div><div class="d-kind">Thread</div><h1>' + E(th.name) + "</h1></div><p>" + E(th.description) + "</p>";
+  h += '<div class="tv-sum"><strong>' + assessed.length + " of " + all.length + " epics assessed</strong>" + (drafts ? '<span class="hint">' + drafts + " still drafts from Claude</span>" : "") +
+    '<button type="button" class="b" data-tv="edit">Edit thread</button></div>';
+  h += '<div><div class="d-kind">Show</div><div class="tv-filters">' + SM.MARKS.concat([{ id: "unassessed", label: "Not assessed" }]).map(function (mk) {
+    return '<button type="button" class="tv-chip" data-tv-mark="' + mk.id + '" aria-pressed="' + (state.tvMark === mk.id) + '">' + E(mk.label) + " " + count(mk.id) + "</button>";
+  }).join("") + "</div></div>";
+  h += '<div><div class="d-kind">Angle</div><div class="tv-filters">' + (th.angles || []).map(function (an) {
+    var n = all.filter(function (r) { return r.a && (r.a.angles || []).indexOf(an.id) >= 0; }).length;
+    return '<button type="button" class="tv-chip" data-tv-angle="' + E(an.id) + '" aria-pressed="' + (state.tvAngle === an.id) + '" title="' + E(an.question) + '">' + E(an.label) + " " + n + "</button>";
+  }).join("") + "</div>";
+  var an = (th.angles || []).find(function (x) { return x.id === state.tvAngle; });
+  if (an) h += '<p class="hint" style="margin-top:6px">' + E(an.question) + "</p>";
+  h += "</div>";
+  var label = function (list, id) { var x = (list || []).find(function (y) { return y.id === id; }); return x ? x.label : id; };
+  var rows = all.filter(function (r) {
+    var mk = r.a && r.a.mark ? r.a.mark : "unassessed";
+    if (state.tvMark && mk !== state.tvMark) return false;
+    if (state.tvAngle && !(r.a && (r.a.angles || []).indexOf(state.tvAngle) >= 0)) return false;
+    return true;
+  });
+  mapList().forEach(function (m) {
+    var mine = rows.filter(function (r) { return r.map === m; });
+    if (!mine.length) return;
+    h += "<section><h2>" + E(m.tab) + ' <span class="hint">' + mine.length + "</span></h2><div class=\"tv-scroll\"><table><thead><tr><th>Where</th><th>Epic</th><th>What happens</th><th>Assessment</th><th>Whose agent</th><th>Angles</th><th>Note</th></tr></thead><tbody>";
+    mine.forEach(function (r) {
+      var a = r.a || {}, mk = a.mark || "unassessed";
+      h += '<tr data-goto="' + E(m.id + "|" + r.task.id) + '"><td class="where">' + E(r.num + " " + r.phase.name) + "<br>" + E(r.step.title) + "</td><td><strong>" + E(r.task.title) + "</strong></td>" +
+        "<td>" + E(a.type ? label(th.types, a.type) : "") + '</td><td><span class="sm-tag m-' + mk + '">' + E(SM.markLabel(a.mark)) + "</span>" + (a.draft ? '<br><span class="hint">draft</span>' : "") + "</td>" +
+        "<td>" + E((a.parties || []).map(function (p) { return label(th.parties, p); }).join(", ")) + "</td>" +
+        '<td><div class="angles">' + (a.angles || []).map(function (x) { return "<span>" + E(label(th.angles, x)) + "</span>"; }).join("") + "</div></td>" +
+        "<td>" + E(a.note || "") + "</td></tr>";
+    });
+    h += "</tbody></table></div></section>";
+  });
+  if ((th.gaps || []).length) {
+    h += '<section style="display:flex;flex-direction:column;gap:10px"><h2>Not on any map yet</h2><p class="hint">Steps this thread needs that no map has. Add them to a map when you agree they belong.</p>';
+    th.gaps.forEach(function (g) {
+      h += '<div class="gap"><strong>' + E(g.title) + '</strong><span class="where">' + E([g.map, g.near].filter(Boolean).join(" · ")) + "</span><p>" + E(g.note) + "</p></div>";
+    });
+    h += "</section>";
+  }
+  return h + "</div>";
 }
 
 // ---------- the drawer ----------
@@ -292,6 +387,27 @@ function picker(list, chosen, title, hint) {
     (chosen.length ? '<span class="hint">Selected: ' + chosen.map(function (id) { return E((byId[id] || { name: id }).name); }).join(", ") + "</span>" : "") +
     "</div>";
 }
+function threadSection(th, t) {
+  var a = (t.threads || {})[th.id] || {}, p = "th|" + th.id + "|";
+  var opt = function (list, val, blank) {
+    return (blank ? '<option value="">' + blank + "</option>" : "") + (list || []).map(function (x) {
+      return '<option value="' + E(x.id) + '"' + (x.id === val ? " selected" : "") + ">" + E(x.label) + "</option>";
+    }).join("");
+  };
+  var checks = function (list, chosen, kind) {
+    return '<div class="chk-list">' + (list || []).map(function (x) {
+      return '<label title="' + E(x.question || "") + '"><input type="checkbox" data-th="' + E(p + kind) + '" value="' + E(x.id) + '"' + ((chosen || []).indexOf(x.id) >= 0 ? " checked" : "") + ">" + E(x.label) + "</label>";
+    }).join("") + "</div>";
+  };
+  var id = "th-" + th.id;
+  return '<div class="section"><h3>' + E(th.name) + "</h3>" +
+    (a.draft ? '<p class="notice">Claude drafted this. Editing anything here marks it as yours.</p>' : "") +
+    '<div class="field"><label for="' + id + '-mark">Assessment</label><select id="' + id + '-mark" data-th="' + E(p + "mark") + '">' + opt(SM.MARKS, a.mark, "Not assessed") + "</select></div>" +
+    '<div class="field"><label for="' + id + '-type">What happens here</label><select id="' + id + '-type" data-th="' + E(p + "type") + '">' + opt(th.types, a.type, "Choose") + "</select></div>" +
+    '<div class="field"><span class="lbl">Whose agent</span>' + checks(th.parties, a.parties, "parties") + "</div>" +
+    '<div class="field"><span class="lbl">Angles</span><span class="hint">Hover an angle for its question.</span>' + checks(th.angles, a.angles, "angles") + "</div>" +
+    '<div class="field"><label for="' + id + '-note">Note</label><textarea id="' + id + '-note" data-th="' + E(p + "note") + '">' + E(a.note || "") + "</textarea></div></div>";
+}
 function stepOptions(currentId) {
   var m = map();
   return m.phases.map(function (p, pi) {
@@ -316,6 +432,7 @@ function drawDrawer() {
     h += '<div class="field"><label for="f-role">Who does it</label>' + roleSelect(t.role) + "</div>";
     h += check("Unresolved: scope not yet agreed", "unresolved", t.unresolved);
     h += picker("components", t.components || [], "What is behind it", "The components this epic depends on. Their status shows on the card.");
+    state.threads.forEach(function (th) { h += threadSection(th, t); });
     h += '<div class="section"><h3>Position</h3><div class="field"><label for="f-move">Step</label><select id="f-move" data-act-change="movetask">' + stepOptions(f.step.id) + "</select></div>";
     h += '<div class="row"><button type="button" class="b" data-act="taskup"' + (f.ti === 0 ? " disabled" : "") + '>Move up</button><button type="button" class="b" data-act="taskdown"' + (f.ti === f.step.tasks.length - 1 ? " disabled" : "") + ">Move down</button></div>";
     h += '<span class="hint">You can also drag a card onto another card or into another step.</span></div>';
@@ -381,6 +498,33 @@ function drawDrawer() {
         (used ? '<span class="hint">In use</span>' : danger("delrole:" + i, "Remove")) + "</div>";
     }).join("") + "</div>";
     h += '<div class="row"><button type="button" class="b" data-act="addrole">Add a role</button></div>';
+  } else if (k === "thread") {
+    var th = state.threads.find(function (x) { return x.id === id; });
+    h += head("Thread", th.name);
+    h += '<div class="field"><label for="f-thname">Name</label><input type="text" id="f-thname" data-thset="name" value="' + E(th.name) + '"></div>';
+    h += '<div class="field"><label for="f-thdesc">Description</label><textarea id="f-thdesc" data-thset="description">' + E(th.description) + "</textarea></div>";
+    ["angles", "parties", "types"].forEach(function (list) {
+      var title = { angles: "Angles", parties: "Whose agent", types: "What happens here" }[list];
+      h += '<div class="section"><h3>' + title + "</h3>";
+      (th[list] || []).forEach(function (x, i) {
+        var n = 0;
+        mapList().forEach(function (m) { m.phases.forEach(function (p) { p.steps.forEach(function (s) { s.tasks.forEach(function (t) {
+          var a = (t.threads || {})[th.id]; if (!a) return;
+          if (list === "types" ? a.type === x.id : (a[list] || []).indexOf(x.id) >= 0) n++;
+        }); }); }); });
+        h += '<div class="angle-item"><input type="text" aria-label="Label" data-thlist="' + list + "|" + i + '|label" value="' + E(x.label) + '">' +
+          (list === "angles" ? '<textarea aria-label="Question" rows="2" data-thlist="' + list + "|" + i + '|question">' + E(x.question || "") + "</textarea>" : "") +
+          '<div class="row"><span class="hint">Used on ' + n + " epic" + (n === 1 ? "" : "s") + "</span>" + (n ? "" : danger("delthitem:" + list + ":" + i, "Remove")) + "</div></div>";
+      });
+      h += '<div class="row"><button type="button" class="b" data-act="addthitem:' + list + '">Add</button></div></div>';
+    });
+    h += '<div class="section"><h3>Not on any map yet</h3>';
+    (th.gaps || []).forEach(function (g, i) {
+      h += '<div class="angle-item"><input type="text" aria-label="Step" data-thgap="' + i + '|title" value="' + E(g.title) + '">' +
+        '<input type="text" aria-label="Where" placeholder="Map · stage" data-thgap="' + i + '|near" value="' + E([g.map, g.near].filter(Boolean).join(" · ")) + '">' +
+        '<textarea aria-label="Note" rows="3" data-thgap="' + i + '|note">' + E(g.note) + '</textarea><div class="row">' + danger("delthgap:" + i, "Remove") + "</div></div>";
+    });
+    h += '<div class="row"><button type="button" class="b" data-act="addthgap">Add a step</button></div></div>';
   } else if (k === "components") {
     var q2 = (state.regFilter || "").toLowerCase();
     h += head("Register", "Components and their status");
@@ -489,6 +633,26 @@ function act(a) {
       setTimeout(function () { var i = $("f-newcomp"); if (i) i.focus(); }, 0);
       break;
     }
+    case "addthitem": {
+      var lst = a.split(":")[1], th1 = state.threads.find(function (x) { return x.id === id; });
+      edit(function () { th1[lst] = th1[lst] || []; th1[lst].push(lst === "angles" ? { id: rid("a-"), label: "New angle", question: "" } : { id: rid(lst.slice(0, 1) + "-"), label: "New" }); }, true);
+      break;
+    }
+    case "delthitem": {
+      var bits = a.split(":"), th2 = state.threads.find(function (x) { return x.id === id; });
+      arm(a, function () { th2[bits[1]].splice(+bits[2], 1); });
+      break;
+    }
+    case "addthgap": {
+      var th3 = state.threads.find(function (x) { return x.id === id; });
+      edit(function () { th3.gaps = th3.gaps || []; th3.gaps.push({ title: "New step", map: "", near: "", note: "" }); }, true);
+      break;
+    }
+    case "delthgap": {
+      var th4 = state.threads.find(function (x) { return x.id === id; });
+      arm(a, function () { th4.gaps.splice(+a.split(":")[1], 1); });
+      break;
+    }
     case "delcomp": {
       var cid2 = a.slice("delcomp:".length);
       arm(a, function () {
@@ -535,9 +699,31 @@ $("highlight").innerHTML = '<option value="">Nothing</option>' + SM.STATUSES.con
   return '<option value="' + s.id + '">' + E(s.label) + "</option>";
 }).join("");
 $("highlight").addEventListener("change", function (e) { state.highlight = e.target.value; drawCanvas(); });
+$("thread").addEventListener("change", function (e) {
+  state.thread = e.target.value; if (!state.thread) state.view = "map";
+  drawThreadSelect(); drawCanvas(); drawDrawer();
+});
+$("threadView").addEventListener("click", function () {
+  state.view = state.view === "thread" ? "map" : "thread";
+  if (state.view === "thread" && state.selected && state.selected.indexOf("thread:") !== 0) state.selected = null;
+  drawThreadSelect(); drawCanvas(); drawDrawer(); $("canvas").scrollTop = 0;
+});
 $("zoom").addEventListener("change", function (e) { state.zoom = +e.target.value; $("canvas").style.setProperty("--zoom", state.zoom); });
 
 $("canvas").addEventListener("click", function (e) {
+  if (state.view === "thread") {
+    var tv = e.target.closest("[data-tv],[data-tv-mark],[data-tv-angle],[data-goto]"); if (!tv) return;
+    if (tv.dataset.tv === "edit") { state.selected = "thread:" + state.thread; drawDrawer(); return; }
+    if (tv.dataset.tvMark) { state.tvMark = state.tvMark === tv.dataset.tvMark ? "" : tv.dataset.tvMark; drawCanvas(); return; }
+    if (tv.dataset.tvAngle) { state.tvAngle = state.tvAngle === tv.dataset.tvAngle ? "" : tv.dataset.tvAngle; drawCanvas(); return; }
+    if (tv.dataset.goto) {
+      var g = tv.dataset.goto.split("|");
+      state.current = g[0]; state.view = "map"; state.selected = "task:" + g[1]; state.armed = null;
+      drawAll();
+      setTimeout(function () { var el = document.querySelector('[data-ref="task:' + g[1] + '"]'); if (el) el.scrollIntoView({ block: "center", inline: "center" }); }, 0);
+    }
+    return;
+  }
   var add = e.target.closest("[data-add]");
   if (add && !state.readOnly) {
     var parts = add.dataset.add.split(":"), m = map();
@@ -611,6 +797,29 @@ drawer.addEventListener("input", function (e) {
     });
     return;
   }
+  if (el.dataset.th) {
+    var tp = el.dataset.th.split("|"), task = findTask(id).task;
+    if (el.type === "checkbox") return; // handled on change
+    edit(function () {
+      task.threads = task.threads || {};
+      var a = task.threads[tp[1]] = task.threads[tp[1]] || {};
+      a[tp[2]] = el.value || (tp[2] === "note" ? "" : null);
+      delete a.draft;
+    }, el.tagName === "SELECT");
+    if (el.tagName === "SELECT") { var keepTh = el.id; setTimeout(function () { var x = $(keepTh); if (x) x.focus(); }, 0); }
+    return;
+  }
+  if (el.dataset.thset || el.dataset.thlist || el.dataset.thgap) {
+    var th = state.threads.find(function (x) { return x.id === id; });
+    edit(function () {
+      if (el.dataset.thset) { th[el.dataset.thset] = el.value; return; }
+      if (el.dataset.thlist) { var q = el.dataset.thlist.split("|"); th[q[0]][+q[1]][q[2]] = el.value; return; }
+      var gq = el.dataset.thgap.split("|"), gap = th.gaps[+gq[0]];
+      if (gq[1] === "near") { var parts = el.value.split("·"); gap.map = (parts[0] || "").trim(); gap.near = parts.slice(1).join("·").trim(); } else gap[gq[1]] = el.value;
+    });
+    if (el.dataset.thset === "name") drawThreadSelect();
+    return;
+  }
   if (el.dataset.role) {
     var rp = el.dataset.role.split("|");
     edit(function () { m.roles[+rp[0]][rp[1]] = el.value; });
@@ -628,6 +837,20 @@ drawer.addEventListener("change", function (e) {
   var k = (state.selected || "").split(":")[0], id = (state.selected || "").slice(k.length + 1);
   if (el.dataset.actChange === "movetask") { edit(function () { moveTask(id, el.value, null); }, true); return; }
   if (el.dataset.actChange === "measures") { edit(function () { m.rows.measures = el.checked ? "Measures" : null; }, true); return; }
+  if (el.dataset.th && el.type === "checkbox") {
+    var cp2 = el.dataset.th.split("|"), task2 = findTask(id).task;
+    edit(function () {
+      task2.threads = task2.threads || {};
+      var a = task2.threads[cp2[1]] = task2.threads[cp2[1]] || {};
+      var arr = a[cp2[2]] = a[cp2[2]] || [];
+      var i = arr.indexOf(el.value);
+      if (el.checked && i < 0) arr.push(el.value);
+      if (!el.checked && i >= 0) arr.splice(i, 1);
+      delete a.draft;
+    }, true);
+    var v2 = el.value, k2 = el.dataset.th; setTimeout(function () { var x = drawer.querySelector('[data-th="' + k2 + '"][value="' + v2 + '"]'); if (x) x.focus(); }, 0);
+    return;
+  }
   if (el.dataset.pick) {
     var list = el.dataset.pick;
     edit(function () {
@@ -677,6 +900,14 @@ async function start() {
     if (changed) { validateSelection(); drawAll(); }
     if (!saveTimer && !saving) setSave(state.readOnly ? "View only" : "All changes saved");
   }, function () { setSave("Lost the connection to the saved maps. Reload to reconnect.", true); });
+  db.doc("registry/threads").onSnapshot(function (d) {
+    if (!d.exists) return;
+    var json = JSON.stringify(d.data());
+    if (dirty("registry/threads", { items: state.threads })) return;
+    if (saved["registry/threads"] === json) return;
+    saved["registry/threads"] = json; state.threads = JSON.parse(json).items || [];
+    drawThreadSelect(); drawCanvas(); if (state.selected && state.selected.indexOf("thread:") === 0) drawDrawer();
+  }, function () {});
   db.doc("registry/components").onSnapshot(function (d) {
     state.loaded.components = true;
     if (!d.exists) return;

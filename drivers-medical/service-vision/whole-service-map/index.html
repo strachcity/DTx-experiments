@@ -22,6 +22,7 @@ body{margin:0;overflow-x:auto;background:#ffffff;color:#0b0c0c;font-family:"Publ
 <nav class="bar" aria-label="Map controls">
   <div class="bar-group" id="tabs"></div>
   <div class="bar-group"><label for="highlight">Highlight</label><select id="highlight"></select></div>
+  <div class="bar-group" id="threadGroup" hidden><label for="thread">Thread</label><select id="thread"></select></div>
 </nav>
 <main id="map"></main>
 
@@ -33,13 +34,15 @@ body{margin:0;overflow-x:auto;background:#ffffff;color:#0b0c0c;font-family:"Publ
 <script src="map.js"></script>
 <script>
 // Content lives in data/*.js; the editor artifact is where it gets changed.
-var state = { map: null, highlight: "" };
+var state = { map: null, highlight: "", thread: "" };
+var threads = SM.threads || [];
 var maps = Object.keys(SM.maps).map(function (k) { return SM.maps[k]; })
   .sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
 
 function draw() {
   document.getElementById("map").innerHTML = SM.render(SM.maps[state.map], SM.components, {
-    imageBase: "../illustrations/", highlight: state.highlight
+    imageBase: "../illustrations/", highlight: state.highlight,
+    thread: threads.find(function (t) { return t.id === state.thread; }) || null
   });
   document.querySelectorAll("#tabs button").forEach(function (b) {
     b.setAttribute("aria-pressed", String(b.dataset.map === state.map));
@@ -58,6 +61,15 @@ hl.innerHTML = '<option value="">Nothing</option>' + SM.STATUSES.concat([{ id: "
   return '<option value="' + s.id + '">' + SM.esc(s.label) + "</option>";
 }).join("");
 hl.addEventListener("change", function () { state.highlight = hl.value; draw(); });
+
+if (threads.length) {
+  var th = document.getElementById("thread");
+  document.getElementById("threadGroup").hidden = false;
+  th.innerHTML = '<option value="">None</option>' + threads.map(function (t) {
+    return '<option value="' + SM.esc(t.id) + '">' + SM.esc(t.name) + "</option>";
+  }).join("");
+  th.addEventListener("change", function () { state.thread = th.value; draw(); });
+}
 
 function route() {
   var id = location.hash.slice(1);
