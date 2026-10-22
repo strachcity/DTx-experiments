@@ -36,7 +36,7 @@ Each prototype is one self-contained HTML file. Open it from GitHub Pages or str
 
 `ivr/`
 
-- `newco-routing-map.html`: the NewCo routing map for phone and web chat, with the requirements, decisions, open questions and risks behind it.
+- `newco-routing-map.html`: the NewCo routing map for phone and web chat, with the requirements, decisions and open questions behind it.
 - `newco-call-simulator.html`: the phone route from the routing map played as a call. The phone line reads each prompt aloud and you answer on a keypad, so a room can hear how long it takes to reach a person. The route and NewCo scripts are copied from the map; today's steps use stand-in wording marked "TBC script (as-is)" until the real scripts arrive.
 
 Every prototype has an "All screens" index, so any single screen can be opened directly in a workshop, and a design-notes toggle that shows the argument each screen is making.
