@@ -340,7 +340,7 @@ const PHONE = {
     ]},
     {id:"p5",t:"NewCo team closed, or a callback request",nodes:[
       {id:"p_tc",type:"step",k:"req",l:"Told the team is closed: ask for a callback or speak to another adviser",sc:["team_closed"],d:"Between 4pm and 7pm: the NewCo team (8am to 4pm) is closed, but the phone line (8am to 7pm) is open.",r:["FR2-01"]},
-      {id:"p_ch",type:"q",k:"req",l:"What does the caller choose?",d:"Press 2 is to be confirmed on 29 September. Outside the phone line's hours (8am to 7pm), callers hear the closed message instead.",r:["FR2-01","FR2-07"]},
+      {id:"p_ch",type:"q",k:"req",l:"What does the caller choose?",d:"Press 2 puts the caller through to a BAU adviser. Outside the phone line's hours (8am to 7pm), callers hear the closed message instead.",r:["FR2-01","FR2-07"]},
       {id:"p_close",type:"end",k:"req",l:"Closing message. Call ends.",sc:["closing"],r:["FR2-07"]},
       {id:"p_mbnum",type:"q",k:"req",dflt:"Number shown",l:"Is the caller's number shown?",d:"The reference was given earlier in the call, so it isn't asked for again. No voice message is recorded.",r:["FR2-08","FR1-N7","FR1-N8"]},
       {id:"p_mbrb",type:"step",k:"req",l:"Number read back to confirm",sc:["cb_req_rb"],r:["FR2-08"]},
@@ -352,8 +352,8 @@ const PHONE = {
       {id:"p_vmq",type:"end",k:"req",l:"Emailed to the NewCo mailbox: the team calls back",r:["FR2-13","FR2-14","FR2-18","FR2-19","FR2-20","FR2-21","FR2-22"]},
       {id:"p_close2",type:"end",k:"req",l:"Closing message. Call ends.",sc:["closing"],r:["FR2-11"]},
       {id:"p_vmdown",type:"step",k:"req",l:"Told the request couldn't be sent, and offered another adviser",sc:["cb_req_unavail"],r:["FR2-12"]},
-      {id:"p_adv",type:"step",k:"req",l:"Put through to another adviser in the BAU queue",sc:["to_adviser"],d:"To be confirmed on 29 September: whether BAU advisers answer NewCo customers here.",r:["FR2-01"]},
-      {id:"p_advend",type:"end",k:"req",l:"BAU adviser helps. Contact logged on the case.",d:"The Mural: log it on the record so the team can see and follow up. To be confirmed on 29 September: whether BAU advisers answer NewCo customers here."}
+      {id:"p_adv",type:"step",k:"req",l:"Put through to another adviser in the BAU queue",sc:["to_adviser"],d:"BAU advisers answer NewCo customers.",r:["FR2-01"]},
+      {id:"p_advend",type:"end",k:"req",l:"BAU adviser helps. Contact logged on the case.",d:"The Mural: log it on the record so the team can see and follow up."}
     ],edges:[
       ["p_tc","p_ch"],
       ["p_ch","p_mbnum","Presses 1: callback request"],["p_ch","p_adv","Presses 2: another adviser"],["p_ch","p_close","Presses nothing"],
