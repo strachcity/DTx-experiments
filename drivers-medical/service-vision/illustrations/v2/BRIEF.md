@@ -1,6 +1,6 @@
 # Illustration brief: whole-service map v2
 
-The step illustrations for `../../whole-service-map-v2.html`. One image per step, named by map and step number in the order the steps appear (`cx-01.webp` to `cx-25.webp`, `newco-01.webp` to `newco-18.webp`). The images already in this folder are the style reference: match them.
+The step illustrations for `../../whole-service-map-v2.html`. One image per step, named by map and step number in the order the steps appear (`cx-01.webp` to `cx-25.webp`, `newco-01.webp` to `newco-19.webp`). The images already in this folder are the style reference: match them.
 
 ## Rules
 
@@ -13,7 +13,7 @@ The step illustrations for `../../whole-service-map-v2.html`. One image per step
 
 ## Still needed
 
-Some of these steps show a reused image as a stand-in until their own arrives: cx-03, cx-12, cx-18, cx-20, cx-22, cx-23, cx-24, cx-25, newco-05 and newco-16.
+Some of these steps show a reused image as a stand-in until their own arrives: cx-03, cx-12, cx-18, cx-20, cx-22, cx-23, cx-24, cx-25, newco-05, newco-09 and newco-17.
 
 ### CX map (customer)
 
@@ -28,5 +28,6 @@ Some of these steps show a reused image as a stand-in until their own arrives: c
 
 ### NewCo map (operations)
 
-- **newco-05** Customer notifies or renews: a screen where cards arrive from a phone, a laptop and an envelope into one queue.
-- **newco-16** Proactive: outbound: the agent at her computer sending updates that fly out to several phones.
+- **newco-05** Customer notifies: a screen where cards arrive from a phone, a laptop and an envelope into one queue.
+- **newco-09** Key the data: a DMI colleague at a desk keying details from a paper form into a screen, a stack of forms beside them.
+- **newco-17** Proactive: outbound: the agent at her computer sending updates that fly out to several phones.
