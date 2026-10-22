@@ -16,7 +16,7 @@ For anything affecting what a screen looks like or says, follow `drivers-medical
 
 ## Conventions
 
-Every prototype is one self-contained HTML file in its project folder, named for what it shows. No numbers, no version suffixes.
+Every prototype is one self-contained HTML file in its project folder, named for what it shows. No numbers. Version a file with a `-v2` suffix when the earlier version needs to stay viewable, for a side-by-side comparison or because its link is in use; otherwise replace it. A versioned canvas gets its own illustrations folder (`illustrations/v2/`), because the images are named by step position and adding a step renumbers them.
 
 - No build step, no npm, no framework, no bundler.
 - No CDN dependencies beyond the Google Fonts import already in use.
