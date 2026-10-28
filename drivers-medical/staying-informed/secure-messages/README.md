@@ -17,7 +17,7 @@ In scope: signed-in copies of information and issue letters (slice 1), replying 
 You need Node.js 22 or later.
 
 ```
-cd drivers-medical/secure-messages
+cd drivers-medical/staying-informed/secure-messages
 npm install
 npm run dev
 ```
@@ -26,7 +26,7 @@ Then open http://localhost:3000. The index is the "All screens" page.
 
 ## On GitHub Pages
 
-https://strachcity.github.io/DTx-experiments/drivers-medical/secure-messages/
+https://strachcity.github.io/DTx-experiments/drivers-medical/staying-informed/secure-messages/
 
 Pages only serves files, so it cannot run the kit's server. Instead, `npm run build` builds a browser-only version into `dist/`. It is not a copy: it runs the same `app/routes.js`, `app/filters.js`, session data defaults and templates in the browser, through a small stand-in for the kit (`static/`). Change the app, and the Pages version changes with it.
 

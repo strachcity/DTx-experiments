@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case updates</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+/* --- govuk-* layer, copied from components.html. --- */
+:root{--black:#0b0c0c;--white:#fff;--blue:#1d70b8;--link:#1a65a6;--link-hover:#0f385c;--dark-blue:#0f385c;--green:#0f7a52;--green-hover:#0b5c3e;--green-shade:#083d29;--yellow:#fd0;--light-yellow:#fff7bf;--light-grey:#f4f8fb;--mid-grey:#cecece;--dark-grey:#484949;--red:#ca3535;--red-shade:#651b1b;--purple:#54319f;--focus:#fd0;--focus-text:#0b0c0c}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--white)}
+body{font-family:"GDS Transport","Inter",Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--black);background:var(--white);margin:0;padding:0;line-height:1.5;font-size:19px}
+
+.govuk-header{background:var(--blue);color:var(--white);padding:10px 0}
+.govuk-header__container{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:10px}
+.govuk-header__homepage-link{display:inline-flex;align-items:center;color:var(--white);text-decoration:none}
+.govuk-header__homepage-link:hover{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
+.govuk-header__logotype{height:30px;width:162px;fill:currentcolor}
+.govuk-header__signout{margin-left:auto;font-size:19px;font-weight:700;color:var(--white);text-decoration:none;cursor:pointer}
+.govuk-header__signout:hover{text-decoration:underline}
+.service-nav{border-bottom:1px solid var(--mid-grey);background:var(--white);padding:12px 0}
+.service-nav__wrapper{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.service-nav__name{font-weight:700;font-size:19px;color:var(--black);text-decoration:none}
+.govuk-phase-banner{border-bottom:1px solid var(--mid-grey);padding:10px 0}
+.govuk-phase-banner__wrapper{max-width:960px;margin:0 auto;padding:0 15px;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.govuk-phase-banner__tag{display:inline-block;background:var(--blue);color:var(--white);font-weight:700;font-size:14px;padding:2px 8px;text-transform:uppercase;letter-spacing:1px}
+.phase-actions{margin-left:auto;display:flex;gap:15px;align-items:center;flex-wrap:wrap}
+.phase-actions a{font-size:16px;cursor:pointer}
+.prototype-warning{background:var(--light-yellow);border:4px solid var(--yellow);padding:15px 20px;margin-bottom:30px;font-size:16px;line-height:1.5}
+.prototype-warning strong{display:block;margin-bottom:4px}
+.govuk-width-container{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-main-wrapper{padding:30px 0 60px}
+.govuk-skip-link{position:absolute;left:-9999px;top:0;background:var(--yellow);color:var(--black);padding:10px 15px;font-weight:700;z-index:10}
+.govuk-skip-link:focus{left:0}
+
+h1,.govuk-heading-xl{font-size:48px;line-height:1.04;font-weight:700;margin:0 0 30px}
+h2,.govuk-heading-l{font-size:36px;line-height:1.11;font-weight:700;margin:30px 0 20px}
+h3,.govuk-heading-m{font-size:24px;line-height:1.25;font-weight:700;margin:20px 0 15px}
+h4,.govuk-heading-s{font-size:19px;line-height:1.3;font-weight:700;margin:15px 0 10px}
+p,.govuk-body{font-size:19px;margin:0 0 20px}
+.govuk-body-s{font-size:16px}
+.govuk-body-l{font-size:24px;line-height:1.25;margin:0 0 20px}
+.govuk-caption{font-size:24px;color:var(--dark-grey);display:block;margin-bottom:5px}
+a{color:var(--link)}a:hover{color:var(--link-hover)}
+a:visited{color:var(--purple)}
+a:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--focus-text);text-decoration:none}
+.govuk-list{margin:0 0 20px;padding:0;list-style:none}
+.govuk-list>li{margin-bottom:5px}
+.govuk-list--bullet{list-style:disc;padding-left:20px}
+.govuk-list--number{list-style:decimal;padding-left:20px}
+.govuk-visually-hidden{position:absolute!important;width:1px;height:1px;margin:0;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);border:0;white-space:nowrap}
+hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margin:30px 0}
+.govuk-back-link{display:inline-block;margin-bottom:15px;font-size:16px;color:var(--black);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.govuk-back-link::before{content:"\25c2 "}
+
+.govuk-button{display:inline-block;padding:8px 20px;font-size:19px;font-weight:700;color:var(--white);background:var(--green);border:none;border-radius:0;border-bottom:2px solid var(--green-shade);cursor:pointer;text-decoration:none;line-height:1.2;-webkit-appearance:none;font-family:inherit}
+.govuk-button:hover{background:var(--green-hover);color:var(--white)}
+.govuk-button:visited{color:var(--white)}
+.govuk-button:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-button--start{font-size:24px;padding:12px 30px}
+.govuk-button--start::after{content:" \2192"}
+.govuk-button--secondary{background:#f3f3f3;color:var(--black);border-bottom-color:#858686}
+.govuk-button--secondary:hover,.govuk-button--secondary:visited{background:#dbdad9;color:var(--black)}
+.govuk-button-group{display:flex;gap:15px;flex-wrap:wrap;align-items:center;margin-top:20px}
+
+.govuk-form-group{margin-bottom:30px}
+.govuk-fieldset{border:0;margin:0;padding:0}
+.govuk-fieldset__legend{font-weight:700;font-size:19px;margin-bottom:10px;display:block}
+.govuk-fieldset__legend--l{font-size:36px;line-height:1.11;margin-bottom:20px}
+.govuk-fieldset__legend--xl{font-size:48px;line-height:1.04;margin-bottom:25px}
+.govuk-fieldset__heading{font-size:inherit;line-height:inherit;font-weight:inherit;margin:0}
+.govuk-radios__item,.govuk-checkboxes__item{display:flex;align-items:flex-start;margin-bottom:15px;gap:12px}
+.govuk-radios__input,.govuk-checkboxes__input{width:44px;height:44px;min-width:44px;margin:0;cursor:pointer;accent-color:var(--black)}
+.govuk-radios__label,.govuk-checkboxes__label{font-size:19px;padding-top:10px;cursor:pointer}
+.govuk-radios__hint,.govuk-checkboxes__hint{font-size:16px;color:var(--dark-grey);margin-top:2px;display:block}
+.govuk-label{display:block;font-weight:700;margin-bottom:5px}
+.govuk-label--l{font-size:36px;line-height:1.11;margin-bottom:15px}
+.govuk-label-wrapper{margin:0}
+.govuk-hint{font-size:16px;color:var(--dark-grey);margin-bottom:10px;display:block}
+.govuk-input{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;max-width:400px}
+.govuk-input:focus,.govuk-select:focus,.govuk-textarea:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-input--width-2{max-width:65px}.govuk-input--width-4{max-width:100px}.govuk-input--width-10{max-width:250px}.govuk-input--width-20{max-width:400px}
+.govuk-file-upload{font-family:inherit;font-size:19px;padding:5px 0;max-width:400px}
+.govuk-date-input{display:flex;gap:20px;flex-wrap:wrap}
+.govuk-date-input__item{flex:0 0 auto}
+.govuk-date-input__label{display:block;font-weight:700;margin-bottom:5px;font-size:19px}
+
+.govuk-summary-list{border-top:1px solid var(--mid-grey);margin:0 0 30px}
+.govuk-summary-list__row{display:flex;border-bottom:1px solid var(--mid-grey);padding:12px 0;gap:15px}
+.govuk-summary-list__key{flex:0 0 32%;font-weight:700;margin:0}
+.govuk-summary-list__value{flex:1;margin:0;min-width:0}
+.govuk-summary-list__actions{flex:0 0 80px;text-align:right;margin:0}
+@media(max-width:640px){.govuk-summary-list__row{flex-direction:column;gap:4px}.govuk-summary-list__key{flex:auto}.govuk-summary-list__actions{text-align:left}}
+.govuk-table{width:100%;border-collapse:collapse;margin-bottom:30px}
+.govuk-table th{text-align:left;font-weight:700;padding:10px 15px 10px 0;border-bottom:2px solid var(--black)}
+.govuk-table td{padding:10px 15px 10px 0;border-bottom:1px solid var(--mid-grey);vertical-align:top}
+
+.govuk-tag{display:inline-block;font-size:19px;line-height:1.32;font-weight:700;padding:2px 8px 3px;border-radius:1px;max-width:260px;overflow-wrap:break-word;color:#0f385c;background:#d2e2f1}
+.govuk-tag--blue{color:#0f385c;background:#d2e2f1}
+.govuk-tag--green{color:#083d29;background:#cfe4dc}
+.govuk-tag--purple{color:#2a1950;background:#ddd6ec}
+.govuk-tag--red{color:#651b1b;background:#f4d7d7}
+.govuk-tag--orange{color:#7a3c1c;background:#fde4d7}
+.govuk-tag--teal{color:#0b4144;background:#d0e6e7}
+.govuk-tag--yellow{color:#7a3c1c;background:#ffee80}
+.govuk-tag--grey{color:#0b0c0c;background:#cecece}
+.govuk-inset-text{border-left:10px solid var(--mid-grey);padding:15px 20px;margin:0 0 30px}
+.govuk-panel{background:var(--green);color:var(--white);padding:35px;text-align:center;margin-bottom:30px}
+.govuk-panel__title{font-size:48px;font-weight:700;margin:0 0 15px}
+.govuk-panel__body{font-size:24px}
+.govuk-warning-text{display:flex;gap:15px;align-items:flex-start;margin-bottom:30px}
+.govuk-warning-text__icon{flex:0 0 35px;height:35px;background:var(--black);color:var(--white);border-radius:50%;text-align:center;font-weight:700;line-height:35px;font-size:24px}
+.govuk-warning-text__text{font-weight:700}
+.govuk-details{margin-bottom:30px;display:block}
+.govuk-details__summary{color:var(--link);cursor:pointer;text-decoration:underline;font-size:19px;margin-bottom:5px}
+.govuk-details__text{border-left:5px solid var(--mid-grey);padding:15px 20px;font-size:19px}
+.govuk-details__text p{margin:0 0 10px}
+.govuk-details__text p:last-child{margin:0}
+.govuk-notification-banner{border:5px solid var(--blue);margin-bottom:30px}
+.govuk-notification-banner__header{background:var(--blue);color:var(--white);padding:8px 15px;font-size:19px;font-weight:700}
+.govuk-notification-banner__title{margin:0;font-size:19px}
+.govuk-notification-banner__content{padding:20px 15px;font-size:19px}
+.govuk-notification-banner__heading{font-size:24px;font-weight:700;margin:0 0 10px}
+.govuk-notification-banner__content p{margin:0 0 10px}
+.govuk-notification-banner__content p:last-child{margin:0}
+
+.govuk-error-summary{border:5px solid var(--red);padding:20px 25px;margin-bottom:30px}
+.govuk-error-summary h2{margin:0 0 10px;font-size:24px}
+.govuk-error-summary ul{margin:0;padding-left:20px}
+.govuk-error-summary li{margin-bottom:6px}
+.govuk-error-summary a{color:var(--red);font-weight:700}
+.govuk-form-group--error{border-left:5px solid var(--red);padding-left:15px}
+.govuk-error-message{color:var(--red);font-weight:700;display:block;margin-bottom:10px}
+.govuk-input--error{border-color:var(--red)}
+
+.govuk-grid-row{display:flex;flex-wrap:wrap;margin:0 -15px}
+.govuk-grid-column-two-thirds{flex:0 0 66.66%;max-width:66.66%;padding:0 15px;min-width:0}
+.govuk-grid-column-one-third{flex:0 0 33.33%;max-width:33.33%;padding:0 15px;min-width:0}
+.govuk-grid-column-full{flex:0 0 100%;max-width:100%;padding:0 15px;min-width:0}
+@media(max-width:640px){.govuk-grid-column-two-thirds,.govuk-grid-column-one-third{flex:0 0 100%;max-width:100%}}
+
+.govuk-footer{background:var(--light-grey);border-top:10px solid var(--blue);padding:30px 0;margin-top:60px}
+.govuk-footer__wrapper{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-footer__meta-item{font-size:16px;color:var(--dark-grey)}
+
+.design-note{border:2px dashed var(--purple);background:#f7f4fc;padding:15px 20px;margin:0 0 25px;font-size:16px}
+.design-note strong{display:block;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-size:14px;margin-bottom:6px}
+.design-note p{font-size:16px;margin:0 0 8px}
+.design-note p:last-child{margin:0}
+.design-note ul{margin:0 0 8px;padding-left:20px}
+
+/* --- Specific to this prototype. Not part of components.html. --- */
+
+/* Prototype controls sit inside the yellow warning, so nobody mistakes
+   them for service UI. */
+.prototype-warning__control{display:flex;gap:10px 15px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #e6d36b}
+.prototype-warning__control button{font-family:inherit;font-size:16px;background:var(--white);border:2px solid var(--black);padding:2px 10px;cursor:pointer}
+.prototype-warning__control button:focus{outline:3px solid var(--focus);outline-offset:0}
+.prototype-warning__control button[aria-pressed="true"]{background:var(--black);color:var(--white)}
+.prototype-warning__date{font-weight:700}
+
+/* Account page cards, after the DVLA driver and vehicles account. */
+.acct-card{border:1px solid var(--mid-grey);border-top:10px solid var(--blue);padding:20px 20px 5px;margin-bottom:30px}
+.acct-card__head{display:flex;justify-content:space-between;align-items:baseline;gap:10px 20px;flex-wrap:wrap;margin-bottom:15px}
+.acct-card__head h2{margin:0;font-size:24px;line-height:1.25}
+.acct-card .govuk-summary-list{margin-bottom:15px}
+.acct-side{background:#f3f2f1;border-top:10px solid var(--blue);padding:20px;margin-bottom:30px}
+.acct-side h2{font-size:24px;margin:0 0 20px}
+.acct-side__link{display:flex;justify-content:space-between;align-items:center;background:var(--green);color:var(--white);font-weight:700;text-decoration:none;padding:8px 12px;margin-bottom:12px;border-bottom:2px solid var(--green-shade)}
+.acct-side__link:visited{color:var(--white)}
+.acct-side__link:hover{background:var(--green-hover);color:var(--white)}
+.acct-side__link::after{content:"\203A";font-size:24px;line-height:1}
+
+/* The case status card. */
+.cu-status{border:5px solid var(--blue);padding:20px 20px 0;margin-bottom:30px}
+.cu-status__headline{font-size:24px;line-height:1.25;font-weight:700;margin:10px 0 20px}
+.cu-status .govuk-summary-list{margin-bottom:20px}
+.cu-status__action{margin-bottom:20px}
+
+/* The timeline, newest first. */
+.cu-timeline{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--mid-grey)}
+.cu-timeline__item{padding:15px 0;border-bottom:1px solid var(--mid-grey)}
+.cu-timeline__date{display:block;font-size:16px;color:var(--dark-grey);margin-bottom:2px}
+.cu-timeline__title{display:block;font-weight:700;margin-bottom:5px}
+.cu-timeline__item p{margin:0 0 5px}
+.cu-timeline__item .govuk-tag{font-size:16px}
+
+/* "How this was built". A demo layer, distinct from design notes. */
+.cu-built{border:2px dashed #0b4144;background:#eef6f6;padding:10px 15px;margin:10px 0 5px;font-size:14px}
+.cu-built__label{display:block;color:#0b4144;text-transform:uppercase;letter-spacing:1px;font-weight:700;font-size:13px;margin-bottom:6px}
+.cu-built table{border-collapse:collapse;width:100%;margin-bottom:6px}
+.cu-built th,.cu-built td{text-align:left;padding:2px 10px 2px 0;vertical-align:top;font-size:14px;border-bottom:1px solid #c5dddd}
+.cu-built th{font-weight:700;width:34%}
+.cu-built code,.cu-mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.cu-built ul{margin:4px 0 0;padding-left:18px}
+.cu-built p{font-size:14px;margin:0 0 4px}
+.cu-scroll{overflow-x:auto;margin-bottom:30px}
+.cu-scroll .govuk-table{margin-bottom:0;font-size:16px}
+
+/* The posted letter, as it reads on paper. */
+.cu-letter{border:1px solid var(--mid-grey);box-shadow:0 2px 0 var(--mid-grey);padding:25px 30px;margin-bottom:20px;background:var(--white)}
+.cu-letter p{font-size:16px}
+.cu-pdf{background:#f3f2f1;border:1px solid var(--mid-grey);padding:40px 20px;text-align:center;margin-bottom:30px;color:var(--dark-grey)}
+
+/* Phone and inbox mock-ups for the notification. */
+.cu-device{border:2px solid var(--black);border-radius:6px;padding:15px 20px;margin-bottom:25px;max-width:480px}
+.cu-device__label{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dark-grey);margin-bottom:8px;display:block}
+.cu-device p{font-size:16px;margin:0 0 8px}
+.cu-device p:last-child{margin:0}
+
+.cu-index{list-style:none;margin:0 0 30px;padding:0}
+.cu-index li{margin-bottom:12px}
+.cu-index a{font-weight:700}
+.cu-index span{display:block;font-size:16px;color:var(--dark-grey)}
+</style>
+</head>
+<body>
+<a class="govuk-skip-link" href="#main">Skip to main content</a>
+<div id="app"></div>
+<footer class="govuk-footer" role="contentinfo">
+  <div class="govuk-footer__wrapper">
+    <p class="govuk-footer__meta-item">Case updates prototype. Fictional, for workshop use only. Not a real DVLA or GOV.UK service. Every person, case, letter and template code is invented.</p>
+  </div>
+</footer>
+
+<script>
+/* ================================================================
+   CASE UPDATES (Drivers Medical, staying informed)
+
+   The idea being demonstrated: the case timeline is built from the
+   letters DVLA already sends and receives, not from new case states.
+   Dynamics logs every letter on a case in its Communications tab. A
+   template map turns each logged row into something a customer can
+   read. derive() below is the whole argument: the timeline and the
+   status card are worked out from three things and never written by
+   hand.
+
+     1. COMMUNICATIONS rows, one per letter, with Dynamics' own fields
+     2. TEMPLATE_MAP, the rule for each template code
+     3. caseStatus, one of the five real case status values
+
+   The derivation rules are numbered 1 to 9 to match the README and
+   the handover. Rules this prototype added are marked "added".
+   ================================================================ */
+
+/* === TEMPLATE CODES ARE INVENTED. This repo is public. The real DGU
+       codes are mapped privately and never appear here. === */
+
+/* === FICTIONAL DATA. The customer is nobody. Contact details use
+       reserved ranges (example.com, 07700 900xxx). The licence number
+       has a month field of 66, which no real licence number can have,
+       so it cannot have been issued to anyone. === */
+const CUSTOMER = {
+  name:'Dana Whitlock',
+  title:'Ms',
+  dob:'1979-06-14',
+  email:'dana.whitlock@example.com',
+  mobile:'07700 900412',
+  licenceNo:'WHITL766149DW9ZZ',
+  licenceFrom:'2024-03-11',
+  licenceTo:'2027-03-10'
+};
+
+/* For prototype use only: the paper-letter code and date of birth. */
+const PAPER_CODE = 'HX7K9MPQ';
+
+/* Prototype assumptions, each flagged on the screen it affects. */
+const RELEASE_WORKING_DAYS = 4;  // a decision's full copy appears 4 working days after posting. A legal question, not settled.
+const QUIET_DAYS = 21;           // over 3 weeks with no new entry counts as a quiet period
+
+/* ---------------------------------------------------------------
+   TEMPLATE_MAP: the rule for each template code.
+
+   From the handover:
+     timelineState  With us | Waiting on you | Waiting on someone else |
+                    Decided | Information only | Not a timeline event
+                    ("Not shown" is dropped: shown: 'No' already says it)
+     summary        plain English. Never the code.
+     shown          Yes | Signal only | Receipt only | No
+     servesNotice   true if the letter serves a legal notice
+
+   Added by this prototype:
+     status         the status card headline, when this row sets the
+                    current state
+     outcome        kept | revoked, for decisions
+     canDrive       the "can I drive?" answer, for decisions only.
+                    Ordinary letters cannot answer it, so an open case
+                    uses DEFAULT_DRIVE.
+     reply          true if the customer can reply online
+   --------------------------------------------------------------- */
+const TEMPLATE_MAP = {
+  'RCV-MED-NOTIFICATION': {timelineState:'With us', shown:'Receipt only', servesNotice:false,
+    summary:'your form telling us about your medical condition',
+    status:'We’re looking at the form you sent us'},
+  'ACK-NOTIFICATION': {timelineState:'Information only', shown:'Yes', servesNotice:false,
+    summary:'We’ve received your form and started looking at your case'},
+  'REQ-QUESTIONNAIRE': {timelineState:'Waiting on you', shown:'Yes', servesNotice:false,
+    summary:'We asked you to fill in a medical questionnaire',
+    status:'We need you to fill in a medical questionnaire'},
+  'RCV-QUESTIONNAIRE': {timelineState:'With us', shown:'Receipt only', servesNotice:false,
+    summary:'your medical questionnaire',
+    status:'We’re looking at your medical questionnaire'},
+  'HP-REPORT-REQUEST': {timelineState:'Waiting on someone else', shown:'Signal only', servesNotice:false,
+    summary:'We asked a doctor who treats you for a report',
+    status:'We’re waiting for a report from a doctor who treats you'},
+  'HP-REPORT-CHASE': {timelineState:'Waiting on someone else', shown:'Signal only', servesNotice:false,
+    summary:'We reminded your doctor to send their report'},
+  'ACK-HP-LETTER': {timelineState:'Information only', shown:'Yes', servesNotice:false,
+    summary:'We’ve written to tell you we’ve asked your doctor for a report'},
+  'RCV-HP-REPORT': {timelineState:'With us', shown:'Receipt only', servesNotice:false,
+    summary:'the report from your doctor',
+    status:'We have your doctor’s report and we’re looking at your case'},
+  'REQ-GLUCOSE-READINGS': {timelineState:'Waiting on you', shown:'Yes', servesNotice:false,
+    summary:'We asked you for your blood glucose readings',
+    status:'We need your blood glucose readings', reply:true},
+  /* Added. An online reply is not a letter, so today it would write no
+     row to the Communications tab. The prototype assumes it does. */
+  'RCV-ONLINE-REPLY': {timelineState:'With us', shown:'Receipt only', servesNotice:false,
+    summary:'your blood glucose readings, sent online',
+    status:'We’re looking at the blood glucose readings you sent'},
+  'INT-CASE-SUMMARY': {timelineState:'Not a timeline event', shown:'No', servesNotice:false,
+    summary:'Internal copy of the case summary for the file'},
+  'DEC-LICENCE-KEPT': {timelineState:'Decided', shown:'Yes', servesNotice:false,
+    summary:'You can keep your licence', outcome:'kept',
+    canDrive:{answer:'Yes, you can keep driving', detail:'We’ve sent you a new licence. It lasts 3 years.'}},
+  'DEC-REVOKE': {timelineState:'Decided', shown:'Yes', servesNotice:true,
+    summary:'We’ve taken away your driving licence', outcome:'revoked',
+    canDrive:{answer:'No, you must not drive', detail:'Your licence was revoked when our letter reached you. This includes driving a car.'}}
+};
+
+/* Added: what each state means on the status card. holder answers
+   "who has my case". usualWait is the range DESIGN.md asks for. The
+   ranges are prototype figures and need real data behind them. */
+const STATE_INFO = {
+  'with-us':       {state:'With us', tag:'With us', colour:'blue',
+                    holder:'Our medical team at DVLA',
+                    usualWait:'This usually takes 4 to 8 weeks from when we have everything we need, because one of our doctors may need to read your reports.'},
+  'waiting-you':   {state:'Waiting on you', tag:'Waiting on you', colour:'orange',
+                    holder:'You. We can’t go further with your case until we hear from you.',
+                    usualWait:'We start looking at your reply as soon as it reaches us.'},
+  'waiting-other': {state:'Waiting on someone else', tag:'Waiting for a report', colour:'yellow',
+                    holder:'A doctor who treats you',
+                    usualWait:'Doctors usually reply within 4 to 6 weeks. If they ask you to book an appointment, please do, because that is often what holds a report up.'},
+  'posted':        {state:'Decided', tag:'Decision posted', colour:'purple', holder:'Decided'},
+  'kept':          {state:'Decided', tag:'Decided', colour:'green', holder:'Decided'},
+  'revoked':       {state:'Decided', tag:'Decided', colour:'purple', holder:'Decided'},
+  'closed':        {state:'Closed', tag:'Closed', colour:'grey', holder:'No one. Your case is closed.'},
+  'cancelled':     {state:'Cancelled', tag:'Cancelled', colour:'grey', holder:'No one. Your case was cancelled.'},
+  'renewal':       {state:'Waiting on you', tag:'Waiting on you', colour:'orange',
+                    holder:'You. We’ve sent you a renewal form.',
+                    usualWait:'We start looking at your renewal as soon as it reaches us.'}
+};
+
+/* The five real case status values, as the frame when nothing on the
+   timeline carries a state (rule 7). */
+const CASE_STATUS = {
+  'Renewal sent':       {key:'renewal',     status:'We’ve sent you a form to renew your licence'},
+  'With DVLA':          {key:'with-us',     status:'We’re looking at your case'},
+  'Waiting for details':{key:'waiting-you', status:'We’re waiting for details from you'},
+  'Closed':             {key:'closed',      status:'Your case is closed'},
+  'Cancelled':          {key:'cancelled',   status:'Your case was cancelled'}
+};
+
+/* An open case cannot answer "can I drive?" from its letters. Section
+   88 wording, for the prototype. Needs checking with policy. */
+const DEFAULT_DRIVE = {answer:'Yes, you can keep driving', detail:'You can keep driving while we look at your case, as long as your doctor has not told you to stop.'};
+
+/* The HTML version of each letter a customer can open. In a real
+   service this would be built from the template and the case's merge
+   fields. {due} is the row's responseDueBy. */
+const LETTERS = {
+  'ACK-NOTIFICATION': {
+    forYourDriving:'Nothing changes. You can keep driving while we look at your case, as long as your doctor has not told you to stop.',
+    whatToDo:'You do not need to do anything now. We’ll write to you if we need more information.',
+    letter:['Dear Dana Whitlock,','Thank you for telling us about your diabetes. We have received your form and started looking at your case.','We may need to ask you, or a doctor who treats you, for more information. We will write to you if we do.','Drivers Medical, DVLA, Swansea, SA99 1ZZ']},
+  'REQ-QUESTIONNAIRE': {
+    forYourDriving:'You can keep driving while we look at your case, as long as your doctor has not told you to stop.',
+    whatToDo:'Fill in the questionnaire that came with this letter and post it back to us by {due}.',
+    letter:['Dear Dana Whitlock,','We need to know more about your diabetes before we can decide whether you can keep driving.','Please fill in the enclosed questionnaire and post it back to us by {due}. If we do not hear from you, we may have to take your licence away.','Drivers Medical, DVLA, Swansea, SA99 1ZZ']},
+  'ACK-HP-LETTER': {
+    forYourDriving:'Nothing changes. You can keep driving while we wait for the report, as long as your doctor has not told you to stop.',
+    whatToDo:'You do not need to do anything. If your doctor asks you to book an appointment, please do, because that is often what holds a report up.',
+    letter:['Dear Dana Whitlock,','We have asked a doctor who treats you for a report about your diabetes. We will not charge you for this.','Doctors usually reply within 4 to 6 weeks. We will write to you again once we have the report.','Drivers Medical, DVLA, Swansea, SA99 1ZZ']},
+  'REQ-GLUCOSE-READINGS': {
+    forYourDriving:'You can keep driving while we look at your case, as long as your doctor has not told you to stop. If we do not get your readings by {due}, we may have to take your licence away.',
+    whatToDo:'Send us your blood glucose readings from the last 3 months by {due}. You can reply online, or post a printout to us.',
+    letter:['Dear Dana Whitlock,','Thank you for your medical questionnaire. Your doctor’s report says you check your blood glucose before you drive. We need to see your readings from the last 3 months before we can finish looking at your case.','Please send them by {due}. You can reply online, or print them from your meter or sensor app and post them to us with this letter.','If we do not hear from you by {due}, we may have to revoke your licence, because we will not have enough information to know whether you meet the standard for driving.','Drivers Medical, DVLA, Swansea, SA99 1ZZ']},
+  'DEC-LICENCE-KEPT': {
+    forYourDriving:'You can keep driving. We’ve sent you a new licence, which lasts 3 years.',
+    whatToDo:'Nothing now. You must tell us if your diabetes changes in a way that could affect your driving, for example if you have a severe hypo.',
+    letter:['Dear Dana Whitlock,','We have looked at your medical questionnaire and your doctor’s report. We have decided you meet the medical standard for driving.','We have sent you a new licence, which lasts 3 years. We will write to you before it runs out.','You must tell us if your diabetes changes in a way that could affect your driving, for example if you have a severe hypo.','Drivers Medical, DVLA, Swansea, SA99 1ZZ']},
+  'DEC-REVOKE': {
+    forYourDriving:'You must not drive. This includes driving a car. Your licence was revoked when this letter reached you.',
+    whatToDo:'Send us your licence. You can apply to get it back once you have gone 3 months without a severe hypo and your doctor confirms your diabetes is under control. If you disagree with our decision, you can appeal.',
+    letter:['Dear Dana Whitlock,','We have looked at the report your doctor sent us. It says you have had 2 severe hypos while you were awake in the last 12 months. A severe hypo is one where you needed help from another person.','The law says you cannot hold a driving licence if you have had more than one severe hypo while awake in the last 12 months. We have therefore revoked your licence. This takes effect when you receive this letter.','Please send your licence to us at the address below.','You can apply for your licence back once you have gone 3 months without a severe hypo since the last one, and your doctor confirms your diabetes is under control. We will not charge you to apply.','If you disagree with this decision, you can appeal to a magistrates’ court within 6 months of the date of this letter, or to a sheriff court within 21 days if you live in Scotland.','Drivers Medical, DVLA, Swansea, SA99 1ZZ']}
+};
+
+/* ---------------------------------------------------------------
+   SCENARIOS. Same customer, five cases. Each seeds its own
+   COMMUNICATIONS rows with the fields Dynamics holds:
+     code, direction, createdOn, responseDueBy, responseStatus,
+     printStatus
+   "Despatched, Awaiting" is invented: the handover gave only
+   "Despatched, Received" and "Despatched, Not expected".
+   --------------------------------------------------------------- */
+function out(id, code, createdOn, responseDueBy, responseStatus){
+  return {id, code, direction:'Outgoing', createdOn, responseDueBy:responseDueBy||'', responseStatus:responseStatus||'Despatched, Not expected', printStatus:code.indexOf('INT-')===0?'':'Sent to Print'};
+}
+function inc(id, code, createdOn){
+  return {id, code, direction:'Incoming', createdOn, responseDueBy:'', responseStatus:'', printStatus:''};
+}
+
+const SCENARIOS = {
+  'hp': {
+    label:'Waiting on a healthcare professional',
+    blurb:'Questionnaire requested and received, then a report requested from a doctor, overdue and chased once. Mirrors a real pre-production case, with invented details.',
+    today:'2026-10-28', caseStatus:'With DVLA',
+    rows:()=>[
+      out('r1','REQ-QUESTIONNAIRE','2026-08-24','2026-09-21','Despatched, Received'),
+      inc('r2','RCV-QUESTIONNAIRE','2026-09-10'),
+      out('r3','HP-REPORT-REQUEST','2026-09-22','2026-10-20','Despatched, Awaiting'),
+      out('r4','ACK-HP-LETTER','2026-09-22'),
+      out('r5','INT-CASE-SUMMARY','2026-09-22'),
+      out('r6','HP-REPORT-CHASE','2026-10-21')
+    ]
+  },
+  'you': {
+    label:'Waiting on you',
+    blurb:'A request for blood glucose readings with a reply-by date. Reply online and the state moves to “With us”. The paper code works in this scenario.',
+    today:'2026-10-28', caseStatus:'Waiting for details',
+    rows:()=>[
+      inc('r1','RCV-MED-NOTIFICATION','2026-09-14'),
+      out('r2','ACK-NOTIFICATION','2026-09-15'),
+      out('r3','HP-REPORT-REQUEST','2026-09-15','2026-10-13','Despatched, Received'),
+      out('r4','ACK-HP-LETTER','2026-09-15'),
+      inc('r5','RCV-HP-REPORT','2026-10-08'),
+      out('r6','REQ-GLUCOSE-READINGS','2026-10-19','2026-11-16','Despatched, Awaiting')
+    ]
+  },
+  'good': {
+    label:'Good news',
+    blurb:'A licence-kept decision. Step through the days to see when it appears, and flip the decision rule to see the trade-off.',
+    today:'2026-10-28', caseStatus:'Closed',
+    jumps:[['Letter created','2026-10-19'],['Next working day','2026-10-20'],['Release date','2026-10-26']],
+    rows:()=>[
+      out('r1','REQ-QUESTIONNAIRE','2026-07-27','2026-08-24','Despatched, Received'),
+      inc('r2','RCV-QUESTIONNAIRE','2026-08-12'),
+      out('r3','HP-REPORT-REQUEST','2026-08-17','2026-09-14','Despatched, Received'),
+      out('r4','ACK-HP-LETTER','2026-08-17'),
+      inc('r5','RCV-HP-REPORT','2026-09-29'),
+      out('r6','DEC-LICENCE-KEPT','2026-10-19')
+    ]
+  },
+  'revoke': {
+    label:'Revocation',
+    blurb:'Day 0: nothing shown. Next working day: the neutral “decision posted” message only. After the release date: the full letter.',
+    today:'2026-10-26', caseStatus:'Closed',
+    jumps:[['Day 0','2026-10-26'],['Next working day','2026-10-27'],['Release date','2026-11-02']],
+    rows:()=>[
+      out('r1','REQ-QUESTIONNAIRE','2026-07-27','2026-08-24','Despatched, Received'),
+      inc('r2','RCV-QUESTIONNAIRE','2026-08-12'),
+      out('r3','HP-REPORT-REQUEST','2026-08-17','2026-09-14','Despatched, Received'),
+      out('r4','ACK-HP-LETTER','2026-08-17'),
+      inc('r5','RCV-HP-REPORT','2026-10-14'),
+      out('r6','DEC-REVOKE','2026-10-26')
+    ]
+  },
+  'quiet': {
+    label:'Quiet period',
+    blurb:'No letters for 5 weeks. Shows the quiet-period message, and the gap that internal case events would need to fill.',
+    today:'2026-10-28', caseStatus:'With DVLA',
+    rows:()=>[
+      inc('r1','RCV-MED-NOTIFICATION','2026-08-17'),
+      out('r2','ACK-NOTIFICATION','2026-08-18'),
+      out('r3','REQ-QUESTIONNAIRE','2026-08-18','2026-09-15','Despatched, Received'),
+      inc('r4','RCV-QUESTIONNAIRE','2026-09-21')
+    ]
+  }
+};
+const SCENARIO_ORDER = ['hp','you','good','revoke','quiet'];
+
+/* ---------------------------------------------------------------- */
+
+let state;
+function resetState(scenario){
+  const key = scenario || (state && state.scenario) || 'hp';
+  const s = SCENARIOS[key];
+  state = {
+    scenario:key,
+    today:s.today,
+    caseStatus:s.caseStatus,
+    communications:s.rows(),
+    holdAllDecisions:true,   // false = the handover's rule: only notices wait
+    showNotes:state ? state.showNotes : false,
+    showBuilt:state ? state.showBuilt : false,
+    access:null,             // null | 'oneLogin' | 'code'
+    reply:{},
+    opened:{},
+    errors:null,
+    events:[{at:s.today, type:'notified', detail:'Text message and email: “There’s an update on your DVLA account”'}],
+    screen:'all-screens'
+  };
+}
+resetState('hp');
+
+/* --- Dates. All dates are ISO strings, read as UTC. --- */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function dt(s){ const p=s.split('-').map(Number); return new Date(Date.UTC(p[0],p[1]-1,p[2])); }
+function iso(d){ return d.toISOString().slice(0,10); }
+function addDays(s,n){ const d=dt(s); d.setUTCDate(d.getUTCDate()+n); return iso(d); }
+function isWeekend(s){ const w=dt(s).getUTCDay(); return w===0||w===6; }
+/* Skips weekends only. Bank holidays are not handled: a prototype
+   simplification, flagged in the notes. */
+function nextWorkingDay(s){ let x=addDays(s,1); while(isWeekend(x)) x=addDays(x,1); return x; }
+function addWorkingDays(s,n){ let x=s; for(let i=0;i<n;i++) x=nextWorkingDay(x); return x; }
+function daysBetween(a,b){ return Math.round((dt(b)-dt(a))/86400000); }
+function fmt(s){ if(!s) return ''; const d=dt(s); return d.getUTCDate()+' '+MONTHS[d.getUTCMonth()]+' '+d.getUTCFullYear(); }
+function fmtDay(s){ return DAYS[dt(s).getUTCDay()]+' '+fmt(s); }
+
+/* ================================================================
+   derive(): the thing being demonstrated.
+   Everything the customer sees about their case comes out of here.
+   ================================================================ */
+function isRequest(row){ return row.direction==='Outgoing' && !!row.responseDueBy && !/Not expected/.test(row.responseStatus); }
+function isResolved(row){ return /Received/.test(row.responseStatus); }
+const OPEN_STATE_KEY = {'With us':'with-us','Waiting on you':'waiting-you','Waiting on someone else':'waiting-other'};
+
+function derive(){
+  const today = state.today;
+  const entries = [], hidden = [];
+  const rows = state.communications.slice().sort((a,b)=> a.createdOn<b.createdOn?-1:a.createdOn>b.createdOn?1:0);
+
+  rows.forEach(row=>{
+    const rule = TEMPLATE_MAP[row.code];
+    if(!rule){
+      hidden.push({row, rule:null, why:'No rule in the template map for this code. An unmapped code shows nothing: the derivation fails closed.'});
+      return;
+    }
+    if(rule.shown==='No' || rule.timelineState==='Not a timeline event'){
+      hidden.push({row, rule, why:'The rule says this letter is not a timeline event, so it is never shown.'});
+      return;
+    }
+    const incoming = row.direction==='Incoming';
+    const visibleFrom = incoming ? row.createdOn : nextWorkingDay(row.createdOn);
+    if(today < visibleFrom){
+      hidden.push({row, rule, pending:true, why:'Rule 2: an outgoing letter appears from the next working day after it is created, when it leaves the building. This one appears on '+fmt(visibleFrom)+'.'});
+      return;
+    }
+    const e = {row, rule, date:visibleFrom, incoming, applied:['Rule 1: the customer sees the summary, never the code.']};
+    if(incoming){
+      e.kind = 'receipt';
+      e.applied.push('Rule 3: an incoming item shows “Received on” the date we logged it.');
+      if(rule.shown==='Receipt only') e.applied.push('Rule 5: receipt only. The form itself is not shown.');
+    } else if(rule.shown==='Signal only'){
+      e.kind = 'signal';
+      e.applied.push('Rule 2: shown from the next working day, '+fmt(visibleFrom)+'.');
+      e.applied.push('Rule 4: a letter to a healthcare professional is a signal, never content. It cannot be opened.');
+    } else {
+      e.kind = 'letter';
+      e.applied.push('Rule 2: shown from the next working day, '+fmt(visibleFrom)+'.');
+    }
+    if(rule.timelineState==='Decided'){
+      const holds = rule.servesNotice || state.holdAllDecisions;
+      e.releaseOn = holds ? addWorkingDays(visibleFrom, RELEASE_WORKING_DAYS) : visibleFrom;
+      if(today < e.releaseOn){
+        e.kind = 'neutral';
+        e.applied.push('Rule 8: decisions are paper first. Until '+fmt(e.releaseOn)+' only the neutral “decision posted” message shows.');
+      } else if(holds){
+        e.applied.push('Rule 8: the full copy was released on '+fmt(e.releaseOn)+', '+RELEASE_WORKING_DAYS+' working days after posting.');
+      } else {
+        e.applied.push('Rule 8: a positive decision shows from the next working day. (Decision rule is set to “only notices wait”.)');
+      }
+    }
+    if(isRequest(row)){
+      e.request = true;
+      e.resolved = isResolved(row);
+      e.applied.push(e.resolved
+        ? 'Rule 6: the response status includes “Received”, so this request is resolved.'
+        : 'Rule 6: no reply yet, so this request is still open.');
+    }
+    entries.push(e);
+  });
+
+  /* Rule 7, extended. In order:
+       a. the latest decision on the timeline (added: a decision ends the case)
+       b. a Closed or Cancelled case status (added), held back while a
+          decision letter has not left the building yet
+       c. the latest unresolved request
+       d. the latest entry that carries a state
+       e. the case status, as the frame */
+  let current = null, heldBack = null;
+  const latest = list => list.length ? list[list.length-1] : null;
+  const decision = latest(entries.filter(e=>e.rule.timelineState==='Decided'));
+  if(decision){
+    current = {key: decision.kind==='neutral' ? 'posted' : decision.rule.outcome, entry:decision,
+      why:'The latest decision on the timeline sets the state. A decision ends the case, so nothing before it can.'};
+  }
+  if(!current && (state.caseStatus==='Closed' || state.caseStatus==='Cancelled')){
+    const pending = hidden.find(h=>h.pending && h.rule && h.rule.timelineState==='Decided');
+    if(pending){
+      heldBack = 'The case status is already '+state.caseStatus+', but the decision letter has not left the building yet. Showing “closed” now would tell the customer a decision has been made before the paper does, so it is held back.';
+    } else {
+      current = {key:CASE_STATUS[state.caseStatus].key, why:'The case status is '+state.caseStatus+', which overrides the letters.'};
+    }
+  }
+  if(!current){
+    const req = latest(entries.filter(e=>e.request && !e.resolved));
+    if(req) current = {key:OPEN_STATE_KEY[req.rule.timelineState], entry:req, why:'Rule 7: the latest unresolved request.'};
+  }
+  if(!current){
+    const last = latest(entries.filter(e=>OPEN_STATE_KEY[e.rule.timelineState] && !(e.request && e.resolved)));
+    if(last) current = {key:OPEN_STATE_KEY[last.rule.timelineState], entry:last, why:'Rule 7: there is no open request, so the latest entry that carries a state.'};
+  }
+  if(!current){
+    current = {key:CASE_STATUS[state.caseStatus].key, why:'Rule 7: nothing on the timeline carries a state, so the case status ('+state.caseStatus+') is the frame.'};
+  }
+  current.heldBack = heldBack;
+
+  /* Rule 9: quiet periods. */
+  const lastEntry = latest(entries);
+  if(lastEntry && ['with-us','waiting-other'].includes(current.key) && daysBetween(lastEntry.date, today) > QUIET_DAYS){
+    current.quietSince = lastEntry.date;
+  }
+
+  return {entries:entries.slice().reverse(), hidden, current};
+}
+
+/* The status card, from the derived current state. */
+function statusCard(der){
+  const cur = der.current, e = cur.entry, info = STATE_INFO[cur.key];
+  const m = {key:cur.key, tag:info.tag, colour:info.colour, holder:info.holder, drive:DEFAULT_DRIVE, action:null, next:'', why:cur.why};
+  switch(cur.key){
+    case 'waiting-you':
+      if(!e){ m.headline = CASE_STATUS[state.caseStatus].status; m.next = info.usualWait; break; }
+      m.headline = e.rule.status;
+      m.next = 'Reply by '+fmt(e.row.responseDueBy)+'. '+info.usualWait;
+      if(e.rule.reply) m.action = {text:'Reply now', href:'#reply-method'};
+      else m.action = {text:'Read the letter', href:'#letter-'+e.row.id};
+      break;
+    case 'waiting-other': {
+      m.headline = e.rule.status;
+      const chases = der.entries.filter(x=>x.row.code==='HP-REPORT-CHASE' && x.row.createdOn>e.row.createdOn);
+      let next = 'We asked them to reply by '+fmt(e.row.responseDueBy)+'. ';
+      if(e.row.responseDueBy < state.today){
+        next = 'We asked them to reply by '+fmt(e.row.responseDueBy)+' and they have not replied yet. ';
+        if(chases.length) next += 'We sent them a reminder on '+fmt(chases[0].date)+'. ';
+      }
+      m.next = next + info.usualWait + ' We’ll look at your case again as soon as the report arrives.';
+      break;
+    }
+    case 'with-us':
+      m.headline = e ? (e.rule.status || CASE_STATUS['With DVLA'].status) : CASE_STATUS['With DVLA'].status;
+      m.next = 'We’ll write to you when we’ve decided, or if we need anything else. '+info.usualWait;
+      break;
+    case 'posted':
+      m.headline = 'We’ve posted you a decision about your licence. It should arrive within 1 to 4 days.';
+      m.holder = 'We’ve made a decision';
+      m.next = 'Read the letter as soon as it arrives. You’ll also be able to read it here from '+fmt(e.releaseOn)+'.';
+      m.drive = {answer:'Your letter will tell you', detail:'Read the letter we’ve posted you. It explains what our decision means for your driving.'};
+      break;
+    case 'kept':
+      m.headline = 'You can keep your licence';
+      m.holder = 'We’ve made a decision and your case is closed';
+      m.next = 'Your new licence should arrive within 1 week. You do not need to do anything else.';
+      m.drive = e.rule.canDrive;
+      m.action = {text:'Read the letter', href:'#letter-'+e.row.id};
+      break;
+    case 'revoked':
+      m.headline = 'We’ve taken away your driving licence';
+      m.holder = 'We’ve made a decision and your case is closed';
+      m.next = 'Send us your licence. You can apply to get it back once you’ve gone 3 months without a severe hypo. If you disagree with our decision, you can appeal: the letter explains how and by when.';
+      m.drive = e.rule.canDrive;
+      m.action = {text:'Read the letter', href:'#letter-'+e.row.id};
+      break;
+    case 'closed':
+    case 'cancelled':
+    case 'renewal':
+      m.headline = CASE_STATUS[state.caseStatus].status;
+      m.next = info.usualWait || 'You do not need to do anything.';
+      break;
+  }
+  if(cur.quietSince){
+    m.quiet = 'No new updates since '+fmt(cur.quietSince)+'. Your case is with our team. '+(info.usualWait||'');
+  }
+  return m;
+}
+
+/* What the customer may see on the rest of the account. The licence
+   card reads from the driver record, which changes on day 0. Here it
+   is held to the same release rule as the letter. */
+function licenceStatus(der){
+  return der.current.key==='revoked' ? 'Revoked. You must not drive.' : 'You have a full driving licence';
+}
+
+/* ================================================================
+   Rendering helpers
+   ================================================================ */
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function navigate(h){ if(location.hash===h){ route(); } else { location.hash = h; } }
+function note(title, body){
+  if(!state.showNotes) return '';
+  return `<div class="design-note"><strong>Design note — ${esc(title)}</strong>${body}</div>`;
+}
+function question(who, q){ return `<p><b>Open question (${esc(who)}):</b> ${q}</p>`; }
+function toggleNotes(){ state.showNotes = !state.showNotes; route(); }
+function toggleBuilt(){ state.showBuilt = !state.showBuilt; route(); }
+function tag(text, colour){ return `<strong class="govuk-tag govuk-tag--${colour}">${esc(text)}</strong>`; }
+function merge(text, row){ return String(text).replace(/\{due\}/g, fmt(row.responseDueBy)); }
+function rowById(id){ return state.communications.find(r=>r.id===id); }
+function logEvent(type, detail){ state.events.push({at:state.today, type, detail}); }
+
+function builtRow(row){
+  return `<table><tbody>
+    <tr><th scope="row">code</th><td><code>${esc(row.code)}</code></td></tr>
+    <tr><th scope="row">direction</th><td>${esc(row.direction)}</td></tr>
+    <tr><th scope="row">createdOn</th><td>${esc(row.createdOn)}</td></tr>
+    <tr><th scope="row">responseDueBy</th><td>${esc(row.responseDueBy||'—')}</td></tr>
+    <tr><th scope="row">responseStatus</th><td>${esc(row.responseStatus||'—')}</td></tr>
+    <tr><th scope="row">printStatus</th><td>${esc(row.printStatus||'—')}</td></tr>
+  </tbody></table>`;
+}
+function builtRule(rule){
+  if(!rule) return '<p>No template rule for this code.</p>';
+  return `<p><b>Template rule:</b> timelineState <code>${esc(rule.timelineState)}</code>, shown <code>${esc(rule.shown)}</code>, servesNotice <code>${rule.servesNotice}</code>, summary “${esc(rule.summary)}”.</p>`;
+}
+function built(entry){
+  if(!state.showBuilt) return '';
+  return `<div class="cu-built"><span class="cu-built__label">How this was built — Communications row</span>${builtRow(entry.row)}${builtRule(entry.rule)}
+    <ul>${entry.applied.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`;
+}
+
+/* ================================================================
+   Chrome
+   ================================================================ */
+const LOGO = '<svg focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 324 60" height="30" width="162" fill="currentcolor" class="govuk-header__logotype" aria-label="GOV.UK" ><title>GOV.UK</title><g><circle cx="20" cy="17.6" r="3.7"/><circle cx="10.2" cy="23.5" r="3.7"/><circle cx="3.7" cy="33.2" r="3.7"/><circle cx="31.7" cy="30.6" r="3.7"/><circle cx="43.3" cy="17.6" r="3.7"/><circle cx="53.2" cy="23.5" r="3.7"/><circle cx="59.7" cy="33.2" r="3.7"/><circle cx="31.7" cy="30.6" r="3.7"/><path d="M33.1,9.8c.2-.1.3-.3.5-.5l4.6,2.4v-6.8l-4.6,1.5c-.1-.2-.3-.3-.5-.5l1.9-5.9h-6.7l1.9,5.9c-.2.1-.3.3-.5.5l-4.6-1.5v6.8l4.6-2.4c.1.2.3.3.5.5l-2.6,8c-.9,2.8,1.2,5.7,4.1,5.7h0c3,0,5.1-2.9,4.1-5.7l-2.6-8ZM37,37.9s-3.4,3.8-4.1,6.1c2.2,0,4.2-.5,6.4-2.8l-.7,8.5c-2-2.8-4.4-4.1-5.7-3.8.1,3.1.5,6.7,5.8,7.2,3.7.3,6.7-1.5,7-3.8.4-2.6-2-4.3-3.7-1.6-1.4-4.5,2.4-6.1,4.9-3.2-1.9-4.5-1.8-7.7,2.4-10.9,3,4,2.6,7.3-1.2,11.1,2.4-1.3,6.2,0,4,4.6-1.2-2.8-3.7-2.2-4.2.2-.3,1.7.7,3.7,3,4.2,1.9.3,4.7-.9,7-5.9-1.3,0-2.4.7-3.9,1.7l2.4-8c.6,2.3,1.4,3.7,2.2,4.5.6-1.6.5-2.8,0-5.3l5,1.8c-2.6,3.6-5.2,8.7-7.3,17.5-7.4-1.1-15.7-1.7-24.5-1.7h0c-8.8,0-17.1.6-24.5,1.7-2.1-8.9-4.7-13.9-7.3-17.5l5-1.8c-.5,2.5-.6,3.7,0,5.3.8-.8,1.6-2.3,2.2-4.5l2.4,8c-1.5-1-2.6-1.7-3.9-1.7,2.3,5,5.2,6.2,7,5.9,2.3-.4,3.3-2.4,3-4.2-.5-2.4-3-3.1-4.2-.2-2.2-4.6,1.6-6,4-4.6-3.7-3.7-4.2-7.1-1.2-11.1,4.2,3.2,4.3,6.4,2.4,10.9,2.5-2.8,6.3-1.3,4.9,3.2-1.8-2.7-4.1-1-3.7,1.6.3,2.3,3.3,4.1,7,3.8,5.4-.5,5.7-4.2,5.8-7.2-1.3-.2-3.7,1-5.7,3.8l-.7-8.5c2.2,2.3,4.2,2.7,6.4,2.8-.7-2.3-4.1-6.1-4.1-6.1h10.6,0Z"/></g><circle class="govuk-logo-dot" cx="226" cy="36" r="7.3"/><path d="M93.94 41.25c.4 1.81 1.2 3.21 2.21 4.62 1 1.4 2.21 2.41 3.61 3.21s3.21 1.2 5.22 1.2 3.61-.4 4.82-1c1.4-.6 2.41-1.4 3.21-2.41.8-1 1.4-2.01 1.61-3.01s.4-2.01.4-3.01v.14h-10.86v-7.02h20.07v24.08h-8.03v-5.56c-.6.8-1.38 1.61-2.19 2.41-.8.8-1.81 1.2-2.81 1.81-1 .4-2.21.8-3.41 1.2s-2.41.4-3.81.4a18.56 18.56 0 0 1-14.65-6.63c-1.6-2.01-3.01-4.41-3.81-7.02s-1.4-5.62-1.4-8.83.4-6.02 1.4-8.83a20.45 20.45 0 0 1 19.46-13.65c3.21 0 4.01.2 5.82.8 1.81.4 3.61 1.2 5.02 2.01 1.61.8 2.81 2.01 4.01 3.21s2.21 2.61 2.81 4.21l-7.63 4.41c-.4-1-1-1.81-1.61-2.61-.6-.8-1.4-1.4-2.21-2.01-.8-.6-1.81-1-2.81-1.4-1-.4-2.21-.4-3.61-.4-2.01 0-3.81.4-5.22 1.2-1.4.8-2.61 1.81-3.61 3.21s-1.61 2.81-2.21 4.62c-.4 1.81-.6 3.71-.6 5.42s.8 5.22.8 5.22Zm57.8-27.9c3.21 0 6.22.6 8.63 1.81 2.41 1.2 4.82 2.81 6.62 4.82S170.2 24.39 171 27s1.4 5.62 1.4 8.83-.4 6.02-1.4 8.83-2.41 5.02-4.01 7.02-4.01 3.61-6.62 4.82-5.42 1.81-8.63 1.81-6.22-.6-8.63-1.81-4.82-2.81-6.42-4.82-3.21-4.41-4.01-7.02-1.4-5.62-1.4-8.83.4-6.02 1.4-8.83 2.41-5.02 4.01-7.02 4.01-3.61 6.42-4.82 5.42-1.81 8.63-1.81Zm0 36.73c1.81 0 3.61-.4 5.02-1s2.61-1.81 3.61-3.01 1.81-2.81 2.21-4.41c.4-1.81.8-3.61.8-5.62 0-2.21-.2-4.21-.8-6.02s-1.2-3.21-2.21-4.62c-1-1.2-2.21-2.21-3.61-3.01s-3.21-1-5.02-1-3.61.4-5.02 1c-1.4.8-2.61 1.81-3.61 3.01s-1.81 2.81-2.21 4.62c-.4 1.81-.8 3.61-.8 5.62 0 2.41.2 4.21.8 6.02.4 1.81 1.2 3.21 2.21 4.41s2.21 2.21 3.61 3.01c1.4.8 3.21 1 5.02 1Zm36.32 7.96-12.24-44.15h9.83l8.43 32.77h.4l8.23-32.77h9.83L200.3 58.04h-12.24Zm74.14-7.96c2.18 0 3.51-.6 3.51-.6 1.2-.6 2.01-1 2.81-1.81s1.4-1.81 1.81-2.81a13 13 0 0 0 .8-4.01V13.9h8.63v28.15c0 2.41-.4 4.62-1.4 6.62-.8 2.01-2.21 3.61-3.61 5.02s-3.41 2.41-5.62 3.21-4.62 1.2-7.02 1.2-5.02-.4-7.02-1.2c-2.21-.8-4.01-1.81-5.62-3.21s-2.81-3.01-3.61-5.02-1.4-4.21-1.4-6.62V13.9h8.63v26.95c0 1.61.2 3.01.8 4.01.4 1.2 1.2 2.21 2.01 2.81.8.8 1.81 1.4 2.81 1.81 0 0 1.34.6 3.51.6Zm34.22-36.18v18.92l15.65-18.92h10.82l-15.03 17.32 16.03 26.83h-10.21l-11.44-20.21-5.62 6.22v13.99h-8.83V13.9"/></svg>';
+
+function warn(){
+  const s = SCENARIOS[state.scenario];
+  let jumps = '';
+  (s.jumps||[]).forEach(([label,date])=>{
+    jumps += `<button type="button" aria-pressed="${state.today===date}" onclick="setToday('${date}')">${esc(label)}</button>`;
+  });
+  return `<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>
+    This is a fictional prototype of Drivers Medical case updates. It is not a real DVLA or GOV.UK service, it makes no real licensing decisions, and every person, case, letter and template code in it is invented.
+    <div class="prototype-warning__control">
+      <span>Scenario: <b>${esc(s.label)}</b></span>
+      <span>Prototype date: <span class="prototype-warning__date">${esc(fmtDay(state.today))}</span></span>
+      <button type="button" onclick="setToday(addDays(state.today,-1))">Previous day</button>
+      <button type="button" onclick="setToday(addDays(state.today,1))">Next day</button>
+      ${jumps}
+    </div>
+  </div>`;
+}
+
+function renderChrome(inner, opts){
+  const o = opts || {};
+  const signedIn = state.access==='oneLogin';
+  let html = `<header class="govuk-header" role="banner"><div class="govuk-header__container">
+    <a href="#all-screens" class="govuk-header__homepage-link">${LOGO}</a>
+    ${signedIn ? '<a class="govuk-header__signout" href="#" onclick="signOut();return false;">Sign out</a>' : ''}
+  </div></header>`;
+  html += `<div class="service-nav"><div class="service-nav__wrapper">
+    <a class="service-nav__name" href="${signedIn?'#account':'#sign-in'}">Driver and vehicles account</a>
+    ${signedIn ? '<a href="#not-built" style="margin-left:auto">Manage your account</a>' : ''}
+  </div></div>`;
+  html += `<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper">
+    <span class="govuk-phase-banner__tag">Prototype</span>
+    <span>This is not a real service.</span>
+    <span class="phase-actions">
+      <a href="#" onclick="toggleNotes();return false;">${state.showNotes?'Hide':'Show'} design notes</a>
+      <a href="#" onclick="toggleBuilt();return false;">${state.showBuilt?'Hide':'Show'} how this was built</a>
+      <a href="#staff">Staff view</a>
+      <a href="#all-screens">All screens</a>
+    </span>
+  </div></div>`;
+  html += `<div class="govuk-width-container"><main class="govuk-main-wrapper" id="main">${warn()}`;
+  if(o.back) html += `<a class="govuk-back-link" href="${o.back[0]}">${esc(o.back[1])}</a>`;
+  html += o.full ? inner : `<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">${inner}</div></div>`;
+  html += '</main></div>';
+  return html;
+}
+
+/* ================================================================
+   Prototype controls
+   ================================================================ */
+function setToday(d){ state.today = d; route(); }
+function switchScenario(){
+  const picked = document.querySelector('input[name="scenario"]:checked');
+  const notes = state.showNotes, builtOn = state.showBuilt;
+  resetState(picked ? picked.value : state.scenario);
+  state.showNotes = notes; state.showBuilt = builtOn;
+  navigate('#all-screens');
+}
+function setDecisionRule(holdAll){ state.holdAllDecisions = holdAll; route(); }
+function resetScenario(){ const n=state.showNotes, b=state.showBuilt; resetState(state.scenario); state.showNotes=n; state.showBuilt=b; route(); }
+function signIn(){ state.access = 'oneLogin'; logEvent('signedIn','GOV.UK One Login (simulated)'); navigate('#account'); }
+function signOut(){ state.access = null; navigate('#sign-in'); }
+
+/* ================================================================
+   Screens
+   ================================================================ */
+function renderAllScreens(){
+  const der = derive();
+  let radios = '';
+  SCENARIO_ORDER.forEach(k=>{
+    const s = SCENARIOS[k];
+    radios += `<div class="govuk-radios__item">
+      <input class="govuk-radios__input" id="sc-${k}" name="scenario" type="radio" value="${k}"${k===state.scenario?' checked':''}>
+      <label class="govuk-radios__label" for="sc-${k}">${esc(s.label)}<span class="govuk-radios__hint">${esc(s.blurb)}</span></label>
+    </div>`;
+  });
+  const letters = der.entries.filter(e=>e.kind==='letter');
+  const link = (href, text, hint) => `<li><a href="${href}">${esc(text)}</a>${hint?`<span>${esc(hint)}</span>`:''}</li>`;
+  const openReq = openReplyRequest(der);
+  return `<h1 class="govuk-heading-xl">Case updates: all screens</h1>
+    <p class="govuk-body-l">The customer’s case timeline, built from the letters DVLA already sends and receives.</p>
+    ${note('What this prototype argues',
+      '<p>Customers can see where their case is, everything we’ve sent them, and what they need to do, without DVLA inventing a single new case state. Every entry on the timeline comes from a row Dynamics already logs. Turn on “Show how this was built” to see the row and the rule behind each one.</p>'
+      +'<p>It combines two earlier prototypes in this folder: the case status tracker (where is my case, can I drive) and secure messages (read the letter, reply to it).</p>')}
+    <form onsubmit="event.preventDefault();switchScenario();">
+      <div class="govuk-form-group"><fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--m"><h2 class="govuk-heading-m" style="margin:0">Scenario</h2></legend>
+        <div class="govuk-radios">${radios}</div>
+      </fieldset></div>
+      <div class="govuk-button-group" style="margin-top:0;margin-bottom:30px">
+        <button class="govuk-button govuk-button--secondary" type="submit">Switch scenario</button>
+        <a href="#" onclick="resetScenario();return false;">Reset this scenario</a>
+      </div>
+    </form>
+
+    <h2 class="govuk-heading-m">Decision rule</h2>
+    <p class="govuk-body">Which decisions wait ${RELEASE_WORKING_DAYS} working days after posting before the full copy shows?</p>
+    <div class="govuk-radios">
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="dr-all" name="dr" type="radio"${state.holdAllDecisions?' checked':''} onchange="setDecisionRule(true)"><label class="govuk-radios__label" for="dr-all">Every decision waits<span class="govuk-radios__hint">The prototype’s default. Seeing “decision posted” tells you nothing about the outcome.</span></label></div>
+      <div class="govuk-radios__item"><input class="govuk-radios__input" id="dr-notice" name="dr" type="radio"${!state.holdAllDecisions?' checked':''} onchange="setDecisionRule(false)"><label class="govuk-radios__label" for="dr-notice">Only decisions that serve a notice wait<span class="govuk-radios__hint">The handover’s rule. Good news shows from the next working day, so “decision posted” can only mean bad news.</span></label></div>
+    </div>
+
+    <h2 class="govuk-heading-m">Getting in</h2>
+    <ul class="cu-index">
+      ${link('#notification','The notification','The text message and email. They name no condition and no outcome.')}
+      ${link('#sign-in','Sign in','GOV.UK One Login, simulated.')}
+      ${link('#code','Use the code from your letter','For a customer with only the paper letter. Works in the “Waiting on you” scenario.')}
+    </ul>
+    <h2 class="govuk-heading-m">Account and case</h2>
+    <ul class="cu-index">
+      ${link('#account','Your account','The driver and vehicles account, with the medical case card on it.')}
+      ${link('#case','Your medical case','Status card, then the timeline.')}
+      ${letters.map(e=>link('#letter-'+e.row.id,'Letter: '+e.rule.summary,'Posted '+fmt(e.date))).join('')}
+      ${letters.length?link('#pdf-'+letters[0].row.id,'PDF of a letter','Placeholder for the letter as posted.'):''}
+    </ul>
+    <h2 class="govuk-heading-m">Reply</h2>
+    <ul class="cu-index">
+      ${openReq ? link('#reply-method','How do you check your blood glucose?','Question 1')
+        + link('#reply-upload','Upload your readings','Question 2')
+        + link('#reply-check','Check your answers','')
+        + link('#reply-sent','Readings sent','Confirmation. Opening it directly does not send anything.')
+        : '<li>Nothing to reply to in this scenario. Switch to “Waiting on you”.</li>'}
+    </ul>
+    <h2 class="govuk-heading-m">Staff</h2>
+    <ul class="cu-index">${link('#staff','Staff view','The raw Communications rows, what the customer can see, and the event log.')}</ul>`;
+}
+
+function renderNotification(){
+  return `<span class="govuk-caption">What the customer receives</span>
+    <h1 class="govuk-heading-xl">There’s an update on your DVLA account</h1>
+    <div class="cu-device"><span class="cu-device__label">Text message</span>
+      <p>DVLA: There’s an update on your driver and vehicles account. Sign in on GOV.UK to see it. We will never ask for bank details by text.</p></div>
+    <div class="cu-device"><span class="cu-device__label">Email</span>
+      <p><b>Subject: An update on your driver and vehicles account</b></p>
+      <p>Dear Dana Whitlock,</p>
+      <p>There’s an update on your driver and vehicles account. Sign in to see it.</p>
+      <p>We will never ask for bank details by email.</p></div>
+    <a class="govuk-button" href="#sign-in">Sign in to see it</a>
+    ${note('The notification is a doorbell',
+      '<p>It names no condition, no outcome and no case type, because a text message can be read by anyone holding the phone. Everything with content sits behind sign-in.</p>'
+      +'<p>In the revocation scenario the notification goes out on the next working day, the same day as the neutral “decision posted” message. Nothing about it changes when the full copy is released.</p>'
+      + question('Content','Which timeline entries trigger a notification? This prototype assumes every entry a customer can see.'))}`;
+}
+
+function renderSignIn(){
+  return `<h1 class="govuk-heading-xl">Sign in to your driver and vehicles account</h1>
+    <p class="govuk-body">You’ll sign in with GOV.UK One Login. You can see your licence, your vehicles and any medical case you have with us.</p>
+    <div class="govuk-inset-text">Prototype: One Login is simulated here. You do not need to enter any details.</div>
+    <button class="govuk-button" type="button" onclick="signIn()">Continue to GOV.UK One Login</button>
+    <h2 class="govuk-heading-m">Only have the paper letter?</h2>
+    <p class="govuk-body">If we’ve asked you to reply to a letter, you can <a href="#code">use the code printed on the letter</a> instead.</p>
+    ${note('Sign-in leads to the account, not to a separate medical service',
+      '<p>The customer already has one place for their licence. The medical case is a card on that account, not a new front door.</p>'
+      + question('DPP','What can each layer show, and what identity checks are needed? This prototype assumes One Login at the account’s current level is enough to see the whole timeline and read letters, and the paper code is enough to reply to one letter and nothing else.'))}`;
+}
+
+function caseCard(der){
+  const m = statusCard(der);
+  return `<div class="acct-card">
+    <div class="acct-card__head"><h2>Your medical case</h2><a href="#case">View your case and letters</a></div>
+    <p>${tag(m.tag, m.colour)}</p>
+    <p class="govuk-body"><b>${esc(m.headline)}</b></p>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can I drive?</dt><dd class="govuk-summary-list__value">${esc(m.drive.answer)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What happens next</dt><dd class="govuk-summary-list__value">${esc(m.key==='waiting-you' && der.current.entry ? 'Reply by '+fmt(der.current.entry.row.responseDueBy) : m.next.split('. ')[0]+'.')}</dd></div>
+    </dl>
+    ${m.action && m.key==='waiting-you' ? `<p><a class="govuk-button" href="${m.action.href}">${esc(m.action.text)}</a></p>` : ''}
+  </div>`;
+}
+
+function renderAccount(){
+  const der = derive();
+  return `<h1 class="govuk-heading-xl">Welcome, Dana Whitlock</h1>
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        ${note('The case goes first',
+          '<p>Over half of all calls to the contact centre ask where a case is. So the medical case sits at the top of the account, above the personal details, and the card answers “can I drive?” and “what happens next” without a click.</p>'
+          +'<p>The card only appears for a customer with a medical case. Everyone else sees the account as it is today.</p>')}
+        ${caseCard(der)}
+        ${note('The licence card can give the decision away',
+          '<p>“Licence status” reads from the driver record, which changes on the day the decision is made, before the letter has left the building. Unless it is held to the same release rule as the letter, it serves the notice ahead of the paper. In this prototype it is held. In the real account it is not, today.</p>')}
+        <div class="acct-card">
+          <div class="acct-card__head"><h2>Your driving licence</h2><a href="#not-built">View and manage licence details</a></div>
+          <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Licence status</dt><dd class="govuk-summary-list__value">${esc(licenceStatus(der))}</dd></div>
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Licence valid from</dt><dd class="govuk-summary-list__value">${fmt(CUSTOMER.licenceFrom)}</dd></div>
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Licence valid to</dt><dd class="govuk-summary-list__value">${fmt(CUSTOMER.licenceTo)}</dd></div>
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Driving licence number</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.licenceNo)}</dd></div>
+          </dl>
+        </div>
+        <div class="acct-card">
+          <div class="acct-card__head"><h2>Your personal details</h2></div>
+          <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Title</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.title)}</dd></div>
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Name</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.name)}</dd></div>
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Date of birth</dt><dd class="govuk-summary-list__value">${fmt(CUSTOMER.dob)}</dd></div>
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Email address</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.email)}</dd></div>
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Mobile phone number</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.mobile)}</dd></div>
+          </dl>
+        </div>
+        <div class="acct-card">
+          <div class="acct-card__head"><h2>Your vehicle</h2></div>
+          <p class="govuk-body">You have not added a vehicle to your account. You can <a href="#not-built">add your vehicle to your account</a> to view its details and use vehicle services.</p>
+        </div>
+      </div>
+      <div class="govuk-grid-column-one-third">
+        <div class="acct-side"><h2>Available services</h2>
+          <a class="acct-side__link" href="#not-built">Add vehicle</a>
+          <a class="acct-side__link" href="#not-built">Get your check code</a>
+          <a class="acct-side__link" href="#not-built">Report a medical condition</a>
+        </div>
+        <div class="acct-side"><h2>Your reminders</h2>
+          <a class="acct-side__link" href="#not-built">Manage reminders</a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderStatusCard(der){
+  const m = statusCard(der);
+  let html = `<div class="cu-status">
+    ${tag(m.tag, m.colour)}
+    <p class="cu-status__headline">${esc(m.headline)}</p>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Who has your case</dt><dd class="govuk-summary-list__value">${esc(m.holder)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What happens next</dt><dd class="govuk-summary-list__value">${esc(m.next)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can I drive?</dt><dd class="govuk-summary-list__value"><b>${esc(m.drive.answer)}</b><br>${esc(m.drive.detail)}</dd></div>
+    </dl>
+    ${m.action ? `<div class="cu-status__action"><a class="govuk-button" href="${m.action.href}">${esc(m.action.text)}</a></div>` : ''}
+  </div>`;
+  if(m.quiet) html += `<div class="govuk-inset-text">${esc(m.quiet)}</div>`;
+  if(state.showBuilt){
+    const cur = der.current;
+    html += `<div class="cu-built"><span class="cu-built__label">How this was built — status card</span>
+      <p><b>Current state:</b> ${esc(STATE_INFO[cur.key].state)}. ${esc(cur.why)}</p>
+      ${cur.entry ? `<p><b>From row:</b> <code>${esc(cur.entry.row.id)}</code> <code>${esc(cur.entry.row.code)}</code>, created ${esc(cur.entry.row.createdOn)}.</p>` : ''}
+      <p><b>Case status in Dynamics:</b> ${esc(state.caseStatus)}.</p>
+      ${cur.heldBack ? `<p><b>Held back:</b> ${esc(cur.heldBack)}</p>` : ''}
+      ${cur.quietSince ? `<p><b>Rule 9:</b> the latest entry is ${daysBetween(cur.quietSince,state.today)} days old, over the ${QUIET_DAYS}-day limit, so the quiet-period message shows.</p>` : ''}
+      <p><b>Can I drive:</b> ${cur.entry && cur.entry.rule.canDrive && cur.key!=='posted' ? 'from the decision’s template rule.' : cur.key==='posted' ? 'silent until the full copy is released.' : 'the default for an open case. Letters cannot answer it.'}</p>
+    </div>`;
+  }
+  return html;
+}
+
+function timelineItem(e){
+  const r = e.row, rule = e.rule;
+  let body = '';
+  if(e.kind==='receipt'){
+    body = `<span class="cu-timeline__title">Received on ${fmt(r.createdOn)}: ${esc(rule.summary)}</span>
+      <p class="govuk-body-s">Forms can take a few days to reach us and be added to your case.</p>`;
+  } else if(e.kind==='signal'){
+    body = `<span class="cu-timeline__date">Sent on ${fmt(e.date)}</span>
+      <span class="cu-timeline__title">${esc(rule.summary)}</span>
+      <p class="govuk-body-s">This letter went to your doctor, not to you, so you cannot open it here.</p>`;
+  } else if(e.kind==='neutral'){
+    body = `<span class="cu-timeline__date">Posted on ${fmt(e.date)}</span>
+      <span class="cu-timeline__title">We’ve posted you a decision about your licence. It should arrive within 1 to 4 days.</span>
+      <p class="govuk-body-s">You’ll be able to read it here from ${fmt(e.releaseOn)}.</p>`;
+  } else {
+    let status = '';
+    if(e.request && !e.resolved) status = `<p>${tag('Waiting on you','orange')} Reply by ${fmt(r.responseDueBy)}</p>`;
+    if(e.request && e.resolved) status = `<p class="govuk-body-s">You’ve replied to this letter.</p>`;
+    body = `<span class="cu-timeline__date">Posted on ${fmt(e.date)}</span>
+      <span class="cu-timeline__title"><a href="#letter-${r.id}">${esc(rule.summary)}</a></span>${status}`;
+  }
+  return `<li class="cu-timeline__item">${body}${built(e)}</li>`;
+}
+
+function renderCase(){
+  const der = derive();
+  let hiddenHtml = '';
+  if(state.showBuilt && der.hidden.length){
+    hiddenHtml = `<div class="cu-built"><span class="cu-built__label">How this was built — rows not on the timeline</span>`
+      + der.hidden.map(h=>`${builtRow(h.row)}${builtRule(h.rule)}<p><b>Why not shown:</b> ${esc(h.why)}</p>`).join('<hr>')
+      + '</div>';
+  }
+  const items = der.entries.map(timelineItem).join('');
+  return `<h1 class="govuk-heading-xl">Your medical case</h1>
+    ${note('The status card answers the call before the timeline explains it',
+      '<p>What’s happening, who has the case, what happens next and roughly when, and can I drive. Those four are what people phone to ask. The timeline underneath is the evidence for the card, not the answer.</p>'
+      + (der.current.key==='waiting-other' ? question('Research','Should “Waiting on someone else” name who, such as “your GP”, or stay general? It stays general here, because the template code says a healthcare professional was written to, not which one.') : '')
+      + (der.current.key==='posted' ? question('Legal (Keya)','How should the “decision posted” message be framed, and when can the full copy appear? This prototype waits '+RELEASE_WORKING_DAYS+' working days after posting. With “every decision waits” on, this message says nothing about the outcome. Switch the decision rule on the All screens page to “only notices wait” and it can only mean bad news.') : '')
+      + (der.current.quietSince ? '<p>The quiet period is the gap the letters cannot fill. Between letters, things happen on a case — it is allocated, a DVLA doctor reads it, it waits in a queue — and none of those write a row to the Communications tab. Until they do, the honest thing is to say nothing new has happened and how long this stage usually takes.</p>' : ''))}
+    ${renderStatusCard(der)}
+    <h2 class="govuk-heading-l">What’s happened so far</h2>
+    ${note('Built from letters that already exist',
+      '<p>Every entry below is a letter DVLA already sends or receives. Nothing was added to the case management system to make this page. Turn on “Show how this was built” to see the Communications row and the template rule behind each entry.</p>'
+      + question('Data','Is the Communications data available outside Dynamics, to a customer account?')
+      + '<p>Outgoing letters appear from the next working day, skipping weekends only. Bank holidays are not handled in the prototype.</p>')}
+    ${items ? `<ol class="cu-timeline">${items}</ol>` : '<p class="govuk-body">Nothing yet. Your case will appear here once we’ve posted you our first letter about it.</p>'}
+    <p class="govuk-body-s">We still post you every letter. Letters appear here from the day after we post them.</p>
+    ${hiddenHtml}`;
+}
+
+function cantOpen(e, row){
+  return `<h1 class="govuk-heading-xl">You cannot open this here</h1>
+    <p class="govuk-body">${e && e.kind==='neutral' ? 'We’ve posted you this letter. You’ll be able to read it here from '+fmt(e.releaseOn)+'.' : row && row.direction==='Incoming' ? 'This is something you or someone else sent us. We show when it arrived, not what it says.' : 'This letter is not one you can read online.'}</p>
+    <p class="govuk-body"><a href="#case">Go back to your case</a></p>`;
+}
+
+function renderLetter(id){
+  const der = derive();
+  const e = der.entries.find(x=>x.row.id===id);
+  if(!e || e.kind!=='letter') return cantOpen(e, rowById(id));
+  const L = LETTERS[e.row.code];
+  if(!L) return cantOpen(e, e.row);
+  if(!state.opened[id]){ state.opened[id] = true; logEvent('opened', 'Opened '+e.row.code+' ('+e.row.id+')'); }
+  const open = e.request && !e.resolved;
+  const isDecision = e.rule.timelineState==='Decided';
+  return `<span class="govuk-caption">Posted on ${fmt(e.date)}</span>
+    <h1 class="govuk-heading-xl">${esc(e.rule.summary)}</h1>
+    ${built(e)}
+    <h2 class="govuk-heading-m">What this means for your driving</h2>
+    <p class="govuk-body">${esc(merge(L.forYourDriving, e.row))}</p>
+    <h2 class="govuk-heading-m">What you need to do</h2>
+    <p class="govuk-body">${esc(merge(L.whatToDo, e.row))}</p>
+    ${open && e.rule.reply ? '<a class="govuk-button" href="#reply-method">Reply now</a>' : ''}
+    ${isDecision && e.rule.outcome==='revoked' ? note('Weight without cruelty',
+      '<p>The outcome is said plainly, once, at the top. What follows is what to do now: send the licence back, when you can apply again, and how to appeal. A bad outcome with no route forward is the version that generates the call.</p>') : ''}
+    <h2 class="govuk-heading-m">The full letter</h2>
+    <div class="cu-letter">${L.letter.map(p=>`<p>${esc(merge(p, e.row))}</p>`).join('')}</div>
+    <p class="govuk-body"><a href="#pdf-${e.row.id}">Download the letter as a PDF</a></p>
+    ${note('The letter, in the order a customer needs it',
+      '<p>What it means for your driving, then what to do, then the letter itself. The letter is the legal record and stays complete, but most people want the first two answers before they read it.</p>'
+      + question('Technical','Can the customer account read letters from Azure Blob storage? The HTML version here is built from the template; the PDF is the letter as posted.'))}
+    <p class="govuk-body"><a href="#case">Back to your case</a></p>`;
+}
+
+function renderPdf(id){
+  const row = rowById(id);
+  const rule = row && TEMPLATE_MAP[row.code];
+  return `<h1 class="govuk-heading-xl">${esc(rule ? rule.summary : 'Letter')} (PDF)</h1>
+    <div class="cu-pdf">In the real service this opens the PDF of the letter as it was posted.</div>
+    ${note('The PDF is the letter as posted',
+      question('Technical','Can the customer account read letters from Azure Blob storage, where Dynamics keeps them?'))}
+    <p class="govuk-body"><a href="#letter-${esc(id)}">Back to the letter</a></p>`;
+}
+
+/* --- Reply journey: one Waiting on you request with reply: true. --- */
+function openReplyRequest(der){
+  return (der||derive()).entries.find(e=>e.request && !e.resolved && e.rule.reply) || null;
+}
+function nothingToReply(){
+  return `<h1 class="govuk-heading-xl">You do not have anything to reply to</h1>
+    <p class="govuk-body">We are not waiting for anything from you at the moment. If we need something, we’ll write to you and it will appear on your case.</p>
+    <p class="govuk-body"><a href="${state.access==='code'?'#sign-in':'#case'}">${state.access==='code'?'Sign in to see your case':'Go to your case'}</a></p>`;
+}
+function errorSummary(){
+  if(!state.errors) return '';
+  return `<div class="govuk-error-summary" role="alert" tabindex="-1"><h2>There is a problem</h2><ul>`
+    + state.errors.map(e=>`<li><a href="#" onclick="document.getElementById('${e.field}').focus();return false;">${esc(e.text)}</a></li>`).join('')
+    + '</ul></div>';
+}
+function fieldError(field){
+  const e = state.errors && state.errors.find(x=>x.field===field);
+  return e ? `<p class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> ${esc(e.text)}</p>` : '';
+}
+function backFromReply(){ return state.access==='code' ? ['#code','Back'] : ['#case','Back to your case']; }
+
+const METHODS = {meter:'With a finger-prick meter', sensor:'With a sensor (continuous glucose monitor)', both:'Both'};
+
+function renderReplyMethod(){
+  if(!openReplyRequest()) return nothingToReply();
+  const v = state.reply.method;
+  const err = state.errors && state.errors.length;
+  return `${errorSummary()}<form onsubmit="event.preventDefault();submitMethod();">
+    <div class="govuk-form-group${err?' govuk-form-group--error':''}"><fieldset class="govuk-fieldset">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--l"><h1 class="govuk-fieldset__heading">How do you check your blood glucose?</h1></legend>
+      ${fieldError('method-meter')}
+      <div class="govuk-radios">${Object.keys(METHODS).map(k=>`<div class="govuk-radios__item"><input class="govuk-radios__input" id="method-${k}" name="method" type="radio" value="${k}"${v===k?' checked':''}><label class="govuk-radios__label" for="method-${k}">${esc(METHODS[k])}</label></div>`).join('')}</div>
+    </fieldset></div>
+    <button class="govuk-button" type="submit">Continue</button>
+  </form>`;
+}
+function submitMethod(){
+  const picked = document.querySelector('input[name="method"]:checked');
+  if(!picked){ state.errors=[{field:'method-meter', text:'Select how you check your blood glucose'}]; return route(); }
+  state.errors = null; state.reply.method = picked.value;
+  navigate(state.reply.changing ? '#reply-check' : '#reply-upload');
+}
+
+function renderReplyUpload(){
+  if(!openReplyRequest()) return nothingToReply();
+  const err = state.errors && state.errors.length;
+  return `${errorSummary()}<form onsubmit="event.preventDefault();submitUpload();">
+    <div class="govuk-form-group${err?' govuk-form-group--error':''}">
+      <h1 class="govuk-label-wrapper"><label class="govuk-label govuk-label--l" for="readings">Upload your blood glucose readings</label></h1>
+      <div class="govuk-hint">Readings from the last 3 months. You can usually download them from your meter or sensor app. PDF, CSV or a photo, under 10MB.</div>
+      ${state.reply.file ? `<p class="govuk-body">Selected: <b>${esc(state.reply.file)}</b></p>` : ''}
+      ${fieldError('readings')}
+      <input class="govuk-file-upload" id="readings" name="readings" type="file" onchange="pickFile(this)">
+    </div>
+    <p class="govuk-body-s"><a href="#" onclick="state.reply.file='glucose-readings-aug-to-oct.pdf';state.errors=null;route();return false;">Prototype: use an example file</a></p>
+    <button class="govuk-button" type="submit">Continue</button>
+  </form>`;
+}
+function pickFile(input){ if(input.files && input.files[0]) state.reply.file = input.files[0].name; }
+function submitUpload(){
+  if(!state.reply.file){ state.errors=[{field:'readings', text:'Select a file with your blood glucose readings'}]; return route(); }
+  state.errors = null; navigate('#reply-check');
+}
+
+function renderReplyCheck(){
+  const req = openReplyRequest();
+  if(!req) return nothingToReply();
+  state.reply.changing = true;
+  return `<h1 class="govuk-heading-xl">Check your answers before sending them</h1>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">How you check your blood glucose</dt><dd class="govuk-summary-list__value">${esc(METHODS[state.reply.method]||'Not answered')}</dd><dd class="govuk-summary-list__actions"><a href="#reply-method">Change<span class="govuk-visually-hidden"> how you check your blood glucose</span></a></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Your readings</dt><dd class="govuk-summary-list__value">${esc(state.reply.file||'No file')}</dd><dd class="govuk-summary-list__actions"><a href="#reply-upload">Change<span class="govuk-visually-hidden"> your readings</span></a></dd></div>
+    </dl>
+    <h2 class="govuk-heading-m">Now send your reply</h2>
+    <p class="govuk-body">By sending this reply you are confirming that, to the best of your knowledge, the details you are giving are correct.</p>
+    <button class="govuk-button" type="button" onclick="sendReply()">Accept and send</button>
+    ${note('The reply lands on the same record as the paper one',
+      '<p>Sending writes an incoming row to the Communications tab and marks the request “Despatched, Received”. Rule 6 then resolves it, and the status card moves to “With us”.</p>'
+      +'<p>That incoming row is an assumption. An online reply is not a letter, so today it would write nothing to the Communications tab. Without it, this whole model cannot see a digital reply.</p>')}`;
+}
+function sendReply(){
+  const req = openReplyRequest();
+  if(!req){ return navigate('#reply-sent'); }
+  if(!state.reply.method || !state.reply.file){ return navigate(!state.reply.method ? '#reply-method' : '#reply-upload'); }
+  req.row.responseStatus = 'Despatched, Received';
+  state.communications.push(inc('r'+(state.communications.length+1), 'RCV-ONLINE-REPLY', state.today));
+  logEvent('replySubmitted', 'Reply to '+req.row.code+' by '+(state.access==='code'?'paper code':'One Login'));
+  state.reply.sent = true; state.reply.changing = false;
+  navigate('#reply-sent');
+}
+function renderReplySent(){
+  const byCode = state.access==='code';
+  return `<div class="govuk-panel"><h1 class="govuk-panel__title">Readings sent</h1><div class="govuk-panel__body">We have your blood glucose readings</div></div>
+    ${!state.reply.sent ? '<p class="govuk-body-s">Prototype: you opened this screen directly, so nothing was sent.</p>' : ''}
+    <h2 class="govuk-heading-m">What happens next</h2>
+    <p class="govuk-body">We’ll look at your readings alongside your doctor’s report. This usually takes 4 to 8 weeks, because one of our doctors may need to read them. We’ll write to you when we’ve decided, or if we need anything else.</p>
+    <p class="govuk-body">You do not need to post the paper form as well.</p>
+    <h2 class="govuk-heading-m">Can I drive?</h2>
+    <p class="govuk-body">Yes. You can keep driving while we look at your case, as long as your doctor has not told you to stop.</p>
+    ${byCode
+      ? '<p class="govuk-body">To see your case and your letters, <a href="#sign-in">sign in to your driver and vehicles account</a>.</p>'
+      : '<p class="govuk-body"><a href="#case">Go to your case</a></p>'}
+    ${note('No reference number',
+      '<p>The customer already has a case. A reference number on its own is what generates the next call, so this says what happens next, roughly when, and whether they can drive.</p>')}`;
+}
+
+/* --- The paper code route. --- */
+function renderCode(){
+  const err = state.errors && state.errors.length;
+  const v = state.codeForm || {};
+  return `${errorSummary()}<h1 class="govuk-heading-xl">Reply using the code on your letter</h1>
+    <p class="govuk-body">The code is printed at the top of the letter we posted you. It lets you reply to that letter and nothing else.</p>
+    <form onsubmit="event.preventDefault();submitCode();">
+      <div class="govuk-form-group${err?' govuk-form-group--error':''}">
+        <label class="govuk-label" for="code">Code</label>
+        <div class="govuk-hint">For example, HX7K 9MPQ</div>
+        ${fieldError('code')}
+        <input class="govuk-input govuk-input--width-10" id="code" name="code" type="text" autocomplete="off" spellcheck="false" value="${esc(v.code||'')}">
+      </div>
+      <div class="govuk-form-group"><fieldset class="govuk-fieldset" role="group">
+        <legend class="govuk-fieldset__legend">Date of birth</legend>
+        <div class="govuk-hint">For example, 14 6 1979</div>
+        ${fieldError('dob-day')}
+        <div class="govuk-date-input">
+          <div class="govuk-date-input__item"><label class="govuk-date-input__label" for="dob-day">Day</label><input class="govuk-input govuk-input--width-2" id="dob-day" type="text" inputmode="numeric" value="${esc(v.day||'')}"></div>
+          <div class="govuk-date-input__item"><label class="govuk-date-input__label" for="dob-month">Month</label><input class="govuk-input govuk-input--width-2" id="dob-month" type="text" inputmode="numeric" value="${esc(v.month||'')}"></div>
+          <div class="govuk-date-input__item"><label class="govuk-date-input__label" for="dob-year">Year</label><input class="govuk-input govuk-input--width-4" id="dob-year" type="text" inputmode="numeric" value="${esc(v.year||'')}"></div>
+        </div>
+      </fieldset></div>
+      <button class="govuk-button" type="submit">Continue</button>
+    </form>
+    <p class="govuk-body-s">Prototype: use code <b>HX7K 9MPQ</b> and date of birth <b>14 6 1979</b>. <a href="#" onclick="state.codeForm={code:'HX7K 9MPQ',day:'14',month:'6',year:'1979'};route();return false;">Fill them in</a></p>
+    ${note('The code reaches one letter',
+      '<p>A customer with only the paper letter replies to the same request, and the reply lands on the same record. The code does not open the timeline or any other letter.</p>'
+      + question('DPP','What identity check is enough for this layer? The prototype has no lockout and treats the code as single-use once a reply is sent.'))}`;
+}
+function submitCode(){
+  const code = document.getElementById('code').value;
+  const day = document.getElementById('dob-day').value, month = document.getElementById('dob-month').value, year = document.getElementById('dob-year').value;
+  state.codeForm = {code, day, month, year};
+  const dob = year && month && day ? year.trim()+'-'+String(month.trim()).padStart(2,'0')+'-'+String(day.trim()).padStart(2,'0') : '';
+  if(code.replace(/\s/g,'').toUpperCase()!==PAPER_CODE || dob!==CUSTOMER.dob){
+    state.errors = [{field:'code', text:'Enter the code and date of birth exactly as they appear on your letter'}];
+    return route();
+  }
+  state.errors = null;
+  if(state.access!=='oneLogin') state.access = 'code';
+  logEvent('codeUsed','Paper code '+PAPER_CODE);
+  navigate('#reply-method');
+}
+
+/* --- Staff view. --- */
+function renderStaff(){
+  const der = derive();
+  const m = statusCard(der);
+  const seen = {};
+  der.entries.forEach(e=>{ seen[e.row.id] = e.kind==='neutral' ? 'Neutral “decision posted” only' : e.kind==='letter' ? 'Yes, can open' : e.kind==='signal' ? 'Signal only' : 'Receipt only'; });
+  der.hidden.forEach(h=>{ seen[h.row.id] = h.pending ? 'Not yet (posts next working day)' : 'Never'; });
+  const rows = state.communications.slice().sort((a,b)=>a.createdOn<b.createdOn?1:-1).map(r=>`<tr>
+      <td class="cu-mono">${esc(r.code)}</td><td>${esc(r.direction)}</td><td>${fmt(r.createdOn)}</td>
+      <td>${r.responseDueBy?fmt(r.responseDueBy):'—'}</td><td>${esc(r.responseStatus||'—')}</td><td>${esc(r.printStatus||'—')}</td>
+      <td>${esc(seen[r.id]||'')}</td></tr>`).join('');
+  const events = state.events.slice().reverse().map(e=>`<tr><td>${fmt(e.at)}</td><td class="cu-mono">${esc(e.type)}</td><td>${esc(e.detail)}</td></tr>`).join('');
+  return `<span class="govuk-caption">Staff view</span>
+    <h1 class="govuk-heading-xl">Case correspondence: Dana Whitlock</h1>
+    <div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">
+      <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Case status</dt><dd class="govuk-summary-list__value">${esc(state.caseStatus)}</dd></div>
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What the customer sees</dt><dd class="govuk-summary-list__value">${tag(m.tag,m.colour)}<br><b>${esc(m.headline)}</b></dd></div>
+        <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can I drive, as shown</dt><dd class="govuk-summary-list__value">${esc(m.drive.answer)}</dd></div>
+      </dl>
+      ${note('The agent sees what the customer sees',
+        '<p>If a customer still calls, the agent reads the same derived status, from the same rows, so the answer on the phone matches the screen. Staff can see the template codes. Customers never can.</p>'
+        + question('Data','Is the Communications data available outside Dynamics?'))}
+    </div></div>
+    <h2 class="govuk-heading-m">Communications</h2>
+    <div class="cu-scroll"><table class="govuk-table">
+      <thead><tr><th scope="col">Code</th><th scope="col">Direction</th><th scope="col">Created on</th><th scope="col">Response due by</th><th scope="col">Response status</th><th scope="col">Print status</th><th scope="col">On the customer’s timeline</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <h2 class="govuk-heading-m">Event log</h2>
+    <div class="cu-scroll"><table class="govuk-table">
+      <thead><tr><th scope="col">Date</th><th scope="col">Event</th><th scope="col">Detail</th></tr></thead>
+      <tbody>${events}</tbody></table></div>`;
+}
+
+function renderNotBuilt(){
+  return `<h1 class="govuk-heading-xl">Not built in this prototype</h1>
+    <p class="govuk-body">This link shows where something sits on the real account. Only the medical case is built here.</p>
+    <p class="govuk-body"><a href="#account">Back to your account</a></p>`;
+}
+
+/* ================================================================
+   Router. Plain #name hashes, so any screen can be linked directly.
+   ================================================================ */
+const SCREENS = {
+  'all-screens': {title:'All screens', render:renderAllScreens, full:true},
+  'notification':{title:'The notification', render:renderNotification},
+  'sign-in':     {title:'Sign in', render:renderSignIn},
+  'account':     {title:'Your account', render:renderAccount, full:true, signedIn:true},
+  'case':        {title:'Your medical case', render:renderCase, signedIn:true, back:['#account','Back to your account']},
+  'letter':      {title:'Letter', render:renderLetter, signedIn:true, back:['#case','Back to your case']},
+  'pdf':         {title:'Letter (PDF)', render:renderPdf, signedIn:true},
+  'reply-method':{title:'How do you check your blood glucose?', render:renderReplyMethod, back:'reply'},
+  'reply-upload':{title:'Upload your readings', render:renderReplyUpload, back:['#reply-method','Back']},
+  'reply-check': {title:'Check your answers', render:renderReplyCheck, back:['#reply-upload','Back']},
+  'reply-sent':  {title:'Readings sent', render:renderReplySent},
+  'code':        {title:'Reply using the code on your letter', render:renderCode, back:['#sign-in','Back']},
+  'staff':       {title:'Staff view', render:renderStaff, full:true},
+  'not-built':   {title:'Not built', render:renderNotBuilt}
+};
+
+function route(){
+  let key = (location.hash || '').replace(/^#\/?/, '') || 'all-screens';
+  let param = null;
+  const m = key.match(/^(letter|pdf)-(.+)$/);
+  if(m){ key = m[1]; param = m[2]; }
+  if(!SCREENS[key]) key = 'all-screens';
+  if(state.screen !== key) state.errors = null;
+  state.screen = key;
+  const s = SCREENS[key];
+  /* Any screen can be opened directly in a workshop, so a signed-in
+     screen opened cold signs the customer in, as the index would. */
+  if(s.signedIn && state.access!=='oneLogin') state.access = 'oneLogin';
+  const back = s.back==='reply' ? backFromReply() : s.back;
+  document.getElementById('app').innerHTML = renderChrome(s.render(param), {full:s.full, back});
+  document.title = s.title+' — Case updates prototype';
+  window.scrollTo(0,0);
+}
+
+window.addEventListener('hashchange', route);
+window.addEventListener('DOMContentLoaded', route);
+</script>
+</body>
+</html>
