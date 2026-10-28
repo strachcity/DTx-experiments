@@ -1,9 +1,9 @@
 # Publishes the repo to GitHub Pages.
 #
 # Every prototype except one is a self-contained HTML file and is
-# published as it is. drivers-medical/secure-messages/ is a Prototype Kit
-# app, so it is built first (npm run build) and its folder on the site is
-# replaced with the built, browser-only version.
+# published as it is. drivers-medical/staying-informed/secure-messages/
+# is a Prototype Kit app, so it is built first (npm run build) and its
+# folder on the site is replaced with the built, browser-only version.
 #
 # Needs Settings > Pages > Build and deployment > Source set to
 # "GitHub Actions".
@@ -34,10 +34,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: drivers-medical/secure-messages/package-lock.json
+          cache-dependency-path: drivers-medical/staying-informed/secure-messages/package-lock.json
 
       - name: Build secure messages
-        working-directory: drivers-medical/secure-messages
+        working-directory: drivers-medical/staying-informed/secure-messages
         run: |
           npm ci
           npm run build
@@ -46,10 +46,10 @@ jobs:
         run: |
           mkdir _site
           git ls-files \
-            | grep -v -e '^\.github/' -e '^drivers-medical/secure-messages/' \
+            | grep -v -e '^\.github/' -e '^drivers-medical/staying-informed/secure-messages/' \
             | xargs -d '\n' cp --parents -t _site
-          mkdir -p _site/drivers-medical/secure-messages
-          cp -r drivers-medical/secure-messages/dist/. _site/drivers-medical/secure-messages/
+          mkdir -p _site/drivers-medical/staying-informed/secure-messages
+          cp -r drivers-medical/staying-informed/secure-messages/dist/. _site/drivers-medical/staying-informed/secure-messages/
 
       - uses: actions/configure-pages@v5
 

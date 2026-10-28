@@ -10,7 +10,7 @@ Nothing here is a real service. Every prototype carries a fictional-prototype wa
 
 ## What is in here
 
-Each prototype is one self-contained HTML file. Open it from GitHub Pages or straight from disk. Nothing to install, nothing to run. The one exception is `drivers-medical/secure-messages/`, below.
+Each prototype is one self-contained HTML file. Open it from GitHub Pages or straight from disk. Nothing to install, nothing to run. The one exception is `drivers-medical/staying-informed/secure-messages/`, below.
 
 - `components.html`: the component reference. Every `govuk-*` component the other prototypes draw on, with the markup beside it. Start here if you are building a new one.
 
@@ -28,12 +28,15 @@ Each prototype is one self-contained HTML file. Open it from GitHub Pages or str
 
 `prototypes/`
 
-- `case-status-tracker.html`: where is my case, what happens next, and can I drive. Over half of all inbound calls to the contact centre ask the first of those.
 - `Futurestatevisionprototypecustomer.html` and `3-Futurestatevisionprototypecustomer.html`: earlier walkthroughs of a future-state customer journey. The second carries no health data, to show what that version costs.
 
-`secure-messages/`
+`staying-informed/`
 
-- The one exception to "nothing to install": a GOV.UK Prototype Kit app, built that way because it is a step towards production. It shows an authenticated, two-way channel where customers read the letters DVLA posts them and reply to a driver questionnaire, by GOV.UK One Login or by a code printed on the paper letter. A GitHub Action builds a browser-only version of it for GitHub Pages from the same routes and templates. See its own `README.md` for running the kit locally with `npm install` and `npm run dev`.
+The status tracking and secure communications propositions, now combined. See the folder's own `README.md` for how the case updates timeline is derived.
+
+- `case-updates.html`: the combined prototype. Sign-in leads to the driver and vehicles account, where a "Your health and driving" card answers what is happening and whether you can drive. It is built around the person, not the case. Behind it, letters and updates worked out from the letters Dynamics already logs, with a "How this was built" toggle that shows the row and rule behind each entry. Switch situation from the yellow box on any screen.
+- `case-status-tracker.html`: where is my case, what happens next, and can I drive. Over half of all inbound calls to the contact centre ask the first of those.
+- `secure-messages/`: the one exception to "nothing to install": a GOV.UK Prototype Kit app, built that way because it is a step towards production. It shows an authenticated, two-way channel where customers read the letters DVLA posts them and reply to a driver questionnaire, by GOV.UK One Login or by a code printed on the paper letter. A GitHub Action builds a browser-only version of it for GitHub Pages from the same routes and templates. See its own `README.md` for running the kit locally with `npm install` and `npm run dev`.
 
 `ivr/`
 
