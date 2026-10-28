@@ -172,11 +172,11 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .acct-side__link:hover{background:var(--green-hover);color:var(--white)}
 .acct-side__link::after{content:"\203A";font-size:24px;line-height:1}
 
-/* The case status card. */
-.cu-status{border:5px solid var(--blue);padding:20px 20px 0;margin-bottom:30px}
-.cu-status__headline{font-size:24px;line-height:1.25;font-weight:700;margin:10px 0 20px}
-.cu-status .govuk-summary-list{margin-bottom:20px}
-.cu-status__action{margin-bottom:20px}
+/* The reference, front and centre, as on the application tracker. */
+.cu-ref{margin:-15px 0 15px}
+.cu-ref__label{display:block;font-size:16px;color:var(--dark-grey)}
+.cu-ref__number{display:block;font-size:30px;line-height:1.25;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.cu-ref__hint{display:block;font-size:16px;color:var(--dark-grey)}
 
 /* The timeline, newest first. */
 .cu-timeline{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--mid-grey)}
@@ -292,6 +292,7 @@ const HOLD_ALL_DECISIONS = true;
                     Ordinary letters cannot answer it, so an open case
                     uses DEFAULT_DRIVE.
      reply          true if the customer can reply online
+     item           what a request asks for, as a row in “What we’ve asked for”
    --------------------------------------------------------------- */
 const TEMPLATE_MAP = {
   'RCV-MED-NOTIFICATION': {timelineState:'With us', shown:'Receipt only', servesNotice:false,
@@ -300,13 +301,13 @@ const TEMPLATE_MAP = {
   'ACK-NOTIFICATION': {timelineState:'Information only', shown:'Yes', servesNotice:false,
     summary:'We’ve received your form and started looking at your diabetes'},
   'REQ-QUESTIONNAIRE': {timelineState:'Waiting on you', shown:'Yes', servesNotice:false,
-    summary:'We asked you to fill in a medical questionnaire',
+    summary:'We asked you to fill in a medical questionnaire', item:'Medical questionnaire',
     status:'We need you to fill in a medical questionnaire'},
   'RCV-QUESTIONNAIRE': {timelineState:'With us', shown:'Receipt only', servesNotice:false,
     summary:'your medical questionnaire',
     status:'We’re looking at your medical questionnaire'},
   'HP-REPORT-REQUEST': {timelineState:'Waiting on someone else', shown:'Signal only', servesNotice:false,
-    summary:'We asked a doctor who treats you for a report',
+    summary:'We asked a doctor who treats you for a report', item:'Report from your doctor',
     status:'We’re waiting for a report from a doctor who treats you'},
   'HP-REPORT-CHASE': {timelineState:'Waiting on someone else', shown:'Signal only', servesNotice:false,
     summary:'We reminded your doctor to send their report'},
@@ -316,7 +317,7 @@ const TEMPLATE_MAP = {
     summary:'the report from your doctor',
     status:'We have your doctor’s report and we’re looking at it'},
   'REQ-GLUCOSE-READINGS': {timelineState:'Waiting on you', shown:'Yes', servesNotice:false,
-    summary:'We asked you for your blood glucose readings',
+    summary:'We asked you for your blood glucose readings', item:'Blood glucose readings',
     status:'We need your blood glucose readings', reply:true},
   /* Added. An online reply is not a letter, so today it would write no
      row to the Communications tab. The prototype assumes it does. */
@@ -430,7 +431,7 @@ const SCENARIOS = {
   'hp': {
     label:'Waiting on a healthcare professional',
     blurb:'Questionnaire requested and received, then a report requested from a doctor, overdue and chased once. Mirrors a real pre-production case, with invented details.',
-    today:'2026-10-28', caseStatus:'With DVLA',
+    today:'2026-10-28', caseStatus:'With DVLA', reference:'MDHR-KTQW-PLXN',
     rows:()=>[
       out('r1','REQ-QUESTIONNAIRE','2026-08-24','2026-09-21','Despatched, Received'),
       inc('r2','RCV-QUESTIONNAIRE','2026-09-10'),
@@ -443,7 +444,7 @@ const SCENARIOS = {
   'you': {
     label:'Waiting on you',
     blurb:'A request for blood glucose readings with a reply-by date. Reply online and the state moves to “With us”. The paper code works in this scenario.',
-    today:'2026-10-28', caseStatus:'Waiting for details',
+    today:'2026-10-28', caseStatus:'Waiting for details', reference:'MDVB-RNQS-TWHK',
     rows:()=>[
       inc('r1','RCV-MED-NOTIFICATION','2026-09-14'),
       out('r2','ACK-NOTIFICATION','2026-09-15'),
@@ -456,7 +457,7 @@ const SCENARIOS = {
   'good': {
     label:'Good news',
     blurb:'A licence-kept decision, released and readable.',
-    today:'2026-10-28', caseStatus:'Closed',
+    today:'2026-10-28', caseStatus:'Closed', reference:'MDGK-WPLT-QRSN',
     rows:()=>[
       out('r1','REQ-QUESTIONNAIRE','2026-07-27','2026-08-24','Despatched, Received'),
       inc('r2','RCV-QUESTIONNAIRE','2026-08-12'),
@@ -469,22 +470,22 @@ const SCENARIOS = {
   'revoke-0': {
     label:'Revocation: the day it is decided',
     blurb:'The letter has not left the building, so nothing about the decision shows.',
-    today:'2026-10-26', caseStatus:'Closed', rows:revocationRows
+    today:'2026-10-26', caseStatus:'Closed', reference:'MDRX-HNTV-KWQP', rows:revocationRows
   },
   'revoke-1': {
     label:'Revocation: the day it is posted',
     blurb:'Only the neutral “we’ve posted you a decision” message.',
-    today:'2026-10-27', caseStatus:'Closed', rows:revocationRows
+    today:'2026-10-27', caseStatus:'Closed', reference:'MDRX-HNTV-KWQP', rows:revocationRows
   },
   'revoke-2': {
     label:'Revocation: after the letter has arrived',
     blurb:'The full letter, 4 working days after posting.',
-    today:'2026-11-02', caseStatus:'Closed', rows:revocationRows
+    today:'2026-11-02', caseStatus:'Closed', reference:'MDRX-HNTV-KWQP', rows:revocationRows
   },
   'quiet': {
     label:'Quiet period',
     blurb:'No letters for 5 weeks. Shows the quiet-period message, and the gap that internal case events would need to fill.',
-    today:'2026-10-28', caseStatus:'With DVLA',
+    today:'2026-10-28', caseStatus:'With DVLA', reference:'MDQL-TSKR-VNWH',
     rows:()=>[
       inc('r1','RCV-MED-NOTIFICATION','2026-08-17'),
       out('r2','ACK-NOTIFICATION','2026-08-18'),
@@ -493,6 +494,8 @@ const SCENARIOS = {
     ]
   }
 };
+/* reference is the case reference the customer quotes when they call.
+   The format is invented: the real one needs checking. */
 const SCENARIO_ORDER = ['hp','you','good','revoke-0','revoke-1','revoke-2','quiet'];
 
 /* ---------------------------------------------------------------- */
@@ -505,6 +508,7 @@ function resetState(scenario){
     scenario:key,
     today:s.today,
     caseStatus:s.caseStatus,
+    reference:s.reference,
     communications:s.rows(),
     showNotes:state ? state.showNotes : false,
     showBuilt:state ? state.showBuilt : false,
@@ -869,6 +873,7 @@ function caseCard(der){
   return `<div class="acct-card">
     <div class="acct-card__head"><h2>Your health and driving</h2><a href="#health">View details and letters</a></div>
     <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Reference</dt><dd class="govuk-summary-list__value"><b>${esc(state.reference)}</b></dd></div>
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions you’ve told us about</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.conditions.join(', '))}</dd></div>
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What’s happening</dt><dd class="govuk-summary-list__value">${tag(m.tag, m.colour)}<br>${esc(m.headline)}</dd></div>
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can I drive?</dt><dd class="govuk-summary-list__value">${esc(m.drive.answer)}</dd></div>
@@ -926,28 +931,80 @@ function renderAccount(){
     </div>`;
 }
 
-function renderStatusCard(der){
+function requestRow(e, der){
+  const r = e.row;
+  let status, detail = '', action = '';
+  if(e.resolved){
+    status = tag('Received','green');
+  } else if(e.rule.timelineState==='Waiting on you'){
+    status = tag('Needed','orange');
+    detail = 'Send by '+fmt(r.responseDueBy)+'.';
+    action = e.rule.reply ? `<a href="#reply-method">Send<span class="govuk-visually-hidden"> your ${esc(e.rule.item.toLowerCase())}</span></a>` : `<a href="#letter-${r.id}">Read<span class="govuk-visually-hidden"> the letter about ${esc(e.rule.item.toLowerCase())}</span></a>`;
+  } else if(r.responseDueBy < state.today){
+    const chase = der.entries.find(x=>x.row.code==='HP-REPORT-CHASE' && x.row.createdOn>r.createdOn);
+    status = tag('Overdue','yellow');
+    detail = 'We asked them to reply by '+fmt(r.responseDueBy)+'.'+(chase ? ' We reminded them on '+fmt(chase.date)+'.' : '');
+  } else {
+    status = tag('Waiting','yellow');
+    detail = 'We asked them to reply by '+fmt(r.responseDueBy)+'.';
+  }
+  return `<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">${esc(e.rule.item)}</dt>
+    <dd class="govuk-summary-list__value">${status}${detail?'<br>'+esc(detail):''}</dd>
+    <dd class="govuk-summary-list__actions">${action}</dd></div>`;
+}
+
+function renderReference(){
+  return `<p class="cu-ref"><span class="cu-ref__label">Your reference</span><span class="cu-ref__number">${esc(state.reference)}</span><span class="cu-ref__hint">Give this number if you call us.</span></p>`;
+}
+
+function renderHeader(der){
   const m = statusCard(der);
-  let html = `<div class="cu-status">
-    ${tag(m.tag, m.colour)}
-    <p class="cu-status__headline">${esc(m.headline)}</p>
+  const cur = der.current;
+  const asked = der.entries.filter(e=>e.request).slice().reverse();
+  let banner = '';
+  if(cur.key==='waiting-you' && cur.entry){
+    const e = cur.entry;
+    const link = e.rule.reply ? '<a href="#reply-method">Send your readings</a>' : `<a href="#letter-${e.row.id}">Read the letter</a>`;
+    banner = `<div class="govuk-notification-banner" role="region" aria-labelledby="nb-title">
+      <div class="govuk-notification-banner__header"><h2 class="govuk-notification-banner__title" id="nb-title">Important</h2></div>
+      <div class="govuk-notification-banner__content"><p class="govuk-notification-banner__heading">You need to send us your ${esc(e.rule.item.toLowerCase())} by ${fmt(e.row.responseDueBy)}. ${link}</p></div>
+    </div>`;
+  }
+  let html = `${banner}
+    <h1 class="govuk-heading-xl">Your health and driving</h1>
+    ${renderReference()}
+    <p class="govuk-body"><b>${esc(CUSTOMER.name)}</b></p>
+    ${note('The reference is front and centre',
+      '<p>It is the number people give when they call, so it sits where the application tracker puts its own, above everything else.</p>'
+      +'<p>It is also the one place the case shows through. A reference belongs to a case, so a customer with two things open at once has two. This page would then show each one with its own reference and status.</p>'
+      + question('Data','What is the real format of a Drivers Medical case reference, and can a customer read it aloud easily? The one here is invented.'))}
     <dl class="govuk-summary-list">
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Who it’s with</dt><dd class="govuk-summary-list__value">${esc(m.holder)}</dd></div>
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What happens next</dt><dd class="govuk-summary-list__value">${esc(m.next)}</dd></div>
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can I drive?</dt><dd class="govuk-summary-list__value"><b>${esc(m.drive.answer)}</b><br>${esc(m.drive.detail)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What’s happening</dt><dd class="govuk-summary-list__value">${tag(m.tag, m.colour)}<br>${esc(m.headline)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Who it’s with</dt><dd class="govuk-summary-list__value">${esc(m.holder)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions you’ve told us about</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.conditions.join(', '))}</dd><dd class="govuk-summary-list__actions"><a href="#not-built">Change<span class="govuk-visually-hidden"> conditions you’ve told us about</span></a></dd></div>
     </dl>
-    ${m.action ? `<div class="cu-status__action"><a class="govuk-button" href="${m.action.href}">${esc(m.action.text)}</a></div>` : ''}
-  </div>`;
-  if(m.quiet) html += `<div class="govuk-inset-text">${esc(m.quiet)}</div>`;
+    ${m.quiet ? `<div class="govuk-inset-text">${esc(m.quiet)}</div>` : ''}
+    <h2 class="govuk-heading-m">What we’ve asked for</h2>
+    ${asked.length
+      ? `<dl class="govuk-summary-list">${asked.map(e=>requestRow(e, der)).join('')}</dl>`
+      : '<p class="govuk-body">We have not asked you or anyone else for anything yet. If we need more information, it will appear here.</p>'}
+    ${note('A list of requests, not a list of steps',
+      '<p>Every row is a request letter DVLA has already sent, and its status comes from the reply. It looks like the application tracker’s checklist, but it is not one. DVLA does not know how many requests a case will need, so this list only ever says what has been asked so far. Nothing here counts down to done.</p>')}
+    <h2 class="govuk-heading-m">What happens next</h2>
+    <p class="govuk-body">${esc(m.next)}</p>
+    <h2 class="govuk-heading-m">How we’ll contact you</h2>
+    <p class="govuk-body">When there’s something new, we’ll send a text to <b>${esc(CUSTOMER.mobile)}</b> and an email to <b>${esc(CUSTOMER.email)}</b>. They will only tell you to sign in. We’ll still post you every letter.</p>
+    <p class="govuk-body"><a href="#not-built">Update your contact details</a></p>`;
   if(state.showBuilt){
-    const cur = der.current;
-    html += `<div class="cu-built"><span class="cu-built__label">How this was built — status card</span>
+    html += `<div class="cu-built"><span class="cu-built__label">How this was built — header</span>
       <p><b>Current state:</b> ${esc(STATE_INFO[cur.key].state)}. ${esc(cur.why)}</p>
       ${cur.entry ? `<p><b>From row:</b> <code>${esc(cur.entry.row.id)}</code> <code>${esc(cur.entry.row.code)}</code>, created ${esc(cur.entry.row.createdOn)}.</p>` : ''}
       <p><b>Case status in Dynamics:</b> ${esc(state.caseStatus)}.</p>
       ${cur.heldBack ? `<p><b>Held back:</b> ${esc(cur.heldBack)}</p>` : ''}
       ${cur.quietSince ? `<p><b>Rule 9:</b> the latest entry is ${daysBetween(cur.quietSince,state.today)} days old, over the ${QUIET_DAYS}-day limit, so the quiet-period message shows.</p>` : ''}
       <p><b>Can I drive:</b> ${cur.entry && cur.entry.rule.canDrive && cur.key!=='posted' ? 'from the decision’s template rule.' : cur.key==='posted' ? 'silent until the full copy is released.' : 'the default for an open case. Letters cannot answer it.'}</p>
+      <p><b>What we’ve asked for:</b> every visible outgoing row with a reply-by date that is not “Not expected”. Rule 6 decides Received.</p>
     </div>`;
   }
   return html;
@@ -986,20 +1043,16 @@ function renderCase(){
       + '</div>';
   }
   const items = der.entries.map(timelineItem).join('');
-  return `<h1 class="govuk-heading-xl">Your health and driving</h1>
-    <dl class="govuk-summary-list">
-      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions you’ve told us about</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.conditions.join(', '))}<br><a href="#not-built">Tell us about a change</a></dd></div>
-    </dl>
+  return `${renderHeader(der)}
     ${note('About the person, not the case',
       '<p>Dynamics opens a case for each notification or renewal. The customer never sees one. They see one page about their health and their licence: the conditions they have told us about, what is happening now, whether they can drive, and every letter we have sent them.</p>'
       +'<p>With one case open, the two are the same thing. They part when there is more than one: a renewal and a new condition, say, open at the same time. This page would then show one status per thing we are looking at, and one list of letters across them.</p>'
       + question('Policy','When two things are open at once, which one answers “can I drive?”. Presumably the strictest, but that needs saying.'))}
-    ${note('The status card answers the call before the timeline explains it',
-      '<p>What’s happening, who it’s with, what happens next and roughly when, and can I drive. Those four are what people phone to ask. The timeline underneath is the evidence for the card, not the answer.</p>'
+    ${note('The header answers the call before the letters explain it',
+      '<p>Can I drive, what’s happening, who it’s with, what happens next and roughly when. Those are what people phone to ask. The letters underneath are the evidence, not the answer.</p>'
       + (der.current.key==='waiting-other' ? question('Research','Should “Waiting on someone else” name who, such as “your GP”, or stay general? It stays general here, because the template code says a healthcare professional was written to, not which one.') : '')
       + (der.current.key==='posted' ? question('Legal (Keya)','How should the “decision posted” message be framed, and when can the full copy appear? This prototype waits '+RELEASE_WORKING_DAYS+' working days after posting. Every decision waits here, good or bad, so this message says nothing about the outcome. If only notices waited, as the handover proposed, it could only ever mean bad news.') : '')
       + (der.current.quietSince ? '<p>The quiet period is the gap the letters cannot fill. Between letters, things happen on a case — it is allocated, a DVLA doctor reads it, it waits in a queue — and none of those write a row to the Communications tab. Until they do, the honest thing is to say nothing new has happened and how long this stage usually takes.</p>' : ''))}
-    ${renderStatusCard(der)}
     <h2 class="govuk-heading-l">Letters and updates</h2>
     ${note('Built from letters that already exist',
       '<p>Every entry below is a letter DVLA already sends or receives. Nothing was added to the case management system to make this page. Turn on “Show how this was built” to see the Communications row and the template rule behind each entry.</p>'
@@ -1029,7 +1082,7 @@ function renderLetter(id){
   const body = L.letter.filter(p=>!/^Dear /.test(p) && !/^Drivers Medical, DVLA/.test(p));
   return `<h1 class="govuk-heading-xl">${esc(e.rule.summary)}</h1>
     <p class="govuk-body-s">We posted this letter to you on ${fmt(e.date)}.</p>
-    <p class="govuk-body">${esc(CUSTOMER.name)}</p>
+    <p class="govuk-body">${esc(CUSTOMER.name)}<br>Your reference: <b>${esc(state.reference)}</b></p>
     ${built(e)}
     <h2 class="govuk-heading-m">What this means for your driving</h2>
     <p class="govuk-body">${esc(merge(L.forYourDriving, e.row))}</p>
@@ -1151,7 +1204,7 @@ function sendReply(){
 }
 function renderReplySent(){
   const byCode = state.access==='code';
-  return `<div class="govuk-panel"><h1 class="govuk-panel__title">Readings sent</h1><div class="govuk-panel__body">We have your blood glucose readings</div></div>
+  return `<div class="govuk-panel"><h1 class="govuk-panel__title">Readings sent</h1><div class="govuk-panel__body">Your reference<br><strong>${esc(state.reference)}</strong></div></div>
     ${!state.reply.sent ? '<p class="govuk-body-s">Prototype: you opened this screen directly, so nothing was sent.</p>' : ''}
     <h2 class="govuk-heading-m">What happens next</h2>
     <p class="govuk-body">We’ll look at your readings alongside your doctor’s report. This usually takes 4 to 8 weeks, because one of our doctors may need to read them. We’ll write to you when we’ve decided, or if we need anything else.</p>
@@ -1161,8 +1214,8 @@ function renderReplySent(){
     ${byCode
       ? '<p class="govuk-body">To see your letters and what’s happening, <a href="#sign-in">sign in to your driver and vehicles account</a>.</p>'
       : '<p class="govuk-body"><a href="#health">Go to your health and driving</a></p>'}
-    ${note('No reference number',
-      '<p>The customer can already see what’s happening in their account. A reference number on its own is what generates the next call, so this says what happens next, roughly when, and whether they can drive.</p>')}`;
+    ${note('The reference, then what happens next',
+      '<p>The reference is the one customers already use when they call, so it goes in the panel. On its own it would generate the next call, so this page also says what happens next, roughly when, and whether they can drive.</p>')}`;
 }
 
 /* --- The paper code route. --- */

@@ -49,7 +49,7 @@ A conditional reveal is a page you decided not to make. Fine for one short follo
 - The fictional-prototype warning banner and the "Prototype — this is not a real service" phase banner.
 - A `note()` design-note toggle, off by default. Design notes are prototype annotations, not service UI.
 - An "All screens" index so any single screen can be opened directly in a workshop.
-- Invented personal details only. Dummy data that looks like the real thing is good, because a plausible-looking record makes the screen easier to argue about. What matters is that it belongs to nobody: never a real person, and never a licence number issued to anyone.
+- Invented personal details only. Dummy data that looks like the real thing is good, because a plausible-looking record makes the screen easier to argue about. What matters is that it belongs to nobody: never a real person, and never a licence number issued to anyone. One exception, agreed with the repo owner: "Jack Strachan" may be used as a dummy name. Every other personal detail stays invented.
 
 ## How to work here
 
