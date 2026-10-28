@@ -33,7 +33,7 @@ Say who holds the case in terms the customer recognises. "A DVLA doctor is revie
 
 A design note should state the argument the screen is making, not describe what is on it.
 
-Say each fact once. If a date, a status or an action appears in more than one place on a screen, remove all but one. A status page answers in sentences, not in a dashboard of tags.
+Say each fact once. If a date, a status or an action appears in more than one place on a screen, remove all but one.
 
 ## Edge cases
 

@@ -172,6 +172,18 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .acct-side__link:hover{background:var(--green-hover);color:var(--white)}
 .acct-side__link::after{content:"\203A";font-size:24px;line-height:1}
 
+/* The reference, front and centre, as on the application tracker. */
+.cu-ref{margin:-15px 0 30px}
+.cu-ref__label{display:block;font-size:16px;color:var(--dark-grey)}
+.cu-ref__number{display:block;font-size:30px;line-height:1.25;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.cu-ref__hint{display:block;font-size:16px;color:var(--dark-grey)}
+
+/* The case status card. */
+.cu-status{border:5px solid var(--blue);padding:20px 20px 0;margin-bottom:30px}
+.cu-status__headline{font-size:24px;line-height:1.25;font-weight:700;margin:10px 0 20px}
+.cu-status .govuk-summary-list{margin-bottom:20px}
+.cu-status__action{margin-bottom:20px}
+
 /* The timeline, newest first. */
 .cu-timeline{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--mid-grey)}
 .cu-timeline__item{padding:15px 0;border-bottom:1px solid var(--mid-grey)}
@@ -286,7 +298,6 @@ const HOLD_ALL_DECISIONS = true;
                     Ordinary letters cannot answer it, so an open case
                     uses DEFAULT_DRIVE.
      reply          true if the customer can reply online
-     item           what a request asks for, as a row in “What we’ve asked for”
    --------------------------------------------------------------- */
 const TEMPLATE_MAP = {
   'RCV-MED-NOTIFICATION': {timelineState:'With us', shown:'Receipt only', servesNotice:false,
@@ -295,13 +306,13 @@ const TEMPLATE_MAP = {
   'ACK-NOTIFICATION': {timelineState:'Information only', shown:'Yes', servesNotice:false,
     summary:'We’ve received your form and started looking at your diabetes'},
   'REQ-QUESTIONNAIRE': {timelineState:'Waiting on you', shown:'Yes', servesNotice:false,
-    summary:'We asked you to fill in a medical questionnaire', item:'Medical questionnaire',
+    summary:'We asked you to fill in a medical questionnaire',
     status:'We need you to fill in a medical questionnaire'},
   'RCV-QUESTIONNAIRE': {timelineState:'With us', shown:'Receipt only', servesNotice:false,
     summary:'your medical questionnaire',
     status:'We’re looking at your medical questionnaire'},
   'HP-REPORT-REQUEST': {timelineState:'Waiting on someone else', shown:'Signal only', servesNotice:false,
-    summary:'We asked a doctor who treats you for a report', item:'Report from your doctor',
+    summary:'We asked a doctor who treats you for a report',
     status:'We’re waiting for a report from a doctor who treats you'},
   'HP-REPORT-CHASE': {timelineState:'Waiting on someone else', shown:'Signal only', servesNotice:false,
     summary:'We reminded your doctor to send their report'},
@@ -311,7 +322,7 @@ const TEMPLATE_MAP = {
     summary:'the report from your doctor',
     status:'We have your doctor’s report and we’re looking at it'},
   'REQ-GLUCOSE-READINGS': {timelineState:'Waiting on you', shown:'Yes', servesNotice:false,
-    summary:'We asked you for your blood glucose readings', item:'Blood glucose readings',
+    summary:'We asked you for your blood glucose readings',
     status:'We need your blood glucose readings', reply:true},
   /* Added. An online reply is not a letter, so today it would write no
      row to the Communications tab. The prototype assumes it does. */
@@ -322,27 +333,33 @@ const TEMPLATE_MAP = {
     summary:'Internal copy of the case summary for the file'},
   'DEC-LICENCE-KEPT': {timelineState:'Decided', shown:'Yes', servesNotice:false,
     summary:'You can keep your licence', outcome:'kept',
-    canDrive:['You can keep driving.', 'We’ve sent you a new licence, which lasts 3 years.']},
+    canDrive:{answer:'Yes, you can keep driving', detail:'We’ve sent you a new licence. It lasts 3 years.'}},
   'DEC-REVOKE': {timelineState:'Decided', shown:'Yes', servesNotice:true,
     summary:'We’ve taken away your driving licence', outcome:'revoked',
-    canDrive:['You must not drive.', 'This includes driving a car. It took effect when our letter reached you.']}
+    canDrive:{answer:'No, you must not drive', detail:'Your licence was revoked when our letter reached you. This includes driving a car.'}}
 };
 
-/* Added: the state names used in "How this was built", and the usual
-   wait DESIGN.md asks for. The ranges are prototype figures and need
-   real data behind them. */
+/* Added: what each state means on the status card. holder answers
+   "who has my case". usualWait is the range DESIGN.md asks for. The
+   ranges are prototype figures and need real data behind them. */
 const STATE_INFO = {
-  'with-us':       {state:'With us',
+  'with-us':       {state:'With us', tag:'With us', colour:'blue',
+                    holder:'Our medical team at DVLA',
                     usualWait:'This usually takes 4 to 8 weeks from when we have everything we need, because one of our doctors may need to read your reports.'},
-  'waiting-you':   {state:'Waiting on you'},
-  'waiting-other': {state:'Waiting on someone else',
+  'waiting-you':   {state:'Waiting on you', tag:'Waiting on you', colour:'orange',
+                    holder:'You. We can’t go any further until we hear from you.',
+                    usualWait:'We start looking at your reply as soon as it reaches us.'},
+  'waiting-other': {state:'Waiting on someone else', tag:'Waiting for a report', colour:'yellow',
+                    holder:'A doctor who treats you',
                     usualWait:'Doctors usually reply within 4 to 6 weeks. If they ask you to book an appointment, please do, because that is often what holds a report up.'},
-  'posted':        {state:'Decided'},
-  'kept':          {state:'Decided'},
-  'revoked':       {state:'Decided'},
-  'closed':        {state:'Closed'},
-  'cancelled':     {state:'Cancelled'},
-  'renewal':       {state:'Waiting on you'}
+  'posted':        {state:'Decided', tag:'Decision posted', colour:'purple', holder:'Decided'},
+  'kept':          {state:'Decided', tag:'Decided', colour:'green', holder:'Decided'},
+  'revoked':       {state:'Decided', tag:'Decided', colour:'purple', holder:'Decided'},
+  'closed':        {state:'Closed', tag:'Closed', colour:'grey', holder:'No one. We’ve finished looking at this.'},
+  'cancelled':     {state:'Cancelled', tag:'Cancelled', colour:'grey', holder:'No one. We’ve stopped looking at this.'},
+  'renewal':       {state:'Waiting on you', tag:'Waiting on you', colour:'orange',
+                    holder:'You. We’ve sent you a renewal form.',
+                    usualWait:'We start looking at your renewal as soon as it reaches us.'}
 };
 
 /* The five real case status values, as the frame when nothing on the
@@ -357,7 +374,7 @@ const CASE_STATUS = {
 
 /* An open case cannot answer "can I drive?" from its letters. Section
    88 wording, for the prototype. Needs checking with policy. */
-const DEFAULT_DRIVE = ['You can keep driving', 'while we look at your diabetes, as long as your doctor has not told you to stop.'];
+const DEFAULT_DRIVE = {answer:'Yes, you can keep driving', detail:'You can keep driving while we look at your diabetes, as long as your doctor has not told you to stop.'};
 
 /* The HTML version of each letter a customer can open. In a real
    service this would be built from the template and the case's merge
@@ -631,57 +648,65 @@ function derive(){
   return {entries:entries.slice().reverse(), hidden, current};
 }
 
-/* What the customer is told, from the derived current state. Each of
-   drive, now and next is [bold lead, the rest]. Each fact is said
-   once: the reply-by date is in "now", never again in "next". */
+/* The status card, from the derived current state. */
 function statusCard(der){
   const cur = der.current, e = cur.entry, info = STATE_INFO[cur.key];
-  const m = {key:cur.key, why:cur.why, drive:DEFAULT_DRIVE, now:null, next:null, action:null};
+  const m = {key:cur.key, tag:info.tag, colour:info.colour, holder:info.holder, drive:DEFAULT_DRIVE, action:null, next:'', why:cur.why};
   switch(cur.key){
     case 'waiting-you':
-      if(!e){ m.now = [CASE_STATUS[state.caseStatus].status+'.', '']; break; }
-      m.now = ['We need your '+e.rule.item.toLowerCase()+' by '+fmt(e.row.responseDueBy)+'.', 'We cannot finish looking at your diabetes until we have them.'];
-      m.next = 'Once we have them, it usually takes 4 to 8 weeks to decide, because one of our doctors may need to read your reports. We’ll write to you when we’ve decided.';
-      m.action = e.rule.reply ? {text:'Send your readings', href:'#reply-method'} : {text:'Read the letter', href:'#letter-'+e.row.id};
+      if(!e){ m.headline = CASE_STATUS[state.caseStatus].status; m.next = info.usualWait; break; }
+      m.headline = e.rule.status;
+      m.next = 'Reply by '+fmt(e.row.responseDueBy)+'. '+info.usualWait;
+      if(e.rule.reply) m.action = {text:'Reply now', href:'#reply-method'};
+      else m.action = {text:'Read the letter', href:'#letter-'+e.row.id};
       break;
     case 'waiting-other': {
-      const chase = der.entries.find(x=>x.row.code==='HP-REPORT-CHASE' && x.row.createdOn>e.row.createdOn);
-      const late = e.row.responseDueBy < state.today;
-      m.now = [e.rule.status+'.', late
-        ? 'We asked them to reply by '+fmt(e.row.responseDueBy)+' and they have not replied yet.'+(chase ? ' We reminded them on '+fmt(chase.date)+'.' : '')
-        : 'We asked them to reply by '+fmt(e.row.responseDueBy)+'.'];
-      m.next = info.usualWait+' Once we have the report, we’ll look at it straight away.';
+      m.headline = e.rule.status;
+      const chases = der.entries.filter(x=>x.row.code==='HP-REPORT-CHASE' && x.row.createdOn>e.row.createdOn);
+      let next = 'We asked them to reply by '+fmt(e.row.responseDueBy)+'. ';
+      if(e.row.responseDueBy < state.today){
+        next = 'We asked them to reply by '+fmt(e.row.responseDueBy)+' and they have not replied yet. ';
+        if(chases.length) next += 'We sent them a reminder on '+fmt(chases[0].date)+'. ';
+      }
+      m.next = next + info.usualWait + ' We’ll pick it up again as soon as the report arrives.';
       break;
     }
     case 'with-us':
-      m.now = [(e && e.rule.status ? e.rule.status : CASE_STATUS['With DVLA'].status)+'.', cur.quietSince ? 'Nothing new has happened since '+fmt(cur.quietSince)+'. Our medical team still has it.' : ''];
-      m.next = info.usualWait+' We’ll write to you when we’ve decided, or if we need anything else.';
+      m.headline = e ? (e.rule.status || CASE_STATUS['With DVLA'].status) : CASE_STATUS['With DVLA'].status;
+      m.next = 'We’ll write to you when we’ve decided, or if we need anything else. '+info.usualWait;
       break;
     case 'posted':
-      m.drive = ['Read the letter we’ve posted you.', 'It explains what our decision means for your driving.'];
-      m.now = ['We’ve posted you a decision about your licence.', 'It should arrive within 1 to 4 days. You’ll also be able to read it here from '+fmt(e.releaseOn)+'.'];
+      m.headline = 'We’ve posted you a decision about your licence. It should arrive within 1 to 4 days.';
+      m.holder = 'We’ve made a decision';
+      m.next = 'Read the letter as soon as it arrives. You’ll also be able to read it here from '+fmt(e.releaseOn)+'.';
+      m.drive = {answer:'Your letter will tell you', detail:'Read the letter we’ve posted you. It explains what our decision means for your driving.'};
       break;
     case 'kept':
-      m.drive = e.rule.canDrive;
-      m.now = ['We’ve finished looking at your diabetes.', ''];
+      m.headline = 'You can keep your licence';
+      m.holder = 'We’ve made a decision';
       m.next = 'Your new licence should arrive within 1 week. You do not need to do anything else.';
+      m.drive = e.rule.canDrive;
       m.action = {text:'Read the letter', href:'#letter-'+e.row.id};
       break;
     case 'revoked':
+      m.headline = 'We’ve taken away your driving licence';
+      m.holder = 'We’ve made a decision';
+      m.next = 'Send us your licence. You can apply to get it back once you’ve gone 3 months without a severe hypo. If you disagree with our decision, you can appeal: the letter explains how and by when.';
       m.drive = e.rule.canDrive;
-      m.now = ['We’ve taken away your driving licence.', ''];
-      m.next = 'Send us your licence. You can apply to get it back once you’ve gone 3 months without a severe hypo. If you disagree with our decision, you can appeal. The letter explains how and by when.';
       m.action = {text:'Read the letter', href:'#letter-'+e.row.id};
       break;
     case 'closed':
     case 'cancelled':
     case 'renewal':
-      m.now = [CASE_STATUS[state.caseStatus].status+'.', ''];
+      m.headline = CASE_STATUS[state.caseStatus].status;
+      m.next = info.usualWait || 'You do not need to do anything.';
       break;
+  }
+  if(cur.quietSince){
+    m.quiet = 'No new updates since '+fmt(cur.quietSince)+'. Our medical team is still looking at it. '+(info.usualWait||'');
   }
   return m;
 }
-function sentence(pair){ return `<b>${esc(pair[0])}</b>${pair[1] ? ' '+esc(pair[1]) : ''}`; }
 
 /* What the customer may see on the rest of the account. The licence
    card reads from the driver record, which changes on day 0. Here it
@@ -702,6 +727,7 @@ function note(title, body){
 function question(who, q){ return `<p><b>Open question (${esc(who)}):</b> ${q}</p>`; }
 function toggleNotes(){ state.showNotes = !state.showNotes; route(); }
 function toggleBuilt(){ state.showBuilt = !state.showBuilt; route(); }
+function tag(text, colour){ return `<strong class="govuk-tag govuk-tag--${colour}">${esc(text)}</strong>`; }
 function merge(text, row){ return String(text).replace(/\{due\}/g, fmt(row.responseDueBy)); }
 function rowById(id){ return state.communications.find(r=>r.id===id); }
 
@@ -851,9 +877,13 @@ function caseCard(der){
   const m = statusCard(der);
   return `<div class="acct-card">
     <div class="acct-card__head"><h2>Your health and driving</h2><a href="#health">View details and letters</a></div>
-    <p class="govuk-body-s">Reference ${esc(state.reference)}</p>
-    <p class="govuk-body">${sentence(m.drive)}</p>
-    <p class="govuk-body">${sentence(m.now)}</p>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Reference</dt><dd class="govuk-summary-list__value"><b>${esc(state.reference)}</b></dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions you’ve told us about</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.conditions.join(', '))}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What’s happening</dt><dd class="govuk-summary-list__value">${tag(m.tag, m.colour)}<br>${esc(m.headline)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can I drive?</dt><dd class="govuk-summary-list__value">${esc(m.drive.answer)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What happens next</dt><dd class="govuk-summary-list__value">${esc(m.key==='waiting-you' && der.current.entry ? 'Reply by '+fmt(der.current.entry.row.responseDueBy) : m.next.split('. ')[0]+'.')}</dd></div>
+    </dl>
     ${m.action && m.key==='waiting-you' ? `<p><a class="govuk-button" href="${m.action.href}">${esc(m.action.text)}</a></p>` : ''}
   </div>`;
 }
@@ -886,7 +916,6 @@ function renderAccount(){
             <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Date of birth</dt><dd class="govuk-summary-list__value">${fmt(CUSTOMER.dob)}</dd></div>
             <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Email address</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.email)}</dd></div>
             <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Mobile phone number</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.mobile)}</dd></div>
-            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Medical conditions you’ve told us about</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.conditions.join(', '))}</dd></div>
           </dl>
         </div>
         <div class="acct-card">
@@ -907,26 +936,27 @@ function renderAccount(){
     </div>`;
 }
 
-function renderHeader(der){
+function renderStatusCard(der){
   const m = statusCard(der);
-  const cur = der.current;
-  let html = `<span class="govuk-caption">Reference ${esc(state.reference)}</span>
-    <h1 class="govuk-heading-xl">Your health and driving</h1>
-    <p class="govuk-body-l">${sentence(m.drive)}</p>
-    <p class="govuk-body-l">${sentence(m.now)}</p>
-    ${m.action ? `<a class="govuk-button" href="${m.action.href}">${esc(m.action.text)}</a>` : ''}
-    ${note('Each fact once',
-      '<p>The page answers in sentences: can I drive, what is happening now, and what happens next. Each fact appears once. An earlier version had a banner, tags, a request checklist and a summary list saying the same reply-by date four times, in three different words. That is now a line in DESIGN.md.</p>'
-      +'<p>The reference is in the caption, because it is the number people give when they call. A reference belongs to a case, so it is the one place the case shows through.</p>'
-      + question('Data','What is the real format of a Drivers Medical case reference? The one here is invented.'))}
-    ${m.next ? `<h2 class="govuk-heading-m">What happens next</h2><p class="govuk-body">${esc(m.next)}</p>` : ''}`;
+  let html = `<div class="cu-status">
+    ${tag(m.tag, m.colour)}
+    <p class="cu-status__headline">${esc(m.headline)}</p>
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Who it’s with</dt><dd class="govuk-summary-list__value">${esc(m.holder)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">What happens next</dt><dd class="govuk-summary-list__value">${esc(m.next)}</dd></div>
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can I drive?</dt><dd class="govuk-summary-list__value"><b>${esc(m.drive.answer)}</b><br>${esc(m.drive.detail)}</dd></div>
+    </dl>
+    ${m.action ? `<div class="cu-status__action"><a class="govuk-button" href="${m.action.href}">${esc(m.action.text)}</a></div>` : ''}
+  </div>`;
+  if(m.quiet) html += `<div class="govuk-inset-text">${esc(m.quiet)}</div>`;
   if(state.showBuilt){
-    html += `<div class="cu-built"><span class="cu-built__label">How this was built — the answer at the top</span>
+    const cur = der.current;
+    html += `<div class="cu-built"><span class="cu-built__label">How this was built — status card</span>
       <p><b>Current state:</b> ${esc(STATE_INFO[cur.key].state)}. ${esc(cur.why)}</p>
       ${cur.entry ? `<p><b>From row:</b> <code>${esc(cur.entry.row.id)}</code> <code>${esc(cur.entry.row.code)}</code>, created ${esc(cur.entry.row.createdOn)}.</p>` : ''}
       <p><b>Case status in Dynamics:</b> ${esc(state.caseStatus)}.</p>
       ${cur.heldBack ? `<p><b>Held back:</b> ${esc(cur.heldBack)}</p>` : ''}
-      ${cur.quietSince ? `<p><b>Rule 9:</b> the latest entry is ${daysBetween(cur.quietSince,state.today)} days old, over the ${QUIET_DAYS}-day limit, so the page says nothing new has happened.</p>` : ''}
+      ${cur.quietSince ? `<p><b>Rule 9:</b> the latest entry is ${daysBetween(cur.quietSince,state.today)} days old, over the ${QUIET_DAYS}-day limit, so the quiet-period message shows.</p>` : ''}
       <p><b>Can I drive:</b> ${cur.entry && cur.entry.rule.canDrive && cur.key!=='posted' ? 'from the decision’s template rule.' : cur.key==='posted' ? 'silent until the full copy is released.' : 'the default for an open case. Letters cannot answer it.'}</p>
     </div>`;
   }
@@ -949,6 +979,7 @@ function timelineItem(e){
       <p class="govuk-body-s">You’ll be able to read it here from ${fmt(e.releaseOn)}.</p>`;
   } else {
     let status = '';
+    if(e.request && !e.resolved) status = `<p>${tag('Waiting on you','orange')} Reply by ${fmt(r.responseDueBy)}</p>`;
     if(e.request && e.resolved) status = `<p class="govuk-body-s">You’ve replied to this letter.</p>`;
     body = `<span class="cu-timeline__date">Posted on ${fmt(e.date)}</span>
       <span class="cu-timeline__title"><a href="#letter-${r.id}">${esc(rule.summary)}</a></span>${status}`;
@@ -965,17 +996,26 @@ function renderCase(){
       + '</div>';
   }
   const items = der.entries.map(timelineItem).join('');
-  return `${renderHeader(der)}
+  return `<h1 class="govuk-heading-xl">Your health and driving</h1>
+    <p class="cu-ref"><span class="cu-ref__label">Your reference</span><span class="cu-ref__number">${esc(state.reference)}</span><span class="cu-ref__hint">Give this number if you call us.</span></p>
+    ${note('The reference is front and centre',
+      '<p>It is the number people give when they call, so it sits where the application tracker puts its own, straight under the heading.</p>'
+      +'<p>It is also the one place the case shows through. A reference belongs to a case, so someone with two things open at once has two.</p>'
+      + question('Data','What is the real format of a Drivers Medical case reference? The one here is invented.'))}
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions you’ve told us about</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.conditions.join(', '))}<br><a href="#not-built">Tell us about a change</a></dd></div>
+    </dl>
     ${note('About the person, not the case',
       '<p>Dynamics opens a case for each notification or renewal. The customer never sees one. They see one page about their health and their licence: the conditions they have told us about, what is happening now, whether they can drive, and every letter we have sent them.</p>'
       +'<p>With one case open, the two are the same thing. They part when there is more than one: a renewal and a new condition, say, open at the same time. This page would then show one status per thing we are looking at, and one list of letters across them.</p>'
       + question('Policy','When two things are open at once, which one answers “can I drive?”. Presumably the strictest, but that needs saying.'))}
-    ${note('The answer before the evidence',
-      '<p>Can I drive, what is happening, and what happens next and roughly when. Those are what people phone to ask. The letters underneath are the evidence, not the answer.</p>'
+    ${note('The status card answers the call before the timeline explains it',
+      '<p>What’s happening, who it’s with, what happens next and roughly when, and can I drive. Those four are what people phone to ask. The timeline underneath is the evidence for the card, not the answer.</p>'
       + (der.current.key==='waiting-other' ? question('Research','Should “Waiting on someone else” name who, such as “your GP”, or stay general? It stays general here, because the template code says a healthcare professional was written to, not which one.') : '')
       + (der.current.key==='posted' ? question('Legal (Keya)','How should the “decision posted” message be framed, and when can the full copy appear? This prototype waits '+RELEASE_WORKING_DAYS+' working days after posting. Every decision waits here, good or bad, so this message says nothing about the outcome. If only notices waited, as the handover proposed, it could only ever mean bad news.') : '')
       + (der.current.quietSince ? '<p>The quiet period is the gap the letters cannot fill. Between letters, things happen on a case — it is allocated, a DVLA doctor reads it, it waits in a queue — and none of those write a row to the Communications tab. Until they do, the honest thing is to say nothing new has happened and how long this stage usually takes.</p>' : ''))}
-    <h2 class="govuk-heading-l">Letters</h2>
+    ${renderStatusCard(der)}
+    <h2 class="govuk-heading-l">Letters and updates</h2>
     ${note('Built from letters that already exist',
       '<p>Every entry below is a letter DVLA already sends or receives. Nothing was added to the case management system to make this page. Turn on “Show how this was built” to see the Communications row and the template rule behind each entry.</p>'
       + question('Data','Is the Communications data available outside Dynamics, to a customer account?')
