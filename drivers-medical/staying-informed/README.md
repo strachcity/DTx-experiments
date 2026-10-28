@@ -1,6 +1,6 @@
 # Staying informed (Drivers Medical)
 
-Fictional prototypes. Nothing here is a real DVLA or GOV.UK service, and every person, case, letter and template code is invented.
+Fictional prototypes. Nothing here is a real DVLA or GOV.UK service. Cases, letters, template codes and personal details are invented. The one exception is the name in `case-updates.html`, which is used with permission.
 
 This folder holds two propositions that have been combined: status tracking (where is my case, can I drive) and secure communications (read the letter, reply to it).
 
@@ -34,7 +34,7 @@ Template codes are invented, because this repo is public. The real codes are map
    - the latest unresolved request
    - the latest entry that sets a state ("Information only" entries do not)
    - the case status, as the frame
-8. **Decisions are paper first.** From the next working day, only "We've posted you a decision about your licence. It should arrive within 1 to 4 days." The full letter appears 4 working days after posting. By default every decision waits, so that message says nothing about the outcome. The All screens page can switch to the handover's rule, where only decisions that serve a notice wait. That shows the trade-off: good news comes sooner, but "decision posted" can then only mean bad news.
+8. **Decisions are paper first.** From the next working day, only "We've posted you a decision about your licence. It should arrive within 1 to 4 days." The full letter appears 4 working days after posting. Every decision waits, good or bad, so that message says nothing about the outcome. The handover proposed holding back only decisions that serve a notice, but then "decision posted" could only ever mean bad news.
 9. **Quiet periods are said out loud.** If there has been no new entry for over 3 weeks, the case page says so, and how long this stage usually takes.
 
 The prototype adds a few fields the handover did not have, all marked "added" in the file:
@@ -49,10 +49,10 @@ The prototype adds a few fields the handover did not have, all marked "added" in
 1. Waiting on a healthcare professional, overdue and chased once.
 2. Waiting on you, for blood glucose readings. Reply online or with the paper code (`HX7K 9MPQ`, date of birth 14 June 1979).
 3. Good news: a licence-kept decision.
-4. Revocation: nothing on day 0, the neutral message from the next working day, then the full letter after the release date.
+4. Revocation, as three scenarios: the day it is decided (nothing shows), the day it is posted (the neutral message only), and after the letter has arrived (the full letter).
 5. Quiet period: no letters for 5 weeks.
 
-The warning box at the top of every screen has the scenario, the prototype date and buttons to step through the days.
+Each scenario on the All screens page opens straight into the customer's account.
 
 ## Open questions
 
