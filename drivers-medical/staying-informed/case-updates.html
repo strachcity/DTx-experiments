@@ -178,6 +178,15 @@ hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margi
 .cu-ref__number{display:block;font-size:30px;line-height:1.25;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums}
 .cu-ref__hint{display:block;font-size:16px;color:var(--dark-grey)}
 
+/* Contact, at the bottom of the page, from the case status tracker. */
+.support{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:35px}
+@media(max-width:800px){.support{grid-template-columns:1fr}}
+.support-card{border:1px solid var(--mid-grey);background:var(--white);padding:20px 25px}
+.support-card h3{margin-top:0}
+.support-card p{font-size:16px;margin:0 0 10px}
+.support-card p:last-child{margin:0}
+.support-card__big{font-size:24px;font-weight:700;display:block;margin-bottom:6px}
+
 /* The case status card. */
 .cu-status{border:5px solid var(--blue);padding:20px 20px 0;margin-bottom:30px}
 .cu-status__headline{font-size:24px;line-height:1.25;font-weight:700;margin:10px 0 20px}
@@ -436,7 +445,7 @@ const SCENARIOS = {
   'hp': {
     label:'Waiting on a healthcare professional',
     blurb:'Questionnaire requested and received, then a report requested from a doctor, overdue and chased once. Mirrors a real pre-production case, with invented details.',
-    today:'2026-10-28', caseStatus:'With DVLA', reference:'MDHR-KTQW-PLXN',
+    today:'2026-10-28', caseStatus:'With DVLA', reference:'482910376',
     rows:()=>[
       out('r1','REQ-QUESTIONNAIRE','2026-08-24','2026-09-21','Despatched, Received'),
       inc('r2','RCV-QUESTIONNAIRE','2026-09-10'),
@@ -449,7 +458,7 @@ const SCENARIOS = {
   'you': {
     label:'Waiting on you',
     blurb:'A request for blood glucose readings with a reply-by date. Reply online and the state moves to “With us”. The paper code works in this scenario.',
-    today:'2026-10-28', caseStatus:'Waiting for details', reference:'MDVB-RNQS-TWHK',
+    today:'2026-10-28', caseStatus:'Waiting for details', reference:'517304829',
     rows:()=>[
       inc('r1','RCV-MED-NOTIFICATION','2026-09-14'),
       out('r2','ACK-NOTIFICATION','2026-09-15'),
@@ -462,7 +471,7 @@ const SCENARIOS = {
   'good': {
     label:'Good news',
     blurb:'A licence-kept decision, released and readable.',
-    today:'2026-10-28', caseStatus:'Closed', reference:'MDGK-WPLT-QRSN',
+    today:'2026-10-28', caseStatus:'Closed', reference:'630918247',
     rows:()=>[
       out('r1','REQ-QUESTIONNAIRE','2026-07-27','2026-08-24','Despatched, Received'),
       inc('r2','RCV-QUESTIONNAIRE','2026-08-12'),
@@ -475,22 +484,22 @@ const SCENARIOS = {
   'revoke-0': {
     label:'Revocation: the day it is decided',
     blurb:'The letter has not left the building, so nothing about the decision shows.',
-    today:'2026-10-26', caseStatus:'Closed', reference:'MDRX-HNTV-KWQP', rows:revocationRows
+    today:'2026-10-26', caseStatus:'Closed', reference:'794162053', rows:revocationRows
   },
   'revoke-1': {
     label:'Revocation: the day it is posted',
     blurb:'Only the neutral “we’ve posted you a decision” message.',
-    today:'2026-10-27', caseStatus:'Closed', reference:'MDRX-HNTV-KWQP', rows:revocationRows
+    today:'2026-10-27', caseStatus:'Closed', reference:'794162053', rows:revocationRows
   },
   'revoke-2': {
     label:'Revocation: after the letter has arrived',
     blurb:'The full letter, 4 working days after posting.',
-    today:'2026-11-02', caseStatus:'Closed', reference:'MDRX-HNTV-KWQP', rows:revocationRows
+    today:'2026-11-02', caseStatus:'Closed', reference:'794162053', rows:revocationRows
   },
   'quiet': {
     label:'Quiet period',
     blurb:'No letters for 5 weeks. Shows the quiet-period message, and the gap that internal case events would need to fill.',
-    today:'2026-10-28', caseStatus:'With DVLA', reference:'MDQL-TSKR-VNWH',
+    today:'2026-10-28', caseStatus:'With DVLA', reference:'851270634',
     rows:()=>[
       inc('r1','RCV-MED-NOTIFICATION','2026-08-17'),
       out('r2','ACK-NOTIFICATION','2026-08-18'),
@@ -499,8 +508,8 @@ const SCENARIOS = {
     ]
   }
 };
-/* reference is the case reference the customer quotes when they call.
-   The format is invented: the real one needs checking. */
+/* reference is the case reference the customer quotes when they call:
+   9 digits, no breaks, as the real ones are. The numbers are invented. */
 const SCENARIO_ORDER = ['hp','you','good','revoke-0','revoke-1','revoke-2','quiet'];
 
 /* ---------------------------------------------------------------- */
@@ -987,6 +996,19 @@ function timelineItem(e){
   return `<li class="cu-timeline__item">${body}${built(e)}</li>`;
 }
 
+function renderSupport(){
+  return `<h2 class="govuk-heading-m">If you still need to ask us something</h2>
+    <div class="support">
+      <div class="support-card"><h3 class="govuk-heading-s">Call us</h3>
+        <p><span class="support-card__big">0300 790 6806</span></p>
+        <p>Monday to Friday, 8am to 5pm. Saturday, 8am to 1pm.</p>
+        <p>Have your reference ready: <b>${esc(state.reference)}</b></p></div>
+      <div class="support-card"><h3 class="govuk-heading-s">Webchat</h3>
+        <p>Usually answered within a few minutes during opening hours.</p>
+        <p><a href="#not-built">Start webchat</a></p></div>
+    </div>`;
+}
+
 function renderCase(){
   const der = derive();
   let hiddenHtml = '';
@@ -1001,7 +1023,7 @@ function renderCase(){
     ${note('The reference is front and centre',
       '<p>It is the number people give when they call, so it sits where the application tracker puts its own, straight under the heading.</p>'
       +'<p>It is also the one place the case shows through. A reference belongs to a case, so someone with two things open at once has two.</p>'
-      + question('Data','What is the real format of a Drivers Medical case reference? The one here is invented.'))}
+      + question('Content','Nine digits with no breaks is hard to read aloud and easy to mistype. Should the page show it in groups of three (482 910 376) while the system keeps it as one number?'))}
     <dl class="govuk-summary-list">
       <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions you’ve told us about</dt><dd class="govuk-summary-list__value">${esc(CUSTOMER.conditions.join(', '))}<br><a href="#not-built">Tell us about a change</a></dd></div>
     </dl>
@@ -1022,7 +1044,10 @@ function renderCase(){
       + '<p>Outgoing letters appear from the next working day, skipping weekends only. Bank holidays are not handled in the prototype.</p>')}
     ${items ? `<ol class="cu-timeline">${items}</ol>` : '<p class="govuk-body">Nothing yet. Letters will appear here once we’ve posted you the first one.</p>'}
     <p class="govuk-body-s">We still post you every letter. Letters appear here from the day after we post them.</p>
-    ${hiddenHtml}`;
+    ${hiddenHtml}
+    ${renderSupport()}
+    ${note('Contact comes last',
+      '<p>Everything above is there so this section is not needed. It sits at the bottom, as on the case status tracker, for the people the page has not answered. The reference is repeated here because this is where someone reaches for it.</p>')}`;
 }
 
 function cantOpen(e, row){
