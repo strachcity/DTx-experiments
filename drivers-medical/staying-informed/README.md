@@ -52,7 +52,11 @@ The prototype adds a few fields the handover did not have, all marked "added" in
 4. Revocation, as three scenarios: the day it is decided (nothing shows), the day it is posted (the neutral message only), and after the letter has arrived (the full letter).
 5. Quiet period: no letters for 5 weeks.
 
-Each scenario on the All screens page opens straight into the customer's account.
+Switch between them from the yellow box at the top of any screen.
+
+## About the person, not the case
+
+Dynamics opens a case for each notification or renewal. The customer never sees one. They see "Your health and driving" on their driver and vehicles account: the conditions they have told us about, what is happening, whether they can drive, and every letter. Letters open as pages, in the style of an HMRC message, with the posted PDF behind them. Where the customer has more than one thing open at once, the page would show a status for each and one list of letters across them. Which one answers "can I drive?" then is a policy question.
 
 ## Open questions
 
