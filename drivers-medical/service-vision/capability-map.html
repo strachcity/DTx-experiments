@@ -141,6 +141,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .horizons a { color: var(--accent); }
 .hzbox { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; background: var(--tint); border-radius: 4px; padding: 12px 14px; }
 .hzbox p { margin-top: 4px; max-width: 70ch; }
+.target { background: color-mix(in srgb, var(--h3) 9%, var(--surface)); border-left: 3px solid var(--h3); display: grid; gap: 2px; align-content: start; }
+.target .num { font-family: var(--font-mono); font-size: 11px; color: var(--h3); font-weight: 600; }
+.target strong { font-size: 14px; }
+.target .muted { font-size: 12px; }
+.target.across, .group.across { font-size: 12.5px; }
+.lane-label a { color: var(--accent); }
 .dimmed { opacity: var(--dim); }
 .hl { background: color-mix(in srgb, var(--accent) 9%, transparent); }
 
@@ -158,7 +164,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-wi
   <header>
     <div class="status"><span class="pill">Working draft</span><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span></div>
     <h1>Where technology and service changes sit on the Drivers Medical journey</h1>
-    <p class="muted">The current-state journey is on top. Below it are two bands, each ranked by impact on the service: seven technology enablers in colour, and seven service changes (policy, operations and commercial) in black. Select any item to see what it depends on, or a stage to see what acts on it.</p>
+    <p class="muted">The top row shows the stage of the target service, from the whole-service map, that each column feeds. Under it is the current-state journey. Below it are two bands, each ranked by impact on the service: seven technology enablers in colour, and seven service changes (policy, operations and commercial) in black. Select any item to see what it depends on, or a stage to see what acts on it.</p>
     <div class="reads">
       <div class="read"><strong>One keystone</strong>The condition and the customer's answers held as data at intake. Most of the other enablers rely on it.</div>
       <div class="read"><strong>Two different prizes</strong>Messages and the case timeline reduce chasing calls. HCP evidence reduces decision time. They should be argued separately.</div>
@@ -221,6 +227,14 @@ const STAGES = [
 const GROUPS = [
   { id: "tell", name: "Tell us", span: 4 },
   { id: "evidence", name: "Evidence & decision making", span: 5 }
+];
+
+// Target service: the v2 whole-service map (CX) stage each run of columns feeds. Outcomes copied from that map.
+const TARGET = [
+  { num: "02", name: "Tell us", span: 3, outcome: "People tell DVLA once, in the channel that suits them, and their case goes straight to the right route." },
+  { num: "04", name: "Provide what's needed", span: 3, outcome: "DVLA gets the evidence it needs to decide, asked for once, and only when it will change the decision." },
+  { num: "06", name: "Get a decision", span: 2, outcome: "People safe to drive keep driving. People who aren't stop, and understand why." },
+  { num: "08", name: "Renew", span: 1, outcome: "People on a medical licence renew with effort proportionate to their risk." }
 ];
 
 const OUTCOMES = [
@@ -549,8 +563,12 @@ function divider(map, txt, cls) {
 function buildMap() {
   const map = $("#map");
   map.innerHTML = "";
-  map.appendChild(el("div", { class: "cell lane-label group" }, "Jira initiative"));
+  map.appendChild(el("div", { class: "cell lane-label", style: "grid-row: span 2" }, `<span><b class="hz h3">H3</b> Target service</span><small>The stage on the <a href="whole-service-map-v2.html#cx">whole-service map</a> each column feeds. 01 Find out, 07 Challenge and 09 Tell us about a change aren't on this map.</small>`));
+  TARGET.forEach(t => map.appendChild(el("div", { class: "cell target", style: `grid-column: span ${t.span}` }, `<span class="num">${t.num}</span><strong>${t.name}</strong><span class="muted">${t.outcome}</span>`)));
+  map.appendChild(el("div", { class: "cell target across", style: "grid-column: span 9" }, `<span><span class="num">03</span> <strong>Stay informed</strong> and <span class="num">05</span> <strong>Get help</strong> run alongside every stage. They are the Staying informed lane below.</span>`));
+  map.appendChild(el("div", { class: "cell lane-label group", style: "grid-row: span 2" }, "Jira initiative"));
   GROUPS.forEach(g => map.appendChild(el("div", { class: "cell group", style: `grid-column: span ${g.span}` }, g.name)));
+  map.appendChild(el("div", { class: "cell group across", style: "grid-column: span 9" }, "Staying informed: across every stage, in the lane below"));
   map.appendChild(el("div", { class: "cell lane-label" }, "Stage<small>Select a stage to see what acts on it</small>"));
   STAGES.forEach((s, i) => {
     const b = el("button", { class: "stage-head", type: "button", id: "st-" + s.id, "data-stage": s.id, "aria-pressed": "false" },
