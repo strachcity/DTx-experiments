@@ -170,6 +170,22 @@ body:has(.detail:not([hidden])) .wrap { padding-bottom: 48vh; }
 .opp .needs button { font-size: 11.5px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 1px 8px; display: inline-flex; gap: 5px; align-items: center; }
 .opp .needs .sw { width: 9px; height: 9px; border-radius: 2px; }
 .enabler-label.tall { align-content: start; }
+/* Rank by: one row above the grid */
+.rankby { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rankby .lab { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-right: 6px; }
+.rankby .caveat { flex-basis: 100%; font-size: 12.5px; color: var(--muted); }
+/* Rank and score in each band label */
+.rank { font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.rank .zero { font-family: var(--font-body); color: var(--muted); font-size: 11.5px; }
+.sbar { display: block; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: 2px; }
+.sbar i { display: block; height: 100%; background: var(--ink); }
+/* Inputs: estimates are dotted and say so */
+.est { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.opp .scores { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; border-top: 1px dashed var(--line); padding-top: 6px; }
+.opp .scores b { color: var(--ink); font-weight: 600; }
+table.howscored { border-collapse: collapse; width: 100%; font-size: 13px; }
+.howscored th, .howscored td { text-align: left; vertical-align: top; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--line); }
+.howscored td.n { font-family: var(--font-mono); white-space: nowrap; }
 .dimmed { opacity: var(--dim); }
 .hl { background: color-mix(in srgb, var(--accent) 9%, transparent); }
 
@@ -191,6 +207,8 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-wi
   </header>
 
   <section class="detail" id="detail" aria-live="polite"></section>
+
+  <div class="rankby" id="rankby"><span class="lab">Rank by</span><p class="caveat">Scores are ordinal judgements on 0 to 5 scales, multiplied to compare. They show the reasoning; they don't decide. Inputs marked estimate are waiting on data.</p></div>
 
   <div class="map-scroll">
     <div class="map" id="map"></div>
@@ -480,11 +498,62 @@ const HZ = {
   "S7": ["H2+", "Changes incentives and accountability, the conditions everything else is judged under.", "Drifts to H2- if new measures sit beside the backlog count while the backlog count still decides."]
 };
 ITEMS.forEach(it => { const h = HZ[it.key]; it.h = h[0]; it.hwhy = h[1]; it.hmove = h[2]; });
+
+// Scores: ordinal judgements on 0 to 5 scales. conf lists the inputs that are not measured.
+const SCORES = {
+  "1":  { reach: 4, reachBacklog: 3, days: 1, calls: 0, control: 3, dependency: 5, conf: {} },
+  "2":  { reach: 3, reachBacklog: 1, days: 3, calls: 1, control: 4, dependency: 3, conf: { reach: "estimate", days: "estimate" } },
+  "3":  { reach: 5, reachBacklog: 2, days: 0, calls: 5, control: 3, dependency: 1, conf: {} },
+  "4":  { reach: 3, reachBacklog: 2, days: 2, calls: 2, control: 2, dependency: 2, conf: { days: "estimate" } },
+  "5":  { reach: 4, reachBacklog: 5, days: 4, calls: 3, control: 2, dependency: 2, conf: { reach: "estimate", days: "estimate" } },
+  "6":  { reach: 3, reachBacklog: 2, days: 5, calls: 3, control: 1, dependency: 1, conf: { calls: "estimate" } },
+  "7":  { reach: 2, reachBacklog: 1, days: 1, calls: 2, control: 4, dependency: 3, conf: {} },
+  "S1": { reach: 2, reachBacklog: 5, days: 4, calls: 1, control: 1, dependency: 2, conf: { days: "estimate" } },
+  "S2": { reach: 3, reachBacklog: 4, days: 4, calls: 2, control: 4, dependency: 1, conf: { reach: "estimate", days: "estimate" } },
+  "S3": { reach: 4, reachBacklog: 3, days: 3, calls: 2, control: 4, dependency: 2, conf: { days: "estimate" } },
+  "S4": { reach: 3, reachBacklog: 2, days: 5, calls: 2, control: 2, dependency: 1, conf: {} },
+  "S5": { reach: 1, reachBacklog: 0, days: 0, calls: 0, control: 2, dependency: 5, conf: {} },
+  "S6": { reach: 5, reachBacklog: 2, days: 1, calls: 1, control: 4, dependency: 1, conf: { days: "estimate" } },
+  "S7": { reach: 5, reachBacklog: 0, days: 0, calls: 0, control: 3, dependency: 4, conf: {} }
+};
+const VIEWS = [
+  { id: "decision", name: "Decision time", score: s => s.reach * s.days * s.control, max: 125, formula: "Reach × days × control" },
+  { id: "backlog", name: "Backlog", score: s => s.reachBacklog * s.days * s.control, max: 125, formula: "Backlog reach × days × control" },
+  { id: "contact", name: "Contact demand", score: s => s.reach * s.calls * s.control, max: 125, formula: "Reach × calls × control" },
+  { id: "dependency", name: "Dependency", score: s => s.dependency, max: 5, formula: "What else relies on it" },
+  { id: "original", name: "Original order", score: null, max: null, formula: "Version 3 ranking, impact and dependency mixed" }
+];
+const CRITERIA = [
+  ["reach", "Reach"], ["reachBacklog", "Backlog reach"], ["days", "Days"], ["calls", "Calls"], ["control", "Control"], ["dependency", "Dependency"]
+];
+// Why each score is what it is
+const BASIS = {
+  "1": { reach: "Every paper notification. DMSP already captures data.", reachBacklog: "Cases already in the backlog were keyed at intake and won't be re-keyed.", days: "Little direct saving. The value comes through other items.", calls: "", control: "A DMI process change, Dynamics fields and the payload DPIA.", dependency: "S1, S3, S5 and S6, plus pre-fill in 5 and the rules in 2." },
+  "2": { reach: "Paper notifications without an MQ go through Level 1. Volume is unknown (data request sent, CDS-265).", reachBacklog: "These cases are mostly past Level 1.", days: "Level 1 queue time is unknown. The ceiling is the DMSP gap of 24 against 66 working days (CDS-271), and only part of that gap is Level 1.", calls: "", control: "Dynamics BPMN.", dependency: "S2, S4 and S6." },
+  "3": { reach: "Every case.", reachBacklog: "", days: "It doesn't change how long a decision takes.", calls: "Progress chases are ~56% of contact.", control: "The Communications table, Blob access and legal release rules.", dependency: "" },
+  "4": { reach: "Letters asking the customer to act. ~88k a year need a new journey.", reachBacklog: "", days: "Saves postal days each way, and fewer rejections.", calls: "", control: "A new build, because GOV.UK Forms can't take medical information. Also One Login and DPP.", dependency: "S3, and feeds 1." },
+  "5": { reach: "50k to 55k HCP letters a month against ~57k decisions a month. Letters per case are unknown, so the share of cases with an HCP request is unknown.", reachBacklog: "Complex cases wait on evidence.", days: "Median ~30 days to return (CDS-730). Chasing and a digital return plausibly cut 10 to 15 days, unmeasured.", calls: "A third of HCP reports are chased.", control: "HCPs are external. GP Connect is direct-care only.", dependency: "S1 and S2." },
+  "6": { reach: "Renewals.", reachBacklog: "", days: "An avoided renewal saves the whole decision.", calls: "", control: "A D90 change and a legal argument.", dependency: "S4." },
+  "7": { reach: "Routing is for the ACE cohort. Measurement is indirect.", reachBacklog: "", days: "", calls: "", control: "", dependency: "S1, S5 and S7 need the gateway metric." },
+  "S1": { reach: "Judgement-heavy conditions.", reachBacklog: "Multiple 23.4%, epilepsy 13.0%.", days: "Fewer Level 3 and 4 referrals, unmeasured.", calls: "", control: "Clinical standards and decision rights.", dependency: "S6 and the archetypes." },
+  "S2": { reach: "Evidence-requested cases (as for 5).", reachBacklog: "", days: "Fees, deadlines and parallel requests. Vision already runs requests in parallel.", calls: "", control: "Contracts and operating instructions, testable in ACE.", dependency: "" },
+  "S3": { reach: "Every paper case and every HCP form.", reachBacklog: "", days: "Declaring once removes a postal cycle on paper; ~33k rejected MQs a year; shorter HCP forms.", calls: "", control: "Form changes, needing clinical sign-off.", dependency: "" },
+  "S4": { reach: "Renewals.", reachBacklog: "", days: "An avoided renewal saves the whole decision. VOC45 cases with an intervention take ~90 days against ~21 without.", calls: "", control: "Policy appetite exists, but it needs a legal argument and D90.", dependency: "" },
+  "S5": { reach: "Indirect.", reachBacklog: "", days: "", calls: "", control: "PRANA from April 2027, and NHS SDE registration.", dependency: "It's what lets policy agree to S1, S3 and S4." },
+  "S6": { reach: "Every case is routed.", reachBacklog: "", days: "Little on its own. It only gains days once S1 to S4 give each route something different to do.", calls: "", control: "", dependency: "" },
+  "S7": { reach: "", reachBacklog: "", days: "", calls: "No direct effect.", control: "Needs senior agreement.", dependency: "Every change is judged by it." }
+};
+ITEMS.forEach(it => { it.sc = SCORES[it.key]; it.basis = BASIS[it.key]; it.order = ITEMS.indexOf(it); });
+const viewById = id => VIEWS.find(v => v.id === id);
+const scoreIn = (it, v) => v.score ? v.score(it.sc) : null;
+// Sort a band by the view's score, highest first. Ties keep key order. Original keeps the version 3 order.
+const ordered = (arr, v = viewById(state.view)) => v.score ? [...arr].sort((a, b) => scoreIn(b, v) - scoreIn(a, v) || a.order - b.order) : [...arr];
+const input = (it, k) => it.sc.conf[k] ? `<span class="est" title="Estimate, waiting on data">${it.sc[k]}</span>` : `${it.sc[k]}`;
 const HORIZONS = [{ id: "all", name: "All" }, { id: "H2+", name: "H2+ transforming" }, { id: "H2-", name: "H2- sustaining" }];
 const hzPill = h => `<b class="hz ${h === "H2+" ? "h2p" : "h2m"}">${h}</b>`;
 const LAYERS = [{ id: "all", name: "Both" }, { id: "tech", name: "Technology" }, { id: "service", name: "Service change" }];
 
-const state = { sel: null, stage: null, outcome: "all", layer: "all", horizon: "all" };
+const state = { sel: null, stage: null, outcome: "all", layer: "all", horizon: "all", view: "decision" };
 
 const $ = (s, el = document) => el.querySelector(s);
 const color = it => it.kind === "tech" ? `var(--e${it.id})` : "var(--ink)";
@@ -505,8 +574,12 @@ function selectStage(id) { state.stage = state.stage === id ? null : id; state.s
 function bandRows(map, arr) {
   arr.forEach(it => {
     const sub = it.kind === "tech" ? it.outcomes.map(o => OUTCOMES.find(x => x.id === o).name).join(" · ") : REACH[it.reach];
+    const v = viewById(state.view), sc = scoreIn(it, v), rank = arr.indexOf(it) + 1;
+    const rk = v.score
+      ? `<span class="rank">#${rank} · ${sc}/${v.max}${sc === 0 ? ` <span class="zero">no effect in this view</span>` : ""}</span><span class="sbar" aria-hidden="true"><i style="width:${Math.round(sc / v.max * 100)}%"></i></span>`
+      : `<span class="rank">#${rank}</span>`;
     const lab = el("button", { class: "enabler-label tall", type: "button", "data-item": it.key, style: "grid-row: span 2" },
-      `<span class="t">${swatch(it)}${it.key}. ${it.name}</span><span class="muted" style="font-size:12px">${hzPill(it.h)} ${sub}</span>`);
+      `<span class="t">${swatch(it)}${it.key}. ${it.name}</span>${rk}<span class="muted" style="font-size:12px">${hzPill(it.h)} ${sub}</span>`);
     lab.addEventListener("click", () => selectItem(it.key));
     map.appendChild(lab);
     STAGES.forEach((s, i) => {
@@ -544,6 +617,7 @@ function oppStrip(it) {
   } else {
     html = `<div>${it.what}</div><div><h4>Needs</h4><span class="needs">${it.depends.map(chip).join("")}</span></div>`;
   }
+  html += `<div class="scores">${CRITERIA.map(([k, name]) => `<span>${name} <b>${input(it, k)}</b></span>`).join("")}</div>`;
   const n = el("div", { class: "opp " + (it.kind === "tech" ? "tech" : "svc"), "data-item": it.key }, html);
   n.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.pick)));
   return n;
@@ -579,15 +653,16 @@ function buildMap() {
   // The main technology changes at each stage: every enabler with primary impact there, by its bar label
   map.appendChild(el("div", { class: "cell lane-label tc-label" }, `Technology change<small>The main technology changes at this stage. Select one to see the enabler.</small>`));
   STAGES.forEach(s => {
-    const main = ENABLERS.filter(e => e.impact[s.id] === "p");
+    const main = ordered(ENABLERS).filter(e => e.impact[s.id] === "p");
     map.appendChild(el("div", { class: "cell techchange", "data-stage": s.id },
       main.map(e => `<button type="button" class="tc" data-tc="${e.key}" style="border-left-color:${color(e)}" aria-label="${e.name}: ${e.labels[s.id] || e.short}"><span class="rk">${e.id}</span><span>${e.labels[s.id] || e.short}</span></button>`).join("")));
   });
   map.querySelectorAll("[data-tc]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.tc)));
-  divider(map, "Technology enablers, ranked by impact on the service · Solid: main change at that stage · Hatched: supporting · H2+ transforms the service, H2- sustains today's", "tech");
-  bandRows(map, ENABLERS);
-  divider(map, "Service changes: policy, operations and commercial, ranked by impact on the service · Filled: main change at that stage · Outline: supporting", "service");
-  bandRows(map, OPPS);
+  const vname = viewById(state.view).name.toLowerCase();
+  divider(map, `Technology enablers, ranked by ${vname} · Solid: main change at that stage · Hatched: supporting · H2+ transforms the service, H2- sustains today's`, "tech");
+  bandRows(map, ordered(ENABLERS));
+  divider(map, `Service changes: policy, operations and commercial, ranked by ${vname} · Filled: main change at that stage · Outline: supporting`, "service");
+  bandRows(map, ordered(OPPS));
 }
 
 function visible() {
@@ -595,6 +670,7 @@ function visible() {
 }
 
 function render() {
+  document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
   document.querySelectorAll(".stage-head").forEach(b => b.setAttribute("aria-pressed", b.dataset.stage === state.stage));
 
   const vis = new Set(visible().map(i => i.key));
@@ -640,6 +716,12 @@ function renderDetail(sel, vis) {
     d.innerHTML = `
       <div class="detail-head">${badge}${hzPill(sel.h)}<h2>${sel.name}</h2><div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>${close}</div>
       <p style="max-width:85ch">${sel.what}</p>
+      <div><h3>How it's scored</h3>
+        <table class="howscored"><thead><tr><th>Criterion</th><th>Score</th><th>Basis</th></tr></thead><tbody>
+        ${CRITERIA.map(([k, name]) => `<tr><td>${name}</td><td class="n">${input(sel, k)}/5${sel.sc.conf[k] ? ` <span class="muted">estimate</span>` : ""}</td><td>${sel.basis[k] || ""}</td></tr>`).join("")}
+        </tbody></table>
+        <p style="margin-top:8px;font-size:13px">${VIEWS.filter(v => v.score).map(v => { const band = isSvc ? OPPS : ENABLERS; return `<strong>${v.name}</strong> ${scoreIn(sel, v)}/${v.max} (#${ordered(band, v).indexOf(sel) + 1} in its band)`; }).join(" · ")}</p>
+      </div>
       <div class="hzbox"><div><h3>Why ${sel.h}</h3><p>${sel.hwhy}</p></div><div><h3>${sel.h === "H2+" ? "How it could slip" : "What would make it H2+"}</h3><p>${sel.hmove}</p></div></div>
       <div class="detail-grid">
         <div><h3>What it unlocks</h3>${list(sel.unlocks)}</div>
@@ -668,6 +750,11 @@ function renderDetail(sel, vis) {
   if (c) c.addEventListener("click", () => { state.sel = null; state.stage = null; render(); });
 }
 
+VIEWS.forEach(v => {
+  const b = el("button", { class: "chip", type: "button", "data-view": v.id, "aria-pressed": "false", title: v.formula }, v.name);
+  b.addEventListener("click", () => { state.view = v.id; buildMap(); render(); });
+  $("#rankby").insertBefore(b, $("#rankby .caveat"));
+});
 buildMap();
 render();
 
