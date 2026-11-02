@@ -154,21 +154,64 @@ li.pocket { color: var(--h3); }
 .note { display: none; border-left: 5px solid #f47738; background: #fff4ec; padding: 8px 12px; font-size: 14px; max-width: 90ch; }
 body.notes .note { display: block; }
 footer { font-size: 13px; color: var(--muted); display: grid; gap: 6px; max-width: 110ch; }
+
+/* Measures each capability should move, and the benefit chain */
+.mz.on { background: var(--hl); box-shadow: 0 0 0 2px var(--h3); color: var(--ink); }
+.tosize { border-left: 5px solid var(--blue); padding: 8px 14px; max-width: 95ch; }
+.tosize h3 { display: flex; gap: 8px; align-items: center; }
+.chain { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.chain .link { border: 1px solid var(--line); padding: 10px 12px; flex: 1 1 220px; }
+.chain .arrow { align-self: center; font-size: 22px; font-weight: 700; }
+.chain .prize { flex: 0 1 200px; background: var(--tint); }
+.chain .pz { font-size: 19px; font-weight: 700; }
+.chain .gap { margin-top: 8px; font-size: 14px; }
+.opp td:nth-child(4), .opp td:nth-child(5) { font-size: 13px; min-width: 200px; }
+
+/* Workshop view: one prize at a time, bigger type, nothing to read before the question */
+.ws { display: none; }
+body.workshop .ws { display: grid; gap: 18px; }
+body.workshop .not-ws { display: none !important; }
+body.workshop { font-size: 18px; }
+body.workshop .wrap { gap: 20px; }
+body.workshop h1 { font-size: 28px; }
+body.workshop .map { grid-template-columns: 300px repeat(10, 232px); }
+body.workshop .cell { font-size: 15px; }
+body.workshop .stage-head .nm { font-size: 20px; }
+body.workshop .stage-head img { height: 190px; }
+body.workshop .bar { font-size: 14px; min-height: 42px; }
+body.workshop .cap-label .t { font-size: 17px; }
+body.workshop .detail { font-size: 17px; }
+.ws-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ws-bar .chip { font-size: 16px; padding: 6px 14px; }
+.ws-bar .chip[disabled] { opacity: .4; cursor: default; }
+.ws-count { font-weight: 700; }
+.ws-keys { font-size: 14px; }
+.ws-h { font-size: 44px; line-height: 1.1; }
+.ws-q { font-size: 28px; font-weight: 700; line-height: 1.3; max-width: 46ch; border-left: 10px solid var(--focus); padding-left: 16px; }
+.ws-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; }
+.ws-card { border: 1px solid var(--line); border-top: 5px solid var(--ink); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.ws-card.on { border-top-color: var(--blue); background: var(--hl); }
+.ws-card h3 { font-size: 20px; }
+.ws-card .pick { font-weight: 700; }
+.ws-n { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 6px; }
+.ws-moves, .ws-tosize { font-size: 16px; }
 @media (prefers-reduced-motion: reduce) { .cell { transition: none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="intro">
-    <div class="status"><strong>Working draft</strong><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span><a href="whole-service-map-v2.html#cx">Open the whole-service map (v2)</a></div>
+    <div class="status"><strong>Working draft</strong><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span><a href="whole-service-map-v2.html#cx">Open the whole-service map (v2)</a><button type="button" class="chip not-ws" data-enter-ws>Open workshop view</button></div>
     <h1>The capabilities the target service needs, and how big each opportunity is</h1>
-    <p class="lede">Each column is a stage of the target service from the whole-service map. Under it is what happens there today, then the capabilities that close the gap: 8 technology capabilities in blue and 7 service changes in black. Select a capability to see the size of its opportunity and the steps of the target service it makes possible.</p>
-    <div id="notes-intro"></div>
+    <p class="lede not-ws">Each column is a stage of the target service from the whole-service map. Under it is what happens there today, then the capabilities that close the gap: 8 technology capabilities in blue and 7 service changes in black. Select a capability to see the size of its opportunity, the measures it should move, and the steps of the target service it makes possible.</p>
+    <div id="notes-intro" class="not-ws"></div>
   </header>
 
-  <section class="reads" aria-label="What the map says" id="reads"></section>
+  <section class="reads not-ws" aria-label="What the map says" id="reads"></section>
 
-  <section class="controls" aria-label="Filters">
+  <section class="ws" id="ws" aria-label="Workshop view" aria-live="polite"></section>
+
+  <section class="controls not-ws" aria-label="Filters">
     <div class="ctrl-row" id="layerRow"><span class="lab">Show</span></div>
     <div class="ctrl-row" id="prizeRow"><span class="lab">Prize</span></div>
     <div class="ctrl-row" id="hzRow"><span class="lab">Horizon</span></div>
@@ -191,7 +234,7 @@ footer { font-size: 13px; color: var(--muted); display: grid; gap: 6px; max-widt
     <div class="map" id="map"></div>
   </div>
 
-  <footer>
+  <footer class="not-ws">
     <p>Target service: whole-service-map-v2.html, CX map. Illustrations are that map's step illustrations, some still stand-ins.</p>
     <p>Sources: DVLA Discovery Report (Mar 2026), CDS-271, CDS-342, CDS-405, CDS-443 (DMSP cohort only, never service-wide), CDS-482, CDS-730 (service-wide HCP baseline), CALD by condition (26 Jun 2026), DGU letter catalogue, operating instructions keyword count, D202 experiment (Oct 2026). Figures marked "inference" or "not yet sized" are not measured.</p>
     <p>Horizon labels follow the three horizons framework in <a href="https://www.eatingpolicy.com/p/a-three-horizons-framework-for-government">Eating Policy</a>. The test for each capability: does it move the service toward the target, or prolong today's? Rankings and placements are judgements, there to be challenged.</p>
@@ -312,12 +355,13 @@ const TODAY = {
 };
 
 // ---------- Capabilities (H2) ----------
+// question: what the workshop view asks the room for each prize
 const PRIZES = [
-  { id: "contact", name: "Fewer chasing contacts" },
-  { id: "time", name: "Faster decisions" },
-  { id: "rework", name: "Less rework" },
-  { id: "repeat", name: "Less repeat demand" },
-  { id: "proof", name: "Evidence to change the rules" }
+  { id: "contact", name: "Fewer chasing contacts", question: "This is the best-measured prize. Which of these two capabilities would actually stop the calls, and is ~56% of contacts the right number to build the case on?" },
+  { id: "time", name: "Faster decisions", question: "Probably the biggest prize, and the least proven. Which of these figures would you trust enough to put in a business case?" },
+  { id: "rework", name: "Less rework", question: "Rejected questionnaires are measured, but no measure on the target map counts them. Should one?" },
+  { id: "repeat", name: "Less repeat demand", question: "Neither capability here is well sized. What would we need to know to argue for longer licences?" },
+  { id: "proof", name: "Evidence to change the rules", question: "None of these can be sized yet, because they're what would size the rest. Do they belong in the first business case?" }
 ];
 const BASIS = {
   wide: ["b-wide", "Measured, service-wide"],
@@ -499,9 +543,54 @@ const SVC = [
     hmove: "Drifts to H2- if new measures sit beside the backlog count while the backlog count still decides." }
 ];
 
+// ---------- Benefit chain and sizing ----------
+// moves: the target-map measures each capability should shift, as [stage, measure] read from STAGES.
+// gap: a benefit no measure on the target map counts. toSize and data: proposed, to check with analysts.
+const BENEFIT = {
+  T1: { moves: [["02", "Complete first time"], ["02", "Routed right first time"], ["02", "Paper keyed by hand"], ["06", "Average days to decision"]],
+        toSize: "Compare days to decision for paper and DMSP cases with the same condition, so the 24 against 66 gap isn't just a different mix of cases. Find out what DMI keys from a D1.",
+        data: "Dynamics case data by route and condition. Blocked for bulk query by the payload DPIA today." },
+  T2: { moves: [["02", "Routed right first time"], ["06", "Average days to decision"], ["08", "Effort per renewal"]],
+        toSize: "Count the cases at Level 1 and how long they wait there, by questionnaire.", data: "Dynamics case events." },
+  T3: { moves: [["03", "Progress-chasing calls"], ["03", "Repeat calls"]],
+        toSize: "Already sized service-wide. To show what it would save, split progress chases by where the case was when the customer called.", data: "Call purpose tracking (T7), joined to case stage." },
+  T4: { moves: [["02", "Paper keyed by hand"], ["06", "Average days to decision"]], gap: "No measure on the target map counts rejected or returned forms.",
+        toSize: "Estimate how many of the ~88k would go online, starting from the D202 take-up (34 of 92), and test it on one more letter.", data: "DGU letter catalogue, D202 experiment." },
+  T5: { moves: [["04", "Days waiting on third parties"], ["06", "Average days to decision"]],
+        toSize: "Days to decision with and without an HCP request, service-wide rather than DMSP only.", data: "CDS-730 and CDS-443, cut by condition and HCP type." },
+  T6: { moves: [["08", "Effort per renewal"], ["08", "Renewals without a gap"]],
+        toSize: "Count licences issued by duration and condition, and how many come back within 3 years.", data: "D90 licence records." },
+  T7: { moves: [["05", "Calls reaching the owning team"], ["05", "Resolved first time"]],
+        toSize: "Measure the share of calls reaching the owning team today, and repeat calls per case.", data: "IVR call purpose tracking." },
+  T8: { moves: [["06", "Decision quality"], ["04", "Evidence requests per case"]],
+        toSize: "Record a recommendation before evidence is requested on a sample of cases, then compare it with the final decision.", data: "A new Dynamics field, or a manual sample in NewCo." },
+  S1: { moves: [["06", "Average days to decision"], ["06", "Decision quality"]], gap: "No measure on the target map counts referrals to DVLA doctors.",
+        toSize: "Days to decision and referral rate for heart, neurological, cognitive and multiple-condition cases, against conditions that already have explicit rules.", data: "CALD by condition, Dynamics escalation events." },
+  S2: { moves: [["04", "Days waiting on third parties"]],
+        toSize: "Rerun the chase rate and days waiting for third-party requests on all cases, not only DMSP.", data: "CDS-443 on the whole caseload." },
+  S3: { moves: [["02", "Complete first time"], ["04", "Evidence requests per case"]], gap: "No measure on the target map counts rejected questionnaires.",
+        toSize: "Count the questions on each form that lead to no decision and no next question, with DVLA doctors.", data: "A form review, not a data extract." },
+  S4: { moves: [["08", "Effort per renewal"], ["09", "Changes reported before review"]],
+        toSize: "Find out why VOC45 interventions rose before relying on that figure. Then the share of renewals, by condition, that issue unchanged.", data: "CDS-482, CDS-342 and CDS-344." },
+  S5: { moves: [["06", "Decision quality"], ["07", "Challenges and appeals"]],
+        toSize: "Reversal rate, and why, from a sample of reconsidered decisions. Linked outcome data follows from April 2027.", data: "A reconsideration sample now, PRANA later." },
+  S6: { moves: [["02", "Routed right first time"], ["06", "Average days to decision"]],
+        toSize: "Rerun the share of cases needing no escalation or evidence on all cases, not only DMSP, by condition.", data: "CDS-405 on the whole caseload." },
+  S7: { moves: "all",
+        toSize: "Nothing to size. Agree which measures replace the backlog count, then take a baseline of each.", data: "MI dashboard." }
+};
+const measuresOf = s => s.measures.split(" · ");
+
 TECH.forEach((c, i) => { c.kind = "tech"; c.rank = i + 1; c.depends = c.depends || []; });
 SVC.forEach((c, i) => { c.kind = "service"; c.rank = i + 1; });
 const CAPS = [...TECH, ...SVC];
+CAPS.forEach(c => {
+  Object.assign(c, BENEFIT[c.key]);
+  if (c.moves === "all") c.moves = STAGES.flatMap(s => measuresOf(s).map(m => [s.id, m]));
+  // If the v2 map renames a measure, say so rather than silently dropping the link
+  c.moves.forEach(([s, m]) => { const st = STAGES.find(x => x.id === s); if (!st || !measuresOf(st).includes(m)) console.warn(`${c.key}: "${m}" is not a measure at stage ${s}`); });
+});
+const movesKey = ([s, m]) => s + "|" + m;
 const byKey = k => CAPS.find(c => c.key === k);
 const stageById = id => STAGES.find(s => s.id === id);
 const stepById = id => STEPS.find(s => s.id === id);
@@ -511,8 +600,8 @@ const REACH = { now: "Within reach now", policy: "Needs policy, legal or clinica
 const neededBy = k => SVC.filter(s => s.depends.includes(k));
 const prizeName = id => PRIZES.find(p => p.id === id).name;
 
-const state = { sel: null, stage: null, layer: "all", prize: "all", horizon: "all", notes: false };
-function resetState() { Object.assign(state, { sel: null, stage: null, layer: "all", prize: "all", horizon: "all", notes: false }); }
+const state = { sel: null, stage: null, layer: "all", prize: "all", horizon: "all", notes: false, workshop: false, wsPrize: PRIZES[0].id };
+function resetState() { Object.assign(state, { sel: null, stage: null, layer: "all", prize: "all", horizon: "all", notes: false, workshop: false, wsPrize: PRIZES[0].id }); }
 
 // ---------- Helpers ----------
 const $ = (s, el = document) => el.querySelector(s);
@@ -531,6 +620,29 @@ const list = items => `<ul>${items.map(i => i.startsWith("<li") ? i : `<li>${i}<
 const pick = k => { const c = byKey(k); return `<button type="button" class="pick" data-pick="${k}">${k} ${c.name}</button>`; };
 function note(t) { return `<div class="note"><strong>Design note.</strong> ${t}</div>`; }
 function img(id, w) { return `<img src="illustrations/v2/${id}.webp" alt="" loading="lazy" width="${w}">`; }
+// Measures grouped by stage, for the benefit chain
+function movesList(c) {
+  if (c.key === "S7") return `<p>Every measure on the target map. This change is what makes them the measures.</p>`;
+  const by = {};
+  c.moves.forEach(([s, m]) => (by[s] = by[s] || []).push(m));
+  return `<ul>${Object.entries(by).map(([s, ms]) => `<li><span class="muted">${stageNum(stageById(s))} ${stageById(s).name}:</span> ${ms.join(", ")}</li>`).join("")}</ul>`;
+}
+const movesShort = c => c.key === "S7" ? "Every measure" : [...new Set(c.moves.map(m => m[1]))].join(" · ");
+function toSizeBox(c) {
+  return `<div class="tosize"><h3>What it would take to size it <b class="tag b-none">Proposed</b></h3><p>${c.toSize}</p><p class="muted" style="margin-top:4px">Data: ${c.data}</p></div>`;
+}
+function chain(c) {
+  const steps = c.steps.map(stepById);
+  const unblocks = STEPS.filter(p => p.flag && p.flag.needs.includes(c.key));
+  return `<div class="chain" aria-label="Benefit chain">
+    <div class="link"><h3>${c.key} makes possible</h3>${steps.length ? list(steps.map(p => `${p.name} <span class="muted">(${stageNum(stageById(p.stage))})</span>`)) : `<p>No single step on the target map.</p>`}
+      ${unblocks.length ? `<p style="margin-top:6px"><strong>Unblocks:</strong> ${unblocks.map(p => `${flagTag(p.flag)} ${p.flag.task}`).join("; ")}</p>` : ""}</div>
+    <span class="arrow" aria-hidden="true">→</span>
+    <div class="link"><h3>Which should move</h3>${movesList(c)}${c.gap ? `<p class="gap"><b class="tag t-tbc">Gap</b> ${c.gap}</p>` : ""}</div>
+    <span class="arrow" aria-hidden="true">→</span>
+    <div class="link prize"><h3>Prize</h3><p class="pz">${prizeName(c.prize)}</p></div>
+  </div>`;
+}
 
 // ---------- Build ----------
 function buildReads() {
@@ -544,62 +656,68 @@ function buildReads() {
     ["Measure first", `Decision measurement (T8) can't be sized because nothing measures decisions today. ${t8} depend on it.`],
     ["Gaps on the target", `No capability does the main work at ${gaps}. Either nothing is needed there, or the evidence hasn't looked.`]
   ].map(([h, p]) => `<div class="read"><strong>${h}</strong>${p}</div>`).join("");
-  $("#notes-intro").innerHTML = note("The argument: every capability earns its place by a step on the target service it makes possible, and by a size of opportunity with its basis stated. Figures are in different units, so there is deliberately no common bar scale. The basis tag is the honest comparison.")
+  $("#notes-intro").innerHTML = note("The argument: every capability earns its place by a step on the target service it makes possible, a measure on the target map it should move, and a size of opportunity with its basis stated. Figures are in different units, so there is deliberately no common bar scale. The basis tag is the honest comparison.")
     + note("Columns follow the CX stages of whole-service-map-v2.html. Today's process stages (Level 1, Level 2, Escalation) don't exist in the target, so they are named in each stage header instead. Enabler 7 of the earlier transformation map is split here into Contact routing (T7) and Decision measurement (T8), because the two halves had different horizons.")
-    + note("Illustrations are read from illustrations/v2/ by step position. If a step is added to the v2 map, the images renumber and STEPS here needs updating.");
+    + note("Illustrations are read from illustrations/v2/ by step position. If a step is added to the v2 map, the images renumber and STEPS here needs updating. If a measure is renamed on v2, the console warns which capability lost its link.");
 }
 
 function buildControls() {
   const chips = (row, items, key) => items.forEach(([id, label]) => {
     const b = el("button", { type: "button", class: "chip", "data-f": key, "data-v": id, "aria-pressed": "false" }, label);
-    b.addEventListener("click", () => { state[key] = id; tidySel(); render(); });
+    b.addEventListener("click", () => { state[key] = id; const c = state.sel && byKey(state.sel); if (c && !visible().includes(c)) go({ sel: null }); else render(); });
     $(row).appendChild(b);
   });
   chips("#layerRow", [["all", "Both"], ["tech", "Technology"], ["service", "Service changes"]], "layer");
   chips("#prizeRow", [["all", "All"], ...PRIZES.map(p => [p.id, p.name])], "prize");
   chips("#hzRow", [["all", "All"], ["H2+", `${hz("H2+")} Transforming`], ["H2-", `${hz("H2-")} Sustaining`]], "horizon");
   $("#notesBtn").addEventListener("click", () => { state.notes = !state.notes; render(); });
+  document.querySelectorAll("[data-enter-ws]").forEach(b => b.addEventListener("click", () => go({ workshop: true, sel: null, stage: null })));
+  document.addEventListener("keydown", e => {
+    if (!state.workshop || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === "ArrowRight") stepPrize(1);
+    else if (e.key === "ArrowLeft") stepPrize(-1);
+    else if (e.key === "Escape") go(state.sel || state.stage ? { sel: null, stage: null } : { workshop: false });
+  });
 }
-function tidySel() { const c = state.sel && byKey(state.sel); if (c && !visible().includes(c)) go(""); }
+function stepPrize(d) {
+  const i = PRIZES.findIndex(p => p.id === state.wsPrize) + d;
+  if (i >= 0 && i < PRIZES.length) go({ wsPrize: PRIZES[i].id, sel: null, stage: null });
+}
 
 function buildMap() {
   const map = $("#map");
   map.innerHTML = "";
-  // Stage headers with the step illustration
   map.appendChild(el("div", { class: "cell lane" }, `Stage<small>From the whole-service map (v2). Select a stage to see what acts on it.</small>`));
   STAGES.forEach(s => {
     const b = el("button", { type: "button", class: "stage-head", "data-stage": s.id, "aria-pressed": "false" },
       `<span class="num">${stageNum(s)}${s.tbc ? ` <b class="tag t-tbc">tbc</b>` : ""}</span><span class="nm">${s.name}</span>${img(s.img, 168)}<span class="was muted">${s.was}</span>`);
-    b.addEventListener("click", () => go(state.stage === s.id ? "" : "stage-" + s.id));
+    b.addEventListener("click", () => go({ stage: state.stage === s.id ? null : s.id, sel: null }));
     map.appendChild(b);
   });
-  // H3
-  map.appendChild(el("div", { class: "cell lane" }, `${hz("H3")} Target<small>Service outcome, measures, and what happens behind the scenes</small>`));
+  map.appendChild(el("div", { class: "cell lane" }, `${hz("H3")} Target<small>Service outcome, the measures that show it working, and what happens behind the scenes. A selected capability highlights the measures it should move.</small>`));
   STAGES.forEach(s => map.appendChild(el("div", { class: "cell h3cell", "data-stage": s.id },
-    `<p>${s.outcome}</p><p class="measures" data-measures>${s.measures}</p>${s.behind ? `<p class="behind">${s.behind}</p>` : ""}`)));
+    `<p>${s.outcome}</p><p class="measures">${measuresOf(s).map(m => `<span class="mz" data-m="${movesKey([s.id, m])}">${m}</span>`).join(" · ")}</p>${s.behind ? `<p class="behind">${s.behind}</p>` : ""}`)));
   map.appendChild(el("div", { class: "cell lane" }, `${hz("H3")} Steps<small>On the target map. Flags show tasks not yet agreed or with no epic, and what they wait on.</small>`));
   STAGES.forEach(s => {
     const html = STEPS.filter(p => p.stage === s.id).map(p => `<div class="step" data-step="${p.id}"><span class="sn">${p.name}</span>${p.flag ? `<span class="flag">${flagTag(p.flag)} ${p.flag.task}</span><span class="needs">${p.flag.needs.length ? `<span class="visually-hidden">Waits on </span>${p.flag.needs.map(k => `<button type="button" data-pick="${k}" title="${byKey(k).name}">${k}</button>`).join("")}` : `<span class="none">No capability yet</span>`}</span>` : ""}</div>`).join("");
     map.appendChild(el("div", { class: "cell steps", "data-stage": s.id }, html));
   });
-  // H1
   map.appendChild(el("div", { class: "cell lane" }, `${hz("H1")} Today<small>From the transformation evidence. <span style="color:var(--red)">! marks a problem.</span></small>`));
   STAGES.forEach(s => {
     const t = TODAY[s.id];
     map.appendChild(el("div", { class: "cell", "data-stage": s.id }, t.length ? `<ul>${t.map(li).join("")}</ul>` : `<p class="empty">No evidence gathered for this stage yet.</p>`));
   });
-  // H2
   map.appendChild(el("div", { class: "band", "data-band": "tech" }, "H2 · Technology capabilities, ranked by impact on the service"));
   TECH.forEach(c => capRow(map, c));
   map.appendChild(el("div", { class: "band svc", "data-band": "service" }, "H2 · Service changes: policy, operations and commercial. Ranked by impact"));
   SVC.forEach(c => capRow(map, c));
-  map.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); go("cap-" + b.dataset.pick); }));
+  map.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); go({ sel: b.dataset.pick, stage: null }); }));
 }
 
 function capRow(map, c) {
   const lab = el("button", { type: "button", class: "cap-label", "data-item": c.key, "aria-pressed": "false" },
     `<span class="t">${c.key}. ${c.name}</span><span class="sz">${hz(c.h)} <b>${c.size.head}</b> ${basis(c.size.basis)}</span>`);
-  lab.addEventListener("click", () => go(state.sel === c.key ? "" : "cap-" + c.key));
+  lab.addEventListener("click", () => go({ sel: state.sel === c.key ? null : c.key, stage: null }));
   map.appendChild(lab);
   STAGES.forEach((s, i) => {
     const imp = c.impact[s.id];
@@ -610,7 +728,7 @@ function capRow(map, c) {
       const label = c.labels[s.id];
       const role = imp === "p" ? "main stage" : "supporting";
       const b = el("button", { type: "button", class: cls, "aria-label": `${c.name}, ${role} at ${s.name}${label ? ": " + label : ""}` }, label ? `<span>${label}</span>` : "");
-      b.addEventListener("click", () => go("cap-" + c.key));
+      b.addEventListener("click", () => go({ sel: c.key, stage: null }));
       cell.appendChild(b);
     }
     map.appendChild(cell);
@@ -618,12 +736,15 @@ function capRow(map, c) {
 }
 
 // ---------- Render ----------
+// In the workshop view only the current prize counts; the other filters are hidden.
 function visible() {
+  if (state.workshop) return CAPS.filter(c => c.prize === state.wsPrize);
   return CAPS.filter(c => (state.layer === "all" || c.kind === state.layer) && (state.prize === "all" || c.prize === state.prize) && (state.horizon === "all" || c.h === state.horizon));
 }
 
 function render() {
   document.body.classList.toggle("notes", state.notes);
+  document.body.classList.toggle("workshop", state.workshop);
   $("#notesBtn").setAttribute("aria-pressed", String(state.notes));
   $("#notesBtn").textContent = state.notes ? "Hide design notes" : "Show design notes";
   document.querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(state[b.dataset.f] === b.dataset.v)));
@@ -635,35 +756,71 @@ function render() {
   const linked = new Set(sel ? (sel.kind === "service" ? sel.depends : neededBy(sel.key).map(s => s.key)) : []);
   const touched = sel ? new Set(Object.keys(sel.impact)) : null;
   const selSteps = new Set(sel ? [...sel.steps, ...STEPS.filter(p => p.flag && p.flag.needs.includes(sel.key)).map(p => p.id)] : []);
+  const selMoves = new Set(sel ? sel.moves.map(movesKey) : []);
 
   document.querySelectorAll("#map [data-item]").forEach(n => {
     const c = byKey(n.dataset.item);
-    n.hidden = state.layer !== "all" && c.kind !== state.layer;
+    // Workshop view hides the other prizes rather than dimming them, so the room sees one argument
+    n.hidden = state.workshop ? !vis.has(c.key) && c.key !== state.sel : state.layer !== "all" && c.kind !== state.layer;
     let dim = !vis.has(c.key) || (sel && c.key !== sel.key && !linked.has(c.key));
+    if (state.workshop && c.key === state.sel) dim = false;
     if (state.stage) dim = dim || !c.impact[state.stage];
     n.classList.toggle("dimmed", !!dim);
     n.classList.toggle("linked", linked.has(c.key));
   });
-  document.querySelectorAll("#map [data-band]").forEach(n => { n.hidden = state.layer !== "all" && n.dataset.band !== state.layer; });
+  document.querySelectorAll("#map [data-band]").forEach(n => {
+    n.hidden = state.workshop ? !CAPS.some(c => c.kind === n.dataset.band && (vis.has(c.key) || c.key === state.sel)) : state.layer !== "all" && n.dataset.band !== state.layer;
+  });
   document.querySelectorAll("#map .cell[data-stage]:not(.bar-cell)").forEach(n => {
     const s = n.dataset.stage;
     n.classList.toggle("hl", !!(touched && touched.has(s) && !n.classList.contains("steps")) || state.stage === s);
     n.classList.toggle("dimmed", !!state.stage && state.stage !== s);
   });
   document.querySelectorAll("#map .step").forEach(n => n.classList.toggle("on", selSteps.has(n.dataset.step)));
-  document.querySelectorAll("#map [data-measures]").forEach(n => n.classList.toggle("hl", !!sel && sel.key === "S7"));
+  document.querySelectorAll("#map [data-m]").forEach(n => n.classList.toggle("on", selMoves.has(n.dataset.m)));
+  renderWorkshop();
   renderDetail(sel);
+}
+
+function renderWorkshop() {
+  const w = $("#ws");
+  if (!state.workshop) { w.innerHTML = ""; return; }
+  const i = PRIZES.findIndex(p => p.id === state.wsPrize), p = PRIZES[i];
+  const cs = CAPS.filter(c => c.prize === p.id);
+  w.innerHTML = `
+    <div class="ws-bar">
+      <span class="ws-count">Prize ${i + 1} of ${PRIZES.length}</span>
+      <button type="button" class="chip" data-ws="-1" ${i === 0 ? "disabled" : ""}>← Previous prize</button>
+      <button type="button" class="chip" data-ws="1" ${i === PRIZES.length - 1 ? "disabled" : ""}>Next prize →</button>
+      <span class="muted ws-keys">Arrow keys step through prizes. Esc goes back.</span>
+      <button type="button" class="chip" data-exit-ws>Leave workshop view</button>
+    </div>
+    <h2 class="ws-h">${p.name}</h2>
+    <p class="ws-q">${p.question}</p>
+    <div class="ws-cards">${cs.map(c => `
+      <article class="ws-card${c.key === state.sel ? " on" : ""}">
+        <h3><button type="button" class="pick" data-pick="${c.key}">${c.key}. ${c.name}</button> ${hz(c.h)}</h3>
+        <p><span class="ws-n">${c.size.head}</span> ${c.size.unit}</p>
+        <p>${basis(c.size.basis)}</p>
+        <p class="ws-moves"><strong>Should move:</strong> ${movesShort(c)}</p>
+        <p class="ws-tosize"><strong>To size it:</strong> ${c.toSize}</p>
+      </article>`).join("")}</div>
+    ${note("One prize at a time, as a question, so the room argues with the map instead of reading it. The size, the measure it moves and what it would take to size it sit together on each card because those are the three things a business case reviewer asks.")}`;
+  w.querySelectorAll("[data-ws]").forEach(b => b.addEventListener("click", () => stepPrize(Number(b.dataset.ws))));
+  w.querySelector("[data-exit-ws]").addEventListener("click", () => go({ workshop: false, sel: null, stage: null }));
+  w.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => go({ sel: state.sel === b.dataset.pick ? null : b.dataset.pick, stage: null })));
 }
 
 function renderDetail(sel) {
   const d = $("#detail");
+  d.hidden = state.workshop && !sel && !state.stage;
   if (sel) d.innerHTML = capDetail(sel);
   else if (state.stage) d.innerHTML = stageDetail(stageById(state.stage));
-  else d.innerHTML = overview();
-  d.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => go("cap-" + b.dataset.pick)));
-  d.querySelectorAll("[data-stagepick]").forEach(b => b.addEventListener("click", () => go("stage-" + b.dataset.stagepick)));
+  else d.innerHTML = state.workshop ? "" : overview();
+  d.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => go({ sel: b.dataset.pick, stage: null })));
+  d.querySelectorAll("[data-stagepick]").forEach(b => b.addEventListener("click", () => go({ stage: b.dataset.stagepick, sel: null })));
   const back = d.querySelector("[data-back]");
-  if (back) back.addEventListener("click", () => go(""));
+  if (back) back.addEventListener("click", () => go({ sel: null, stage: null }));
 }
 
 function capDetail(c) {
@@ -671,17 +828,14 @@ function capDetail(c) {
   const badge = `<span class="badge" style="background:${isSvc ? "var(--ink)" : "var(--blue)"}">${isSvc ? "Service change" : "Technology"} ${c.key}</span>`;
   const rel = isSvc ? c.depends : neededBy(c.key).map(s => s.key);
   const stages = STAGES.filter(s => c.impact[s.id]);
-  const unblocks = STEPS.filter(p => p.flag && p.flag.needs.includes(c.key));
   const gallery = c.steps.map(id => { const p = stepById(id), s = stageById(p.stage); return `<figure>${img(id, 132)}<figcaption><span class="st">${stageNum(s)} ${s.name}</span><br>${p.name}</figcaption></figure>`; }).join("");
   return `
-    <div class="detail-head">${badge}${hz(c.h)}<h2>${c.name}</h2><b class="tag b-none">${prizeName(c.prize)}</b>${isSvc ? `<b class="tag b-none">${REACH[c.reach]}</b>` : ""}${c.contest ? `<b class="tag t-contest">Horizon contested</b>` : ""}<button type="button" class="pick" data-back>Back to all capabilities</button></div>
+    <div class="detail-head">${badge}${hz(c.h)}<h2>${c.name}</h2><b class="tag b-none">${prizeName(c.prize)}</b>${isSvc ? `<b class="tag b-none">${REACH[c.reach]}</b>` : ""}${c.contest ? `<b class="tag t-contest">Horizon contested</b>` : ""}<button type="button" class="pick" data-back>${state.workshop ? "Close" : "Back to all capabilities"}</button></div>
     <p style="max-width:85ch;font-size:17px">${c.what}</p>
     <div class="size"><span class="head">${c.size.head}</span><span class="unit">${c.size.unit}</span><span class="src">${basis(c.size.basis)} ${c.size.src || ""}</span></div>
-    <div>
-      <h3>What it makes possible on the target service</h3>
-      ${gallery ? `<div class="gallery">${gallery}</div>` : `<p class="muted">No single step. It changes what every stage is measured on: the measures row of the target map, highlighted below.</p>`}
-      ${unblocks.length ? `<p style="margin-top:10px"><strong>Unblocks:</strong> ${unblocks.map(p => `${flagTag(p.flag)} ${p.flag.task} <span class="muted">(${p.name})</span>`).join("; ")}</p>` : ""}
-    </div>
+    ${toSizeBox(c)}
+    ${chain(c)}
+    ${gallery ? `<div><h3>On the target service</h3><div class="gallery">${gallery}</div></div>` : ""}
     <div class="hzbox"><div><h3>Why ${c.h}</h3><p>${c.hwhy}</p></div><div><h3>${c.h === "H2+" ? "How it could slip" : "What would make it H2+"}</h3><p>${c.hmove}</p></div>${c.contest ? `<div><h3>Against the target map</h3><p>${c.contest}</p></div>` : ""}</div>
     <div class="cols">
       <div><h3>Other evidence of size</h3>${list(c.evidence)}</div>
@@ -698,10 +852,15 @@ function stageDetail(s) {
   const main = acting.filter(c => c.impact[s.id] === "p"), sup = acting.filter(c => c.impact[s.id] === "s");
   const flags = STEPS.filter(p => p.stage === s.id && p.flag);
   const t = TODAY[s.id];
+  const byMeasure = measuresOf(s).map(m => {
+    const cs = CAPS.filter(c => c.key !== "S7" && c.moves.some(x => x[0] === s.id && x[1] === m));
+    return `<strong>${m}:</strong> ${cs.length ? cs.map(c => pick(c.key)).join(", ") : `<span class="muted">no capability on this map moves it</span>`}`;
+  });
   return `
-    <div class="detail-head"><span class="badge" style="background:var(--ink)">Stage ${stageNum(s)}</span><h2>${s.name}</h2>${s.tbc ? `<b class="tag t-tbc">tbc</b>` : ""}<span class="muted">${s.was}</span><button type="button" class="pick" data-back>Back to all capabilities</button></div>
+    <div class="detail-head"><span class="badge" style="background:var(--ink)">Stage ${stageNum(s)}</span><h2>${s.name}</h2>${s.tbc ? `<b class="tag t-tbc">tbc</b>` : ""}<span class="muted">${s.was}</span><button type="button" class="pick" data-back>${state.workshop ? "Close" : "Back to all capabilities"}</button></div>
     <div class="cols">
-      <div><h3>${hz("H3")} Target</h3><p>${s.outcome}</p><p class="muted" style="margin-top:6px">Measured by: ${s.measures}</p></div>
+      <div><h3>${hz("H3")} Target</h3><p>${s.outcome}</p></div>
+      <div><h3>Its measures, and what moves them</h3>${list(byMeasure)}</div>
       <div><h3>${hz("H1")} Today</h3>${t.length ? `<ul>${t.map(li).join("")}</ul>` : `<p class="muted">No evidence gathered for this stage yet. Nothing here can be sized until it is.</p>`}</div>
       <div><h3>Capabilities doing the main work</h3>${main.length ? list(main.map(c => pick(c.key))) : `<p class="muted">None. This stage has no capability doing the main work on this map.</p>`}</div>
       <div><h3>Supporting</h3>${sup.length ? list(sup.map(c => pick(c.key))) : `<p class="muted">None.</p>`}</div>
@@ -714,28 +873,45 @@ function overview() {
   const rows = PRIZES.map(p => {
     const cs = v.filter(c => c.prize === p.id);
     if (!cs.length) return "";
-    return `<tr class="grp"><td colspan="4">${p.name}</td></tr>` + cs.map(c => `<tr>
+    return `<tr class="grp"><td colspan="5">${p.name}</td></tr>` + cs.map(c => `<tr>
       <td>${pick(c.key)} ${hz(c.h)}</td>
       <td class="n">${c.size.head}</td>
-      <td>${c.size.unit}</td>
-      <td>${basis(c.size.basis)}</td></tr>`).join("");
+      <td>${c.size.unit}<br>${basis(c.size.basis)}</td>
+      <td>${movesShort(c)}${c.gap ? `<br><b class="tag t-tbc">Gap</b> <span class="muted">${c.gap}</span>` : ""}</td>
+      <td>${c.toSize}</td></tr>`).join("");
   }).join("");
   return `
-    <div class="detail-head"><h2>Size of the opportunity, by prize</h2><span class="muted">${v.length} of ${CAPS.length} capabilities. Select one for its steps on the target service, evidence and blockers.</span></div>
-    <table class="opp"><thead><tr><th scope="col">Capability</th><th scope="col">Headline</th><th scope="col">What the figure is</th><th scope="col">Basis</th></tr></thead><tbody>${rows || `<tr><td colspan="4">No capabilities match these filters.</td></tr>`}</tbody></table>
-    ${note("Grouped by prize because each prize is a separate business case argument. Chasing contacts and decision time should not be added together: they are measured in different units and paid for by different budgets.")}`;
+    <div class="detail-head"><h2>Size of the opportunity, by prize</h2><span class="muted">${v.length} of ${CAPS.length} capabilities. Select one for its steps on the target service, evidence and blockers.</span><button type="button" class="chip" data-enter-ws-inline>Open workshop view</button></div>
+    <table class="opp"><thead><tr><th scope="col">Capability</th><th scope="col">Headline</th><th scope="col">What the figure is</th><th scope="col">Should move, on the target map</th><th scope="col">What it would take to size it <span class="tag b-none">Proposed</span></th></tr></thead><tbody>${rows || `<tr><td colspan="5">No capabilities match these filters.</td></tr>`}</tbody></table>
+    ${note("Grouped by prize because each prize is a separate business case argument. Chasing contacts and decision time should not be added together: they are measured in different units and paid for by different budgets. The sizing column is proposed and needs checking with analysts before anyone is asked to run it.")}`;
 }
 
-// ---------- Hash router: #cap-T3, #stage-04, or nothing ----------
-function go(hash) { if (location.hash.slice(1) === hash) route(); else location.hash = hash; }
+// ---------- Hash router ----------
+// Parts joined by "/": "workshop", "p-<prize>", "cap-<key>" or "stage-<id>". For example #workshop/p-time/cap-T5.
+function hashFor() {
+  const p = [];
+  if (state.workshop) p.push("workshop", "p-" + state.wsPrize);
+  if (state.sel) p.push("cap-" + state.sel);
+  else if (state.stage) p.push("stage-" + state.stage);
+  return p.join("/");
+}
+function go(patch) {
+  Object.assign(state, patch);
+  const h = hashFor();
+  if (location.hash.slice(1) === h) render(); else location.hash = h;
+}
 function route() {
-  const h = location.hash.slice(1);
-  state.sel = null; state.stage = null;
-  if (h.startsWith("cap-") && byKey(h.slice(4))) state.sel = h.slice(4);
-  else if (h.startsWith("stage-") && stageById(h.slice(6))) state.stage = h.slice(6);
+  state.sel = null; state.stage = null; state.workshop = false;
+  location.hash.slice(1).split("/").forEach(t => {
+    if (t === "workshop") state.workshop = true;
+    else if (t.startsWith("p-") && PRIZES.some(p => p.id === t.slice(2))) state.wsPrize = t.slice(2);
+    else if (t.startsWith("cap-") && byKey(t.slice(4))) state.sel = t.slice(4);
+    else if (t.startsWith("stage-") && stageById(t.slice(6))) state.stage = t.slice(6);
+  });
   render();
 }
 window.addEventListener("hashchange", route);
+document.addEventListener("click", e => { if (e.target.closest("[data-enter-ws-inline]")) go({ workshop: true, sel: null, stage: null }); });
 
 resetState();
 buildReads();
