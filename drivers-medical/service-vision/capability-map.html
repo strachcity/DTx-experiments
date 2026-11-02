@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Drivers Medical capability map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+<style>
+/* A canvas, not a prototype. Columns are the CX stages of whole-service-map-v2.html (H3).
+   Under each: today's service (H1), then the capabilities that get from one to the other (H2). */
+:root {
+  --ink: #0b0c0c; --muted: #505a5f; --line: #b1b4b6; --line-soft: #e5e6e7; --tint: #f3f2f1;
+  --blue: #1d70b8; --blue-dark: #003078; --blue-tint: #d2e2f1; --green: #00703c; --red: #d4351c;
+  --h2p: #00703c; --h2m: #a64b00; --h3: #10605b; --focus: #ffdd00; --hl: #fff7bf;
+  --font: "Public Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: #ffffff; color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.45; }
+a { color: var(--blue); } a:hover { color: var(--blue-dark); }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 0; box-shadow: 0 0 0 5px var(--ink); }
+h1 { font-size: 36px; line-height: 1.1; margin: 0; }
+h2 { font-size: 22px; margin: 0; }
+h3 { font-size: 15px; margin: 0 0 6px; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.muted { color: var(--muted); }
+.fig { font-weight: 700; font-variant-numeric: tabular-nums; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.wrap { padding: 32px max(16px, 3vw) 48px; display: grid; gap: 24px; }
+.intro { display: grid; gap: 12px; max-width: 1180px; }
+.status { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); }
+.status strong { color: var(--ink); background: var(--tint); border: 1px solid var(--line); padding: 1px 8px; }
+.lede { font-size: 18px; max-width: 75ch; }
+.reads { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; max-width: 1180px; }
+.read { border-left: 5px solid var(--blue); background: var(--tint); padding: 12px 14px; font-size: 14px; }
+.read strong { display: block; margin-bottom: 4px; font-size: 15px; }
+
+.controls { display: grid; gap: 10px; max-width: 1180px; }
+.ctrl-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ctrl-row > .lab { min-width: 150px; font-weight: 700; font-size: 14px; }
+.chip { border: 1px solid var(--line); background: #fff; padding: 4px 10px; font-size: 14px; display: inline-flex; gap: 6px; align-items: center; }
+.chip:hover { border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.chip .k { font-size: 12px; font-weight: 700; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.key { width: 28px; height: 12px; display: inline-block; }
+.key.tp { background: var(--blue); }
+.key.ts { background: repeating-linear-gradient(135deg, var(--blue-tint) 0 4px, #fff 4px 7px); box-shadow: inset 0 0 0 1px var(--blue); }
+.key.sp { background: var(--ink); }
+.key.ss { box-shadow: inset 0 0 0 2px var(--ink); }
+
+/* Tags: every one carries text, never colour alone */
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 6px; line-height: 1.5; white-space: nowrap; }
+.hz-h2p { background: var(--h2p); color: #fff; }
+.hz-h2m { color: var(--h2m); box-shadow: inset 0 0 0 2px var(--h2m); }
+.hz-h3 { background: var(--h3); color: #fff; }
+.hz-h1 { background: var(--muted); color: #fff; }
+.b-wide { background: #cce2d8; color: #005a30; }
+.b-cohort { background: #bbd4ea; color: #0c2d4a; }
+.b-ceiling { background: #fcd6c3; color: #6e3619; }
+.b-none { background: #e5e6e7; color: #282d30; }
+.t-tbc { background: #fff7bf; color: #594d00; }
+.t-noepic { background: #e5e6e7; color: #282d30; }
+.t-contest { background: #f4d7e3; color: #5c1a36; }
+.chip[aria-pressed="true"] .hz-h2m { color: #fff; box-shadow: inset 0 0 0 2px #fff; }
+
+/* Detail panel */
+.detail { border: 1px solid var(--line); border-top: 5px solid var(--ink); padding: 20px 22px; display: grid; gap: 18px; max-width: 1400px; }
+.detail-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.detail-head .badge { font-size: 13px; font-weight: 700; padding: 2px 8px; color: #fff; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+.cols li { max-width: 60ch; }
+.size { display: grid; grid-template-columns: minmax(180px, auto) 1fr; gap: 6px 20px; align-items: baseline; background: var(--tint); padding: 14px 16px; }
+.size .head { font-size: 34px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.size .unit { font-size: 16px; }
+.size .src { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.hzbox { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; border-left: 5px solid var(--line); padding: 4px 0 4px 14px; }
+.gallery { display: flex; flex-wrap: wrap; gap: 12px; }
+.gallery figure { margin: 0; width: 132px; display: grid; gap: 4px; font-size: 13px; }
+.gallery img { width: 132px; height: 165px; object-fit: cover; display: block; border: 1px solid var(--line-soft); }
+.gallery .st { color: var(--muted); font-size: 12px; }
+.pick { background: none; border: 0; padding: 0; color: var(--blue); text-decoration: underline; text-align: left; }
+.pick:hover { color: var(--blue-dark); }
+table.opp { border-collapse: collapse; width: 100%; font-size: 14px; }
+.opp caption { text-align: left; font-weight: 700; font-size: 17px; padding: 10px 0 6px; }
+.opp th, .opp td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line-soft); }
+.opp th { border-bottom: 2px solid var(--ink); font-size: 13px; }
+.opp td.n { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 16px; }
+.opp .grp td { padding-top: 16px; font-weight: 700; border-bottom: 1px solid var(--ink); }
+
+/* The map */
+.map-scroll { overflow-x: auto; border: 1px solid var(--line); }
+.map { display: grid; grid-template-columns: 270px repeat(10, 188px); width: max-content; }
+.cell { border-right: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); padding: 10px; font-size: 13px; transition: opacity .15s, background .15s; }
+.lane { position: sticky; left: 0; z-index: 2; background: #fff; border-right: 1px solid var(--line); font-weight: 700; font-size: 14px; display: grid; gap: 4px; align-content: start; }
+.lane small { font-weight: 400; color: var(--muted); font-size: 13px; }
+.stage-head { text-align: left; border: 0; border-right: 1px solid var(--line-soft); border-bottom: 3px solid var(--ink); background: #fff; padding: 10px; display: grid; gap: 4px; align-content: start; }
+.stage-head:hover { background: var(--tint); }
+.stage-head[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.stage-head[aria-pressed="true"] .muted { color: #fff; }
+.stage-head .num { font-size: 13px; font-weight: 700; }
+.stage-head .nm { font-size: 17px; font-weight: 700; line-height: 1.2; }
+.stage-head img { width: 100%; height: 150px; object-fit: cover; display: block; margin: 4px 0; }
+.stage-head .was { font-size: 12px; }
+.h3cell { background: #f2f7f6; }
+.h3cell .measures { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--h3); }
+.h3cell .behind { margin-top: 8px; font-size: 12px; font-style: italic; color: var(--muted); }
+.steps { display: grid; gap: 8px; }
+.step { border-left: 3px solid transparent; padding-left: 6px; }
+.step.on { border-left-color: var(--blue); background: var(--hl); }
+.step .sn { font-weight: 700; }
+.step .flag { display: block; margin-top: 2px; font-size: 12px; }
+.needs { display: inline-flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
+.needs button { font-size: 11px; font-weight: 700; padding: 0 4px; border: 1px solid var(--line); background: #fff; }
+.needs .none { font-size: 11px; color: var(--muted); }
+.cell ul { padding-left: 14px; gap: 5px; }
+li.pain { color: var(--red); list-style: none; margin-left: -14px; padding-left: 14px; position: relative; }
+li.pain::before { content: "!"; position: absolute; left: 0; font-weight: 700; }
+li.pocket { color: var(--h3); }
+.empty { color: var(--muted); font-style: italic; font-size: 12px; }
+.band { grid-column: 1 / -1; background: var(--ink); color: #fff; font-weight: 700; font-size: 13px; padding: 7px 10px; position: sticky; left: 0; }
+.band.svc { background: var(--tint); color: var(--ink); border-top: 3px solid var(--ink); }
+.cap-label { position: sticky; left: 0; z-index: 2; background: #fff; text-align: left; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line-soft); padding: 9px 10px; display: grid; gap: 3px; }
+.cap-label:hover { background: var(--tint); }
+.cap-label[aria-pressed="true"] { box-shadow: inset 5px 0 0 var(--blue); background: var(--hl); }
+.cap-label .t { font-weight: 700; font-size: 14px; line-height: 1.25; }
+.cap-label .sz { font-size: 12px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.cap-label .sz b { font-variant-numeric: tabular-nums; }
+.bar-cell { padding: 8px 0; display: flex; align-items: center; }
+.bar { width: 100%; min-height: 32px; padding: 4px 8px; border: 0; text-align: left; font-size: 12px; font-weight: 700; line-height: 1.2; display: flex; align-items: center; }
+.bar.tp { background: var(--blue); color: #fff; }
+.bar.ts { background: repeating-linear-gradient(135deg, var(--blue-tint) 0 5px, #fff 5px 9px); color: var(--ink); box-shadow: inset 0 1px 0 var(--blue), inset 0 -1px 0 var(--blue); }
+.bar.sp { background: var(--ink); color: #fff; }
+.bar.ss { background: #fff; color: var(--ink); box-shadow: inset 0 2px 0 var(--ink), inset 0 -2px 0 var(--ink); }
+.bar.ts span, .bar.ss span { background: #fff; padding: 0 3px; }
+.bar.start { margin-left: 6px; } .bar.end { margin-right: 6px; }
+.bar.ts.start { box-shadow: inset 0 1px 0 var(--blue), inset 0 -1px 0 var(--blue), inset 1px 0 0 var(--blue); }
+.bar.ts.end { box-shadow: inset 0 1px 0 var(--blue), inset 0 -1px 0 var(--blue), inset -1px 0 0 var(--blue); }
+.bar.ts.start.end { box-shadow: inset 0 0 0 1px var(--blue); }
+.bar.ss.start { box-shadow: inset 0 2px 0 var(--ink), inset 0 -2px 0 var(--ink), inset 2px 0 0 var(--ink); }
+.bar.ss.end { box-shadow: inset 0 2px 0 var(--ink), inset 0 -2px 0 var(--ink), inset -2px 0 0 var(--ink); }
+.bar.ss.start.end { box-shadow: inset 0 0 0 2px var(--ink); }
+.dimmed { opacity: .18; }
+.linked { opacity: .7; }
+.hl { background: var(--hl) !important; }
+[hidden] { display: none !important; }
+
+/* Design notes: prototype annotations, off by default */
+.note { display: none; border-left: 5px solid #f47738; background: #fff4ec; padding: 8px 12px; font-size: 14px; max-width: 90ch; }
+body.notes .note { display: block; }
+footer { font-size: 13px; color: var(--muted); display: grid; gap: 6px; max-width: 110ch; }
+@media (prefers-reduced-motion: reduce) { .cell { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <div class="status"><strong>Working draft</strong><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span><a href="whole-service-map-v2.html#cx">Open the whole-service map (v2)</a></div>
+    <h1>The capabilities the target service needs, and how big each opportunity is</h1>
+    <p class="lede">Each column is a stage of the target service from the whole-service map. Under it is what happens there today, then the capabilities that close the gap: 8 technology capabilities in blue and 7 service changes in black. Select a capability to see the size of its opportunity and the steps of the target service it makes possible.</p>
+    <div id="notes-intro"></div>
+  </header>
+
+  <section class="reads" aria-label="What the map says" id="reads"></section>
+
+  <section class="controls" aria-label="Filters">
+    <div class="ctrl-row" id="layerRow"><span class="lab">Show</span></div>
+    <div class="ctrl-row" id="prizeRow"><span class="lab">Prize</span></div>
+    <div class="ctrl-row" id="hzRow"><span class="lab">Horizon</span></div>
+    <div class="ctrl-row"><span class="lab">Design notes</span><button type="button" class="chip" id="notesBtn" aria-pressed="false">Show design notes</button></div>
+    <div class="legend">
+      <span><i class="key tp"></i>Technology, main stage</span>
+      <span><i class="key ts"></i>Technology, supporting</span>
+      <span><i class="key sp"></i>Service change, main stage</span>
+      <span><i class="key ss"></i>Service change, supporting</span>
+      <span><b class="tag hz-h3">H3</b> target, or a pocket of it that exists today</span>
+      <span><b class="tag hz-h2p">H2+</b> transforming</span>
+      <span><b class="tag hz-h2m">H2-</b> sustaining</span>
+      <span><b class="tag t-tbc">tbc</b> not yet agreed on the target map</span>
+    </div>
+  </section>
+
+  <section class="detail" id="detail" aria-live="polite"></section>
+
+  <div class="map-scroll" tabindex="0" aria-label="Capability map, scrolls sideways">
+    <div class="map" id="map"></div>
+  </div>
+
+  <footer>
+    <p>Target service: whole-service-map-v2.html, CX map. Illustrations are that map's step illustrations, some still stand-ins.</p>
+    <p>Sources: DVLA Discovery Report (Mar 2026), CDS-271, CDS-342, CDS-405, CDS-443 (DMSP cohort only, never service-wide), CDS-482, CDS-730 (service-wide HCP baseline), CALD by condition (26 Jun 2026), DGU letter catalogue, operating instructions keyword count, D202 experiment (Oct 2026). Figures marked "inference" or "not yet sized" are not measured.</p>
+    <p>Horizon labels follow the three horizons framework in <a href="https://www.eatingpolicy.com/p/a-three-horizons-framework-for-government">Eating Policy</a>. The test for each capability: does it move the service toward the target, or prolong today's? Rankings and placements are judgements, there to be challenged.</p>
+  </footer>
+</div>
+
+<script>
+// ---------- Target service (H3): CX stages of whole-service-map-v2.html ----------
+const STAGES = [
+  { id: "01", name: "Find out", img: "cx-01", was: "Before today's journey starts",
+    outcome: "People with a medical condition know whether they need to tell DVLA, how to do it, and whether they can keep driving meanwhile.",
+    measures: "Unnecessary notifications · Late declarations",
+    behind: "Guidance written with DM policy, so what customers read matches how cases are decided." },
+  { id: "02", name: "Tell us", img: "cx-04", was: "Today: Tell us, Case created, Level 1 triage",
+    outcome: "People tell DVLA once, in the channel that suits them, and their case goes straight to the right route.",
+    measures: "Complete first time · Routed right first time · Paper keyed by hand",
+    behind: "Every channel lands in one intake, paper included. Case classified by risk archetype and routed to a pathway." },
+  { id: "03", name: "Stay informed", img: "cx-09", was: "Today: what customers hear at every stage",
+    outcome: "Customers always know where their case is, what happens next, and whether they can drive.",
+    measures: "Progress-chasing calls · Repeat calls",
+    behind: "Status changes in Dynamics trigger messages automatically." },
+  { id: "04", name: "Provide what's needed", img: "cx-11", was: "Today: Questionnaire, Level 2 decision, Evidence wait",
+    outcome: "DVLA gets the evidence it needs to decide, asked for once, and only when it will change the decision.",
+    measures: "Evidence requests per case · Days waiting on third parties",
+    behind: "Evidence requested only where it changes the decision. Third parties chased when it is late." },
+  { id: "05", name: "Get help", img: "cx-15", was: "Today: the chasing calls",
+    outcome: "When customers get in touch, they reach someone who knows their case and can resolve it.",
+    measures: "Resolved first time · Calls reaching the owning team",
+    behind: "Calls and chats arrive with the case already on screen." },
+  { id: "06", name: "Get a decision", img: "cx-17", was: "Today: Escalation, Decision",
+    outcome: "People safe to drive keep driving. People who aren't stop, and understand why.",
+    measures: "Average days to decision · Decision quality",
+    behind: "Decisions supported by risk and operational insight." },
+  { id: "07", name: "Challenge", img: "cx-20", was: "Not on today's journey map",
+    outcome: "People who disagree can have a decision looked at again, quickly and fairly.",
+    measures: "Challenges and appeals · Appeals won", behind: "" },
+  { id: "08", name: "Renew", tbc: true, img: "cx-23", was: "Today: Licence and review",
+    outcome: "People on a medical licence renew with effort proportionate to their risk.",
+    measures: "Effort per renewal · Renewals without a gap",
+    behind: "Renewal route set by risk archetype." },
+  { id: "09", name: "Tell us about a change", tbc: true, img: "cx-24", was: "Not on today's journey map",
+    outcome: "Changes in health reach DVLA and trigger the right level of review.",
+    measures: "Changes reported before review", behind: "A change re-triggers routing." },
+  { id: "inf", num: "∞", name: "Whole service", tbc: true, img: "cx-25", was: "Not on today's journey map",
+    outcome: "Anyone using the service can get help or complain, whatever stage they are at.",
+    measures: "Complaints · Customer satisfaction", behind: "" }
+];
+
+// Steps on the v2 CX map, in order. Illustrations are named by this position.
+// flag: a task on the target map that is tbc or has no epic, and the capabilities it waits on.
+const STEPS = [
+  { id: "cx-01", stage: "01", name: "Check if you need to tell DVLA" },
+  { id: "cx-02", stage: "01", name: "Understand what to do" },
+  { id: "cx-03", stage: "02", name: "Sign in or create an account", flag: { kind: "tbc", task: "Create a DVLA account", needs: [], why: "No capability on this map covers the account model." } },
+  { id: "cx-04", stage: "02", name: "Tell DVLA yourself" },
+  { id: "cx-05", stage: "02", name: "Tell DVLA with help" },
+  { id: "cx-06", stage: "02", name: "Someone else tells us", flag: { kind: "tbc", task: "Online or on paper for someone else", needs: [], why: "Consent and account access for representatives aren't in the transformation evidence." } },
+  { id: "cx-07", stage: "02", name: "Get confirmation" },
+  { id: "cx-08", stage: "03", name: "See your case", flag: { kind: "noepic", task: "Check if you can drive", needs: [], why: "No capability on this map gives a plain answer to whether you can drive today." } },
+  { id: "cx-09", stage: "03", name: "Get updated" },
+  { id: "cx-10", stage: "04", name: "Get a request" },
+  { id: "cx-11", stage: "04", name: "Send what's asked for" },
+  { id: "cx-12", stage: "04", name: "Consent to share your data", flag: { kind: "tbc", task: "Consent to share with healthcare professionals", needs: ["T4", "T5"], why: "Online consent comes with the secure return channel. Record access depends on it." } },
+  { id: "cx-13", stage: "04", name: "Book, manage or cancel an appointment" },
+  { id: "cx-14", stage: "04", name: "Clinician provides evidence", flag: { kind: "tbc", task: "Share patient records", needs: ["T5"], why: "GP Connect is direct-care only. Record access needs NHS England policy or an NHS App route." } },
+  { id: "cx-15", stage: "05", name: "Get in touch" },
+  { id: "cx-16", stage: "05", name: "Get a call back", flag: { kind: "noepic", task: "Request a call back, out of hours", needs: ["T7"], why: "Contact routing is the nearest capability. Call backs aren't in its scope yet." } },
+  { id: "cx-17", stage: "06", name: "Receive a decision", flag: { kind: "noepic", task: "All four decision outcomes", needs: ["S1", "T8", "S5"], why: "The decision stage has no epic. These are the capabilities that act on it." } },
+  { id: "cx-18", stage: "06", name: "Understand the decision", flag: { kind: "noepic", task: "See the reasons", needs: ["S1"], why: "Inference: written thresholds are what make reasons possible to explain." } },
+  { id: "cx-19", stage: "06", name: "Surrender your licence" },
+  { id: "cx-20", stage: "07", name: "Challenge the decision" },
+  { id: "cx-21", stage: "07", name: "Appeal" },
+  { id: "cx-22", stage: "08", name: "Get a renewal reminder" },
+  { id: "cx-23", stage: "08", name: "Renew", flag: { kind: "tbc", task: "Confirm nothing has changed", needs: ["S4", "T6", "T2"], why: "Waits on policy, on D90 issuing longer licences, and on a rules engine to run declaration renewals." } },
+  { id: "cx-24", stage: "09", name: "Report a change", flag: { kind: "tbc", task: "Pause or resume your licence", needs: ["S4", "S5"], why: "Resuming on self-declaration needs review on change, and checks that show declaration-based decisions hold up." } },
+  { id: "cx-25", stage: "inf", name: "Make a complaint", flag: { kind: "noepic", task: "Complain", needs: [], why: "Not covered by any capability on this map." } }
+];
+
+// ---------- Today (H1), re-keyed from the transformation map's lanes ----------
+// "!" marks a problem, "^" a pocket of the target that already exists.
+const TODAY = {
+  "01": [],
+  "02": ["Customers tell DVLA on a paper D1, online on DMSP, or by phone",
+         "^DMSP: declare once, answers held as data. 30 to 40% of notifications (provisional)",
+         "!DMI keys the D1 by hand. Unknown what is captured as structured data",
+         "!A caseworker reads the D1 and picks a questionnaire. A rules step done by hand",
+         "!Nothing tells the customer their case arrived"],
+  "03": ["!<span class='fig'>~56%</span> of contacts are progress chases, about <span class='fig'>£1.8m</span> a year",
+         "Five case statuses go to the customer account",
+         "!<span class='fig'>~296k</span> letters a year only say 'we've written to your doctor'",
+         "!Letter events don't reach the customer account",
+         "!No signal that a doctor is looking at the case"],
+  "04": ["Paper questionnaire completed and posted back",
+         "!<span class='fig'>~33k</span> questionnaires a year rejected for missing information",
+         "<span class='fig'>50–55k</span> HCP letters a month, median <span class='fig'>~30 days</span> to return (CDS-730)",
+         "!Evidence is 50–65% of time to decision when requested (DMSP only)",
+         "!Only <span class='fig'>37 of 3,234</span> third-party requests chased (DMSP only)",
+         "^Vision: parallel requests, evidence reuse, customer-held charts accepted",
+         "^Specsavers field tests are commissioned and booked by the supplier"],
+  "05": ["Phone routing for the NewCo cohort runs from manual tables, updated twice a week",
+         "!The IVR has no real-time link to Dynamics",
+         "!Dynamics slow, no case preview, 1,500+ logged issues"],
+  "06": ["Heart, chronic neurological and cognitive cases go to EOC or DVLA doctors with no written standard",
+         "!Referral-to-revoke ratio 1 to 2.2, against 0.07 for diabetes (crude)",
+         "<span class='fig'>82%</span> of decisions issue or keep a licence. <span class='fig'>~89k</span> refusals and revocations a year",
+         "!No recommendation recorded before evidence is requested, so how often evidence changes the decision can't be measured",
+         "Decision letters print from 5am the next working day. <span class='fig'>34 of 92</span> used the digital D202 route"],
+  "07": ["!Some reversals came from questionnaire errors, not new evidence",
+         "!Nothing routinely checks decisions after they're made"],
+  "08": ["!Short licences bring people back within 3 years, in waves",
+         "Renewals re-run the same casework",
+         "^17 chronic neurological conditions renew on declaration (since Oct 2021)",
+         "!VOC45 evidence interventions rose from under 1% to 18–23%, ~90 days against ~21",
+         "!D90 constrains licence durations",
+         "!HCP forms repeat what the customer already said (PK2 repeats 4 PK1 topics)"],
+  "09": [],
+  "inf": []
+};
+
+// ---------- Capabilities (H2) ----------
+const PRIZES = [
+  { id: "contact", name: "Fewer chasing contacts" },
+  { id: "time", name: "Faster decisions" },
+  { id: "rework", name: "Less rework" },
+  { id: "repeat", name: "Less repeat demand" },
+  { id: "proof", name: "Evidence to change the rules" }
+];
+const BASIS = {
+  wide: ["b-wide", "Measured, service-wide"],
+  cohort: ["b-cohort", "Measured, one cohort"],
+  ceiling: ["b-ceiling", "Upper bound"],
+  none: ["b-none", "Not yet sized"]
+};
+
+const TECH = [
+  { key: "T1", name: "Structured data at intake", short: "Data at intake", h: "H2+", prize: "time",
+    impact: { "02": "p", "04": "p", "06": "s", "08": "s", "09": "s" },
+    labels: { "02": "Condition held as data", "04": "Answers as fields, HCP forms pre-filled", "08": "Renew from what we know" },
+    steps: ["cx-04", "cx-07", "cx-11", "cx-14", "cx-23", "cx-24"],
+    what: "The declared condition keyed from the D1 as structured data, and paper questionnaire answers held as Dynamics fields rather than scanned images.",
+    size: { head: "24 vs 66", unit: "working days to decision: DMSP cases against other routes", basis: "ceiling", src: "CDS-271. A ceiling, not an estimate." },
+    evidence: ["86.5% of resolved DMSP notifications had no escalation and no evidence request (CDS-405, DMSP only)", "~33k questionnaires a year rejected for missing information"],
+    unlocks: ["Level 1 rules have something to run on", "Routing by risk archetype at intake", "HCP forms pre-filled with what the customer said (ask once)", "Automatic checks on answers, fewer rejected questionnaires", "The gateway metric and archetype validation"],
+    blockers: ["Not yet known what DMI keys from a D1, or whether paper questionnaire answers are keyed at all", "Payload data in Dynamics blocked for bulk query by a DPIA issue", "Condition code migration incomplete"],
+    hwhy: "Changes what the service can know about a case at the moment it arrives. Every rules-based or risk-based route depends on it.",
+    hmove: "Drifts to H2- if the data is only used to speed up the existing queue." },
+  { key: "T2", name: "Rules and workflow layer in Dynamics", short: "Rules and workflow", h: "H2-", prize: "time",
+    impact: { "02": "p", "04": "s", "06": "s", "08": "s" },
+    labels: { "02": "Auto-send the right questionnaire", "04": "Automatic reminders", "08": "Declaration renewals, later" },
+    steps: ["cx-10", "cx-14", "cx-23"],
+    what: "BPMN and Power Automate flows in Dynamics, with letters generated from DGU templates automatically, not keyed by a caseworker.",
+    size: { head: "Not sized", unit: "Level 1 volume and wait have not been measured", basis: "none", src: "Size this before it goes in a business case." },
+    evidence: ["Level 1 is process-driven triage, not judgement", "98.5% of non-escalated, no-intervention diabetes renewals issued (CDS-342, short follow-up)", "17 chronic neurological conditions have been declaration-based since Oct 2021"],
+    unlocks: ["Level 1 becomes an automatic questionnaire send with a return barcode", "Triggered letters and messages at each case event", "Automatic chasing of overdue evidence", "Later, declaration-based renewals on the same rules engine"],
+    blockers: ["Automating licensing decisions is off the table for now", "~21 Level 1 flows need writing up as BPMN", "Depends on T1 for structured inputs"],
+    hwhy: "As scoped, it automates a hand-off inside today's process. The customer still declares twice, on the D1 and then the questionnaire.",
+    hmove: "Becomes H2+ if it's built as the rules engine for declaration-based decisions, not just questionnaire dispatch." },
+  { key: "T3", name: "Correspondence events and automated Notify", short: "Events and Notify", h: "H2-", prize: "contact",
+    impact: { "02": "p", "03": "p", "04": "p", "05": "s", "06": "p", "08": "s" },
+    labels: { "02": "Receipt message", "03": "Timeline from real letters", "04": "Waiting on someone else", "06": "Decision posted" },
+    steps: ["cx-07", "cx-08", "cx-09", "cx-10", "cx-17", "cx-22"],
+    what: "A new event from the Dynamics Communications table to the customer domain, so letter events drive automated Notify messages and the case timeline.",
+    size: { head: "~56%", unit: "of contacts are progress chases, about £1.8m a year", basis: "wide", src: "Discovery Report, Mar 2026. The size of the problem it acts on, not all of it a saving." },
+    evidence: ["~296k letters a year only say we've written to or chased an HCP", "~2.4m letters a year in total, ~9,600 a working day"],
+    unlocks: ["Proactive messages sent automatically, not by hand", "The case timeline built from real letters", "Letters readable in the customer account", "Retiring paper-only update letters"],
+    blockers: ["Communications table may not be able to leave Dynamics", "Access to Blob storage for PDFs not agreed", "Release rules for decision letters (legal)", "Print status only confirms 'sent to print'"],
+    hwhy: "A pressure valve. It makes waiting tolerable and cuts chasing calls, without changing why cases wait. Real value, worth naming honestly.",
+    hmove: "Becomes H2+ only if the timeline data is used to expose and fix where cases stall.",
+    contest: "The target map makes automatic messages part of the target service (stage 03, behind the scenes). Both can hold: the messages are the target, but on their own they don't change why cases wait." },
+  { key: "T4", name: "Secure digital return channel", short: "Secure return", h: "H2-", prize: "rework",
+    impact: { "02": "s", "04": "p", "06": "p", "07": "s" },
+    labels: { "04": "Reply, upload, consent online", "06": "Digital D202", "07": "Send further evidence" },
+    steps: ["cx-11", "cx-12", "cx-20"],
+    what: "Replies, uploads and consent online behind GOV.UK One Login, with paper kept for everyone.",
+    size: { head: "~88k", unit: "customer actions a year still need a digital journey, led by 33k rejected questionnaires", basis: "wide", src: "DGU letter catalogue." },
+    evidence: ["D202 QR test: 34 of 92 used it, 100% data accuracy (Oct 2026)", "56% of letters asking the customer to act already have a digital route"],
+    unlocks: ["Answers back faster, and as data (feeds T1)", "Customer-held evidence uploaded, not posted", "Digital D202 at scale"],
+    blockers: ["GOV.UK Forms can't take medical information, so it has to be built", "DMSP submissions don't attach to an existing case", "DPIA and what each access tier may show"],
+    hwhy: "A digital copy of the paper route, with paper kept. It relieves postal delay rather than changing the structure.",
+    hmove: "Becomes H2+ if replies come back as data that drive decisions (through T1)." },
+  { key: "T5", name: "HCP evidence exchange", short: "HCP evidence", h: "H2+", prize: "time",
+    impact: { "04": "p", "06": "s" },
+    labels: { "04": "Chase, digital return, pre-fill, record access" },
+    steps: ["cx-12", "cx-14"],
+    what: "In order of cost: automated reminders, a digital return route for HCPs, pre-filled 'confirm' forms, then patient-mediated record access.",
+    size: { head: "50–55k", unit: "HCP letters a month, median ~30 days to return, ~95% returned", basis: "wide", src: "CDS-730. Use March 2026 onwards." },
+    evidence: ["Evidence is 50–65% of time to decision when requested (CDS-443, DMSP only)", "Backlog weighted to complex cases: multiple 23.4%, diabetes 7.4% (CALD, 26 Jun 2026)"],
+    unlocks: ["Shorter evidence waits on the cases that make up the backlog", "Fewer chases from customers stuck waiting on someone else", "Evidence that comes back as data"],
+    blockers: ["GP Connect is direct-care only. Record access needs NHS England policy or an NHS App route", "HCP appetite for changed forms not tested", "Pre-fill depends on T1"],
+    hwhy: "Digital return, pre-filled forms and record access change how evidence is sourced and by whom.",
+    hmove: "Reminders alone are H2-: they push the same request harder." },
+  { key: "T6", name: "Flexible licence durations in D90", short: "D90 durations", h: "H2+", prize: "repeat",
+    impact: { "06": "s", "08": "p" },
+    labels: { "08": "Longer licences, light check-ins" },
+    steps: ["cx-17", "cx-22", "cx-23"],
+    what: "D90 able to issue longer licences with 'has anything changed?' check-ins, instead of enforced short renewal cycles.",
+    size: { head: "Not sized", unit: "short licences return within 3 years, in waves", basis: "none", src: "Discovery Report. The least sized capability on this map." },
+    evidence: ["A 10-year licence with reviews is legally feasible"],
+    unlocks: ["Fewer decisions needed in the first place", "Flattens recurring renewal waves", "Decision effort concentrated where risk changes"],
+    blockers: ["D90 technology is the constraint, not policy", "Legal argument on 'stable risk profile'"],
+    hwhy: "Removes a structure that manufactures demand: short licences that bring the same people back.",
+    hmove: "Drifts to H2- if longer licences arrive without a way to know when risk changes." },
+  { key: "T7", name: "Contact routing", short: "Contact routing", h: "H2-", prize: "contact",
+    impact: { "02": "s", "05": "p" },
+    labels: { "02": "Phone notifications reach an agent", "05": "IVR recognises the case" },
+    steps: ["cx-05", "cx-15", "cx-16"],
+    what: "IVR and webchat routing from case data, with call purpose tracking.",
+    size: { head: "Not sized", unit: "no figure yet for calls reaching the owning team", basis: "none", src: "Call purpose tracking would give one." },
+    evidence: ["Twice-weekly manual routing tables are an acceptable bridge"],
+    unlocks: ["Callers in the NewCo cohort reach a NewCo agent", "Calls arrive with the case already on screen", "Call purpose data to show which chasing calls stop"],
+    blockers: ["Real-time Dynamics integration for IVR"],
+    hwhy: "As built today, routing is a workaround so the NewCo cohort reaches its team. Twice-weekly manual tables make that explicit.",
+    hmove: "Becomes part of the target once routing reads case data in real time, as stage 05 describes.",
+    contest: "Stage 05 of the target map has the IVR recognise your case. That is the end state. Only the bridge, manual tables, is sustaining." },
+  { key: "T8", name: "Decision measurement", short: "Decision measurement", h: "H2+", prize: "proof",
+    impact: { "04": "s", "06": "p", "07": "s", "08": "s" },
+    labels: { "04": "Record view before evidence", "06": "Gateway metric" },
+    steps: ["cx-17", "cx-18"],
+    what: "Record a recommendation before evidence is requested, and build the MI dashboard, so the service can see how often evidence changes the decision.",
+    size: { head: "Not sized", unit: "it is what would size the policy changes", basis: "none", src: "The evidence-to-decision ratio can't be calculated today." },
+    evidence: ["Nothing records the caseworker's view before evidence is requested"],
+    unlocks: ["The gateway metric: how often evidence changes the decision", "Sizing for explicit thresholds, decision checks and new measures", "Proof of NewCo capacity against BAU"],
+    blockers: ["MI dashboard dependency for the measurement framework"],
+    hwhy: "Changes what the service can prove about its own decisions, and so what policy can agree to.",
+    hmove: "Drifts to H2- if it's reported but never used to change what evidence is asked for." }
+];
+
+const SVC = [
+  { key: "S1", name: "Explicit thresholds for judgement-heavy conditions", short: "Explicit thresholds", h: "H2+", prize: "time", reach: "policy", depends: ["T1", "T5", "T8"],
+    impact: { "04": "s", "06": "p", "08": "s" },
+    labels: { "06": "Written standards for EOC and doctors" },
+    steps: ["cx-17", "cx-18"],
+    what: "Written standards for what evidence must show in heart, neurological, cognitive and multiple-condition cases, which today go to an EOC or DVLA doctor with no explicit standard to judge against.",
+    size: { head: "23.4%", unit: "of the 256,445 cases awaiting a decision are multiple-condition cases. Epilepsy is 13.0%", basis: "wide", src: "CALD by condition, 26 Jun 2026." },
+    evidence: ["Referral-to-revoke ratio 1 to 2.2 for heart, chronic neurological and cognitive, against 0.07 for diabetes (crude keyword count)", "Vision and diabetes already run on explicit rules, and are the fast end of the service"],
+    unlocks: ["Faster, more consistent decisions on the cases that make up the backlog", "Fewer referrals to Level 3 and 4", "Thresholds that can be tested and changed"],
+    blockers: ["Clinical standards and Level 4 decision rights", "DVLA doctors' agreement", "Hardest of the seven"],
+    hwhy: "Changes the rules that govern decisions, in the conditions where judgement currently has no written standard.",
+    hmove: "Drifts to H2- if thresholds are written but referrals carry on as before." },
+  { key: "S2", name: "Commission evidence instead of requesting it", short: "Commission evidence", h: "H2+", prize: "time", reach: "now", depends: ["T2", "T5"],
+    impact: { "04": "p", "06": "s" },
+    labels: { "04": "Supplier, fee, deadline, return route" },
+    steps: ["cx-13", "cx-14"],
+    what: "Choose which supplier answers which question, on what fee, deadline and return route, as Specsavers field tests already work. Spread parallel requests, evidence reuse and customer-held evidence beyond the one or two conditions that use them.",
+    size: { head: "37 of 3,234", unit: "third-party requests were chased", basis: "cohort", src: "CDS-443. DMSP cases only. Never quote as service-wide." },
+    evidence: ["Median ~30 days for HCP letters, 50–55k a month (CDS-730, service-wide)", "Parallel requests, reuse and customer-held charts already exist in vision"],
+    unlocks: ["Shorter, more predictable evidence waits", "Evidence that answers the deciding question", "A test that fits inside ACE"],
+    blockers: ["Commercial and fee route for GPs and consultants", "HCP appetite untested"],
+    hwhy: "Changes the administrative structures of evidence: contracts, fees, deadlines, who answers which question.",
+    hmove: "Drifts to H2- if it becomes a one-supplier deal for the ACE cohort only." },
+  { key: "S3", name: "Ask only what decides the case", short: "Ask only what decides", h: "H2+", prize: "rework", reach: "now", depends: ["T1", "T4"],
+    impact: { "02": "p", "04": "p" },
+    labels: { "02": "Declare once", "04": "Drop questions that decide nothing" },
+    steps: ["cx-04", "cx-11", "cx-14"],
+    what: "Declare once instead of D1 then questionnaire, and remove questions on customer and HCP forms that lead to no licensing decision and no next question.",
+    size: { head: "~33k", unit: "questionnaires a year rejected for missing information", basis: "wide", src: "DGU letter catalogue (LHREJMQ)." },
+    evidence: ["CN2 repeats 7 CN1 topics in full, PK2 repeats 4 PK1 topics", "DMSP already makes declaring one step"],
+    unlocks: ["Less work for customers and HCPs", "Fewer rejected forms", "The first test of HCP appetite for changed forms"],
+    blockers: ["Form change process and clinical sign-off", "HCPs not yet asked"],
+    hwhy: "Simplifies the rules rather than adding staff to cope with them. The questions themselves change.",
+    hmove: "Drifts to H2- if forms are tidied but no question is removed." },
+  { key: "S4", name: "Review on change, not on the date", short: "Review on change", h: "H2+", prize: "repeat", reach: "policy", depends: ["T6", "T2"],
+    impact: { "06": "s", "08": "p", "09": "p" },
+    labels: { "08": "Longer licences, check-ins, reuse evidence", "09": "Review when something changes" },
+    steps: ["cx-22", "cx-23", "cx-24"],
+    what: "Longer licences with 'has anything changed?' check-ins, earlier evidence kept usable, and an end to adding evidence to groups whose outcome barely moves.",
+    size: { head: "18–23%", unit: "of VOC45 cases now get an evidence intervention, up from under 1%. ~90 days against ~21, yet ~96% still issue", basis: "cohort", src: "CDS-482. One form only. Why interventions rose is unknown: check this first." },
+    evidence: ["17 chronic neurological conditions declaration-based since Oct 2021", "Diabetes renewals: 98.5% issued with no intervention (CDS-342, short follow-up)"],
+    unlocks: ["Fewer decisions needed", "Flatter renewal waves", "Effort moved to where risk changes"],
+    blockers: ["Legal argument on 'stable risk profile'", "D90 licence durations", "Unknown why VOC45 interventions rose"],
+    hwhy: "Changes review cycles, the structure behind recurring demand. The 2021 neurological change is a pocket of the target to grow from.",
+    hmove: "Drifts to H2- if it stays a one-off exception for a few conditions." },
+  { key: "S5", name: "Check how declaration-based decisions hold up", short: "Check decisions", h: "H2+", prize: "proof", reach: "policy", depends: ["T8", "T1"],
+    impact: { "06": "p", "07": "s", "08": "p" },
+    labels: { "06": "Linked data, reversals, gateway metric", "08": "Outcomes after the decision" },
+    steps: ["cx-17", "cx-20", "cx-24"],
+    what: "A routine check on decisions after they're made, through linked data (PRANA, MIB), reversals and the gateway metric. Framed as assurance for decisions.",
+    size: { head: "Not sized", unit: "nothing routinely checks decisions today", basis: "none", src: "PRANA thin slice agreed. Substantive work from April 2027." },
+    evidence: ["Some reversals came from questionnaire errors, not new evidence"],
+    unlocks: ["Evidence that lets policy say yes to S1, S3 and S4", "A way to see if loosening rules changes outcomes"],
+    blockers: ["NHS SDE registration", "No population denominators until the Major Trauma Registry", "Limited DVLA appetite for outcome measurement"],
+    hwhy: "A feedback loop on outcomes. It changes what the service can prove, and so what policy can agree to.",
+    hmove: "Drifts to H2- if it produces reports nobody is accountable for acting on." },
+  { key: "S6", name: "Run separate routes for different kinds of case", short: "Separate routes", h: "H2-", prize: "time", reach: "now", depends: ["T1", "T2"],
+    impact: { "02": "p", "04": "s", "06": "s", "08": "s", "09": "s" },
+    labels: { "02": "Route by risk archetype at intake", "08": "Renewal route by archetype" },
+    steps: ["cx-04", "cx-07", "cx-23", "cx-24"],
+    what: "The risk-archetype model as an operating model: distinct routes, and possibly teams, from intake.",
+    size: { head: "86.5%", unit: "of DMSP cases needed no escalation and no evidence", basis: "cohort", src: "CDS-405, 31 Mar to 21 Jun 2026. DMSP only." },
+    evidence: ["Renewal intervention rate splits sharply by condition (CDS-344)"],
+    unlocks: ["Proportionate effort by case type", "Simple cases kept out of complex queues"],
+    blockers: ["Cuts against the universal agent role", "Thin on its own: needs S1 to S4 to give each route something different to do", "Archetype analysis needs a redesigned approach"],
+    hwhy: "On its own, routing sends cases into the same process by a different door. A demonstration that may not scale.",
+    hmove: "Becomes H2+ when S1 to S4 give each route a genuinely different way of deciding." },
+  { key: "S7", name: "Change what the service is measured on", short: "New measures", h: "H2+", prize: "proof", reach: "now", depends: ["T8"],
+    impact: { "01": "s", "02": "s", "03": "s", "04": "s", "05": "s", "06": "s", "07": "s", "08": "s", "09": "s", "inf": "s" },
+    labels: { "06": "Time to a safe decision, decision quality" },
+    steps: [],
+    what: "Move from the backlog count and throughput to time to a safe decision, decision quality and the share of evidence requests that change the outcome. The measures row of the target map is this change.",
+    size: { head: "Not sized", unit: "the backlog count is the dominant priority today", basis: "none", src: "Discovery Report." },
+    evidence: ["Throughput KPIs work against end-to-end ownership"],
+    unlocks: ["Changes judged on outcomes, not on that month's backlog", "A fair comparison of NewCo with BAU"],
+    blockers: ["MI dashboard", "Senior agreement to change headline measures"],
+    hwhy: "Changes incentives and accountability, the conditions everything else is judged under.",
+    hmove: "Drifts to H2- if new measures sit beside the backlog count while the backlog count still decides." }
+];
+
+TECH.forEach((c, i) => { c.kind = "tech"; c.rank = i + 1; c.depends = c.depends || []; });
+SVC.forEach((c, i) => { c.kind = "service"; c.rank = i + 1; });
+const CAPS = [...TECH, ...SVC];
+const byKey = k => CAPS.find(c => c.key === k);
+const stageById = id => STAGES.find(s => s.id === id);
+const stepById = id => STEPS.find(s => s.id === id);
+const stageNum = s => s.num || s.id;
+const REACH = { now: "Within reach now", policy: "Needs policy, legal or clinical change" };
+// Technology that service changes rely on, and the reverse
+const neededBy = k => SVC.filter(s => s.depends.includes(k));
+const prizeName = id => PRIZES.find(p => p.id === id).name;
+
+const state = { sel: null, stage: null, layer: "all", prize: "all", horizon: "all", notes: false };
+function resetState() { Object.assign(state, { sel: null, stage: null, layer: "all", prize: "all", horizon: "all", notes: false }); }
+
+// ---------- Helpers ----------
+const $ = (s, el = document) => el.querySelector(s);
+function el(tag, attrs = {}, html = "") {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (html) n.innerHTML = html;
+  return n;
+}
+const hz = h => `<b class="tag ${h === "H2+" ? "hz-h2p" : h === "H2-" ? "hz-h2m" : h === "H3" ? "hz-h3" : "hz-h1"}">${h}</b>`;
+const basis = b => `<b class="tag ${BASIS[b][0]}">${BASIS[b][1]}</b>`;
+const flagTag = f => f.kind === "tbc" ? `<b class="tag t-tbc">tbc</b>` : `<b class="tag t-noepic">No epic yet</b>`;
+const li = t => t.startsWith("!") ? `<li class="pain"><span class="visually-hidden">Problem: </span>${t.slice(1)}</li>`
+  : t.startsWith("^") ? `<li class="pocket">${hz("H3")} ${t.slice(1)}</li>` : `<li>${t}</li>`;
+const list = items => `<ul>${items.map(i => i.startsWith("<li") ? i : `<li>${i}</li>`).join("")}</ul>`;
+const pick = k => { const c = byKey(k); return `<button type="button" class="pick" data-pick="${k}">${k} ${c.name}</button>`; };
+function note(t) { return `<div class="note"><strong>Design note.</strong> ${t}</div>`; }
+function img(id, w) { return `<img src="illustrations/v2/${id}.webp" alt="" loading="lazy" width="${w}">`; }
+
+// ---------- Build ----------
+function buildReads() {
+  const t1 = neededBy("T1").map(s => s.key).join(", ");
+  const t8 = neededBy("T8").map(s => s.key).join(", ");
+  const gaps = STAGES.filter(s => !CAPS.some(c => c.impact[s.id] === "p")).map(s => s.name).join(", ");
+  $("#reads").innerHTML = [
+    ["Two prizes are measured service-wide", "Fewer chasing contacts (~56% of contacts, about £1.8m a year) and less rework (~33k rejected questionnaires). These are the strongest lines for a business case now."],
+    ["Faster decisions is bigger and less proven", "Evidence time is measured on DMSP cases only, and the backlog is complex cases. HCP evidence (T5) and explicit thresholds (S1) are what reach them."],
+    ["One keystone", `Structured data at intake (T1). Service changes ${t1} depend on it, and so does pre-fill in HCP evidence.`],
+    ["Measure first", `Decision measurement (T8) can't be sized because nothing measures decisions today. ${t8} depend on it.`],
+    ["Gaps on the target", `No capability does the main work at ${gaps}. Either nothing is needed there, or the evidence hasn't looked.`]
+  ].map(([h, p]) => `<div class="read"><strong>${h}</strong>${p}</div>`).join("");
+  $("#notes-intro").innerHTML = note("The argument: every capability earns its place by a step on the target service it makes possible, and by a size of opportunity with its basis stated. Figures are in different units, so there is deliberately no common bar scale. The basis tag is the honest comparison.")
+    + note("Columns follow the CX stages of whole-service-map-v2.html. Today's process stages (Level 1, Level 2, Escalation) don't exist in the target, so they are named in each stage header instead. Enabler 7 of the earlier transformation map is split here into Contact routing (T7) and Decision measurement (T8), because the two halves had different horizons.")
+    + note("Illustrations are read from illustrations/v2/ by step position. If a step is added to the v2 map, the images renumber and STEPS here needs updating.");
+}
+
+function buildControls() {
+  const chips = (row, items, key) => items.forEach(([id, label]) => {
+    const b = el("button", { type: "button", class: "chip", "data-f": key, "data-v": id, "aria-pressed": "false" }, label);
+    b.addEventListener("click", () => { state[key] = id; tidySel(); render(); });
+    $(row).appendChild(b);
+  });
+  chips("#layerRow", [["all", "Both"], ["tech", "Technology"], ["service", "Service changes"]], "layer");
+  chips("#prizeRow", [["all", "All"], ...PRIZES.map(p => [p.id, p.name])], "prize");
+  chips("#hzRow", [["all", "All"], ["H2+", `${hz("H2+")} Transforming`], ["H2-", `${hz("H2-")} Sustaining`]], "horizon");
+  $("#notesBtn").addEventListener("click", () => { state.notes = !state.notes; render(); });
+}
+function tidySel() { const c = state.sel && byKey(state.sel); if (c && !visible().includes(c)) go(""); }
+
+function buildMap() {
+  const map = $("#map");
+  map.innerHTML = "";
+  // Stage headers with the step illustration
+  map.appendChild(el("div", { class: "cell lane" }, `Stage<small>From the whole-service map (v2). Select a stage to see what acts on it.</small>`));
+  STAGES.forEach(s => {
+    const b = el("button", { type: "button", class: "stage-head", "data-stage": s.id, "aria-pressed": "false" },
+      `<span class="num">${stageNum(s)}${s.tbc ? ` <b class="tag t-tbc">tbc</b>` : ""}</span><span class="nm">${s.name}</span>${img(s.img, 168)}<span class="was muted">${s.was}</span>`);
+    b.addEventListener("click", () => go(state.stage === s.id ? "" : "stage-" + s.id));
+    map.appendChild(b);
+  });
+  // H3
+  map.appendChild(el("div", { class: "cell lane" }, `${hz("H3")} Target<small>Service outcome, measures, and what happens behind the scenes</small>`));
+  STAGES.forEach(s => map.appendChild(el("div", { class: "cell h3cell", "data-stage": s.id },
+    `<p>${s.outcome}</p><p class="measures" data-measures>${s.measures}</p>${s.behind ? `<p class="behind">${s.behind}</p>` : ""}`)));
+  map.appendChild(el("div", { class: "cell lane" }, `${hz("H3")} Steps<small>On the target map. Flags show tasks not yet agreed or with no epic, and what they wait on.</small>`));
+  STAGES.forEach(s => {
+    const html = STEPS.filter(p => p.stage === s.id).map(p => `<div class="step" data-step="${p.id}"><span class="sn">${p.name}</span>${p.flag ? `<span class="flag">${flagTag(p.flag)} ${p.flag.task}</span><span class="needs">${p.flag.needs.length ? `<span class="visually-hidden">Waits on </span>${p.flag.needs.map(k => `<button type="button" data-pick="${k}" title="${byKey(k).name}">${k}</button>`).join("")}` : `<span class="none">No capability yet</span>`}</span>` : ""}</div>`).join("");
+    map.appendChild(el("div", { class: "cell steps", "data-stage": s.id }, html));
+  });
+  // H1
+  map.appendChild(el("div", { class: "cell lane" }, `${hz("H1")} Today<small>From the transformation evidence. <span style="color:var(--red)">! marks a problem.</span></small>`));
+  STAGES.forEach(s => {
+    const t = TODAY[s.id];
+    map.appendChild(el("div", { class: "cell", "data-stage": s.id }, t.length ? `<ul>${t.map(li).join("")}</ul>` : `<p class="empty">No evidence gathered for this stage yet.</p>`));
+  });
+  // H2
+  map.appendChild(el("div", { class: "band", "data-band": "tech" }, "H2 · Technology capabilities, ranked by impact on the service"));
+  TECH.forEach(c => capRow(map, c));
+  map.appendChild(el("div", { class: "band svc", "data-band": "service" }, "H2 · Service changes: policy, operations and commercial. Ranked by impact"));
+  SVC.forEach(c => capRow(map, c));
+  map.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); go("cap-" + b.dataset.pick); }));
+}
+
+function capRow(map, c) {
+  const lab = el("button", { type: "button", class: "cap-label", "data-item": c.key, "aria-pressed": "false" },
+    `<span class="t">${c.key}. ${c.name}</span><span class="sz">${hz(c.h)} <b>${c.size.head}</b> ${basis(c.size.basis)}</span>`);
+  lab.addEventListener("click", () => go(state.sel === c.key ? "" : "cap-" + c.key));
+  map.appendChild(lab);
+  STAGES.forEach((s, i) => {
+    const imp = c.impact[s.id];
+    const cell = el("div", { class: "cell bar-cell", "data-stage": s.id, "data-item": c.key });
+    if (imp) {
+      const prev = c.impact[STAGES[i - 1]?.id], next = c.impact[STAGES[i + 1]?.id];
+      const cls = ["bar", (c.kind === "tech" ? "t" : "s") + imp, prev ? "" : "start", next ? "" : "end"].join(" ");
+      const label = c.labels[s.id];
+      const role = imp === "p" ? "main stage" : "supporting";
+      const b = el("button", { type: "button", class: cls, "aria-label": `${c.name}, ${role} at ${s.name}${label ? ": " + label : ""}` }, label ? `<span>${label}</span>` : "");
+      b.addEventListener("click", () => go("cap-" + c.key));
+      cell.appendChild(b);
+    }
+    map.appendChild(cell);
+  });
+}
+
+// ---------- Render ----------
+function visible() {
+  return CAPS.filter(c => (state.layer === "all" || c.kind === state.layer) && (state.prize === "all" || c.prize === state.prize) && (state.horizon === "all" || c.h === state.horizon));
+}
+
+function render() {
+  document.body.classList.toggle("notes", state.notes);
+  $("#notesBtn").setAttribute("aria-pressed", String(state.notes));
+  $("#notesBtn").textContent = state.notes ? "Hide design notes" : "Show design notes";
+  document.querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(state[b.dataset.f] === b.dataset.v)));
+  document.querySelectorAll(".stage-head").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.stage === state.stage)));
+  document.querySelectorAll(".cap-label").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.item === state.sel)));
+
+  const vis = new Set(visible().map(c => c.key));
+  const sel = state.sel ? byKey(state.sel) : null;
+  const linked = new Set(sel ? (sel.kind === "service" ? sel.depends : neededBy(sel.key).map(s => s.key)) : []);
+  const touched = sel ? new Set(Object.keys(sel.impact)) : null;
+  const selSteps = new Set(sel ? [...sel.steps, ...STEPS.filter(p => p.flag && p.flag.needs.includes(sel.key)).map(p => p.id)] : []);
+
+  document.querySelectorAll("#map [data-item]").forEach(n => {
+    const c = byKey(n.dataset.item);
+    n.hidden = state.layer !== "all" && c.kind !== state.layer;
+    let dim = !vis.has(c.key) || (sel && c.key !== sel.key && !linked.has(c.key));
+    if (state.stage) dim = dim || !c.impact[state.stage];
+    n.classList.toggle("dimmed", !!dim);
+    n.classList.toggle("linked", linked.has(c.key));
+  });
+  document.querySelectorAll("#map [data-band]").forEach(n => { n.hidden = state.layer !== "all" && n.dataset.band !== state.layer; });
+  document.querySelectorAll("#map .cell[data-stage]:not(.bar-cell)").forEach(n => {
+    const s = n.dataset.stage;
+    n.classList.toggle("hl", !!(touched && touched.has(s) && !n.classList.contains("steps")) || state.stage === s);
+    n.classList.toggle("dimmed", !!state.stage && state.stage !== s);
+  });
+  document.querySelectorAll("#map .step").forEach(n => n.classList.toggle("on", selSteps.has(n.dataset.step)));
+  document.querySelectorAll("#map [data-measures]").forEach(n => n.classList.toggle("hl", !!sel && sel.key === "S7"));
+  renderDetail(sel);
+}
+
+function renderDetail(sel) {
+  const d = $("#detail");
+  if (sel) d.innerHTML = capDetail(sel);
+  else if (state.stage) d.innerHTML = stageDetail(stageById(state.stage));
+  else d.innerHTML = overview();
+  d.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => go("cap-" + b.dataset.pick)));
+  d.querySelectorAll("[data-stagepick]").forEach(b => b.addEventListener("click", () => go("stage-" + b.dataset.stagepick)));
+  const back = d.querySelector("[data-back]");
+  if (back) back.addEventListener("click", () => go(""));
+}
+
+function capDetail(c) {
+  const isSvc = c.kind === "service";
+  const badge = `<span class="badge" style="background:${isSvc ? "var(--ink)" : "var(--blue)"}">${isSvc ? "Service change" : "Technology"} ${c.key}</span>`;
+  const rel = isSvc ? c.depends : neededBy(c.key).map(s => s.key);
+  const stages = STAGES.filter(s => c.impact[s.id]);
+  const unblocks = STEPS.filter(p => p.flag && p.flag.needs.includes(c.key));
+  const gallery = c.steps.map(id => { const p = stepById(id), s = stageById(p.stage); return `<figure>${img(id, 132)}<figcaption><span class="st">${stageNum(s)} ${s.name}</span><br>${p.name}</figcaption></figure>`; }).join("");
+  return `
+    <div class="detail-head">${badge}${hz(c.h)}<h2>${c.name}</h2><b class="tag b-none">${prizeName(c.prize)}</b>${isSvc ? `<b class="tag b-none">${REACH[c.reach]}</b>` : ""}${c.contest ? `<b class="tag t-contest">Horizon contested</b>` : ""}<button type="button" class="pick" data-back>Back to all capabilities</button></div>
+    <p style="max-width:85ch;font-size:17px">${c.what}</p>
+    <div class="size"><span class="head">${c.size.head}</span><span class="unit">${c.size.unit}</span><span class="src">${basis(c.size.basis)} ${c.size.src || ""}</span></div>
+    <div>
+      <h3>What it makes possible on the target service</h3>
+      ${gallery ? `<div class="gallery">${gallery}</div>` : `<p class="muted">No single step. It changes what every stage is measured on: the measures row of the target map, highlighted below.</p>`}
+      ${unblocks.length ? `<p style="margin-top:10px"><strong>Unblocks:</strong> ${unblocks.map(p => `${flagTag(p.flag)} ${p.flag.task} <span class="muted">(${p.name})</span>`).join("; ")}</p>` : ""}
+    </div>
+    <div class="hzbox"><div><h3>Why ${c.h}</h3><p>${c.hwhy}</p></div><div><h3>${c.h === "H2+" ? "How it could slip" : "What would make it H2+"}</h3><p>${c.hmove}</p></div>${c.contest ? `<div><h3>Against the target map</h3><p>${c.contest}</p></div>` : ""}</div>
+    <div class="cols">
+      <div><h3>Other evidence of size</h3>${list(c.evidence)}</div>
+      <div><h3>What it unlocks</h3>${list(c.unlocks)}</div>
+      <div><h3>Blockers</h3><ul>${c.blockers.map(b => li("!" + b)).join("")}</ul></div>
+      <div><h3>Stages it changes</h3>${list(stages.map(s => `<button type="button" class="pick" data-stagepick="${s.id}">${stageNum(s)} ${s.name}</button> <span class="muted">${c.impact[s.id] === "p" ? "main stage" : "supporting"}</span>`))}</div>
+      <div><h3>${isSvc ? "Depends on this technology" : "Service changes that depend on it"}</h3>${rel.length ? list(rel.map(pick)) : `<p class="muted">None on this map.</p>`}</div>
+    </div>
+    ${note(isSvc ? "A service change is the argument for the technology under it. Fund the technology without the change and the business case is for a faster version of today's service." : "Read the size against its basis tag before quoting it. A cohort figure is evidence the opportunity exists, not a measure of it.")}`;
+}
+
+function stageDetail(s) {
+  const acting = visible().filter(c => c.impact[s.id]);
+  const main = acting.filter(c => c.impact[s.id] === "p"), sup = acting.filter(c => c.impact[s.id] === "s");
+  const flags = STEPS.filter(p => p.stage === s.id && p.flag);
+  const t = TODAY[s.id];
+  return `
+    <div class="detail-head"><span class="badge" style="background:var(--ink)">Stage ${stageNum(s)}</span><h2>${s.name}</h2>${s.tbc ? `<b class="tag t-tbc">tbc</b>` : ""}<span class="muted">${s.was}</span><button type="button" class="pick" data-back>Back to all capabilities</button></div>
+    <div class="cols">
+      <div><h3>${hz("H3")} Target</h3><p>${s.outcome}</p><p class="muted" style="margin-top:6px">Measured by: ${s.measures}</p></div>
+      <div><h3>${hz("H1")} Today</h3>${t.length ? `<ul>${t.map(li).join("")}</ul>` : `<p class="muted">No evidence gathered for this stage yet. Nothing here can be sized until it is.</p>`}</div>
+      <div><h3>Capabilities doing the main work</h3>${main.length ? list(main.map(c => pick(c.key))) : `<p class="muted">None. This stage has no capability doing the main work on this map.</p>`}</div>
+      <div><h3>Supporting</h3>${sup.length ? list(sup.map(c => pick(c.key))) : `<p class="muted">None.</p>`}</div>
+      <div><h3>Not yet agreed on the target</h3>${flags.length ? list(flags.map(p => `${flagTag(p.flag)} ${p.flag.task}. ${p.flag.why}${p.flag.needs.length ? ` Waits on ${p.flag.needs.map(pick).join(", ")}.` : ""}`)) : `<p class="muted">Every task at this stage has an epic and is agreed.</p>`}</div>
+    </div>`;
+}
+
+function overview() {
+  const v = visible();
+  const rows = PRIZES.map(p => {
+    const cs = v.filter(c => c.prize === p.id);
+    if (!cs.length) return "";
+    return `<tr class="grp"><td colspan="4">${p.name}</td></tr>` + cs.map(c => `<tr>
+      <td>${pick(c.key)} ${hz(c.h)}</td>
+      <td class="n">${c.size.head}</td>
+      <td>${c.size.unit}</td>
+      <td>${basis(c.size.basis)}</td></tr>`).join("");
+  }).join("");
+  return `
+    <div class="detail-head"><h2>Size of the opportunity, by prize</h2><span class="muted">${v.length} of ${CAPS.length} capabilities. Select one for its steps on the target service, evidence and blockers.</span></div>
+    <table class="opp"><thead><tr><th scope="col">Capability</th><th scope="col">Headline</th><th scope="col">What the figure is</th><th scope="col">Basis</th></tr></thead><tbody>${rows || `<tr><td colspan="4">No capabilities match these filters.</td></tr>`}</tbody></table>
+    ${note("Grouped by prize because each prize is a separate business case argument. Chasing contacts and decision time should not be added together: they are measured in different units and paid for by different budgets.")}`;
+}
+
+// ---------- Hash router: #cap-T3, #stage-04, or nothing ----------
+function go(hash) { if (location.hash.slice(1) === hash) route(); else location.hash = hash; }
+function route() {
+  const h = location.hash.slice(1);
+  state.sel = null; state.stage = null;
+  if (h.startsWith("cap-") && byKey(h.slice(4))) state.sel = h.slice(4);
+  else if (h.startsWith("stage-") && stageById(h.slice(6))) state.stage = h.slice(6);
+  render();
+}
+window.addEventListener("hashchange", route);
+
+resetState();
+buildReads();
+buildControls();
+buildMap();
+route();
+</script>
+</body>
+</html>
