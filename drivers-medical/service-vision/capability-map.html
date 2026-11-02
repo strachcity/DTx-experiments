@@ -122,6 +122,7 @@ table.opp { border-collapse: collapse; width: 100%; font-size: 14px; }
 li.pain { color: var(--red); list-style: none; margin-left: -14px; padding-left: 14px; position: relative; }
 li.pain::before { content: "!"; position: absolute; left: 0; font-weight: 700; }
 li.pocket { color: var(--h3); }
+.today p:not(.empty) { color: var(--red); font-weight: 700; }
 .empty { color: var(--muted); font-style: italic; font-size: 12px; }
 .band { grid-column: 1 / -1; background: var(--ink); color: #fff; font-weight: 700; font-size: 13px; padding: 7px 10px; position: sticky; left: 0; }
 .band.svc { background: var(--tint); color: var(--ink); border-top: 3px solid var(--ink); }
@@ -162,26 +163,16 @@ footer { font-size: 13px; color: var(--muted); display: grid; gap: 6px; max-widt
   <header class="intro">
     <div class="status"><strong>Working draft</strong><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span><a href="whole-service-map-v2.html#cx">Open the whole-service map (v2)</a></div>
     <h1>The capabilities the target service needs, and how big each opportunity is</h1>
-    <p class="lede">Each column is a stage of the target service from the whole-service map. Under it is what happens there today, then the capabilities that close the gap: 8 technology capabilities in blue and 7 service changes in black. Select a capability to see the size of its opportunity and the steps of the target service it makes possible.</p>
-    <div id="notes-intro"></div>
+    <p class="lede">Across the top is the target service, stage by stage. Under it, the main problem at that stage today. Under that, the capabilities that would close the gap, as bars across the stages they change, with the size of each opportunity beside its name. Select a capability or a stage for the detail.</p>
   </header>
-
-  <section class="reads" aria-label="What the map says" id="reads"></section>
 
   <section class="controls" aria-label="Filters">
     <div class="ctrl-row" id="layerRow"><span class="lab">Show</span></div>
-    <div class="ctrl-row" id="prizeRow"><span class="lab">Prize</span></div>
-    <div class="ctrl-row" id="hzRow"><span class="lab">Horizon</span></div>
-    <div class="ctrl-row"><span class="lab">Design notes</span><button type="button" class="chip" id="notesBtn" aria-pressed="false">Show design notes</button></div>
     <div class="legend">
       <span><i class="key tp"></i>Technology, main stage</span>
       <span><i class="key ts"></i>Technology, supporting</span>
       <span><i class="key sp"></i>Service change, main stage</span>
       <span><i class="key ss"></i>Service change, supporting</span>
-      <span><b class="tag hz-h3">H3</b> target, or a pocket of it that exists today</span>
-      <span><b class="tag hz-h2p">H2+</b> transforming</span>
-      <span><b class="tag hz-h2m">H2-</b> sustaining</span>
-      <span><b class="tag t-tbc">tbc</b> not yet agreed on the target map</span>
     </div>
   </section>
 
@@ -272,6 +263,16 @@ const STEPS = [
 
 // ---------- Today (H1), re-keyed from the transformation map's lanes ----------
 // "!" marks a problem, "^" a pocket of the target that already exists.
+// One line per stage for the map
+const TODAY_LINE = {
+  "02": "Paper D1s are keyed by hand, and a caseworker picks the questionnaire. DMSP is only 30 to 40% of notifications (provisional)",
+  "03": "<span class='fig'>~56%</span> of contacts are progress chases, about <span class='fig'>£1.8m</span> a year",
+  "04": "HCP evidence takes a median of <span class='fig'>~30 days</span>, on <span class='fig'>50–55k</span> letters a month",
+  "05": "The phone line can't see the case. Routing runs from manual tables updated twice a week",
+  "06": "Heart, neurological and cognitive cases go to doctors with no written standard to decide against",
+  "07": "Nothing routinely checks decisions after they're made",
+  "08": "Short licences bring people back within 3 years, in waves of demand"
+};
 const TODAY = {
   "01": [],
   "02": ["Customers tell DVLA on a paper D1, online on DMSP, or by phone",
@@ -511,8 +512,8 @@ const REACH = { now: "Within reach now", policy: "Needs policy, legal or clinica
 const neededBy = k => SVC.filter(s => s.depends.includes(k));
 const prizeName = id => PRIZES.find(p => p.id === id).name;
 
-const state = { sel: null, stage: null, layer: "all", prize: "all", horizon: "all", notes: false };
-function resetState() { Object.assign(state, { sel: null, stage: null, layer: "all", prize: "all", horizon: "all", notes: false }); }
+const state = { sel: null, stage: null, layer: "all" };
+function resetState() { Object.assign(state, { sel: null, stage: null, layer: "all" }); }
 
 // ---------- Helpers ----------
 const $ = (s, el = document) => el.querySelector(s);
@@ -529,26 +530,9 @@ const li = t => t.startsWith("!") ? `<li class="pain"><span class="visually-hidd
   : t.startsWith("^") ? `<li class="pocket">${hz("H3")} ${t.slice(1)}</li>` : `<li>${t}</li>`;
 const list = items => `<ul>${items.map(i => i.startsWith("<li") ? i : `<li>${i}</li>`).join("")}</ul>`;
 const pick = k => { const c = byKey(k); return `<button type="button" class="pick" data-pick="${k}">${k} ${c.name}</button>`; };
-function note(t) { return `<div class="note"><strong>Design note.</strong> ${t}</div>`; }
 function img(id, w) { return `<img src="illustrations/v2/${id}.webp" alt="" loading="lazy" width="${w}">`; }
 
 // ---------- Build ----------
-function buildReads() {
-  const t1 = neededBy("T1").map(s => s.key).join(", ");
-  const t8 = neededBy("T8").map(s => s.key).join(", ");
-  const gaps = STAGES.filter(s => !CAPS.some(c => c.impact[s.id] === "p")).map(s => s.name).join(", ");
-  $("#reads").innerHTML = [
-    ["Two prizes are measured service-wide", "Fewer chasing contacts (~56% of contacts, about £1.8m a year) and less rework (~33k rejected questionnaires). These are the strongest lines for a business case now."],
-    ["Faster decisions is bigger and less proven", "Evidence time is measured on DMSP cases only, and the backlog is complex cases. HCP evidence (T5) and explicit thresholds (S1) are what reach them."],
-    ["One keystone", `Structured data at intake (T1). Service changes ${t1} depend on it, and so does pre-fill in HCP evidence.`],
-    ["Measure first", `Decision measurement (T8) can't be sized because nothing measures decisions today. ${t8} depend on it.`],
-    ["Gaps on the target", `No capability does the main work at ${gaps}. Either nothing is needed there, or the evidence hasn't looked.`]
-  ].map(([h, p]) => `<div class="read"><strong>${h}</strong>${p}</div>`).join("");
-  $("#notes-intro").innerHTML = note("The argument: every capability earns its place by a step on the target service it makes possible, and by a size of opportunity with its basis stated. Figures are in different units, so there is deliberately no common bar scale. The basis tag is the honest comparison.")
-    + note("Columns follow the CX stages of whole-service-map-v2.html. Today's process stages (Level 1, Level 2, Escalation) don't exist in the target, so they are named in each stage header instead. Enabler 7 of the earlier transformation map is split here into Contact routing (T7) and Decision measurement (T8), because the two halves had different horizons.")
-    + note("Illustrations are read from illustrations/v2/ by step position. If a step is added to the v2 map, the images renumber and STEPS here needs updating.");
-}
-
 function buildControls() {
   const chips = (row, items, key) => items.forEach(([id, label]) => {
     const b = el("button", { type: "button", class: "chip", "data-f": key, "data-v": id, "aria-pressed": "false" }, label);
@@ -556,9 +540,6 @@ function buildControls() {
     $(row).appendChild(b);
   });
   chips("#layerRow", [["all", "Both"], ["tech", "Technology"], ["service", "Service changes"]], "layer");
-  chips("#prizeRow", [["all", "All"], ...PRIZES.map(p => [p.id, p.name])], "prize");
-  chips("#hzRow", [["all", "All"], ["H2+", `${hz("H2+")} Transforming`], ["H2-", `${hz("H2-")} Sustaining`]], "horizon");
-  $("#notesBtn").addEventListener("click", () => { state.notes = !state.notes; render(); });
 }
 function tidySel() { const c = state.sel && byKey(state.sel); if (c && !visible().includes(c)) go(""); }
 
@@ -573,32 +554,23 @@ function buildMap() {
     b.addEventListener("click", () => go(state.stage === s.id ? "" : "stage-" + s.id));
     map.appendChild(b);
   });
-  // H3
-  map.appendChild(el("div", { class: "cell lane" }, `${hz("H3")} Target<small>Service outcome, measures, and what happens behind the scenes</small>`));
-  STAGES.forEach(s => map.appendChild(el("div", { class: "cell h3cell", "data-stage": s.id },
-    `<p>${s.outcome}</p><p class="measures" data-measures>${s.measures}</p>${s.behind ? `<p class="behind">${s.behind}</p>` : ""}`)));
-  map.appendChild(el("div", { class: "cell lane" }, `${hz("H3")} Steps<small>On the target map. Flags show tasks not yet agreed or with no epic, and what they wait on.</small>`));
-  STAGES.forEach(s => {
-    const html = STEPS.filter(p => p.stage === s.id).map(p => `<div class="step" data-step="${p.id}"><span class="sn">${p.name}</span>${p.flag ? `<span class="flag">${flagTag(p.flag)} ${p.flag.task}</span><span class="needs">${p.flag.needs.length ? `<span class="visually-hidden">Waits on </span>${p.flag.needs.map(k => `<button type="button" data-pick="${k}" title="${byKey(k).name}">${k}</button>`).join("")}` : `<span class="none">No capability yet</span>`}</span>` : ""}</div>`).join("");
-    map.appendChild(el("div", { class: "cell steps", "data-stage": s.id }, html));
-  });
-  // H1
-  map.appendChild(el("div", { class: "cell lane" }, `${hz("H1")} Today<small>From the transformation evidence. <span style="color:var(--red)">! marks a problem.</span></small>`));
-  STAGES.forEach(s => {
-    const t = TODAY[s.id];
-    map.appendChild(el("div", { class: "cell", "data-stage": s.id }, t.length ? `<ul>${t.map(li).join("")}</ul>` : `<p class="empty">No evidence gathered for this stage yet.</p>`));
-  });
-  // H2
-  map.appendChild(el("div", { class: "band", "data-band": "tech" }, "H2 · Technology capabilities, ranked by impact on the service"));
+  // Target
+  map.appendChild(el("div", { class: "cell lane" }, `Target<small>What the stage should achieve, from the whole-service map</small>`));
+  STAGES.forEach(s => map.appendChild(el("div", { class: "cell h3cell", "data-stage": s.id }, `<p>${s.outcome}</p>`)));
+  // Today: the one problem that matters most at each stage. The full list is in the stage detail.
+  map.appendChild(el("div", { class: "cell lane" }, `Today<small>The main problem at this stage</small>`));
+  STAGES.forEach(s => map.appendChild(el("div", { class: "cell today", "data-stage": s.id }, TODAY_LINE[s.id] ? `<p>${TODAY_LINE[s.id]}</p>` : `<p class="empty">No evidence gathered yet.</p>`)));
+  // Capabilities
+  map.appendChild(el("div", { class: "band", "data-band": "tech" }, "Technology capabilities, ranked by impact on the service"));
   TECH.forEach(c => capRow(map, c));
-  map.appendChild(el("div", { class: "band svc", "data-band": "service" }, "H2 · Service changes: policy, operations and commercial. Ranked by impact"));
+  map.appendChild(el("div", { class: "band svc", "data-band": "service" }, "Service changes: policy, operations and commercial. Ranked by impact"));
   SVC.forEach(c => capRow(map, c));
   map.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); go("cap-" + b.dataset.pick); }));
 }
 
 function capRow(map, c) {
   const lab = el("button", { type: "button", class: "cap-label", "data-item": c.key, "aria-pressed": "false" },
-    `<span class="t">${c.key}. ${c.name}</span><span class="sz">${hz(c.h)} <b>${c.size.head}</b> ${basis(c.size.basis)}</span>`);
+    `<span class="t">${c.key}. ${c.name}</span><span class="sz"><b>${c.size.head}</b> ${basis(c.size.basis)}</span>`);
   lab.addEventListener("click", () => go(state.sel === c.key ? "" : "cap-" + c.key));
   map.appendChild(lab);
   STAGES.forEach((s, i) => {
@@ -619,13 +591,10 @@ function capRow(map, c) {
 
 // ---------- Render ----------
 function visible() {
-  return CAPS.filter(c => (state.layer === "all" || c.kind === state.layer) && (state.prize === "all" || c.prize === state.prize) && (state.horizon === "all" || c.h === state.horizon));
+  return CAPS.filter(c => state.layer === "all" || c.kind === state.layer);
 }
 
 function render() {
-  document.body.classList.toggle("notes", state.notes);
-  $("#notesBtn").setAttribute("aria-pressed", String(state.notes));
-  $("#notesBtn").textContent = state.notes ? "Hide design notes" : "Show design notes";
   document.querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(state[b.dataset.f] === b.dataset.v)));
   document.querySelectorAll(".stage-head").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.stage === state.stage)));
   document.querySelectorAll(".cap-label").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.item === state.sel)));
@@ -634,7 +603,6 @@ function render() {
   const sel = state.sel ? byKey(state.sel) : null;
   const linked = new Set(sel ? (sel.kind === "service" ? sel.depends : neededBy(sel.key).map(s => s.key)) : []);
   const touched = sel ? new Set(Object.keys(sel.impact)) : null;
-  const selSteps = new Set(sel ? [...sel.steps, ...STEPS.filter(p => p.flag && p.flag.needs.includes(sel.key)).map(p => p.id)] : []);
 
   document.querySelectorAll("#map [data-item]").forEach(n => {
     const c = byKey(n.dataset.item);
@@ -647,19 +615,18 @@ function render() {
   document.querySelectorAll("#map [data-band]").forEach(n => { n.hidden = state.layer !== "all" && n.dataset.band !== state.layer; });
   document.querySelectorAll("#map .cell[data-stage]:not(.bar-cell)").forEach(n => {
     const s = n.dataset.stage;
-    n.classList.toggle("hl", !!(touched && touched.has(s) && !n.classList.contains("steps")) || state.stage === s);
+    n.classList.toggle("hl", !!(touched && touched.has(s)) || state.stage === s);
     n.classList.toggle("dimmed", !!state.stage && state.stage !== s);
   });
-  document.querySelectorAll("#map .step").forEach(n => n.classList.toggle("on", selSteps.has(n.dataset.step)));
-  document.querySelectorAll("#map [data-measures]").forEach(n => n.classList.toggle("hl", !!sel && sel.key === "S7"));
   renderDetail(sel);
 }
 
 function renderDetail(sel) {
   const d = $("#detail");
+  d.hidden = !sel && !state.stage;
   if (sel) d.innerHTML = capDetail(sel);
   else if (state.stage) d.innerHTML = stageDetail(stageById(state.stage));
-  else d.innerHTML = overview();
+  else d.innerHTML = "";
   d.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => go("cap-" + b.dataset.pick)));
   d.querySelectorAll("[data-stagepick]").forEach(b => b.addEventListener("click", () => go("stage-" + b.dataset.stagepick)));
   const back = d.querySelector("[data-back]");
@@ -674,12 +641,12 @@ function capDetail(c) {
   const unblocks = STEPS.filter(p => p.flag && p.flag.needs.includes(c.key));
   const gallery = c.steps.map(id => { const p = stepById(id), s = stageById(p.stage); return `<figure>${img(id, 132)}<figcaption><span class="st">${stageNum(s)} ${s.name}</span><br>${p.name}</figcaption></figure>`; }).join("");
   return `
-    <div class="detail-head">${badge}${hz(c.h)}<h2>${c.name}</h2><b class="tag b-none">${prizeName(c.prize)}</b>${isSvc ? `<b class="tag b-none">${REACH[c.reach]}</b>` : ""}${c.contest ? `<b class="tag t-contest">Horizon contested</b>` : ""}<button type="button" class="pick" data-back>Back to all capabilities</button></div>
+    <div class="detail-head">${badge}${hz(c.h)}<h2>${c.name}</h2><b class="tag b-none">${prizeName(c.prize)}</b>${isSvc ? `<b class="tag b-none">${REACH[c.reach]}</b>` : ""}${c.contest ? `<b class="tag t-contest">Horizon contested</b>` : ""}<button type="button" class="pick" data-back>Close</button></div>
     <p style="max-width:85ch;font-size:17px">${c.what}</p>
     <div class="size"><span class="head">${c.size.head}</span><span class="unit">${c.size.unit}</span><span class="src">${basis(c.size.basis)} ${c.size.src || ""}</span></div>
     <div>
       <h3>What it makes possible on the target service</h3>
-      ${gallery ? `<div class="gallery">${gallery}</div>` : `<p class="muted">No single step. It changes what every stage is measured on: the measures row of the target map, highlighted below.</p>`}
+      ${gallery ? `<div class="gallery">${gallery}</div>` : `<p class="muted">No single step. It changes what every stage is measured on.</p>`}
       ${unblocks.length ? `<p style="margin-top:10px"><strong>Unblocks:</strong> ${unblocks.map(p => `${flagTag(p.flag)} ${p.flag.task} <span class="muted">(${p.name})</span>`).join("; ")}</p>` : ""}
     </div>
     <div class="hzbox"><div><h3>Why ${c.h}</h3><p>${c.hwhy}</p></div><div><h3>${c.h === "H2+" ? "How it could slip" : "What would make it H2+"}</h3><p>${c.hmove}</p></div>${c.contest ? `<div><h3>Against the target map</h3><p>${c.contest}</p></div>` : ""}</div>
@@ -689,8 +656,7 @@ function capDetail(c) {
       <div><h3>Blockers</h3><ul>${c.blockers.map(b => li("!" + b)).join("")}</ul></div>
       <div><h3>Stages it changes</h3>${list(stages.map(s => `<button type="button" class="pick" data-stagepick="${s.id}">${stageNum(s)} ${s.name}</button> <span class="muted">${c.impact[s.id] === "p" ? "main stage" : "supporting"}</span>`))}</div>
       <div><h3>${isSvc ? "Depends on this technology" : "Service changes that depend on it"}</h3>${rel.length ? list(rel.map(pick)) : `<p class="muted">None on this map.</p>`}</div>
-    </div>
-    ${note(isSvc ? "A service change is the argument for the technology under it. Fund the technology without the change and the business case is for a faster version of today's service." : "Read the size against its basis tag before quoting it. A cohort figure is evidence the opportunity exists, not a measure of it.")}`;
+    </div>`;
 }
 
 function stageDetail(s) {
@@ -699,7 +665,7 @@ function stageDetail(s) {
   const flags = STEPS.filter(p => p.stage === s.id && p.flag);
   const t = TODAY[s.id];
   return `
-    <div class="detail-head"><span class="badge" style="background:var(--ink)">Stage ${stageNum(s)}</span><h2>${s.name}</h2>${s.tbc ? `<b class="tag t-tbc">tbc</b>` : ""}<span class="muted">${s.was}</span><button type="button" class="pick" data-back>Back to all capabilities</button></div>
+    <div class="detail-head"><span class="badge" style="background:var(--ink)">Stage ${stageNum(s)}</span><h2>${s.name}</h2>${s.tbc ? `<b class="tag t-tbc">tbc</b>` : ""}<span class="muted">${s.was}</span><button type="button" class="pick" data-back>Close</button></div>
     <div class="cols">
       <div><h3>${hz("H3")} Target</h3><p>${s.outcome}</p><p class="muted" style="margin-top:6px">Measured by: ${s.measures}</p></div>
       <div><h3>${hz("H1")} Today</h3>${t.length ? `<ul>${t.map(li).join("")}</ul>` : `<p class="muted">No evidence gathered for this stage yet. Nothing here can be sized until it is.</p>`}</div>
@@ -709,22 +675,6 @@ function stageDetail(s) {
     </div>`;
 }
 
-function overview() {
-  const v = visible();
-  const rows = PRIZES.map(p => {
-    const cs = v.filter(c => c.prize === p.id);
-    if (!cs.length) return "";
-    return `<tr class="grp"><td colspan="4">${p.name}</td></tr>` + cs.map(c => `<tr>
-      <td>${pick(c.key)} ${hz(c.h)}</td>
-      <td class="n">${c.size.head}</td>
-      <td>${c.size.unit}</td>
-      <td>${basis(c.size.basis)}</td></tr>`).join("");
-  }).join("");
-  return `
-    <div class="detail-head"><h2>Size of the opportunity, by prize</h2><span class="muted">${v.length} of ${CAPS.length} capabilities. Select one for its steps on the target service, evidence and blockers.</span></div>
-    <table class="opp"><thead><tr><th scope="col">Capability</th><th scope="col">Headline</th><th scope="col">What the figure is</th><th scope="col">Basis</th></tr></thead><tbody>${rows || `<tr><td colspan="4">No capabilities match these filters.</td></tr>`}</tbody></table>
-    ${note("Grouped by prize because each prize is a separate business case argument. Chasing contacts and decision time should not be added together: they are measured in different units and paid for by different budgets.")}`;
-}
 
 // ---------- Hash router: #cap-T3, #stage-04, or nothing ----------
 function go(hash) { if (location.hash.slice(1) === hash) route(); else location.hash = hash; }
@@ -738,7 +688,6 @@ function route() {
 window.addEventListener("hashchange", route);
 
 resetState();
-buildReads();
 buildControls();
 buildMap();
 route();
