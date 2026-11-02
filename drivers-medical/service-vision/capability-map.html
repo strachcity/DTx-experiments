@@ -147,6 +147,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .target .muted { font-size: 12px; }
 .target.across, .group.across { font-size: 12.5px; }
 .lane-label a { color: var(--accent); }
+/* Technology change row: the main technology changes at each stage, beside Technology today */
+.tc-label { background: var(--ink); color: var(--bg); }
+.tc-label small { color: var(--bg); opacity: .8; }
+.techchange { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); border-bottom: 2px solid var(--ink); display: grid; gap: 6px; align-content: start; }
+.tc { display: flex; gap: 6px; align-items: flex-start; text-align: left; border: 1px solid var(--line); border-left-width: 4px; background: var(--surface); padding: 5px 7px; font-size: 12.5px; font-weight: 600; line-height: 1.3; border-radius: 3px; }
+.tc:hover { border-color: var(--muted); }
+.tc .rk { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--muted); }
+.tc.on { box-shadow: 0 0 0 2px var(--accent); }
+.tc.off { opacity: var(--dim); }
 .dimmed { opacity: var(--dim); }
 .hl { background: color-mix(in srgb, var(--accent) 9%, transparent); }
 
@@ -164,7 +173,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-wi
   <header>
     <div class="status"><span class="pill">Working draft</span><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span></div>
     <h1>Where technology and service changes sit on the Drivers Medical journey</h1>
-    <p class="muted">The top row shows the stage of the target service, from the whole-service map, that each column feeds. Under it is the current-state journey. Below it are two bands, each ranked by impact on the service: seven technology enablers in colour, and seven service changes (policy, operations and commercial) in black. Select any item to see what it depends on, or a stage to see what acts on it.</p>
+    <p class="muted">The top row shows the stage of the target service, from the whole-service map, that each column feeds. Under it is the current-state journey, ending with the main technology changes at each stage beside the technology in use today. Below it are two bands, each ranked by impact on the service: seven technology enablers in colour, and seven service changes (policy, operations and commercial) in black. Select any item to see what it depends on, or a stage to see what acts on it.</p>
     <div class="reads">
       <div class="read"><strong>One keystone</strong>The condition and the customer's answers held as data at intake. Most of the other enablers rely on it.</div>
       <div class="read"><strong>Two different prizes</strong>Messages and the case timeline reduce chasing calls. HCP evidence reduces decision time. They should be argued separately.</div>
@@ -583,6 +592,14 @@ function buildMap() {
       map.appendChild(el("div", { class: "cell", "data-stage": s.id }, items.length ? `<ul>${items.map(t => `<li>${text(t)}</li>`).join("")}</ul>` : ""));
     });
   });
+  // The main technology changes at each stage: every enabler with primary impact there, by its bar label
+  map.appendChild(el("div", { class: "cell lane-label tc-label" }, `Technology change<small>The main technology changes at this stage. Select one to see the enabler.</small>`));
+  STAGES.forEach(s => {
+    const main = ENABLERS.filter(e => e.impact[s.id] === "p");
+    map.appendChild(el("div", { class: "cell techchange", "data-stage": s.id },
+      main.map(e => `<button type="button" class="tc" data-tc="${e.key}" style="border-left-color:${color(e)}" aria-label="${e.name}: ${e.labels[s.id] || e.short}"><span class="rk">${e.id}</span><span>${e.labels[s.id] || e.short}</span></button>`).join("")));
+  });
+  map.querySelectorAll("[data-tc]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.tc)));
   divider(map, "Technology enablers, ranked by impact on the service", "tech");
   bandRows(map, ENABLERS);
   divider(map, "Service changes, ranked by impact on the service. Policy, operations and commercial levers", "service");
@@ -621,6 +638,10 @@ function render() {
     const s = n.dataset.stage;
     n.classList.toggle("hl", !!((stagesTouched && stagesTouched.has(s)) || state.stage === s));
     n.classList.toggle("dimmed", !!state.stage && state.stage !== s);
+  });
+  document.querySelectorAll("#map [data-tc]").forEach(b => {
+    b.classList.toggle("on", b.dataset.tc === state.sel);
+    b.classList.toggle("off", !vis.has(b.dataset.tc) || (!!sel && b.dataset.tc !== state.sel));
   });
   renderDetail(sel, vis);
 }
