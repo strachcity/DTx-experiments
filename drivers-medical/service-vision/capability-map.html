@@ -159,6 +159,17 @@ body:has(.detail:not([hidden])) .wrap { padding-bottom: 48vh; }
 .tc .rk { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--muted); }
 .tc.on { box-shadow: 0 0 0 2px var(--accent); }
 .tc.off { opacity: var(--dim); }
+/* Opportunity strip under each item's bars, so the opportunity can be read without opening anything */
+.opp { grid-column: span 9; border-bottom: 1px solid var(--line); padding: 4px 12px 14px; display: grid; gap: 16px; font-size: 12.5px; line-height: 1.4; transition: opacity 0.15s; }
+.opp.tech { grid-template-columns: 1.5fr 1.1fr 1.1fr 1fr 0.8fr; }
+.opp.svc { grid-template-columns: 2.5fr 1fr; padding-top: 2px; padding-bottom: 10px; color: var(--muted); }
+.opp h4 { margin: 0 0 3px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.opp ul { margin: 0; padding-left: 14px; display: grid; gap: 2px; }
+.opp .size { font-weight: 600; }
+.opp .needs { display: flex; flex-wrap: wrap; gap: 4px; }
+.opp .needs button { font-size: 11.5px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 1px 8px; display: inline-flex; gap: 5px; align-items: center; }
+.opp .needs .sw { width: 9px; height: 9px; border-radius: 2px; }
+.enabler-label.tall { align-content: start; }
 .dimmed { opacity: var(--dim); }
 .hl { background: color-mix(in srgb, var(--accent) 9%, transparent); }
 
@@ -437,6 +448,15 @@ const OPPS = [
     blockers: ["MI dashboard", "Senior agreement to change headline measures"]
   }
 ];
+const SIZE = {
+  "1": "DMSP cases took 24 working days, against 66 for other routes (CDS-271). A ceiling, not an estimate",
+  "2": "Not yet sized. Level 1 volume and wait unknown",
+  "3": "~56% of contacts are progress chases, about £1.8m a year",
+  "4": "~88k a year need a new journey, led by LHREJMQ (33k)",
+  "5": "50–55k HCP letters a month, median ~30 days to return (CDS-730)",
+  "6": "Not yet sized. Short licences return within 3 years, creating waves of demand",
+  "7": "Not yet sized. Evidence-to-decision ratio can't be calculated today"
+};
 ENABLERS.forEach(e => { e.kind = "tech"; e.key = String(e.id); e.rank = e.id; });
 OPPS.forEach((o, i) => { o.kind = "service"; o.key = o.id; o.rank = i + 1; });
 const ITEMS = [...ENABLERS, ...OPPS];
@@ -485,7 +505,7 @@ function selectStage(id) { state.stage = state.stage === id ? null : id; state.s
 function bandRows(map, arr) {
   arr.forEach(it => {
     const sub = it.kind === "tech" ? it.outcomes.map(o => OUTCOMES.find(x => x.id === o).name).join(" · ") : REACH[it.reach];
-    const lab = el("button", { class: "enabler-label", type: "button", "data-item": it.key },
+    const lab = el("button", { class: "enabler-label tall", type: "button", "data-item": it.key, style: "grid-row: span 2" },
       `<span class="t">${swatch(it)}${it.key}. ${it.name}</span><span class="muted" style="font-size:12px">${hzPill(it.h)} ${sub}</span>`);
     lab.addEventListener("click", () => selectItem(it.key));
     map.appendChild(lab);
@@ -505,7 +525,28 @@ function bandRows(map, arr) {
       }
       map.appendChild(c);
     });
+    map.appendChild(oppStrip(it));
   });
+}
+
+// The opportunity, readable in the grid. Technology gets the full strip; service changes say what they are and what they need.
+function oppStrip(it) {
+  const chip = k => { const x = byKey(String(k)); return `<button type="button" data-pick="${x.key}" title="${x.name}">${swatch(x)}${x.key} ${x.short}</button>`; };
+  let html;
+  if (it.kind === "tech") {
+    const needed = OPPS.filter(o => o.depends.includes(it.id));
+    html = `
+      <div><h4>What changes</h4>${it.what}</div>
+      <div><h4>Size of the opportunity</h4><span class="size">${SIZE[it.key]}</span></div>
+      <div><h4>Unlocks</h4><ul>${it.unlocks.slice(0, 2).map(u => `<li>${u}</li>`).join("")}</ul></div>
+      <div><h4>Main blocker</h4><span class="pain">${it.blockers[0]}</span></div>
+      <div><h4>Needed by</h4>${needed.length ? `<span class="needs">${needed.map(o => chip(o.key)).join("")}</span>` : `<span class="muted">None</span>`}</div>`;
+  } else {
+    html = `<div>${it.what}</div><div><h4>Needs</h4><span class="needs">${it.depends.map(chip).join("")}</span></div>`;
+  }
+  const n = el("div", { class: "opp " + (it.kind === "tech" ? "tech" : "svc"), "data-item": it.key }, html);
+  n.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.pick)));
+  return n;
 }
 
 function divider(map, txt, cls) {
