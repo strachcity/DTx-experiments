@@ -73,7 +73,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .chip .rk { font-family: var(--font-mono); font-size: 11px; opacity: 0.75; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-.detail { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; display: grid; gap: 14px; min-height: 200px; }
+/* Detail docks to the bottom of the screen so the grid stays in view while it is open */
+.detail { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--ink); border-radius: 6px; padding: 18px 20px; display: grid; gap: 14px;
+  position: fixed; left: max(16px, 3vw); right: max(16px, 3vw); bottom: 16px; max-height: 46vh; overflow-y: auto; z-index: 10; box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+body:has(.detail:not([hidden])) .wrap { padding-bottom: 48vh; }
 .detail-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
 .detail-head .badge { font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 3px; color: #fff; }
 .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
@@ -173,40 +176,8 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-wi
   <header>
     <div class="status"><span class="pill">Working draft</span><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span></div>
     <h1>Where technology and service changes sit on the Drivers Medical journey</h1>
-    <p class="muted">The top row shows the stage of the target service, from the whole-service map, that each column feeds. Under it is the current-state journey, ending with the main technology changes at each stage beside the technology in use today. Below it are two bands, each ranked by impact on the service: seven technology enablers in colour, and seven service changes (policy, operations and commercial) in black. Select any item to see what it depends on, or a stage to see what acts on it.</p>
-    <div class="reads">
-      <div class="read"><strong>One keystone</strong>The condition and the customer's answers held as data at intake. Most of the other enablers rely on it.</div>
-      <div class="read"><strong>Two different prizes</strong>Messages and the case timeline reduce chasing calls. HCP evidence reduces decision time. They should be argued separately.</div>
-      <div class="read"><strong>The backlog is complex cases</strong>Speeding up simple flow won't shrink the backlog much on its own. That depends on stages 6 and 7.</div>
-      <div class="read"><strong>Mostly H2- technology</strong>Four of the seven technology enablers, as scoped, sustain today's service. Most of the transforming work is service change and data.</div>
-      <div class="read"><strong>Do now, unlock later</strong>Commissioning evidence and asking only what decides are within reach now. Checking decisions is what lets policy agree to the rest.</div>
-    </div>
+    <p class="muted">Today's journey, stage by stage, under the target service it feeds. The technology change row shows the main technology changes at each stage. Below are the seven technology enablers and seven service changes, drawn across the stages they change. Select anything for the detail.</p>
   </header>
-
-  <section class="controls" aria-label="Filters">
-    <div class="ctrl-row" id="layerRow"><h3>Layer</h3></div>
-    <div class="ctrl-row" id="outcomeRow"><h3>Outcome area</h3></div>
-    <div class="ctrl-row" id="horizonRow"><h3>Horizon</h3></div>
-    <div class="ctrl-row" id="techChips"><h3>Technology</h3><span id="enablerRow" class="ctrl-row"></span></div>
-    <div class="ctrl-row" id="svcChips"><h3>Service change</h3><span id="oppRow" class="ctrl-row"></span></div>
-    <div class="legend">
-      <span><i class="key"></i>Technology, primary</span>
-      <span><i class="key s"></i>Technology, supporting</span>
-      <span><i class="key svc"></i>Service change, primary</span>
-      <span><i class="key svc out"></i>Service change, supporting</span>
-      <span><b class="pain">Orange text</b> marks a pain point or constraint</span>
-      <span><b class="hz h3">H3</b> a pocket of the future service that already exists</span>
-      <span class="mono">CDS-nnn = data source</span>
-    </div>
-  </section>
-
-  <section class="horizons" aria-label="Three horizons">
-    <div><b class="hz h1">H1</b><p><strong>Current system.</strong> Today's Drivers Medical: the journey lanes on the map. It works well enough to persist but fails people in critical ways.</p></div>
-    <div><b class="hz h2p">H2+</b><p><strong>Transforming.</strong> Changes the conditions the service runs under: rules, contracts, review cycles, measures, data. Slow to pay off and hard to attribute.</p></div>
-    <div><b class="hz h2m">H2-</b><p><strong>Sustaining.</strong> Real short-term value that relieves the pressure for structural change. Fine when it's deliberate and named honestly.</p></div>
-    <div><b class="hz h3">H3</b><p><strong>Future system.</strong> Working assumption: proportionate decisions, one declaration, evidence only where it changes the outcome, review on change, decisions checked against outcomes.</p></div>
-    <p class="muted hzsrc">Labels follow the three horizons framework in <a href="https://www.eatingpolicy.com/p/a-three-horizons-framework-for-government">Eating Policy</a>. The test for each item: does it move the service toward H3, or prolong H1? Classification depends on the H3 vision, which is a draft here.</p>
-  </section>
 
   <section class="detail" id="detail" aria-live="polite"></section>
 
@@ -507,34 +478,6 @@ function el(tag, attrs = {}, html = "") {
 }
 function swatch(it) { return it.kind === "tech" ? `<i class="sw" style="background:${color(it)}"></i>` : `<i class="sw svc"></i>`; }
 
-function buildControls() {
-  const lrow = $("#layerRow");
-  LAYERS.forEach(l => {
-    const b = el("button", { class: "chip", type: "button", id: "lay-" + l.id, "data-layer": l.id, "aria-pressed": "false" }, l.name);
-    b.addEventListener("click", () => { state.layer = l.id; const s = state.sel && byKey(state.sel); if (s && l.id !== "all" && s.kind !== l.id) state.sel = null; render(); });
-    lrow.appendChild(b);
-  });
-  const hrow = $("#horizonRow");
-  HORIZONS.forEach(h => {
-    const b = el("button", { class: "chip", type: "button", id: "hz-" + h.id.replace("+","p").replace("-","m"), "data-horizon": h.id, "aria-pressed": "false" }, h.name);
-    b.addEventListener("click", () => { state.horizon = h.id; const s = state.sel && byKey(state.sel); if (s && h.id !== "all" && s.h !== h.id) state.sel = null; render(); });
-    hrow.appendChild(b);
-  });
-  const orow = $("#outcomeRow");
-  OUTCOMES.forEach(o => {
-    const b = el("button", { class: "chip", type: "button", id: "out-" + o.id, "data-outcome": o.id, "aria-pressed": "false" }, o.name);
-    b.addEventListener("click", () => { state.outcome = o.id; state.stage = null; const s = state.sel && byKey(state.sel); if (s && o.id !== "all" && !s.outcomes.includes(o.id)) state.sel = null; render(); });
-    orow.appendChild(b);
-  });
-  [["#enablerRow", ENABLERS], ["#oppRow", OPPS]].forEach(([row, arr]) => {
-    arr.forEach(it => {
-      const b = el("button", { class: "chip", type: "button", id: "it-" + it.key, "data-item": it.key, "aria-pressed": "false" },
-        `${swatch(it)}<span class="rk">${it.key}</span>${it.short} ${hzPill(it.h)}`);
-      b.addEventListener("click", () => selectItem(it.key));
-      $(row).appendChild(b);
-    });
-  });
-}
 
 function selectItem(k) { state.sel = state.sel === k ? null : k; state.stage = null; render(); }
 function selectStage(id) { state.stage = state.stage === id ? null : id; state.sel = null; render(); }
@@ -578,7 +521,7 @@ function buildMap() {
   map.appendChild(el("div", { class: "cell lane-label group", style: "grid-row: span 2" }, "Jira initiative"));
   GROUPS.forEach(g => map.appendChild(el("div", { class: "cell group", style: `grid-column: span ${g.span}` }, g.name)));
   map.appendChild(el("div", { class: "cell group across", style: "grid-column: span 9" }, "Staying informed: across every stage, in the lane below"));
-  map.appendChild(el("div", { class: "cell lane-label" }, "Stage<small>Select a stage to see what acts on it</small>"));
+  map.appendChild(el("div", { class: "cell lane-label" }, `Stage<small>Select a stage to see what acts on it. <span class="pain">Orange</span> marks a problem. <b class="hz h3">H3</b> marks part of the target service that already exists.</small>`));
   STAGES.forEach((s, i) => {
     const b = el("button", { class: "stage-head", type: "button", id: "st-" + s.id, "data-stage": s.id, "aria-pressed": "false" },
       `<span class="num">${String(i + 1).padStart(2, "0")}</span><strong>${s.name}</strong><span class="muted" style="font-size:12px">${s.sub}</span>`);
@@ -600,9 +543,9 @@ function buildMap() {
       main.map(e => `<button type="button" class="tc" data-tc="${e.key}" style="border-left-color:${color(e)}" aria-label="${e.name}: ${e.labels[s.id] || e.short}"><span class="rk">${e.id}</span><span>${e.labels[s.id] || e.short}</span></button>`).join("")));
   });
   map.querySelectorAll("[data-tc]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.tc)));
-  divider(map, "Technology enablers, ranked by impact on the service", "tech");
+  divider(map, "Technology enablers, ranked by impact on the service · Solid: main change at that stage · Hatched: supporting · H2+ transforms the service, H2- sustains today's", "tech");
   bandRows(map, ENABLERS);
-  divider(map, "Service changes, ranked by impact on the service. Policy, operations and commercial levers", "service");
+  divider(map, "Service changes: policy, operations and commercial, ranked by impact on the service · Filled: main change at that stage · Outline: supporting", "service");
   bandRows(map, OPPS);
 }
 
@@ -611,13 +554,7 @@ function visible() {
 }
 
 function render() {
-  document.querySelectorAll("[data-layer]").forEach(b => b.setAttribute("aria-pressed", b.dataset.layer === state.layer));
-  document.querySelectorAll("[data-outcome]").forEach(b => b.setAttribute("aria-pressed", b.dataset.outcome === state.outcome));
-  document.querySelectorAll("[data-horizon]").forEach(b => b.setAttribute("aria-pressed", b.dataset.horizon === state.horizon));
-  document.querySelectorAll(".controls [data-item]").forEach(b => b.setAttribute("aria-pressed", b.dataset.item === state.sel));
   document.querySelectorAll(".stage-head").forEach(b => b.setAttribute("aria-pressed", b.dataset.stage === state.stage));
-  $("#techChips").hidden = state.layer === "service";
-  $("#svcChips").hidden = state.layer === "tech";
 
   const vis = new Set(visible().map(i => i.key));
   const sel = state.sel ? byKey(state.sel) : null;
@@ -651,6 +588,8 @@ function pick(it, extra = "") { return `<button class="chip" type="button" data-
 
 function renderDetail(sel, vis) {
   const d = $("#detail");
+  d.hidden = !sel && !state.stage;
+  const close = `<button type="button" class="chip" data-close>Close</button>`;
   if (sel) {
     const stages = STAGES.filter(s => sel.impact[s.id]);
     const isSvc = sel.kind === "service";
@@ -658,7 +597,7 @@ function renderDetail(sel, vis) {
     const badge = isSvc ? `<span class="badge" style="background:var(--ink);color:var(--bg)">Service change ${sel.rank}</span>` : `<span class="badge" style="background:${color(sel)}">Enabler ${sel.rank}</span>`;
     const tags = [...sel.outcomes.map(o => OUTCOMES.find(x => x.id === o).name), ...(isSvc ? [REACH[sel.reach]] : [])];
     d.innerHTML = `
-      <div class="detail-head">${badge}${hzPill(sel.h)}<h2>${sel.name}</h2><div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div></div>
+      <div class="detail-head">${badge}${hzPill(sel.h)}<h2>${sel.name}</h2><div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>${close}</div>
       <p style="max-width:85ch">${sel.what}</p>
       <div class="hzbox"><div><h3>Why ${sel.h}</h3><p>${sel.hwhy}</p></div><div><h3>${sel.h === "H2+" ? "How it could slip" : "What would make it H2+"}</h3><p>${sel.hmove}</p></div></div>
       <div class="detail-grid">
@@ -674,25 +613,20 @@ function renderDetail(sel, vis) {
     const pains = LANES.flatMap(l => (CELLS[l.id][s.id] || []).filter(t => t.startsWith("!")).map(t => t.slice(1)));
     const sect = (kind, h) => { const a = acting.filter(x => x.kind === kind); return a.length ? `<div><h3>${h}</h3>${list(a.map(e => pick(e, ` <span class="muted">${e.impact[s.id] === "p" ? "primary" : "supporting"}</span>`)))}</div>` : ""; };
     d.innerHTML = `
-      <div class="detail-head"><span class="badge" style="background:var(--ink);color:var(--bg)">Stage ${STAGES.indexOf(s) + 1}</span><h2>${s.name}</h2><span class="muted">${s.sub}</span></div>
+      <div class="detail-head"><span class="badge" style="background:var(--ink);color:var(--bg)">Stage ${STAGES.indexOf(s) + 1}</span><h2>${s.name}</h2><span class="muted">${s.sub}</span>${close}</div>
       <div class="detail-grid">
         ${sect("tech", "Technology enablers here")}
         ${sect("service", "Service changes here")}
         <div><h3>Pain points and constraints</h3>${pains.length ? list(pains.map(p => `<span class="pain">${p}</span>`)) : `<p class="muted">None recorded yet.</p>`}</div>
       </div>`;
   } else {
-    const v = visible();
-    const col = (kind, h) => { const a = v.filter(x => x.kind === kind); return a.length ? `<div><h3>${h}</h3>${list(a.map(e => pick(e)))}</div>` : ""; };
-    d.innerHTML = `
-      <div class="detail-head"><h2>${state.outcome === "all" ? (state.horizon === "all" ? "Everything on the map" : state.horizon + " items") : OUTCOMES.find(o => o.id === state.outcome).name}</h2><span class="muted">${v.length} of 14 items. Select one for detail, or a stage to see what acts on it.</span></div>
-      <div class="detail-grid">${col("tech", "Technology enablers")}${col("service", "Service changes")}
-        <div><h3>How they fit</h3>${list(["Service changes S2 and S3 are within reach now and testable in ACE. They build the evidence for S1 and S4", "S5 is what lets policy say yes. Without it, S1 and S4 stay provocations", "Only enabler 5 and service changes S1 and S2 reach the complex cases where decision time goes", "Four of the seven technology enablers, as scoped, are H2-. Most of the H2+ work is service change"])}</div>
-      </div>`;
+    d.innerHTML = "";
   }
   d.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.pick)));
+  const c = d.querySelector("[data-close]");
+  if (c) c.addEventListener("click", () => { state.sel = null; state.stage = null; render(); });
 }
 
-buildControls();
 buildMap();
 render();
 
