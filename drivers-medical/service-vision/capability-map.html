@@ -175,13 +175,17 @@ body:has(.detail:not([hidden])) .wrap { padding-bottom: 48vh; }
 .rankby .lab { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-right: 6px; }
 .rankby .caveat { flex-basis: 100%; font-size: 12.5px; color: var(--muted); }
 /* Rank and score in each band label */
+.band-head .hd-note { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; margin-left: 10px; }
+.why { display: grid; gap: 1px; font-size: 12px; line-height: 1.3; margin: 2px 0 4px; }
+.why strong { font-size: 12.5px; }
+.why .sbar { margin: 2px 0 3px; }
 .rank { font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
 .rank .zero { font-family: var(--font-body); color: var(--muted); font-size: 11.5px; }
 .sbar { display: block; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: 2px; }
 .sbar i { display: block; height: 100%; background: var(--ink); }
 /* Inputs: estimates are dotted and say so */
 .est { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
-.opp .scores { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; border-top: 1px dashed var(--line); padding-top: 6px; }
+.opp .scores { grid-column: 1 / -1; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; border-top: 1px dashed var(--line); padding-top: 6px; }
 .opp .scores b { color: var(--ink); font-weight: 600; }
 table.howscored { border-collapse: collapse; width: 100%; font-size: 13px; }
 .howscored th, .howscored td { text-align: left; vertical-align: top; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--line); }
@@ -208,7 +212,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-wi
 
   <section class="detail" id="detail" aria-live="polite"></section>
 
-  <div class="rankby" id="rankby"><span class="lab">Rank by</span><p class="caveat">Scores are ordinal judgements on 0 to 5 scales, multiplied to compare. They show the reasoning; they don't decide. Inputs marked estimate are waiting on data.</p></div>
+  <div class="rankby" id="rankby"><span class="lab">Rank by</span><p class="caveat">Each item is rated on how many cases it reaches, what it saves on each case, and how far DVLA can do it alone. The ratings are multiplied to put the items in order. They are judgements, not measurements, and they show the reasoning rather than decide. Dotted underlines are estimates waiting on data.</p></div>
 
   <div class="map-scroll">
     <div class="map" id="map"></div>
@@ -517,12 +521,27 @@ const SCORES = {
   "S7": { reach: 5, reachBacklog: 0, days: 0, calls: 0, control: 3, dependency: 4, conf: {} }
 };
 const VIEWS = [
-  { id: "decision", name: "Decision time", score: s => s.reach * s.days * s.control, max: 125, formula: "Reach × days × control" },
-  { id: "backlog", name: "Backlog", score: s => s.reachBacklog * s.days * s.control, max: 125, formula: "Backlog reach × days × control" },
-  { id: "contact", name: "Contact demand", score: s => s.reach * s.calls * s.control, max: 125, formula: "Reach × calls × control" },
-  { id: "dependency", name: "Dependency", score: s => s.dependency, max: 5, formula: "What else relies on it" },
-  { id: "original", name: "Original order", score: null, max: null, formula: "Version 3 ranking, impact and dependency mixed" }
+  { id: "decision", name: "Decision time", uses: ["reach", "days", "control"], score: s => s.reach * s.days * s.control, max: 125, formula: "Reach × days × control",
+    says: "how much time to a decision it could save: how many cases it reaches, how many days it saves on each, and how far DVLA can do it alone" },
+  { id: "backlog", name: "Backlog", uses: ["reachBacklog", "days", "control"], score: s => s.reachBacklog * s.days * s.control, max: 125, formula: "Backlog reach × days × control",
+    says: "how much it could help the current backlog: how many backlog cases it reaches, how many days it saves on each, and how far DVLA can do it alone" },
+  { id: "contact", name: "Contact demand", uses: ["reach", "calls", "control"], score: s => s.reach * s.calls * s.control, max: 125, formula: "Reach × calls × control",
+    says: "how many chasing calls it could stop: how many cases it reaches, how much of the reason to call it removes, and how far DVLA can do it alone" },
+  { id: "dependency", name: "Dependency", uses: ["dependency"], score: s => s.dependency, max: 5, formula: "What else relies on it",
+    says: "how much else on this map relies on it" },
+  { id: "original", name: "Original order", uses: [], score: null, max: null, formula: "Version 3 ranking, impact and dependency mixed",
+    says: "the original judgement, which mixed impact and dependency" }
 ];
+// What each 0 to 5 rating means, in words. From the scoring scales.
+const WORDS = {
+  reach:        ["Reaches no cases", "Reaches a small cohort", "Reaches some condition groups", "Reaches a large segment", "Reaches most paper cases", "Reaches nearly every case"],
+  reachBacklog: ["Reaches no backlog cases", "Reaches a few backlog cases", "Reaches some of the backlog", "Reaches a large part of the backlog", "Reaches most of the backlog", "Reaches nearly all the backlog"],
+  days:         ["Saves no decision time", "Saves under a day a case", "Saves 1 to 5 days a case", "Saves 5 to 10 days a case", "Saves 10 to 20 days a case", "Saves 20+ days, or the whole decision"],
+  calls:        ["Stops no calls", "Stops a few calls", "Stops some chasing", "Removes a common reason to chase", "Removes a common reason to chase", "Removes the main reason to chase"],
+  control:      ["Out of DVLA's hands", "Needs law, clinical standards or D90", "Needs outside parties or a big build", "Needs architecture, DPP or legal sign-off", "DVLA teams can do it", "DVLA can do it alone, now"],
+  dependency:   ["Nothing relies on it", "Nothing relies on it", "One or two items rely on it", "Two or three items rely on it", "Many items rely on it", "Most other items rely on it"]
+};
+const word = (it, k) => { const w = WORDS[k][it.sc[k]]; return it.sc.conf[k] ? `<span class="est" title="Estimate, waiting on data">${w}</span>` : w; };
 const CRITERIA = [
   ["reach", "Reach"], ["reachBacklog", "Backlog reach"], ["days", "Days"], ["calls", "Calls"], ["control", "Control"], ["dependency", "Dependency"]
 ];
@@ -575,9 +594,9 @@ function bandRows(map, arr) {
   arr.forEach(it => {
     const sub = it.kind === "tech" ? it.outcomes.map(o => OUTCOMES.find(x => x.id === o).name).join(" · ") : REACH[it.reach];
     const v = viewById(state.view), sc = scoreIn(it, v), rank = arr.indexOf(it) + 1;
-    const rk = v.score
-      ? `<span class="rank">#${rank} · ${sc}/${v.max}${sc === 0 ? ` <span class="zero">no effect in this view</span>` : ""}</span><span class="sbar" aria-hidden="true"><i style="width:${Math.round(sc / v.max * 100)}%"></i></span>`
-      : `<span class="rank">#${rank}</span>`;
+    const rk = !v.score ? `<span class="why"><strong>#${rank}</strong> in the original order</span>`
+      : sc === 0 ? `<span class="why"><strong>#${rank}</strong> · no effect on ${v.name.toLowerCase()}</span>`
+      : `<span class="why"><strong>#${rank} on ${v.name.toLowerCase()}</strong><span class="sbar" aria-hidden="true"><i style="width:${Math.round(sc / v.max * 100)}%"></i></span>${v.uses.map(k => `<span>${word(it, k)}</span>`).join("")}</span>`;
     const lab = el("button", { class: "enabler-label tall", type: "button", "data-item": it.key, style: "grid-row: span 2" },
       `<span class="t">${swatch(it)}${it.key}. ${it.name}</span>${rk}<span class="muted" style="font-size:12px">${hzPill(it.h)} ${sub}</span>`);
     lab.addEventListener("click", () => selectItem(it.key));
@@ -617,7 +636,7 @@ function oppStrip(it) {
   } else {
     html = `<div>${it.what}</div><div><h4>Needs</h4><span class="needs">${it.depends.map(chip).join("")}</span></div>`;
   }
-  html += `<div class="scores">${CRITERIA.map(([k, name]) => `<span>${name} <b>${input(it, k)}</b></span>`).join("")}</div>`;
+  html += `<div class="scores">${CRITERIA.map(([k]) => `<span>${word(it, k)}</span>`).join("<span aria-hidden='true'>·</span>")}</div>`;
   const n = el("div", { class: "opp " + (it.kind === "tech" ? "tech" : "svc"), "data-item": it.key }, html);
   n.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.pick)));
   return n;
@@ -658,10 +677,11 @@ function buildMap() {
       main.map(e => `<button type="button" class="tc" data-tc="${e.key}" style="border-left-color:${color(e)}" aria-label="${e.name}: ${e.labels[s.id] || e.short}"><span class="rk">${e.id}</span><span>${e.labels[s.id] || e.short}</span></button>`).join("")));
   });
   map.querySelectorAll("[data-tc]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.tc)));
-  const vname = viewById(state.view).name.toLowerCase();
-  divider(map, `Technology enablers, ranked by ${vname} · Solid: main change at that stage · Hatched: supporting · H2+ transforms the service, H2- sustains today's`, "tech");
+  const vw = viewById(state.view);
+  const vname = vw.says;
+  divider(map, `Technology enablers <span class="hd-note">Ranked by ${vname}. Solid bar: the main change at that stage. Hatched: supporting. H2+ transforms the service, H2- sustains today's.</span>`, "tech");
   bandRows(map, ordered(ENABLERS));
-  divider(map, `Service changes: policy, operations and commercial, ranked by ${vname} · Filled: main change at that stage · Outline: supporting`, "service");
+  divider(map, `Service changes <span class="hd-note">Policy, operations and commercial. Ranked by ${vname}. Filled bar: the main change at that stage. Outline: supporting.</span>`, "service");
   bandRows(map, ordered(OPPS));
 }
 
@@ -718,9 +738,9 @@ function renderDetail(sel, vis) {
       <p style="max-width:85ch">${sel.what}</p>
       <div><h3>How it's scored</h3>
         <table class="howscored"><thead><tr><th>Criterion</th><th>Score</th><th>Basis</th></tr></thead><tbody>
-        ${CRITERIA.map(([k, name]) => `<tr><td>${name}</td><td class="n">${input(sel, k)}/5${sel.sc.conf[k] ? ` <span class="muted">estimate</span>` : ""}</td><td>${sel.basis[k] || ""}</td></tr>`).join("")}
+        ${CRITERIA.map(([k, name]) => `<tr><td>${name}</td><td class="n">${input(sel, k)}/5${sel.sc.conf[k] ? ` <span class="muted">estimate</span>` : ""}</td><td><strong>${WORDS[k][sel.sc[k]]}.</strong> ${sel.basis[k] || ""}</td></tr>`).join("")}
         </tbody></table>
-        <p style="margin-top:8px;font-size:13px">${VIEWS.filter(v => v.score).map(v => { const band = isSvc ? OPPS : ENABLERS; return `<strong>${v.name}</strong> ${scoreIn(sel, v)}/${v.max} (#${ordered(band, v).indexOf(sel) + 1} in its band)`; }).join(" · ")}</p>
+        <p style="margin-top:8px;font-size:13px">${VIEWS.filter(v => v.score).map(v => { const band = isSvc ? OPPS : ENABLERS; return `<strong>#${ordered(band, v).indexOf(sel) + 1} on ${v.name.toLowerCase()}</strong> <span class="muted">(${v.formula}: ${scoreIn(sel, v)} of ${v.max})</span>`; }).join(" · ")}</p>
       </div>
       <div class="hzbox"><div><h3>Why ${sel.h}</h3><p>${sel.hwhy}</p></div><div><h3>${sel.h === "H2+" ? "How it could slip" : "What would make it H2+"}</h3><p>${sel.hmove}</p></div></div>
       <div class="detail-grid">
