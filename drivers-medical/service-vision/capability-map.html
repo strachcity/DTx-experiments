@@ -173,7 +173,9 @@ body:has(.detail:not([hidden])) .wrap { padding-bottom: 48vh; }
 /* Rank by: one row above the grid */
 .rankby { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .rankby .lab { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-right: 6px; }
-.rankby .caveat { flex-basis: 100%; font-size: 12.5px; color: var(--muted); }
+.rankby-row { grid-column: 1 / -1; background: var(--bg); border-top: 2px solid var(--ink); padding: 14px 12px 12px; }
+.rankby-row > * { position: sticky; left: 12px; max-width: min(1100px, calc(100vw - 2 * max(16px, 3vw) - 24px)); }
+.rankby-row .caveat { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
 /* Rank and score in each band label */
 .band-head .hd-note { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; margin-left: 10px; }
 .why { display: grid; gap: 1px; font-size: 12px; line-height: 1.3; margin: 2px 0 4px; }
@@ -211,8 +213,6 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-wi
   </header>
 
   <section class="detail" id="detail" aria-live="polite"></section>
-
-  <div class="rankby" id="rankby"><span class="lab">Rank by</span><p class="caveat">Each item is rated on how many cases it reaches, what it saves on each case, and how far DVLA can do it alone. The ratings are multiplied to put the items in order. They are judgements, not measurements, and they show the reasoning rather than decide. Dotted underlines are estimates waiting on data.</p></div>
 
   <div class="map-scroll">
     <div class="map" id="map"></div>
@@ -677,6 +677,14 @@ function buildMap() {
       main.map(e => `<button type="button" class="tc" data-tc="${e.key}" style="border-left-color:${color(e)}" aria-label="${e.name}: ${e.labels[s.id] || e.short}"><span class="rk">${e.id}</span><span>${e.labels[s.id] || e.short}</span></button>`).join("")));
   });
   map.querySelectorAll("[data-tc]").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.tc)));
+  // Rank by sits in the grid, directly above the bands it reorders
+  const rb = el("div", { class: "cell rankby-row" }, `<div class="rankby"><span class="lab">Rank the enablers and service changes by</span></div><p class="caveat">Each item is rated on how many cases it reaches, what it saves on each case, and how far DVLA can do it alone. The ratings are multiplied to put the items in order. They are judgements, not measurements, and they show the reasoning rather than decide. Dotted underlines are estimates waiting on data.</p>`);
+  VIEWS.forEach(v => {
+    const b = el("button", { class: "chip", type: "button", "data-view": v.id, "aria-pressed": String(v.id === state.view), title: v.formula }, v.name);
+    b.addEventListener("click", () => { state.view = v.id; buildMap(); render(); });
+    rb.querySelector(".rankby").appendChild(b);
+  });
+  map.appendChild(rb);
   const vw = viewById(state.view);
   const vname = vw.says;
   divider(map, `Technology enablers <span class="hd-note">Ranked by ${vname}. Solid bar: the main change at that stage. Hatched: supporting. H2+ transforms the service, H2- sustains today's.</span>`, "tech");
@@ -770,11 +778,6 @@ function renderDetail(sel, vis) {
   if (c) c.addEventListener("click", () => { state.sel = null; state.stage = null; render(); });
 }
 
-VIEWS.forEach(v => {
-  const b = el("button", { class: "chip", type: "button", "data-view": v.id, "aria-pressed": "false", title: v.formula }, v.name);
-  b.addEventListener("click", () => { state.view = v.id; buildMap(); render(); });
-  $("#rankby").insertBefore(b, $("#rankby .caveat"));
-});
 buildMap();
 render();
 
