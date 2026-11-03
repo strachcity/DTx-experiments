@@ -22,6 +22,7 @@
 
   --e1: #1f6fb2; --e2: #c4561d; --e3: #2d8a5a; --e4: #b0347c;
   --e5: #6a4bc4; --e6: #a77a12; --e7: #56636f;
+  --e8: #0e7c86; --e9: #8a4f2a; --e10: #2f5fa8; --e11: #5d7a1c;
   --dim: 0.18;
   --tint: #eef3f7;
   --h2p: #1a7a4c; --h2m: #b0541a; --h3: #0d7d8c;
@@ -33,6 +34,7 @@
     --accent: #6fb1e3; --tint: #1f2a34; --h2p: #3aa872; --h2m: #ec8a4c; --h3: #3fb6c4;
     --e1: #5aa4e6; --e2: #e8854f; --e3: #5cbf8a; --e4: #e06aae;
     --e5: #9c84ec; --e6: #d6aa45; --e7: #93a1ad;
+    --e8: #45c1cc; --e9: #d39268; --e10: #7fa6e8; --e11: #a6c45a;
     color-scheme: dark;
   }
 }
@@ -41,6 +43,7 @@
   --accent: #6fb1e3; --tint: #1f2a34; --h2p: #3aa872; --h2m: #ec8a4c; --h3: #3fb6c4;
   --e1: #5aa4e6; --e2: #e8854f; --e3: #5cbf8a; --e4: #e06aae;
   --e5: #9c84ec; --e6: #d6aa45; --e7: #93a1ad;
+  --e8: #45c1cc; --e9: #d39268; --e10: #7fa6e8; --e11: #a6c45a;
   color-scheme: dark;
 }
 
@@ -178,6 +181,13 @@ body:has(.detail:not([hidden])) .wrap { padding-bottom: 48vh; }
 .rankby-row .caveat { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
 /* Rank and score in each band label */
 .band-head .hd-note { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; margin-left: 10px; }
+.tagrow { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0; }
+.ttag { font-size: 11px; font-weight: 600; line-height: 1.5; padding: 0 6px; border-radius: 3px; border: 1px solid var(--line); background: var(--surface); }
+.ttag.live { border-color: var(--h2p); color: var(--h2p); }
+.ttag.eng { border-color: var(--h2m); color: var(--h2m); }
+.ttag.new { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.opp .qs { margin-top: 6px; color: var(--muted); }
+.opp .qs li::marker { content: "? "; }
 .why { display: grid; gap: 1px; font-size: 12px; line-height: 1.3; margin: 2px 0 4px; }
 .why strong { font-size: 12.5px; }
 .why .sbar { margin: 2px 0 3px; }
@@ -209,7 +219,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-wi
   <header>
     <div class="status"><span class="pill">Working draft</span><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span></div>
     <h1>Where technology and service changes sit on the Drivers Medical journey</h1>
-    <p class="muted">Today's journey, stage by stage, under the target service it feeds. The technology change row shows the main technology changes at each stage. Below are the seven technology enablers and seven service changes, drawn across the stages they change. Select anything for the detail.</p>
+    <p class="muted">Today's journey, stage by stage, under the target service it feeds. The technology change row shows the main technology changes at each stage. Below are the eleven technology enablers and seven service changes, drawn across the stages they change. Select anything for the detail.</p>
   </header>
 
   <section class="detail" id="detail" aria-live="polite"></section>
@@ -341,7 +351,7 @@ const ENABLERS = [
     outcomes: ["tell", "evidence"],
     impact: { l1: "p", mq: "s", l2: "s", hcp: "s", dec: "s", review: "s" },
     labels: { l1: "Auto-send the right MQ", hcp: "Auto reminders", review: "Declaration renewals, later" },
-    what: "BPMN and Power Automate flows in Dynamics, with letters generated from DGU templates automatically, not keyed by a caseworker.",
+    what: "BPMN and Power Automate flows in Dynamics, with letters generated from DGU templates automatically, not keyed by a caseworker. The right MQ goes out on paper, with email or online prompts.",
     unlocks: ["Level 1 becomes an automatic MQ send with a return barcode", "Triggered letters and messages at each case event", "Automatic chasing of overdue evidence", "Later, declaration-based renewals on the same rules engine"],
     evidence: ["Level 1 is process-driven triage, not judgement", "98.5% of non-escalated, no-intervention diabetes renewals issued (CDS-342)", "17 chronic neurological conditions have been declaration-based since Oct 2021"],
     blockers: ["Automating licensing decisions is off the table for now", "~21 Level 1 flows need writing up as BPMN", "Depends on enabler 1 for structured inputs"]
@@ -351,17 +361,17 @@ const ENABLERS = [
     outcomes: ["informed"],
     impact: { notify: "s", create: "p", l1: "s", mq: "p", l2: "s", hcp: "p", esc: "s", dec: "p", review: "s" },
     labels: { create: "Receipt message", mq: "'We've posted you a form'", hcp: "'Waiting on someone else'", dec: "'Decision posted'" },
-    what: "A new event from the Dynamics Communications table to the customer domain (option B), so letter events drive automated Notify messages and the case timeline.",
+    what: "A new event from the Dynamics Communications table to the customer domain (option B), so letter events drive automated Notify messages and the case timeline. Notify, through AWS, sends texts at key points: case updates and calls to action. Email is still to build.",
     unlocks: ["Proactive messages sent automatically, not by hand", "The case timeline built from real letters", "Letters readable in the customer account", "Retiring paper-only update letters"],
     evidence: ["~56% of contacts are progress chases, about £1.8m a year", "~296k letters a year only say we've written to or chased an HCP", "~2.4m letters a year in total, ~9,600 a working day"],
-    blockers: ["Communications table may not be able to leave Dynamics", "Access to Blob storage for PDFs not agreed", "Release rules for decision letters (legal)", "Print status only confirms 'sent to print'"]
+    blockers: ["Proactive communications were descoped from Evolve", "Communications table may not be able to leave Dynamics", "Access to Blob storage for PDFs not agreed", "Release rules for decision letters (legal)", "Print status only confirms 'sent to print'"]
   },
   {
     id: 4, name: "Secure digital return channel", short: "Secure return",
     outcomes: ["tell", "informed"],
     impact: { notify: "s", mq: "p", hcp: "s", dec: "p" },
     labels: { mq: "Reply online, as data", hcp: "Upload own evidence", dec: "Digital D202" },
-    what: "Replies, uploads and consent online behind GOV.UK One Login, with paper kept for everyone.",
+    what: "Replies, uploads and consent online behind GOV.UK One Login, with paper kept for everyone. Experiment two tests uploading evidence digitally. It feeds medical investigation and the D202 process.",
     unlocks: ["Answers back faster, and as data (feeds enabler 1)", "Customer-held evidence uploaded, not posted", "Digital D202 at scale"],
     evidence: ["D202 QR test: 34 of 92 used it, 100% data accuracy", "56% of letters asking the customer to act already have a digital route", "~88k a year need a new journey, led by LHREJMQ (33k)"],
     blockers: ["GOV.UK Forms can't take medical information, so it has to be built", "DMSP submissions don't attach to an existing case", "DPIA and what each access tier may show (DPP)"]
@@ -371,7 +381,7 @@ const ENABLERS = [
     outcomes: ["evidence"],
     impact: { l2: "s", hcp: "p", esc: "s" },
     labels: { hcp: "Chase, digital return, pre-fill, record access" },
-    what: "In order of cost: automated reminders, a digital return route for HCPs, pre-filled 'confirm' forms, then patient-mediated record access.",
+    what: "In order of cost: automated reminders, a digital return route for HCPs, pre-filled 'confirm' forms, then patient-mediated record access. Trust the customer and accept more of their evidence. The MED portal concept (TBC) would carry the HCP questionnaire and sampling, with Dynamics, and is being discussed with Digital Payments.",
     unlocks: ["Shorter evidence waits on the cases that make up the backlog", "Fewer chases from customers stuck waiting on someone else", "Evidence that comes back as data"],
     evidence: ["50–55k HCP letters a month, median ~30 days to return (CDS-730)", "Evidence is 50–65% of time to decision when requested (CDS-443, DMSP only)", "Backlog weighted to complex cases: multiple 23.4%, diabetes 7.4% (CALD, 26 Jun 2026)"],
     blockers: ["GP Connect is direct-care only. Record access needs NHS England policy or an NHS App route", "HCP appetite for changed forms not tested", "Pre-fill depends on enabler 1"]
@@ -383,7 +393,7 @@ const ENABLERS = [
     labels: { review: "Longer licences, light check-ins" },
     what: "D90 able to issue longer licences with 'has anything changed?' check-ins, instead of enforced short renewal cycles.",
     unlocks: ["Fewer decisions needed in the first place", "Flattens recurring renewal waves", "Decision effort concentrated where risk changes"],
-    evidence: ["Short licences return within 3 years, creating waves of demand (Discovery)", "A 10-year licence with reviews is legally feasible", "Least sized of the seven"],
+    evidence: ["Short licences return within 3 years, creating waves of demand (Discovery)", "A 10-year licence with reviews is legally feasible", "Least sized of the original seven"],
     blockers: ["D90 technology is the constraint, not policy", "Legal argument on 'stable risk profile'"]
   },
   {
@@ -391,17 +401,72 @@ const ENABLERS = [
     outcomes: ["informed", "evidence"],
     impact: { notify: "s", l2: "p", hcp: "s", esc: "s", dec: "s" },
     labels: { notify: "Phone first notifications", l2: "Record pre-evidence view" },
-    what: "IVR and webchat routing from case data, call purpose tracking, the MI dashboard, and recording a recommendation before evidence is requested.",
-    unlocks: ["NewCo cohort callers reach a NewCo agent", "The gateway metric: how often evidence changes the decision", "Proof of NewCo capacity against BAU"],
+    what: "IVR and webchat routing from case data, call purpose tracking, the MI dashboard, and recording a recommendation before evidence is requested. Storm and Dynamics integration, so agents can answer the timeframe question.",
+    unlocks: ["Agents can answer how long a case will take", "NewCo cohort callers reach a NewCo agent", "The gateway metric: how often evidence changes the decision", "Proof of NewCo capacity against BAU"],
     evidence: ["Evidence-to-decision ratio can't be calculated today", "Twice-weekly manual routing is an acceptable bridge"],
     blockers: ["Real-time Dynamics integration for IVR", "MI dashboard dependency for the measurement framework"]
+  },
+  // 8 to 11 come from the 3 November whiteboard session
+  {
+    id: 8, name: "Third-party notification routes", short: "Third-party routes", isNew: true,
+    outcomes: ["tell"],
+    impact: { notify: "p", create: "s" },
+    labels: { notify: "Doctor and police reports, through DMSP and NEDS [?]" },
+    what: "Routes for doctors and the police to tell DVLA about a driver, through DMSP and NEDS [?].",
+    unlocks: ["Third-party reports arrive in the same intake as everything else", "Possibly a different service for the police"],
+    evidence: ["Some notifications come from doctors or police (current state)"],
+    blockers: ["Not yet known whether the police need a different service"],
+    questions: ["Offer a different service to the police?", "Use government statistics on alcohol and drugs? [?]"]
+  },
+  {
+    id: 9, name: "Single source of truth for operating instructions and policy", short: "One source for OIs", isNew: true,
+    outcomes: ["evidence"],
+    impact: { l1: "s", l2: "p", esc: "s", dec: "s" },
+    labels: { l2: "One aligned set of OIs agents can use" },
+    what: "Operating instructions and policy in one place, aligned with each other and usable by agents, with a clear way to change them.",
+    unlocks: ["Agents decide from the same instructions", "Better data entry for OIs on paper cases"],
+    evidence: ["Raised at the 3 November session, with a question mark against it"],
+    blockers: ["How OIs are updated: change management"],
+    questions: ["Is this in scope? It has a question mark on the board"]
+  },
+  {
+    id: 10, name: "Secure communication and case updates", short: "Secure messages", isNew: true,
+    outcomes: ["informed"],
+    impact: { mq: "s", hcp: "p", dec: "p", review: "s" },
+    labels: { hcp: "Two-way messages, send evidence", dec: "Decisions and documents online" },
+    what: "In the customer account: view updates and documents, message DVLA both ways and send evidence, and see decisions.",
+    unlocks: ["Updates and letters readable online", "Two-way messages instead of post for evidence"],
+    evidence: ["Five case statuses already go to the customer account (current state)"],
+    blockers: ["Decision copy online depends on legal release rules"],
+    questions: []
+  },
+  {
+    id: 11, name: "Storing data against the customer record", short: "Customer record", isNew: true,
+    outcomes: ["tell", "evidence"],
+    impact: { create: "p", hcp: "s", review: "p" },
+    labels: { create: "Stored against the person, not the case", review: "Start from what we hold" },
+    what: "Evidence and answers stored against the customer, not only the case, so they can be used again on the next case or renewal.",
+    unlocks: ["Ask once, then reuse at renewal", "Evidence from a medical investigation kept for next time"],
+    evidence: ["Starred on the 3 November board", "Renewals re-run the same casework (current state)"],
+    blockers: ["Payload data in Dynamics blocked for bulk query by a DPIA issue"],
+    questions: []
   }
 ];
+// From the 3 November whiteboard: how enablers connect, what's being tested, and which need an engineer.
+const LINKS = [[1, 2], [2, 3], [3, 4], [3, 10], [4, 10], [4, 5], [5, 11], [7, 9]];
+const STATUS = { "2": "Day 1 testing", "3": "Day 1 testing", "4": "Experiment two", "5": "MED portal concept, TBC" };
+const ENGINEER = new Set(["3", "4", "5", "6", "7", "10"]);
+const QUESTIONS = {
+  "1": ["How does DMI work?", "Is Kerv [?] scanning turning paper into structured data?", "Live in \"Violette\" [?]"],
+  "3": ["Build email?", "Is the Notify integration ready?"],
+  "5": ["What is HCP CYA? [?]", "What does sampling mean here? [?]"],
+  "7": ["RTAs [?]"]
+};
 
 const OPPS = [
   {
     id: "S1", name: "Explicit thresholds for judgement-heavy conditions", short: "Explicit thresholds",
-    reach: "policy", outcomes: ["evidence"], depends: [1, 5, 7],
+    reach: "policy", outcomes: ["evidence"], depends: [1, 5, 7, 9],
     impact: { l2: "s", hcp: "s", esc: "p", review: "s" },
     labels: { esc: "Written standards for EOC and doctors" },
     what: "Written standards for what evidence must show in heart, neurological, cognitive and multiple-condition cases, which today go to an EOC or DVLA doctor with no explicit standard to judge against.",
@@ -421,7 +486,7 @@ const OPPS = [
   },
   {
     id: "S3", name: "Ask only what decides the case", short: "Ask only what decides",
-    reach: "now", outcomes: ["tell", "evidence"], depends: [1, 4],
+    reach: "now", outcomes: ["tell", "evidence"], depends: [1, 4, 11],
     impact: { notify: "p", l1: "s", mq: "p", hcp: "p" },
     labels: { notify: "Declare once", mq: "Drop 'for information' questions", hcp: "HCP asked only what the customer can't tell us" },
     what: "Declare once instead of D1 then MQ, and remove questions on customer and HCP forms that lead to no licensing decision and no next question.",
@@ -431,7 +496,7 @@ const OPPS = [
   },
   {
     id: "S4", name: "Review on change, not on the date", short: "Review on change",
-    reach: "policy", outcomes: ["evidence"], depends: [6, 2],
+    reach: "policy", outcomes: ["evidence"], depends: [6, 2, 11],
     impact: { hcp: "s", dec: "s", review: "p" },
     labels: { review: "Longer licences, check-ins, reuse evidence" },
     what: "Longer licences with 'has anything changed?' check-ins, earlier evidence kept usable, and an end to adding evidence to groups whose outcome barely moves.",
@@ -477,9 +542,17 @@ const SIZE = {
   "4": "~88k a year need a new journey, led by LHREJMQ (33k)",
   "5": "50–55k HCP letters a month, median ~30 days to return (CDS-730)",
   "6": "Not yet sized. Short licences return within 3 years, creating waves of demand",
-  "7": "Not yet sized. Evidence-to-decision ratio can't be calculated today"
+  "7": "Not yet sized. Evidence-to-decision ratio can't be calculated today",
+  "8": "Not yet sized. The share of notifications from third parties is unknown",
+  "9": "Not yet sized",
+  "10": "Not yet sized. Five case statuses already reach the account",
+  "11": "Not yet sized. Renewals re-run the same casework today"
 };
-ENABLERS.forEach(e => { e.kind = "tech"; e.key = String(e.id); e.rank = e.id; });
+ENABLERS.forEach(e => {
+  e.kind = "tech"; e.key = String(e.id); e.rank = e.id;
+  e.links = LINKS.filter(l => l.includes(e.id)).map(l => l[0] === e.id ? l[1] : l[0]);
+  e.status = STATUS[e.key]; e.engineer = ENGINEER.has(e.key); e.questions = e.questions || QUESTIONS[e.key] || [];
+});
 OPPS.forEach((o, i) => { o.kind = "service"; o.key = o.id; o.rank = i + 1; });
 const ITEMS = [...ENABLERS, ...OPPS];
 const byKey = k => ITEMS.find(i => i.key === k);
@@ -499,6 +572,10 @@ const HZ = {
   "S4": ["H2+", "Changes review cycles, the structure behind recurring demand. The 2021 neurological change is an H3 pocket to grow from.", "Drifts to H2- if it stays a one-off exception for a few conditions."],
   "S5": ["H2+", "A feedback loop on outcomes. It changes what the service can prove, and so what policy can agree to.", "Drifts to H2- if it produces reports nobody is accountable for acting on."],
   "S6": ["H2-", "On its own, routing sends cases into the same process by a different door. A demonstration that may not scale.", "Becomes H2+ when S1 to S4 give each route a genuinely different way of deciding."],
+  "8": ["H2-", "Adds routes into today's intake without changing what happens after.", "Becomes H2+ if third-party reports arrive as data that route the case."],
+  "9": ["H2+", "One source agents decide from changes the rules everyone works to, and gives written standards somewhere to live.", "Drifts to H2- if it's a tidier document store that nobody changes."],
+  "10": ["H2-", "A better window on today's case. It cuts chasing without changing why cases wait.", "Becomes H2+ when two-way messages replace the postal loop for evidence and decisions."],
+  "11": ["H2+", "Holding evidence against the person, not the case, is what lets the service ask once and reuse it at renewal.", "Drifts to H2- if data is stored but each case still starts from scratch."],
   "S7": ["H2+", "Changes incentives and accountability, the conditions everything else is judged under.", "Drifts to H2- if new measures sit beside the backlog count while the backlog count still decides."]
 };
 ITEMS.forEach(it => { const h = HZ[it.key]; it.h = h[0]; it.hwhy = h[1]; it.hmove = h[2]; });
@@ -506,12 +583,16 @@ ITEMS.forEach(it => { const h = HZ[it.key]; it.h = h[0]; it.hwhy = h[1]; it.hmov
 // Scores: ordinal judgements on 0 to 5 scales. conf lists the inputs that are not measured.
 const SCORES = {
   "1":  { reach: 4, reachBacklog: 3, days: 1, calls: 0, control: 3, dependency: 5, conf: {} },
-  "2":  { reach: 3, reachBacklog: 1, days: 3, calls: 1, control: 4, dependency: 3, conf: { reach: "estimate", days: "estimate" } },
+  "2":  { reach: 3, reachBacklog: 1, days: 3, calls: 1, control: 5, dependency: 3, conf: { reach: "estimate", days: "estimate" } },
   "3":  { reach: 5, reachBacklog: 2, days: 0, calls: 5, control: 3, dependency: 1, conf: {} },
-  "4":  { reach: 3, reachBacklog: 2, days: 2, calls: 2, control: 2, dependency: 2, conf: { days: "estimate" } },
+  "4":  { reach: 3, reachBacklog: 2, days: 2, calls: 2, control: 3, dependency: 2, conf: { days: "estimate" } },
   "5":  { reach: 4, reachBacklog: 5, days: 4, calls: 3, control: 2, dependency: 2, conf: { reach: "estimate", days: "estimate" } },
   "6":  { reach: 3, reachBacklog: 2, days: 5, calls: 3, control: 1, dependency: 1, conf: { calls: "estimate" } },
-  "7":  { reach: 2, reachBacklog: 1, days: 1, calls: 2, control: 4, dependency: 3, conf: {} },
+  "7":  { reach: 2, reachBacklog: 1, days: 1, calls: 3, control: 4, dependency: 3, conf: {} },
+  "8":  { reach: 2, reachBacklog: 1, days: 1, calls: 0, control: 2, dependency: 1, conf: { reach: "estimate", days: "estimate" } },
+  "9":  { reach: 5, reachBacklog: 4, days: 1, calls: 1, control: 4, dependency: 2, conf: { reachBacklog: "estimate", days: "estimate", calls: "estimate" } },
+  "10": { reach: 4, reachBacklog: 2, days: 1, calls: 3, control: 2, dependency: 2, conf: { reach: "estimate", days: "estimate", calls: "estimate" } },
+  "11": { reach: 4, reachBacklog: 2, days: 2, calls: 1, control: 3, dependency: 3, conf: { days: "estimate" } },
   "S1": { reach: 2, reachBacklog: 5, days: 4, calls: 1, control: 1, dependency: 2, conf: { days: "estimate" } },
   "S2": { reach: 3, reachBacklog: 4, days: 4, calls: 2, control: 4, dependency: 1, conf: { reach: "estimate", days: "estimate" } },
   "S3": { reach: 4, reachBacklog: 3, days: 3, calls: 2, control: 4, dependency: 2, conf: { days: "estimate" } },
@@ -548,12 +629,16 @@ const CRITERIA = [
 // Why each score is what it is
 const BASIS = {
   "1": { reach: "Every paper notification. DMSP already captures data.", reachBacklog: "Cases already in the backlog were keyed at intake and won't be re-keyed.", days: "Little direct saving. The value comes through other items.", calls: "", control: "A DMI process change, Dynamics fields and the payload DPIA.", dependency: "S1, S3, S5 and S6, plus pre-fill in 5 and the rules in 2." },
-  "2": { reach: "Paper notifications without an MQ go through Level 1. Volume is unknown (data request sent, CDS-265).", reachBacklog: "These cases are mostly past Level 1.", days: "Level 1 queue time is unknown. The ceiling is the DMSP gap of 24 against 66 working days (CDS-271), and only part of that gap is Level 1.", calls: "", control: "Dynamics BPMN.", dependency: "S2, S4 and S6." },
+  "2": { reach: "Paper notifications without an MQ go through Level 1. Volume is unknown (data request sent, CDS-265).", reachBacklog: "These cases are mostly past Level 1.", days: "Level 1 queue time is unknown. The ceiling is the DMSP gap of 24 against 66 working days (CDS-271), and only part of that gap is Level 1.", calls: "", control: "Raised from 4 to 5 after 3 November: Level 1 automation is in Day 1 testing.", dependency: "S2, S4 and S6." },
   "3": { reach: "Every case.", reachBacklog: "", days: "It doesn't change how long a decision takes.", calls: "Progress chases are ~56% of contact.", control: "The Communications table, Blob access and legal release rules.", dependency: "" },
-  "4": { reach: "Letters asking the customer to act. ~88k a year need a new journey.", reachBacklog: "", days: "Saves postal days each way, and fewer rejections.", calls: "", control: "A new build, because GOV.UK Forms can't take medical information. Also One Login and DPP.", dependency: "S3, and feeds 1." },
+  "4": { reach: "Letters asking the customer to act. ~88k a year need a new journey.", reachBacklog: "", days: "Saves postal days each way, and fewer rejections.", calls: "", control: "Raised from 2 to 3 after 3 November: digital upload is running as experiment two. Still a new build, because GOV.UK Forms can't take medical information.", dependency: "S3, and feeds 1." },
   "5": { reach: "50k to 55k HCP letters a month against ~57k decisions a month. Letters per case are unknown, so the share of cases with an HCP request is unknown.", reachBacklog: "Complex cases wait on evidence.", days: "Median ~30 days to return (CDS-730). Chasing and a digital return plausibly cut 10 to 15 days, unmeasured.", calls: "A third of HCP reports are chased.", control: "HCPs are external. GP Connect is direct-care only.", dependency: "S1 and S2." },
   "6": { reach: "Renewals.", reachBacklog: "", days: "An avoided renewal saves the whole decision.", calls: "", control: "A D90 change and a legal argument.", dependency: "S4." },
-  "7": { reach: "Routing is for the ACE cohort. Measurement is indirect.", reachBacklog: "", days: "", calls: "", control: "", dependency: "S1, S5 and S7 need the gateway metric." },
+  "7": { reach: "Routing is for the ACE cohort. Measurement is indirect.", reachBacklog: "", days: "", calls: "Raised from 2 to 3 after 3 November: Storm and Dynamics integration would let agents answer the timeframe question.", control: "", dependency: "S1, S5 and S7 need the gateway metric." },
+  "8": { reach: "Notifications from doctors and police. Their share is unknown.", reachBacklog: "", days: "Little on its own.", calls: "", control: "Needs the police and other outside parties.", dependency: "" },
+  "9": { reach: "Every case is decided under OIs.", reachBacklog: "Backlog cases are decided under them too.", days: "Mainly consistency, not speed.", calls: "", control: "OIs and policy are DVLA's own.", dependency: "S1 needs somewhere for written standards; linked to the Storm and Dynamics request." },
+  "10": { reach: "Customers with an account.", reachBacklog: "", days: "Saves postal days when evidence and replies go online.", calls: "Updates and documents readable without calling.", control: "Customer account, Dynamics and an engineer. Release rules for decision letters.", dependency: "Linked to proactive communications and digital upload." },
+  "11": { reach: "Every case that comes back: renewals and new conditions.", reachBacklog: "", days: "Reuse at renewal, unmeasured.", calls: "", control: "Dynamics data model and the payload DPIA.", dependency: "S3 and S4, and medical investigation feeds it." },
   "S1": { reach: "Judgement-heavy conditions.", reachBacklog: "Multiple 23.4%, epilepsy 13.0%.", days: "Fewer Level 3 and 4 referrals, unmeasured.", calls: "", control: "Clinical standards and decision rights.", dependency: "S6 and the archetypes." },
   "S2": { reach: "Evidence-requested cases (as for 5).", reachBacklog: "", days: "Fees, deadlines and parallel requests. Vision already runs requests in parallel.", calls: "", control: "Contracts and operating instructions, testable in ACE.", dependency: "" },
   "S3": { reach: "Every paper case and every HCP form.", reachBacklog: "", days: "Declaring once removes a postal cycle on paper; ~33k rejected MQs a year; shorter HCP forms.", calls: "", control: "Form changes, needing clinical sign-off.", dependency: "" },
@@ -598,7 +683,7 @@ function bandRows(map, arr) {
       : sc === 0 ? `<span class="why"><strong>#${rank}</strong> · no effect on ${v.name.toLowerCase()}</span>`
       : `<span class="why"><strong>#${rank} on ${v.name.toLowerCase()}</strong><span class="sbar" aria-hidden="true"><i style="width:${Math.round(sc / v.max * 100)}%"></i></span>${v.uses.map(k => `<span>${word(it, k)}</span>`).join("")}</span>`;
     const lab = el("button", { class: "enabler-label tall", type: "button", "data-item": it.key, style: "grid-row: span 2" },
-      `<span class="t">${swatch(it)}${it.key}. ${it.name}</span>${rk}<span class="muted" style="font-size:12px">${hzPill(it.h)} ${sub}</span>`);
+      `<span class="t">${swatch(it)}${it.key}. ${it.name}</span>${tagsFor(it)}${rk}<span class="muted" style="font-size:12px">${hzPill(it.h)} ${sub}</span>`);
     lab.addEventListener("click", () => selectItem(it.key));
     map.appendChild(lab);
     STAGES.forEach((s, i) => {
@@ -622,6 +707,13 @@ function bandRows(map, arr) {
 }
 
 // The opportunity, readable in the grid. Technology gets the full strip; service changes say what they are and what they need.
+function tagsFor(it) {
+  const t = [];
+  if (it.isNew) t.push(`<span class="ttag new" title="Added from the 3 November whiteboard">New</span>`);
+  if (it.status) t.push(`<span class="ttag live">${it.status}</span>`);
+  if (it.engineer) t.push(`<span class="ttag eng" title="Marked engineer on the 3 November whiteboard">Needs an engineer</span>`);
+  return t.length ? `<span class="tagrow">${t.join("")}</span>` : "";
+}
 function oppStrip(it) {
   const chip = k => { const x = byKey(String(k)); return `<button type="button" data-pick="${x.key}" title="${x.name}">${swatch(x)}${x.key} ${x.short}</button>`; };
   let html;
@@ -631,8 +723,9 @@ function oppStrip(it) {
       <div><h4>What changes</h4>${it.what}</div>
       <div><h4>Size of the opportunity</h4><span class="size">${SIZE[it.key]}</span></div>
       <div><h4>Unlocks</h4><ul>${it.unlocks.slice(0, 2).map(u => `<li>${u}</li>`).join("")}</ul></div>
-      <div><h4>Main blocker</h4><span class="pain">${it.blockers[0]}</span></div>
-      <div><h4>Needed by</h4>${needed.length ? `<span class="needs">${needed.map(o => chip(o.key)).join("")}</span>` : `<span class="muted">None</span>`}</div>`;
+      <div><h4>Main blocker</h4><span class="pain">${it.blockers[0]}</span>${it.questions.length ? `<ul class="qs">${it.questions.map(q => `<li>${q}</li>`).join("")}</ul>` : ""}</div>
+      <div><h4>Connected to</h4>${it.links.length ? `<span class="needs">${it.links.map(chip).join("")}</span>` : `<span class="muted">None</span>`}
+        <h4 style="margin-top:8px">Needed by</h4>${needed.length ? `<span class="needs">${needed.map(o => chip(o.key)).join("")}</span>` : `<span class="muted">None</span>`}</div>`;
   } else {
     html = `<div>${it.what}</div><div><h4>Needs</h4><span class="needs">${it.depends.map(chip).join("")}</span></div>`;
   }
@@ -703,7 +796,7 @@ function render() {
 
   const vis = new Set(visible().map(i => i.key));
   const sel = state.sel ? byKey(state.sel) : null;
-  const linked = new Set(sel ? (sel.kind === "service" ? sel.depends.map(String) : OPPS.filter(o => o.depends.includes(sel.id)).map(o => o.key)) : []);
+  const linked = new Set(sel ? (sel.kind === "service" ? sel.depends.map(String) : [...OPPS.filter(o => o.depends.includes(sel.id)).map(o => o.key), ...sel.links.map(String)]) : []);
   const stagesTouched = sel ? new Set(Object.keys(sel.impact)) : null;
 
   document.querySelectorAll("#map [data-item]").forEach(n => {
