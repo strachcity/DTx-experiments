@@ -22,7 +22,7 @@
 
   --e1: #1f6fb2; --e2: #c4561d; --e3: #2d8a5a; --e4: #b0347c;
   --e5: #6a4bc4; --e6: #a77a12; --e7: #56636f;
-  --e8: #0e7c86; --e9: #8a4f2a; --e10: #2f5fa8; --e11: #5d7a1c;
+  --e8: #0e7c86; --e9: #8a4f2a; --e10: #2f5fa8; --e11: #5d7a1c; --e12: #a3346b;
   --dim: 0.18;
   --tint: #eef3f7;
   --h2p: #1a7a4c; --h2m: #b0541a; --h3: #0d7d8c;
@@ -34,7 +34,7 @@
     --accent: #6fb1e3; --tint: #1f2a34; --h2p: #3aa872; --h2m: #ec8a4c; --h3: #3fb6c4;
     --e1: #5aa4e6; --e2: #e8854f; --e3: #5cbf8a; --e4: #e06aae;
     --e5: #9c84ec; --e6: #d6aa45; --e7: #93a1ad;
-    --e8: #45c1cc; --e9: #d39268; --e10: #7fa6e8; --e11: #a6c45a;
+    --e8: #45c1cc; --e9: #d39268; --e10: #7fa6e8; --e11: #a6c45a; --e12: #e584b3;
     color-scheme: dark;
   }
 }
@@ -43,7 +43,7 @@
   --accent: #6fb1e3; --tint: #1f2a34; --h2p: #3aa872; --h2m: #ec8a4c; --h3: #3fb6c4;
   --e1: #5aa4e6; --e2: #e8854f; --e3: #5cbf8a; --e4: #e06aae;
   --e5: #9c84ec; --e6: #d6aa45; --e7: #93a1ad;
-  --e8: #45c1cc; --e9: #d39268; --e10: #7fa6e8; --e11: #a6c45a;
+  --e8: #45c1cc; --e9: #d39268; --e10: #7fa6e8; --e11: #a6c45a; --e12: #e584b3;
   color-scheme: dark;
 }
 
@@ -219,7 +219,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-wi
   <header>
     <div class="status"><span class="pill">Working draft</span><span>2 November 2026</span><span>CustomerFirst × DVLA Drivers Medical</span></div>
     <h1>Where technology and service changes sit on the Drivers Medical journey</h1>
-    <p class="muted">Today's journey, stage by stage, under the target service it feeds. The technology change row shows the main technology changes at each stage. Below are the eleven technology enablers and seven service changes, drawn across the stages they change. Select anything for the detail.</p>
+    <p class="muted">Today's journey, stage by stage, under the target service it feeds. The technology change row shows the main technology changes at each stage. Below are the twelve technology enablers and seven service changes, drawn across the stages they change. Select anything for the detail.</p>
   </header>
 
   <section class="detail" id="detail" aria-live="polite"></section>
@@ -361,9 +361,9 @@ const ENABLERS = [
     outcomes: ["informed"],
     impact: { notify: "s", create: "p", l1: "s", mq: "p", l2: "s", hcp: "p", esc: "s", dec: "p", review: "s" },
     labels: { create: "Receipt message", mq: "'We've posted you a form'", hcp: "'Waiting on someone else'", dec: "'Decision posted'" },
-    what: "A new event from the Dynamics Communications table to the customer domain (option B), so letter events drive automated Notify messages and the case timeline. Notify, through AWS, sends texts at key points: case updates and calls to action. Email is still to build.",
+    what: "First step: agents pick a Notify message in Dynamics, and it is recorded on the case timeline automatically. Then a new event from the Dynamics Communications table to the customer domain (option B), so letter events drive automated Notify messages and the case timeline. Notify, through AWS, sends texts at key points: case updates and calls to action. Email is still to build.",
     unlocks: ["Proactive messages sent automatically, not by hand", "The case timeline built from real letters", "Letters readable in the customer account", "Retiring paper-only update letters"],
-    evidence: ["~56% of contacts are progress chases, about £1.8m a year", "~296k letters a year only say we've written to or chased an HCP", "~2.4m letters a year in total, ~9,600 a working day"],
+    evidence: ["~56% of contacts are progress chases, about £1.8m a year", "At launch, agents send each SMS and email by hand and record it in Dynamics (ITS prioritised list)", "~296k letters a year only say we've written to or chased an HCP", "~2.4m letters a year in total, ~9,600 a working day"],
     blockers: ["Proactive communications were descoped from Evolve", "Communications table may not be able to leave Dynamics", "Access to Blob storage for PDFs not agreed", "Release rules for decision letters (legal)", "Print status only confirms 'sent to print'"]
   },
   {
@@ -371,9 +371,9 @@ const ENABLERS = [
     outcomes: ["tell", "informed"],
     impact: { notify: "s", mq: "p", hcp: "s", dec: "p" },
     labels: { mq: "Reply online, as data", hcp: "Upload own evidence", dec: "Digital D202" },
-    what: "Replies, uploads and consent online behind GOV.UK One Login, with paper kept for everyone. Experiment two tests uploading evidence digitally. It feeds medical investigation and the D202 process.",
-    unlocks: ["Answers back faster, and as data (feeds enabler 1)", "Customer-held evidence uploaded, not posted", "Digital D202 at scale"],
-    evidence: ["D202 QR test: 34 of 92 used it, 100% data accuracy", "56% of letters asking the customer to act already have a digital route", "~88k a year need a new journey, led by LHREJMQ (33k)"],
+    what: "Replies, uploads and consent online behind GOV.UK One Login, with paper kept for everyone. Experiment two tests uploading evidence digitally. It feeds medical investigation and the D202 process. The tested D202 route is scaled as one reusable way for customers to submit information, recorded in Dynamics.",
+    unlocks: ["Answers back faster, and as data (feeds enabler 1)", "Customer-held evidence uploaded, not posted", "Digital D202 at scale", "One pattern reused for other information customers send, not a build per journey"],
+    evidence: ["D202 QR test: 34 of 92 used it, 100% data accuracy", "2.4m letters a year still arrive by post; 394 letter templates ask for a reply by post", "56% of letters asking the customer to act already have a digital route", "~88k a year need a new journey, led by LHREJMQ (33k)"],
     blockers: ["GOV.UK Forms can't take medical information, so it has to be built", "DMSP submissions don't attach to an existing case", "DPIA and what each access tier may show (DPP)"]
   },
   {
@@ -381,8 +381,8 @@ const ENABLERS = [
     outcomes: ["evidence"],
     impact: { l2: "s", hcp: "p", esc: "s" },
     labels: { hcp: "Chase, digital return, pre-fill, record access" },
-    what: "In order of cost: automated reminders, a digital return route for HCPs, pre-filled 'confirm' forms, then patient-mediated record access. Trust the customer and accept more of their evidence. The MED portal concept (TBC) would carry the HCP questionnaire and sampling, with Dynamics, and is being discussed with Digital Payments.",
-    unlocks: ["Shorter evidence waits on the cases that make up the backlog", "Fewer chases from customers stuck waiting on someone else", "Evidence that comes back as data"],
+    what: "In order of cost: automated reminders, a digital return route for HCPs, pre-filled 'confirm' forms, then patient-mediated record access. Trust the customer and accept more of their evidence. The MED portal concept (TBC) would carry the HCP questionnaire and sampling, with Dynamics, and is being discussed with Digital Payments. Third-party appointment bookings, from Specsavers or phoned in by customers, are recorded on the case timeline.",
+    unlocks: ["Shorter evidence waits on the cases that make up the backlog", "Appointment progress visible on the case, without manual updates", "Fewer chases from customers stuck waiting on someone else", "Evidence that comes back as data"],
     evidence: ["50–55k HCP letters a month, median ~30 days to return (CDS-730)", "Evidence is 50–65% of time to decision when requested (CDS-443, DMSP only)", "Backlog weighted to complex cases: multiple 23.4%, diabetes 7.4% (CALD, 26 Jun 2026)"],
     blockers: ["GP Connect is direct-care only. Record access needs NHS England policy or an NHS App route", "HCP appetite for changed forms not tested", "Pre-fill depends on enabler 1"]
   },
@@ -397,13 +397,13 @@ const ENABLERS = [
     blockers: ["D90 technology is the constraint, not policy", "Legal argument on 'stable risk profile'"]
   },
   {
-    id: 7, name: "Contact routing and measurement", short: "Routing + MI",
+    id: 7, name: "Contact routing, call records and measurement", short: "Routing, calls + MI",
     outcomes: ["informed", "evidence"],
     impact: { notify: "s", l2: "p", hcp: "s", esc: "s", dec: "s" },
     labels: { notify: "Phone first notifications", l2: "Record pre-evidence view" },
-    what: "IVR and webchat routing from case data, call purpose tracking, the MI dashboard, and recording a recommendation before evidence is requested. Storm and Dynamics integration, so agents can answer the timeframe question.",
-    unlocks: ["Agents can answer how long a case will take", "NewCo cohort callers reach a NewCo agent", "The gateway metric: how often evidence changes the decision", "Proof of NewCo capacity against BAU"],
-    evidence: ["Evidence-to-decision ratio can't be calculated today", "Twice-weekly manual routing is an acceptable bridge"],
+    what: "IVR and webchat routing from case data, call purpose tracking, the MI dashboard, and recording a recommendation before evidence is requested. Storm and Dynamics integration, so call details and AI call summaries go onto the case timeline, and agents can answer the timeframe question. The automatic routing list for the NewCo team is part of enabler 12.",
+    unlocks: ["Agents can answer how long a case will take", "Medical information taken by phone is recorded with an audit trail", "NewCo cohort callers reach a NewCo agent", "The gateway metric: how often evidence changes the decision", "Proof of NewCo capacity against BAU"],
+    evidence: ["Evidence-to-decision ratio can't be calculated today", "Twice-weekly manual routing is an acceptable bridge", "Recording calls by hand: at 107k to 143k calls a month, 10 seconds a case is about 12 days of work a month (Dynamics capabilities note, 13 Oct)", "DVLA Policy agreed information can be taken by phone, with an audit trail"],
     blockers: ["Real-time Dynamics integration for IVR", "MI dashboard dependency for the measurement framework"]
   },
   // 8 to 11 come from the 3 November whiteboard session
@@ -436,9 +436,9 @@ const ENABLERS = [
     labels: { hcp: "Two-way messages, send evidence", dec: "Decisions and documents online" },
     what: "In the customer account: view updates and documents, message DVLA both ways and send evidence, and see decisions.",
     unlocks: ["Updates and letters readable online", "Two-way messages instead of post for evidence"],
-    evidence: ["Five case statuses already go to the customer account (current state)"],
+    evidence: ["Five case statuses already go to the customer account (current state)", "72% of progress-chasing calls in Q1 2026 followed a medical licence renewal (Dynamics capabilities note)"],
     blockers: ["Decision copy online depends on legal release rules"],
-    questions: []
+    questions: ["Is Dynamics case data accurate enough to show customers? (ITS list: explore early)"]
   },
   {
     id: 11, name: "Storing data against the customer record", short: "Customer record", isNew: true,
@@ -450,12 +450,25 @@ const ENABLERS = [
     evidence: ["Starred on the 3 November board", "Renewals re-run the same casework (current state)"],
     blockers: ["Payload data in Dynamics blocked for bulk query by a DPIA issue"],
     questions: []
+  },
+  // 12 comes from the ITS prioritised list of Dynamics changes for the NewCo team (13 October)
+  {
+    id: 12, name: "Team ownership in Dynamics", short: "Team ownership", isNew: true, newFrom: "the ITS prioritised list of Dynamics changes (13 October)",
+    outcomes: ["informed", "evidence"],
+    impact: { notify: "s", create: "p", l2: "s", hcp: "s", dec: "s" },
+    labels: { create: "Case marked as owned by the NewCo team" },
+    what: "A NewCo marker on each case the team owns, a banner on those cases, phone and webchat routing updated automatically from Dynamics, and cases kept in view when they move between work queues.",
+    unlocks: ["Callers reach the team that owns their case, not BAU agents", "End-to-end ownership: cases don't drop out of view between queues", "Colleagues can see at a glance how a case is being managed", "Reusable for future specialist teams and customer groups"],
+    evidence: ["Without automatic routing, customers 'reach BAU agents who do not own the case, breaking end-to-end case ownership at the first contact' (Dynamics capabilities note, 13 Oct)", "The manual workaround is a daily MIDAS export: new customers wait up to a day to be routed, and the cost rises with every customer added", "Cases typically have c.4 touchpoints and move between queues as work progresses"],
+    blockers: ["Automatic routing needs the Dynamics API", "Queue visibility is a switch that turns on for BAU as well"],
+    questions: ["Can the case marker trigger the routing updates?"]
   }
 ];
 // From the 3 November whiteboard: how enablers connect, what's being tested, and which need an engineer.
-const LINKS = [[1, 2], [2, 3], [3, 4], [3, 10], [4, 10], [4, 5], [5, 11], [7, 9]];
-const STATUS = { "2": "Day 1 testing", "3": "Day 1 testing", "4": "Experiment two", "5": "MED portal concept, TBC" };
-const ENGINEER = new Set(["3", "4", "5", "6", "7", "10"]);
+const LINKS = [[1, 2], [2, 3], [3, 4], [3, 10], [4, 10], [4, 5], [5, 11], [7, 9], [7, 12], [3, 12]];
+// Status tags removed: the 3 November tags were out of date against the ITS prioritised list, where only the case marker was in progress.
+const STATUS = {};
+const ENGINEER = new Set(["3", "4", "5", "6", "7", "10", "12"]);
 const QUESTIONS = {
   "1": ["How does DMI work?", "Is Kerv [?] scanning turning paper into structured data?", "Live in \"Violette\" [?]"],
   "3": ["Build email?", "Is the Notify integration ready?"],
@@ -546,7 +559,8 @@ const SIZE = {
   "8": "Not yet sized. The share of notifications from third parties is unknown",
   "9": "Not yet sized",
   "10": "Not yet sized. Five case statuses already reach the account",
-  "11": "Not yet sized. Renewals re-run the same casework today"
+  "11": "Not yet sized. Renewals re-run the same casework today",
+  "12": "Not yet sized. ITS has not yet sized the effort"
 };
 ENABLERS.forEach(e => {
   e.kind = "tech"; e.key = String(e.id); e.rank = e.id;
@@ -575,6 +589,7 @@ const HZ = {
   "8": ["H2-", "Adds routes into today's intake without changing what happens after.", "Becomes H2+ if third-party reports arrive as data that route the case."],
   "9": ["H2+", "One source agents decide from changes the rules everyone works to, and gives written standards somewhere to live.", "Drifts to H2- if it's a tidier document store that nobody changes."],
   "10": ["H2-", "A better window on today's case. It cuts chasing without changing why cases wait.", "Becomes H2+ when two-way messages replace the postal loop for evidence and decisions."],
+  "12": ["H2+", "Ownership built into the system is what makes the universal agent model more than a workaround: the case, the calls and the team stay together.", "Drifts to H2- if it stays a routing list for one pilot group."],
   "11": ["H2+", "Holding evidence against the person, not the case, is what lets the service ask once and reuse it at renewal.", "Drifts to H2- if data is stored but each case still starts from scratch."],
   "S7": ["H2+", "Changes incentives and accountability, the conditions everything else is judged under.", "Drifts to H2- if new measures sit beside the backlog count while the backlog count still decides."]
 };
@@ -593,6 +608,7 @@ const SCORES = {
   "9":  { reach: 5, reachBacklog: 4, days: 1, calls: 1, control: 4, dependency: 2, conf: { reachBacklog: "estimate", days: "estimate", calls: "estimate" } },
   "10": { reach: 4, reachBacklog: 2, days: 1, calls: 3, control: 2, dependency: 2, conf: { reach: "estimate", days: "estimate", calls: "estimate" } },
   "11": { reach: 4, reachBacklog: 2, days: 2, calls: 1, control: 3, dependency: 3, conf: { days: "estimate" } },
+  "12": { reach: 2, reachBacklog: 1, days: 1, calls: 3, control: 3, dependency: 3, conf: { reach: "estimate", calls: "estimate" } },
   "S1": { reach: 2, reachBacklog: 5, days: 4, calls: 1, control: 1, dependency: 2, conf: { days: "estimate" } },
   "S2": { reach: 3, reachBacklog: 4, days: 4, calls: 2, control: 4, dependency: 1, conf: { reach: "estimate", days: "estimate" } },
   "S3": { reach: 4, reachBacklog: 3, days: 3, calls: 2, control: 4, dependency: 2, conf: { days: "estimate" } },
@@ -638,6 +654,7 @@ const BASIS = {
   "8": { reach: "Notifications from doctors and police. Their share is unknown.", reachBacklog: "", days: "Little on its own.", calls: "", control: "Needs the police and other outside parties.", dependency: "" },
   "9": { reach: "Every case is decided under OIs.", reachBacklog: "Backlog cases are decided under them too.", days: "Mainly consistency, not speed.", calls: "", control: "OIs and policy are DVLA's own.", dependency: "S1 needs somewhere for written standards; linked to the Storm and Dynamics request." },
   "10": { reach: "Customers with an account.", reachBacklog: "", days: "Saves postal days when evidence and replies go online.", calls: "Updates and documents readable without calling.", control: "Customer account, Dynamics and an engineer. Release rules for decision letters.", dependency: "Linked to proactive communications and digital upload." },
+  "12": { reach: "The NewCo cohort now; every team that owns customers later.", reachBacklog: "Backlog cases moved to the team.", days: "Little directly: fewer hand-offs between queues.", calls: "Callers reach the team that can answer, so the call moves the case on.", control: "The case marker is in progress. Automatic routing needs the Dynamics API; queue visibility changes BAU too.", dependency: "Routing in 7 and the universal agent model rely on it." },
   "11": { reach: "Every case that comes back: renewals and new conditions.", reachBacklog: "", days: "Reuse at renewal, unmeasured.", calls: "", control: "Dynamics data model and the payload DPIA.", dependency: "S3 and S4, and medical investigation feeds it." },
   "S1": { reach: "Judgement-heavy conditions.", reachBacklog: "Multiple 23.4%, epilepsy 13.0%.", days: "Fewer Level 3 and 4 referrals, unmeasured.", calls: "", control: "Clinical standards and decision rights.", dependency: "S6 and the archetypes." },
   "S2": { reach: "Evidence-requested cases (as for 5).", reachBacklog: "", days: "Fees, deadlines and parallel requests. Vision already runs requests in parallel.", calls: "", control: "Contracts and operating instructions, testable in ACE.", dependency: "" },
@@ -709,7 +726,7 @@ function bandRows(map, arr) {
 // The opportunity, readable in the grid. Technology gets the full strip; service changes say what they are and what they need.
 function tagsFor(it) {
   const t = [];
-  if (it.isNew) t.push(`<span class="ttag new" title="Added from the 3 November whiteboard">New</span>`);
+  if (it.isNew) t.push(`<span class="ttag new" title="Added from ${it.newFrom || "the 3 November whiteboard"}">New</span>`);
   if (it.status) t.push(`<span class="ttag live">${it.status}</span>`);
   if (it.engineer) t.push(`<span class="ttag eng" title="Marked engineer on the 3 November whiteboard">Needs an engineer</span>`);
   return t.length ? `<span class="tagrow">${t.join("")}</span>` : "";
