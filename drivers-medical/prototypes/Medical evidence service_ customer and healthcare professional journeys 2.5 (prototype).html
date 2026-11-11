@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en-GB" class="govuk-template">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medical evidence service: customer and healthcare professional journeys (prototype)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+<style>
+
+
+
+/* --- govuk-* layer, copied from components.html. --- */
+:root{--black:#0b0c0c;--white:#fff;--blue:#1d70b8;--link:#1a65a6;--link-hover:#0f385c;--dark-blue:#0f385c;--green:#0f7a52;--green-hover:#0b5c3e;--green-shade:#083d29;--yellow:#fd0;--light-yellow:#fff7bf;--light-grey:#f4f8fb;--mid-grey:#cecece;--dark-grey:#484949;--red:#ca3535;--red-shade:#651b1b;--purple:#54319f;--focus:#fd0;--focus-text:#0b0c0c}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--white)}
+body{font-family:"GDS Transport","Inter",Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--black);background:var(--white);margin:0;padding:0;line-height:1.5;font-size:19px}
+
+.govuk-header{background:var(--blue);color:var(--white);padding:10px 0}
+.govuk-header__container{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:10px}
+.govuk-header__homepage-link{display:inline-flex;align-items:center;color:var(--white);text-decoration:none}
+.govuk-header__homepage-link:hover{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
+.govuk-header__logotype{height:30px;width:162px;fill:currentcolor}
+.govuk-header__signout{margin-left:auto;font-size:19px;font-weight:700;color:var(--white);text-decoration:none;cursor:pointer}
+.govuk-header__signout:hover{text-decoration:underline}
+.service-nav{border-bottom:1px solid var(--mid-grey);background:var(--white);padding:12px 0}
+.service-nav__wrapper{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.service-nav__name{font-weight:700;font-size:19px;color:var(--black);text-decoration:none}
+.govuk-phase-banner{border-bottom:1px solid var(--mid-grey);padding:10px 0}
+.govuk-phase-banner__wrapper{max-width:960px;margin:0 auto;padding:0 15px;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.govuk-phase-banner__tag{display:inline-block;background:var(--blue);color:var(--white);font-weight:700;font-size:14px;padding:2px 8px;text-transform:uppercase;letter-spacing:1px}
+.phase-actions{margin-left:auto;display:flex;gap:15px;align-items:center;flex-wrap:wrap}
+.phase-actions a{font-size:16px;cursor:pointer}
+.prototype-warning{background:var(--light-yellow);border:4px solid var(--yellow);padding:15px 20px;margin-bottom:30px;font-size:16px;line-height:1.5}
+.prototype-warning strong{display:block;margin-bottom:4px}
+.govuk-width-container{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-main-wrapper{padding:30px 0 60px}
+.govuk-skip-link{position:absolute;left:-9999px;top:0;background:var(--yellow);color:var(--black);padding:10px 15px;font-weight:700;z-index:10}
+.govuk-skip-link:focus{left:0}
+
+h1,.govuk-heading-xl{font-size:48px;line-height:1.04;font-weight:700;margin:0 0 30px}
+h2,.govuk-heading-l{font-size:36px;line-height:1.11;font-weight:700;margin:30px 0 20px}
+h3,.govuk-heading-m{font-size:24px;line-height:1.25;font-weight:700;margin:20px 0 15px}
+h4,.govuk-heading-s{font-size:19px;line-height:1.3;font-weight:700;margin:15px 0 10px}
+p,.govuk-body{font-size:19px;margin:0 0 20px}
+.govuk-body-s{font-size:16px}
+.govuk-body-l{font-size:24px;line-height:1.25;margin:0 0 20px}
+.govuk-caption{font-size:24px;color:var(--dark-grey);display:block;margin-bottom:5px}
+a{color:var(--link)}a:hover{color:var(--link-hover)}
+a:visited{color:var(--purple)}
+a:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--focus-text);text-decoration:none}
+.govuk-list{margin:0 0 20px;padding:0;list-style:none}
+.govuk-list>li{margin-bottom:5px}
+.govuk-list--bullet{list-style:disc;padding-left:20px}
+.govuk-list--number{list-style:decimal;padding-left:20px}
+.govuk-visually-hidden{position:absolute!important;width:1px;height:1px;margin:0;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);border:0;white-space:nowrap}
+hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margin:30px 0}
+.govuk-back-link{display:inline-block;margin-bottom:15px;font-size:16px;color:var(--black);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.govuk-back-link::before{content:"\25c2 "}
+
+.govuk-button{display:inline-block;padding:8px 20px;font-size:19px;font-weight:700;color:var(--white);background:var(--green);border:none;border-radius:0;border-bottom:2px solid var(--green-shade);cursor:pointer;text-decoration:none;line-height:1.2;-webkit-appearance:none;font-family:inherit}
+.govuk-button:hover{background:var(--green-hover);color:var(--white)}
+.govuk-button:visited{color:var(--white)}
+.govuk-button:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-button--start{font-size:24px;padding:12px 30px}
+.govuk-button--start::after{content:" \2192"}
+.govuk-button--secondary{background:#f3f3f3;color:var(--black);border-bottom-color:#858686}
+.govuk-button--secondary:hover,.govuk-button--secondary:visited{background:#dbdad9;color:var(--black)}
+.govuk-button-group{display:flex;gap:15px;flex-wrap:wrap;align-items:center;margin-top:20px}
+
+.govuk-form-group{margin-bottom:30px}
+.govuk-fieldset{border:0;margin:0;padding:0}
+.govuk-fieldset__legend{font-weight:700;font-size:19px;margin-bottom:10px;display:block}
+.govuk-fieldset__legend--l{font-size:36px;line-height:1.11;margin-bottom:20px}
+.govuk-fieldset__legend--xl{font-size:48px;line-height:1.04;margin-bottom:25px}
+.govuk-fieldset__heading{font-size:inherit;line-height:inherit;font-weight:inherit;margin:0}
+.govuk-radios__item,.govuk-checkboxes__item{display:flex;align-items:flex-start;margin-bottom:15px;gap:12px}
+.govuk-radios__input,.govuk-checkboxes__input{width:44px;height:44px;min-width:44px;margin:0;cursor:pointer;accent-color:var(--black)}
+.govuk-radios__label,.govuk-checkboxes__label{font-size:19px;padding-top:10px;cursor:pointer}
+.govuk-radios__hint,.govuk-checkboxes__hint{font-size:16px;color:var(--dark-grey);margin-top:2px;display:block}
+.govuk-label{display:block;font-weight:700;margin-bottom:5px}
+.govuk-label--l{font-size:36px;line-height:1.11;margin-bottom:15px}
+.govuk-label-wrapper{margin:0}
+.govuk-hint{font-size:16px;color:var(--dark-grey);margin-bottom:10px;display:block}
+.govuk-input{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;max-width:400px}
+.govuk-input:focus,.govuk-select:focus,.govuk-textarea:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-input--width-2{max-width:65px}.govuk-input--width-4{max-width:100px}.govuk-input--width-10{max-width:250px}.govuk-input--width-20{max-width:400px}
+.govuk-file-upload{font-family:inherit;font-size:19px;padding:5px 0;max-width:400px}
+.govuk-date-input{display:flex;gap:20px;flex-wrap:wrap}
+.govuk-date-input__item{flex:0 0 auto}
+.govuk-date-input__label{display:block;font-weight:700;margin-bottom:5px;font-size:19px}
+
+.govuk-summary-list{border-top:1px solid var(--mid-grey);margin:0 0 30px}
+.govuk-summary-list__row{display:flex;border-bottom:1px solid var(--mid-grey);padding:12px 0;gap:15px}
+.govuk-summary-list__key{flex:0 0 32%;font-weight:700;margin:0}
+.govuk-summary-list__value{flex:1;margin:0;min-width:0}
+.govuk-summary-list__actions{flex:0 0 80px;text-align:right;margin:0}
+@media(max-width:640px){.govuk-summary-list__row{flex-direction:column;gap:4px}.govuk-summary-list__key{flex:auto}.govuk-summary-list__actions{text-align:left}}
+.govuk-table{width:100%;border-collapse:collapse;margin-bottom:30px}
+.govuk-table th{text-align:left;font-weight:700;padding:10px 15px 10px 0;border-bottom:2px solid var(--black)}
+.govuk-table td{padding:10px 15px 10px 0;border-bottom:1px solid var(--mid-grey);vertical-align:top}
+
+.govuk-tag{display:inline-block;font-size:19px;line-height:1.32;font-weight:700;padding:2px 8px 3px;border-radius:1px;max-width:260px;overflow-wrap:break-word;color:#0f385c;background:#d2e2f1}
+.govuk-tag--blue{color:#0f385c;background:#d2e2f1}
+.govuk-tag--green{color:#083d29;background:#cfe4dc}
+.govuk-tag--purple{color:#2a1950;background:#ddd6ec}
+.govuk-tag--red{color:#651b1b;background:#f4d7d7}
+.govuk-tag--orange{color:#7a3c1c;background:#fde4d7}
+.govuk-tag--teal{color:#0b4144;background:#d0e6e7}
+.govuk-tag--yellow{color:#7a3c1c;background:#ffee80}
+.govuk-tag--grey{color:#0b0c0c;background:#cecece}
+.govuk-inset-text{border-left:10px solid var(--mid-grey);padding:15px 20px;margin:0 0 30px}
+.govuk-panel{background:var(--green);color:var(--white);padding:35px;text-align:center;margin-bottom:30px}
+.govuk-panel__title{font-size:48px;font-weight:700;margin:0 0 15px}
+.govuk-panel__body{font-size:24px}
+.govuk-warning-text{display:flex;gap:15px;align-items:flex-start;margin-bottom:30px}
+.govuk-warning-text__icon{flex:0 0 35px;height:35px;background:var(--black);color:var(--white);border-radius:50%;text-align:center;font-weight:700;line-height:35px;font-size:24px}
+.govuk-warning-text__text{font-weight:700}
+.govuk-details{margin-bottom:30px;display:block}
+.govuk-details__summary{color:var(--link);cursor:pointer;text-decoration:underline;font-size:19px;margin-bottom:5px}
+.govuk-details__text{border-left:5px solid var(--mid-grey);padding:15px 20px;font-size:19px}
+.govuk-details__text p{margin:0 0 10px}
+.govuk-details__text p:last-child{margin:0}
+.govuk-notification-banner{border:5px solid var(--blue);margin-bottom:30px}
+.govuk-notification-banner__header{background:var(--blue);color:var(--white);padding:8px 15px;font-size:19px;font-weight:700}
+.govuk-notification-banner__title{margin:0;font-size:19px}
+.govuk-notification-banner__content{padding:20px 15px;font-size:19px}
+.govuk-notification-banner__heading{font-size:24px;font-weight:700;margin:0 0 10px}
+.govuk-notification-banner__content p{margin:0 0 10px}
+.govuk-notification-banner__content p:last-child{margin:0}
+
+.govuk-error-summary{border:5px solid var(--red);padding:20px 25px;margin-bottom:30px}
+.govuk-error-summary h2{margin:0 0 10px;font-size:24px}
+.govuk-error-summary ul{margin:0;padding-left:20px}
+.govuk-error-summary li{margin-bottom:6px}
+.govuk-error-summary a{color:var(--red);font-weight:700}
+.govuk-form-group--error{border-left:5px solid var(--red);padding-left:15px}
+.govuk-error-message{color:var(--red);font-weight:700;display:block;margin-bottom:10px}
+.govuk-input--error{border-color:var(--red)}
+
+.govuk-grid-row{display:flex;flex-wrap:wrap;margin:0 -15px}
+.govuk-grid-column-two-thirds{flex:0 0 66.66%;max-width:66.66%;padding:0 15px;min-width:0}
+.govuk-grid-column-one-third{flex:0 0 33.33%;max-width:33.33%;padding:0 15px;min-width:0}
+.govuk-grid-column-full{flex:0 0 100%;max-width:100%;padding:0 15px;min-width:0}
+@media(max-width:640px){.govuk-grid-column-two-thirds,.govuk-grid-column-one-third{flex:0 0 100%;max-width:100%}}
+
+.govuk-footer{background:var(--light-grey);border-top:10px solid var(--blue);padding:30px 0;margin-top:60px}
+.govuk-footer__wrapper{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-footer__meta-item{font-size:16px;color:var(--dark-grey)}
+
+.design-note{border:2px dashed var(--purple);background:#f7f4fc;padding:15px 20px;margin:0 0 25px;font-size:16px}
+.design-note strong{display:block;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-size:14px;margin-bottom:6px}
+.design-note p{font-size:16px;margin:0 0 8px}
+.design-note p:last-child{margin:0}
+.design-note ul{margin:0 0 8px;padding-left:20px}
+
+/* --- Specific to this prototype. Not part of components.html. --- */
+
+/* The situation picker sits inside the yellow warning, so nobody
+   mistakes it for service UI. */
+.prototype-warning__control{display:flex;gap:10px 15px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #e6d36b}
+.prototype-warning__control label{font-weight:700}
+.prototype-warning__control select{font-family:inherit;font-size:16px;padding:4px 8px;border:2px solid var(--black);background:var(--white);max-width:100%}
+.prototype-warning__control select:focus{outline:3px solid var(--focus);outline-offset:0}
+
+/* Account page cards, after the DVLA driver and vehicles account. */
+.acct-card{border:1px solid var(--mid-grey);border-top:10px solid var(--blue);padding:20px 20px 5px;margin-bottom:30px}
+.acct-card__head{display:flex;justify-content:space-between;align-items:baseline;gap:10px 20px;flex-wrap:wrap;margin-bottom:15px}
+.acct-card__head h2{margin:0;font-size:24px;line-height:1.25}
+.acct-card .govuk-summary-list{margin-bottom:15px}
+.acct-side{background:#f3f2f1;border-top:10px solid var(--blue);padding:20px;margin-bottom:30px}
+.acct-side h2{font-size:24px;margin:0 0 20px}
+.acct-side__link{display:flex;justify-content:space-between;align-items:center;background:var(--green);color:var(--white);font-weight:700;text-decoration:none;padding:8px 12px;margin-bottom:12px;border-bottom:2px solid var(--green-shade)}
+.acct-side__link:visited{color:var(--white)}
+.acct-side__link:hover{background:var(--green-hover);color:var(--white)}
+.acct-side__link::after{content:"\203A";font-size:24px;line-height:1}
+
+/* The reference, front and centre, as on the application tracker. */
+.cu-ref{margin:-15px 0 30px}
+.cu-ref__label{display:block;font-size:16px;color:var(--dark-grey)}
+.cu-ref__number{display:block;font-size:30px;line-height:1.25;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.cu-ref__hint{display:block;font-size:16px;color:var(--dark-grey)}
+
+/* Contact, at the bottom of the page, from the case status tracker. */
+.support{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:35px}
+@media(max-width:800px){.support{grid-template-columns:1fr}}
+.support-card{border:1px solid var(--mid-grey);background:var(--white);padding:20px 25px}
+.support-card h3{margin-top:0}
+.support-card p{font-size:16px;margin:0 0 10px}
+.support-card p:last-child{margin:0}
+.support-card__big{font-size:24px;font-weight:700;display:block;margin-bottom:6px}
+
+/* The case status card. */
+.cu-status{border:5px solid var(--blue);padding:20px 20px 0;margin-bottom:30px}
+.cu-status__headline{font-size:24px;line-height:1.25;font-weight:700;margin:10px 0 20px}
+.cu-status .govuk-summary-list{margin-bottom:20px}
+.cu-status__action{margin-bottom:20px}
+
+/* The timeline, newest first. */
+.cu-timeline{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--mid-grey)}
+.cu-timeline__item{padding:15px 0;border-bottom:1px solid var(--mid-grey)}
+.cu-timeline__date{display:block;font-size:16px;color:var(--dark-grey);margin-bottom:2px}
+.cu-timeline__title{display:block;font-weight:700;margin-bottom:5px}
+.cu-timeline__item p{margin:0 0 5px}
+.cu-timeline__item .govuk-tag{font-size:16px}
+
+/* "How this was built". A demo layer, distinct from design notes. */
+.cu-built{border:2px dashed #0b4144;background:#eef6f6;padding:10px 15px;margin:10px 0 5px;font-size:14px}
+.cu-built__label{display:block;color:#0b4144;text-transform:uppercase;letter-spacing:1px;font-weight:700;font-size:13px;margin-bottom:6px}
+.cu-built table{border-collapse:collapse;width:100%;margin-bottom:6px}
+.cu-built th,.cu-built td{text-align:left;padding:2px 10px 2px 0;vertical-align:top;font-size:14px;border-bottom:1px solid #c5dddd}
+.cu-built th{font-weight:700;width:34%}
+.cu-built code,.cu-mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.cu-built ul{margin:4px 0 0;padding-left:18px}
+.cu-built p{font-size:14px;margin:0 0 4px}
+.cu-scroll{overflow-x:auto;margin-bottom:30px}
+.cu-scroll .govuk-table{margin-bottom:0;font-size:16px}
+
+.cu-pdf{background:#f3f2f1;border:1px solid var(--mid-grey);padding:40px 20px;text-align:center;margin-bottom:30px;color:var(--dark-grey)}
+
+/* Phone and inbox mock-ups for the notification. */
+.cu-device{border:2px solid var(--black);border-radius:6px;padding:15px 20px;margin-bottom:25px;max-width:480px}
+.cu-device__label{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dark-grey);margin-bottom:8px;display:block}
+.cu-device p{font-size:16px;margin:0 0 8px}
+.cu-device p:last-child{margin:0}
+
+.cu-index{list-style:none;margin:0 0 30px;padding:0}
+.cu-index li{margin-bottom:12px}
+.cu-index a{font-weight:700}
+.cu-index span{display:block;font-size:16px;color:var(--dark-grey)}
+
+html{color-scheme:light}
+.govuk-textarea{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;min-height:120px;display:block}
+.govuk-textarea:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-form-group--error .govuk-textarea,.govuk-form-group--error .govuk-input{border-color:var(--red)}
+.govuk-select{font-family:inherit;font-size:19px;padding:5px;border:2px solid var(--black)}
+.govuk-panel__body strong{font-size:36px;letter-spacing:1px}
+.govuk-button[disabled]{opacity:.5}
+</style>
+</head>
+<body>
+<a class="govuk-skip-link" href="#" onclick="document.getElementById('main').scrollIntoView();return false">Skip to main content</a>
+<div id="app"></div>
+<footer class="govuk-footer" role="contentinfo"><div class="govuk-footer__wrapper"><p class="govuk-footer__meta-item">Medical evidence service prototype. Fictional, for workshop use only. Not a real DVLA or GOV.UK service. The cases, routing rules and fees are invented. Nothing is saved or sent from this page.</p></div></footer>
+<script>
+const LOGO = '<svg focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 324 60" height="30" width="162" fill="currentcolor" class="govuk-header__logotype" aria-label="GOV.UK" ><title>GOV.UK</title><g><circle cx="20" cy="17.6" r="3.7"/><circle cx="10.2" cy="23.5" r="3.7"/><circle cx="3.7" cy="33.2" r="3.7"/><circle cx="31.7" cy="30.6" r="3.7"/><circle cx="43.3" cy="17.6" r="3.7"/><circle cx="53.2" cy="23.5" r="3.7"/><circle cx="59.7" cy="33.2" r="3.7"/><circle cx="31.7" cy="30.6" r="3.7"/><path d="M33.1,9.8c.2-.1.3-.3.5-.5l4.6,2.4v-6.8l-4.6,1.5c-.1-.2-.3-.3-.5-.5l1.9-5.9h-6.7l1.9,5.9c-.2.1-.3.3-.5.5l-4.6-1.5v6.8l4.6-2.4c.1.2.3.3.5.5l-2.6,8c-.9,2.8,1.2,5.7,4.1,5.7h0c3,0,5.1-2.9,4.1-5.7l-2.6-8ZM37,37.9s-3.4,3.8-4.1,6.1c2.2,0,4.2-.5,6.4-2.8l-.7,8.5c-2-2.8-4.4-4.1-5.7-3.8.1,3.1.5,6.7,5.8,7.2,3.7.3,6.7-1.5,7-3.8.4-2.6-2-4.3-3.7-1.6-1.4-4.5,2.4-6.1,4.9-3.2-1.9-4.5-1.8-7.7,2.4-10.9,3,4,2.6,7.3-1.2,11.1,2.4-1.3,6.2,0,4,4.6-1.2-2.8-3.7-2.2-4.2.2-.3,1.7.7,3.7,3,4.2,1.9.3,4.7-.9,7-5.9-1.3,0-2.4.7-3.9,1.7l2.4-8c.6,2.3,1.4,3.7,2.2,4.5.6-1.6.5-2.8,0-5.3l5,1.8c-2.6,3.6-5.2,8.7-7.3,17.5-7.4-1.1-15.7-1.7-24.5-1.7h0c-8.8,0-17.1.6-24.5,1.7-2.1-8.9-4.7-13.9-7.3-17.5l5-1.8c-.5,2.5-.6,3.7,0,5.3.8-.8,1.6-2.3,2.2-4.5l2.4,8c-1.5-1-2.6-1.7-3.9-1.7,2.3,5,5.2,6.2,7,5.9,2.3-.4,3.3-2.4,3-4.2-.5-2.4-3-3.1-4.2-.2-2.2-4.6,1.6-6,4-4.6-3.7-3.7-4.2-7.1-1.2-11.1,4.2,3.2,4.3,6.4,2.4,10.9,2.5-2.8,6.3-1.3,4.9,3.2-1.8-2.7-4.1-1-3.7,1.6.3,2.3,3.3,4.1,7,3.8,5.4-.5,5.7-4.2,5.8-7.2-1.3-.2-3.7,1-5.7,3.8l-.7-8.5c2.2,2.3,4.2,2.7,6.4,2.8-.7-2.3-4.1-6.1-4.1-6.1h10.6,0Z"/></g><circle class="govuk-logo-dot" cx="226" cy="36" r="7.3"/><path d="M93.94 41.25c.4 1.81 1.2 3.21 2.21 4.62 1 1.4 2.21 2.41 3.61 3.21s3.21 1.2 5.22 1.2 3.61-.4 4.82-1c1.4-.6 2.41-1.4 3.21-2.41.8-1 1.4-2.01 1.61-3.01s.4-2.01.4-3.01v.14h-10.86v-7.02h20.07v24.08h-8.03v-5.56c-.6.8-1.38 1.61-2.19 2.41-.8.8-1.81 1.2-2.81 1.81-1 .4-2.21.8-3.41 1.2s-2.41.4-3.81.4a18.56 18.56 0 0 1-14.65-6.63c-1.6-2.01-3.01-4.41-3.81-7.02s-1.4-5.62-1.4-8.83.4-6.02 1.4-8.83a20.45 20.45 0 0 1 19.46-13.65c3.21 0 4.01.2 5.82.8 1.81.4 3.61 1.2 5.02 2.01 1.61.8 2.81 2.01 4.01 3.21s2.21 2.61 2.81 4.21l-7.63 4.41c-.4-1-1-1.81-1.61-2.61-.6-.8-1.4-1.4-2.21-2.01-.8-.6-1.81-1-2.81-1.4-1-.4-2.21-.4-3.61-.4-2.01 0-3.81.4-5.22 1.2-1.4.8-2.61 1.81-3.61 3.21s-1.61 2.81-2.21 4.62c-.4 1.81-.6 3.71-.6 5.42s.8 5.22.8 5.22Zm57.8-27.9c3.21 0 6.22.6 8.63 1.81 2.41 1.2 4.82 2.81 6.62 4.82S170.2 24.39 171 27s1.4 5.62 1.4 8.83-.4 6.02-1.4 8.83-2.41 5.02-4.01 7.02-4.01 3.61-6.62 4.82-5.42 1.81-8.63 1.81-6.22-.6-8.63-1.81-4.82-2.81-6.42-4.82-3.21-4.41-4.01-7.02-1.4-5.62-1.4-8.83.4-6.02 1.4-8.83 2.41-5.02 4.01-7.02 4.01-3.61 6.42-4.82 5.42-1.81 8.63-1.81Zm0 36.73c1.81 0 3.61-.4 5.02-1s2.61-1.81 3.61-3.01 1.81-2.81 2.21-4.41c.4-1.81.8-3.61.8-5.62 0-2.21-.2-4.21-.8-6.02s-1.2-3.21-2.21-4.62c-1-1.2-2.21-2.21-3.61-3.01s-3.21-1-5.02-1-3.61.4-5.02 1c-1.4.8-2.61 1.81-3.61 3.01s-1.81 2.81-2.21 4.62c-.4 1.81-.8 3.61-.8 5.62 0 2.41.2 4.21.8 6.02.4 1.81 1.2 3.21 2.21 4.41s2.21 2.21 3.61 3.01c1.4.8 3.21 1 5.02 1Zm36.32 7.96-12.24-44.15h9.83l8.43 32.77h.4l8.23-32.77h9.83L200.3 58.04h-12.24Zm74.14-7.96c2.18 0 3.51-.6 3.51-.6 1.2-.6 2.01-1 2.81-1.81s1.4-1.81 1.81-2.81a13 13 0 0 0 .8-4.01V13.9h8.63v28.15c0 2.41-.4 4.62-1.4 6.62-.8 2.01-2.21 3.61-3.61 5.02s-3.41 2.41-5.62 3.21-4.62 1.2-7.02 1.2-5.02-.4-7.02-1.2c-2.21-.8-4.01-1.81-5.62-3.21s-2.81-3.01-3.61-5.02-1.4-4.21-1.4-6.62V13.9h8.63v26.95c0 1.61.2 3.01.8 4.01.4 1.2 1.2 2.21 2.01 2.81.8.8 1.81 1.4 2.81 1.81 0 0 1.34.6 3.51.6Zm34.22-36.18v18.92l15.65-18.92h10.82l-15.03 17.32 16.03 26.83h-10.21l-11.44-20.21-5.62 6.22v13.99h-8.83V13.9"/></svg>';
+
+const FEE="£[fee to be decided]",REF="MED10000005";
+const P=(id,q,t,o,x)=>Object.assign({id,q,t,o,l:q},x||{});
+const YN=["Yes","No","I’m not sure"],YN3=["Yes","No","Unable to say"],NYF=["No","Yes","Further assessment required"];
+/* ---------- healthcare professional tasks ---------- */
+const confirmP=()=>[
+P("k_conf","Does anything in the patient’s records contradict their declaration?","radio",["No, nothing in my records contradicts it","Yes, something contradicts it","I can’t confirm either way"],{l:"Records contradict declaration",hint:"This is not a statement that the patient is fit to drive. DVLA makes that decision.",qb:"Based on your records, do you consider this patient safe to drive?",ob:["Yes","No","I can’t say"],hb:"Test wording only: this asks the healthcare professional to put their name to a fitness judgement."}),
+P("k_fix","Tell us what contradicts it","area",0,{l:"What contradicts it",s:a=>a.k_conf&&(/^Yes, something/.test(a.k_conf)||(WV=="B"&&a.k_conf=="No"))})];
+const targetP=()=>[
+P("t_ass","Has a formal cognitive assessment been carried out?","radio",["Yes, in the last 12 months","Yes, more than 12 months ago","No"],{l:"Formal cognitive assessment"}),
+P("t_out","What was the outcome?","area",0,{l:"Assessment outcome",s:a=>/^Yes/.test(a.t_ass||"")}),
+P("t_cog","In your clinical opinion, is there cognitive impairment that could affect safe driving?","radio",NYF,{l:"Cognitive impairment affecting driving"}),
+P("t_cogd","Briefly describe the relevant impairment","area",0,{l:"Impairment",s:a=>a.t_cog=="Yes"}),
+P("t_stab","Is the patient’s condition stable enough for their declaration to reflect their usual condition?","radio",YN3,{l:"Condition stable"})];
+const parkP=()=>[
+P("p_stab","Is the patient’s Parkinson’s stable enough for their declaration to reflect their usual condition?","radio",YN3,{l:"Condition stable"}),
+P("p_mot","Do the patient’s symptoms create a clinically significant risk to safe vehicle control?","radio",["No","Yes","Unable to determine"],{l:"Risk to vehicle control"}),
+P("p_sl","Based on the patient’s history, treatment and any evidence, is there a clinical concern that sleepiness could affect safe driving?","radio",["Yes","No","Further assessment needed"],{l:"Sleepiness concern"}),
+P("p_cog","Is there evidence of cognitive impairment that could affect safe driving?","radio",NYF,{l:"Cognitive impairment"})];
+const COV=["Diagnosis and current treatment","Whether the condition is stable","Effect on driving-relevant function","Cognition or alertness"];
+const gap=(i,a)=>a.k_up&&(a.k_up.startsWith("No")||!(a.k_cov||[]).includes(COV[i]));
+const attachP=()=>[
+P("k_up","Do you have a recent clinic letter for this patient?","radio",["Yes, I’ll attach it","No, I’ll answer the questions instead"],{l:"Clinic letter",up:1}),
+P("k_cov","What does the letter already cover?","check",COV,{l:"Letter covers",s:a=>(a.k_up||"").startsWith("Yes"),hint:"Select all that apply. We’ll only ask about what it leaves out."}),
+P("k_q0","Briefly describe the diagnosis and current treatment","area",0,{l:"Diagnosis and treatment",s:a=>gap(0,a)}),
+P("k_q1","Is the condition currently stable?","radio",YN3,{l:"Condition stable",s:a=>gap(1,a)}),
+P("k_q2","Does the condition create a clinically significant risk to safe vehicle control?","radio",["No","Yes","Unable to determine"],{l:"Risk to vehicle control",s:a=>gap(2,a)}),
+P("k_q3","Is there a clinical concern about cognition or alertness affecting safe driving?","radio",["No","Yes","Further assessment needed"],{l:"Cognition or alertness concern",s:a=>gap(3,a)})];
+const TD={Confirm:"Read what the patient told us and confirm whether anything in your records contradicts it. You do not need to write a report.",Targeted:"Answer a few clinical questions. We’re not asking about anything the patient has already told us.",Attach:"Attach a clinic letter you already have, then answer only the questions it leaves out."};
+const TL={Confirm:"confirm your patient’s information",Targeted:"a few clinical questions",Attach:"attach what you already have"};
+const TC={Confirm:"blue",Targeted:"purple",Attach:"teal"};
+/* Which of the patient’s declared answers are relevant to each clinician question. [] means the patient was not asked anything relevant. */
+const REL={k_conf:"ALL",k_fix:"ALL",t_ass:["Memory or concentration difficulties","Diagnosis (as stated by patient)"],t_out:["Diagnosis (as stated by patient)"],t_cog:["Memory or concentration difficulties","Diagnosis (as stated by patient)","Has stopped driving"],t_cogd:["Memory or concentration difficulties","Diagnosis (as stated by patient)"],t_stab:["Takes regular medication"],p_stab:["Got worse since last review","Medication changed in last 6 months"],p_mot:["Off periods or freezing","Sudden or unpredictable","Licence type"],p_sl:["Unusually sleepy","Sleepiness affected driving","Medication changed in last 6 months"],p_cog:[],k_up:["Has a recent clinic letter"],k_cov:["Has a recent clinic letter"],k_q0:["Condition (example)"],k_q1:["Most recent relapse"],k_q2:["Affects use of vehicle controls"],k_q3:[]};
+let SHOWPA=true;
+const TN={Confirm:"Review and verify, rather than provide.",Targeted:"Only the questions the customer couldn’t answer.",Attach:"Existing evidence is reused. Tick all four topics to see zero extra questions."};
+const CASES=[
+{ref:"MED10000001",pt:"Patient A",cond:"Parkinson’s",task:"Confirm",tag:"Exception",why:"The patient’s declaration shows a change: they say their Parkinson’s has got worse and their medication has changed. We’d like you to check this against your records.",decl:[["Got worse since last review","Yes"],["Medication changed in last 6 months","Yes"],["Off periods or freezing","Yes"],["Sudden or unpredictable","No"],["Unusually sleepy","Yes"],["Sleepiness affected driving","No"],["Deep brain stimulator","No"]],pages:confirmP,n:"Exception route: the declaration shows something to check, so a short confirmation replaces a full report."},
+{ref:"MED10000002",pt:"Patient B",cond:"Cognitive impairment",task:"Targeted",tag:"Risk indicator",why:"The patient’s answers include a risk indicator that needs clinical judgement. We have not asked you anything the patient could tell us themselves.",decl:[["Memory or concentration difficulties","Yes"],["Diagnosis (as stated by patient)","Mild cognitive impairment"],["Has stopped driving","No"],["Takes regular medication","Yes"]],pages:targetP,n:"Defined risk indicators trigger a fuller request. The risk archetype work would define these."},
+{ref:"MED10000003",pt:"Patient C",cond:"Chronic neurological condition",task:"Attach",tag:"Existing evidence",why:"The patient told us they have a recent clinic letter. You can attach yours and answer only what it leaves out.",decl:[["Condition (example)","Multiple sclerosis"],["Most recent relapse","More than 2 years ago"],["Has a recent clinic letter","Yes"],["Affects use of vehicle controls","No"]],pages:attachP,n:"Reuses evidence that already exists instead of asking for it again."},
+{ref:"MED10000004",pt:"Patient D",cond:"Parkinson’s",task:"Confirm",tag:"Routine check",why:"We check a small sample of declarations to keep the service accurate. This is not a concern about this patient.",decl:[["Got worse since last review","No"],["Medication changed in last 6 months","No"],["Off periods or freezing","No"],["Unusually sleepy","No"],["Deep brain stimulator","No"]],pages:confirmP,n:"Random verification keeps declarations honest and measures accuracy. Check the wording does not imply a concern about the patient."}];
+/* ---------- customer declaration ---------- */
+const CP=[
+P("u_lic","Which type of driving licence do you hold?","radio",["Car or motorcycle (Group 1)","Lorry or bus (Group 2)","Both"],{l:"Licence type"}),
+P("u_worse","Has your Parkinson’s got worse since your last medical review?","radio",["Yes","No","I’m not sure","This is my first notification to DVLA"],{l:"Got worse since last review"}),
+P("u_med","Has your medication changed in the last 6 months?","radio",YN,{l:"Medication changed in last 6 months"}),
+P("u_off","Do you have ‘off’ periods or freezing?","radio",YN,{l:"Off periods or freezing",hint:"This means times when your movement becomes slower or you suddenly have difficulty moving."}),
+P("u_sud","Do they happen suddenly or unpredictably?","radio",YN,{l:"Sudden or unpredictable",s:a=>a.u_off=="Yes"}),
+P("u_sleep","Does Parkinson’s, or medication for it, make you unusually sleepy during the day?","radio",YN,{l:"Unusually sleepy",hint:"We ask because Parkinson’s and some medicines can affect how alert you are when driving."}),
+P("u_sdrv","Has this sleepiness ever affected you while driving?","radio",["Yes","No","I have stopped driving because of it","I’m not sure"],{l:"Sleepiness affected driving",s:a=>a.u_sleep=="Yes"}),
+P("u_dbs","Do you have a deep brain stimulator?","radio",YN,{l:"Deep brain stimulator"}),
+P("u_let","Do you already have a recent clinic or consultant letter?","radio",["Yes, I can attach one","No"],{l:"Recent clinic letter",up:1,hint:"Do not request new evidence just to complete this."}),
+P("u_cons","Can we show your answers to your doctor if we need to ask them something?","radio",["Yes, you can share my answers","No, please do not share my answers"],{l:"Share with doctor",hint:"They would then only confirm your answers or add clinical judgement, rather than answering the same questions again."})];
+/* illustrative routing rules, not DVLA rules */
+function decide(){const a=CA,d=a.u_sdrv;
+ if((a.u_cons||"").startsWith("No"))return{task:"Targeted",tag:"Answers not shared",why:"The patient chose not to share their answers, so we can’t show you their declaration. We’re asking you the clinical questions directly."};
+ if(d=="Yes"||d=="I have stopped driving because of it")return{task:"Targeted",tag:"Risk indicator",why:"The patient says sleepiness has affected their driving. That is a risk indicator that needs clinical judgement."};
+ if(a.u_worse=="Yes"||a.u_med=="Yes")return{task:"Confirm",tag:"Exception",why:"The patient’s declaration shows a change: their Parkinson’s has got worse or their medication has changed. We’d like you to check this against your records."};
+ if(SAMPLE)return{task:"Confirm",tag:"Routine check",why:"We check a small sample of declarations to keep the service accurate. This is not a concern about this patient."};
+ return null}
+function buildCase(){const a=CA,r=decide(),L=[["Licence type",a.u_lic],["Got worse since last review",a.u_worse],["Medication changed in last 6 months",a.u_med],["Off periods or freezing",a.u_off],["Sudden or unpredictable",a.u_sud],["Unusually sleepy",a.u_sleep],["Sleepiness affected driving",a.u_sdrv],["Deep brain stimulator",a.u_dbs],["Recent clinic letter",a.u_let]].filter(x=>x[1]);
+ sub={r,dl:L};ans[4]={};
+ if(!r){CASES.length=4;return}
+ CASES[4]={ref:REF,pt:"Your customer journey",cond:"Parkinson’s",task:r.task,tag:r.tag,why:r.why,decl:(a.u_cons||"").startsWith("No")?[["Declaration","Not shared: the patient chose not to share their answers"]]:L,pages:r.task=="Confirm"?confirmP:parkP,n:"Built from your own customer answers. The routing rules are illustrative, not DVLA rules."}}
+/* ---------- state ---------- */
+let access=false,user=null,U={role:"",name:"",reg:"",clin:""},ci=0,cur=null,chk=false,err=null,t0=0,WV="A",showNotes=false,ans=[{},{},{},{},{}],CA={},ccur=null,cchk=false,SAMPLE=false,sub=null;
+const adm=()=>user&&user.role=="admin";
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const note=(t,b)=>showNotes?`<div class="design-note"><strong>Design note — ${esc(t)}</strong>${b}</div>`:"";
+const qn=(w,q)=>`<p><b>Open question (${esc(w)}):</b> ${q}</p>`;
+const tag=(t,c)=>`<strong class="govuk-tag govuk-tag--${c}">${esc(t)}</strong>`;
+const Q=p=>WV=="B"&&p.qb?p.qb:p.q,O=p=>WV=="B"&&p.ob?p.ob:p.o,HN=p=>WV=="B"&&p.hb?p.hb:p.hint;
+const val=(a,p)=>{const v=a[p.id];return Array.isArray(v)?v.join(", "):v};
+function navigate(h){if(location.hash===h)route();else location.hash=h}
+function toggleNotes(){showNotes=!showNotes;route()}
+function setWV(v){WV=v;ans[ci]={};const h=location.hash;if(h=="#hcp-question"||h=="#hcp-check")navigate("#hcp-request");else route()}
+function resetAll(){ans=[{},{},{},{},{}];CASES.length=4;CA={};ccur=null;cchk=false;SAMPLE=false;sub=null;chk=false;err=null;navigate("#all-screens")}
+function signOut(s){if(s=="hcp"){user=null;navigate("#hcp-sign-in")}else{access=false;navigate("#sign-in")}}
+/* ---------- chrome ---------- */
+function warn(){const h=(location.hash||"#all-screens"),g=h=="#all-screens"||h=="#dvla-record"?h:h.startsWith("#hcp")?"#hcp-sign-in":"#sign-in";
+ const o=[["#all-screens","All screens"],["#sign-in","Customer: tell us about your Parkinson’s"],["#hcp-sign-in","Healthcare professional: evidence requests"],["#dvla-record","DVLA case record (concept)"]].map(([v,t])=>`<option value="${v}"${v==g?" selected":""}>${t}</option>`).join("");
+ return `<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>This is a fictional prototype of a declaration-first medical evidence service for Parkinson’s. It is not a real DVLA or GOV.UK service and it makes no real licensing decisions. The cases and routing rules are invented, and nothing is saved or sent.<div class="prototype-warning__control"><label for="jp">Show this journey</label><select id="jp" onchange="navigate(this.value)">${o}</select><label for="wv">Confirmation wording</label><select id="wv" onchange="setWV(this.value)"><option value="A"${WV=="A"?" selected":""}>A: nothing contradicts this</option><option value="B"${WV=="B"?" selected":""}>B: safe to drive</option></select><label for="pa">Patient’s answers on each question page</label><select id="pa" onchange="SHOWPA=this.value=='on';route()"><option value="on"${SHOWPA?" selected":""}>Shown beside each question</option><option value="off"${SHOWPA?"":" selected"}>Only on the request page</option></select></div></div>`}
+function chrome(inner,o){o=o||{};const hcp=o.svc=="hcp",signed=hcp?!!user:access;
+ let h=`<header class="govuk-header" role="banner"><div class="govuk-header__container"><a href="#all-screens" class="govuk-header__homepage-link">${LOGO}</a>${signed?`<a class="govuk-header__signout" href="#" onclick="signOut('${hcp?"hcp":"c"}');return false;">Sign out</a>`:""}</div></header>`;
+ h+=`<div class="service-nav"><div class="service-nav__wrapper"><a class="service-nav__name" href="${hcp?(user?"#hcp-requests":"#hcp-sign-in"):(access?"#account":"#sign-in")}">${hcp?"Medical evidence service":"Driver and vehicles account"}</a></div></div>`;
+ h+=`<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper"><span class="govuk-phase-banner__tag">Prototype</span><span>This is not a real service.</span><span class="phase-actions"><a href="#" onclick="toggleNotes();return false;">${showNotes?"Hide":"Show"} design notes</a><a href="#" onclick="resetAll();return false;">Reset examples</a><a href="#all-screens">All screens</a></span></div></div>`;
+ h+=`<div class="govuk-width-container"><main class="govuk-main-wrapper" id="main">${warn()}`;
+ if(o.back)h+=`<a class="govuk-back-link" href="#" onclick="${o.back[0]};return false;">${esc(o.back[1])}</a>`;
+ h+=o.full?inner:`<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">${inner}</div></div>`;
+ return h+"</main></div>"}
+/* ---------- shared question page ---------- */
+function readF(p){const o=O(p);
+ if(p.t=="radio"){const e=document.querySelector("input[name=f]:checked");return e?o[e.value]:null}
+ if(p.t=="check"){const a=[...document.querySelectorAll("input[name=f]:checked")].map(e=>o[e.value]);return a.length?a:null}
+ return document.getElementById("tx").value.trim()||null}
+const errMsg=p=>p.t=="radio"?`Select an answer for “${p.l}”`:p.t=="check"?`Select at least one option for “${p.l}”`:`Enter an answer for “${p.l}”`;
+function qpage(p,a,cap,next,backJs,svc,pre){
+ const hn=HN(p),bad=!!err;let body="";
+ if(p.t=="radio"||p.t=="check"){const k=p.t=="radio"?"radios":"checkboxes",ty=p.t=="radio"?"radio":"checkbox";
+  body=`<div class="govuk-${k}">${O(p).map((x,i)=>`<div class="govuk-${k}__item"><input class="govuk-${k}__input" type="${ty}" name="f" id="f${i}" value="${i}" ${(p.t=="radio"?a[p.id]===x:(a[p.id]||[]).includes(x))?"checked":""}><label class="govuk-${k}__label" for="f${i}">${x}</label></div>`).join("")}</div>`}
+ else body=`<textarea class="govuk-textarea" id="tx" aria-label="${esc(p.l)}">${esc(a[p.id])}</textarea>`;
+ const up=p.up?`<div class="govuk-form-group"><span class="govuk-hint">Prototype only: files are not uploaded.</span><input class="govuk-file-upload" type="file"></div>`:"";
+ return chrome(`${bad?`<div class="govuk-error-summary" role="alert"><h2>There is a problem</h2><ul><li><a href="#" onclick="document.getElementById('grp').scrollIntoView();return false;">${esc(err)}</a></li></ul></div>`:""}<div class="govuk-form-group${bad?" govuk-form-group--error":""}" id="grp"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend govuk-fieldset__legend--l"><span class="govuk-caption">${esc(cap)}</span><h1 class="govuk-fieldset__heading">${Q(p)}</h1></legend>${hn?`<span class="govuk-hint">${hn}</span>`:""}${bad?`<span class="govuk-error-message">Error: ${esc(err)}</span>`:""}${pre||""}${body}</fieldset></div>${up}<button class="govuk-button" type="button" onclick="${next}">Continue</button>`,{back:[backJs,"Back"],svc})}
+const row=(k,v,act)=>`<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">${k}</dt><dd class="govuk-summary-list__value">${v}</dd>${act===undefined?"":`<dd class="govuk-summary-list__actions">${act}</dd>`}</div>`;
+/* ---------- all screens ---------- */
+const li=(h,t,d)=>`<li><a href="${h}">${t}</a><span>${d}</span></li>`;
+const rAll=()=>chrome(`<h1 class="govuk-heading-xl">All screens</h1><p class="govuk-body">Two journeys linked by one declaration. What the customer tells us is what the healthcare professional is later shown, and DVLA only asks the doctor when something needs checking.</p><h2 class="govuk-heading-m">Customer</h2><ul class="cu-index">${li("#sign-in","Sign in","GOV.UK One Login, simulated")}${li("#account","Account: your health and driving","The card changes as the case moves")}${li("#declare-start","Tell us about your Parkinson’s","Start page, then one question per page, check answers, confirmation")}</ul><h2 class="govuk-heading-m">Healthcare professional</h2><ul class="cu-index">${li("#hcp-sign-in","Sign in","Registered clinician, or staff acting for one")}${li("#hcp-requests","Your evidence requests","Confirm, targeted questions, or attach what you already have")}</ul><h2 class="govuk-heading-m">DVLA</h2><ul class="cu-index">${li("#dvla-record","Case record (concept)","Where the information goes, and the random verification control")}</ul>${note("Start anywhere","<p>Do the customer journey first, then open the healthcare professional journey. The request built from your answers appears at the bottom of the requests list.</p>")}`,{});
+/* ---------- customer ---------- */
+const cvis=()=>CP.filter(p=>!p.s||p.s(CA));
+function cstatus(){
+ if(!sub)return{tag:"Not started",col:"grey",head:"You haven’t told us about your Parkinson’s yet.",next:"It takes a few minutes. You can answer ‘I’m not sure’ to anything you don’t know.",go:1};
+ const r=sub.r,a=ans[4];
+ if(!r)return{tag:"With us",col:"blue",head:"We’re looking at what you told us",next:"We don’t expect to need to ask your doctor. We’ll write to you when we have a decision."};
+ if(a._sent&&!a._adm)return{tag:"With us",col:"blue",head:"We’re looking at information from your doctor",next:"We’ll write to you when we have a decision."};
+ return{tag:"Waiting on someone else",col:"purple",head:r.task=="Confirm"?"We’ve asked a doctor who treats you to check what you told us":"We’ve asked a doctor who treats you a few clinical questions",next:"You don’t need to do anything. We’ll tell you if we need anything from you."}}
+const rSignIn=()=>chrome(`<h1 class="govuk-heading-xl">Sign in to your driver and vehicles account</h1><p class="govuk-body">You’ll sign in with GOV.UK One Login. You can tell us about a health condition and see what’s happening with your case.</p><div class="govuk-inset-text">Prototype: One Login is simulated here. You do not need to enter any details.</div><button class="govuk-button" type="button" onclick="access=true;navigate('#account')">Continue to GOV.UK One Login</button>${note("Same front door as the rest of the account","<p>Health and driving is a card on the customer’s existing account, not a new service to find.</p>"+qn("DPP","What identity level is needed before a customer can make a declaration that carries most of a decision?"))}`);
+function rAccount(){const s=cstatus();
+ return chrome(`<h1 class="govuk-heading-xl">Your driver and vehicles account</h1><div class="acct-card"><div class="acct-card__head"><h2>Your health and driving</h2></div><dl class="govuk-summary-list">${sub?row("Reference","<b>"+REF+"</b>"):""}${sub?row("Condition you’ve told us about","Parkinson’s"):""}${row("What’s happening",tag(s.tag,s.col)+"<br>"+s.head)}${row("What happens next",s.next)}</dl>${s.go?`<p><button class="govuk-button" type="button" onclick="navigate('#declare-start')">Tell us about your Parkinson’s</button></p>`:""}</div>${note("The card follows the case","<p>Status wording follows the case updates prototype: With us, Waiting on someone else. It changes when the doctor’s request is sent and answered.</p>"+qn("Policy","Should the customer see that a doctor has been asked, and what for?"))}`,{})}
+const rDStart=()=>chrome(`<span class="govuk-caption">Your health and driving</span><h1 class="govuk-heading-xl">Tell us about your Parkinson’s</h1><p class="govuk-body">Your answers carry most of the decision. We only ask your doctor when something needs checking.</p><p class="govuk-body"><strong>You do not need to request new medical evidence to complete this.</strong></p><p class="govuk-body">You can answer ‘I’m not sure’ to anything you do not know.</p><button class="govuk-button govuk-button--start" type="button" onclick="ccur=cvis()[0].id;cchk=false;err=null;navigate('#declare-question')">Start now</button>${note("The declaration is data, not a form to scan","<p>Answers are held as structured data so DVLA can spot exceptions and contradictions, and so the doctor is shown them instead of being asked again.</p>"+qn("Policy","What is the legal footing for treating the declaration as the main evidence on a first notification?"))}`,{back:["navigate('#account')","Back to your account"]});
+function rDQ(){const v=cvis();if(!v.find(p=>p.id==ccur))ccur=v[0].id;const p=v.find(x=>x.id==ccur);
+ return qpage(p,CA,"Tell us about your Parkinson’s","cnext()","cback()","c")}
+function cnext(){const p=cvis().find(x=>x.id==ccur),v=readF(p);if(v==null){err=errMsg(p);route();return}
+ CA[p.id]=v;err=null;const vs=cvis();
+ if(cchk){const u=vs.find(x=>CA[x.id]===undefined);if(u){ccur=u.id;navigate("#declare-question")}else{cchk=false;navigate("#declare-check")}return}
+ const i=vs.findIndex(x=>x.id==ccur);if(i+1<vs.length){ccur=vs[i+1].id;navigate("#declare-question")}else navigate("#declare-check")}
+function cback(){const v=cvis();err=null;if(cchk){cchk=false;navigate("#declare-check");return}const i=v.findIndex(p=>p.id==ccur);if(i>0){ccur=v[i-1].id;navigate("#declare-question")}else navigate("#declare-start")}
+function cbackCheck(){const v=cvis();ccur=v[v.length-1].id;navigate("#declare-question")}
+function cchg(id){ccur=id;cchk=true;err=null;navigate("#declare-question")}
+const rDCheck=()=>chrome(`<h1 class="govuk-heading-xl">Check your answers before sending them</h1><dl class="govuk-summary-list">${cvis().map(p=>row(esc(p.l),esc(val(CA,p)),`<a href="#" onclick="cchg('${p.id}');return false;">Change<span class="govuk-visually-hidden"> ${esc(p.l)}</span></a>`)).join("")}</dl><h2 class="govuk-heading-m">Now send your information</h2><p class="govuk-body">By submitting this, you confirm that the information you’ve provided is true to the best of your knowledge.</p><button class="govuk-button" type="button" onclick="buildCase();navigate('#declare-sent')">Accept and send</button>`,{back:["cbackCheck()","Back"]});
+function rDSent(){if(!sub)return rAccount();const r=sub.r;
+ return chrome(`<div class="govuk-panel"><h1 class="govuk-panel__title">Information sent</h1><div class="govuk-panel__body">Your reference number<br><strong>${REF}</strong></div></div><p class="govuk-body">Prototype only: nothing has actually been sent.</p><h2 class="govuk-heading-m">What happens next</h2><p class="govuk-body">${!r?"Based on your answers, we don’t expect to need to ask your doctor. We’ll review what you told us and write to you.":r.task=="Confirm"?"We’ll ask a doctor who treats you to check your answers against their records. They won’t need to write a report. You don’t need to do anything.":"We’ll ask a doctor who treats you a few clinical questions. You don’t need to do anything."}</p><div class="govuk-button-group"><button class="govuk-button" type="button" onclick="navigate('#account')">Go to your account</button>${r?`<button class="govuk-button govuk-button--secondary" type="button" onclick="navigate('#hcp-sign-in')">See what the doctor receives</button>`:`<button class="govuk-button govuk-button--secondary" type="button" onclick="navigate('#dvla-record')">See the DVLA case record</button>`}</div>${note("Illustrative routing rules","<p>Not DVLA rules. A request is created if the customer withholds consent, says sleepiness has affected their driving, or says their condition has got worse or their medication has changed. Otherwise no request is sent, which tests whether the declaration alone can carry the decision. Licence type is collected but not used yet.</p>"+qn("Medical","Which declared answers should be risk indicators, and which only exceptions?"))}`,{})}
+/* ---------- healthcare professional ---------- */
+function login(){const r=document.querySelector("input[name=r]:checked");U.name=document.getElementById("nm").value.trim();U.reg=document.getElementById("rg").value.trim();U.clin=document.getElementById("cl").value.trim();U.role=r?r.value:"";
+ if(!U.role||!U.name||!U.reg||(U.role=="admin"&&!U.clin)){err="Choose how you’re using the service and fill in every box"+(U.role=="admin"?", including the clinician’s name":"");route();return}
+ user=Object.assign({},U);err=null;navigate("#hcp-requests")}
+const rHSign=()=>chrome(`${err?`<div class="govuk-error-summary" role="alert"><h2>There is a problem</h2><ul><li>${esc(err)}</li></ul></div>`:""}<h1 class="govuk-heading-xl">Sign in to the medical evidence service</h1><p class="govuk-body">For healthcare professionals, and the practice or hospital staff who complete requests for them.</p><div class="govuk-inset-text">Prototype: no real check is made. A real service would verify the registration against the professional register.</div><div class="govuk-form-group"><fieldset class="govuk-fieldset"><legend class="govuk-fieldset__legend">How are you using the service?</legend><div class="govuk-radios"><div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="r" id="r1" value="hcp" ${U.role=="hcp"?"checked":""}><label class="govuk-radios__label" for="r1">I’m a registered healthcare professional</label></div><div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="r" id="r2" value="admin" ${U.role=="admin"?"checked":""}><label class="govuk-radios__label" for="r2">I’m completing requests for a clinician (practice or hospital staff)</label></div></div></fieldset></div><div class="govuk-form-group"><label class="govuk-label" for="nm">Your name</label><input class="govuk-input" id="nm" value="${esc(U.name)}"></div><div class="govuk-form-group"><label class="govuk-label" for="rg">Clinician’s professional registration number</label><span class="govuk-hint">For example, a GMC number</span><input class="govuk-input govuk-input--width-10" id="rg" value="${esc(U.reg)}"></div><div class="govuk-form-group"><label class="govuk-label" for="cl">Clinician’s name</label><span class="govuk-hint">Only if you’re completing requests for a clinician</span><input class="govuk-input" id="cl" value="${esc(U.clin)}"></div><button class="govuk-button" type="button" onclick="login()">Continue</button>${note("Admin staff act for the clinician","<p>The admin route ends with the clinician approving before anything is sent to DVLA.</p>"+qn("DPP","How do we verify the person is a registered healthcare professional, and how do practice and hospital admin teams complete tasks for them?"))}`,{svc:"hcp"});
+function openCase(i){ci=i;navigate("#hcp-request")}
+function rHReqs(){return chrome(`<h1 class="govuk-heading-xl">Your evidence requests</h1><p class="govuk-body">Each request says why we’re asking and what we need. We only ask for what the patient couldn’t tell us.</p><div class="cu-scroll"><table class="govuk-table"><thead><tr><th>Patient</th><th>What we need</th><th>Status</th><th><span class="govuk-visually-hidden">Action</span></th></tr></thead><tbody>${CASES.map((c,i)=>`<tr><td>${c.pt}<span class="govuk-hint">${c.ref} · ${c.cond}</span></td><td>${tag(c.task,TC[c.task])}<span class="govuk-hint">${c.tag}</span></td><td>${ans[i]._sent?tag(ans[i]._adm?"Awaiting approval":"Sent","green"):tag("New","blue")}</td><td><a href="#" onclick="openCase(${i});return false;">Open<span class="govuk-visually-hidden"> ${c.ref}</span></a></td></tr>`).join("")}</tbody></table></div>${CASES.length<5?`<p class="govuk-body">Complete the customer journey to add a request built from your own answers.</p>`:""}<p class="govuk-body-s">Prefer paper? You can still return the paper form. Using the digital service is optional.</p>${note("Tasks are chosen by what each case needs","<p>Not by condition form. If the declaration predicts the outcome, some cases would never be sent here at all.</p>"+qn("Policy","What do we pay for a quick confirmation compared with a full report?"))}`,{svc:"hcp",full:true})}
+function rHReq(){const c=CASES[ci];if(!c)return rHReqs();
+ return chrome(`<span class="govuk-caption">${c.pt} · ${c.ref}</span><h1 class="govuk-heading-xl">${c.cond}: ${TL[c.task]}</h1><div class="govuk-inset-text"><strong>Why we’re asking you.</strong> ${c.why}</div><h2 class="govuk-heading-m">What the patient told us</h2><dl class="govuk-summary-list">${c.decl.map(([l,v])=>row(l,esc(v))).join("")}</dl><h2 class="govuk-heading-m">What we need from you</h2><p class="govuk-body">${TD[c.task]}</p><p class="govuk-body">Fee: ${FEE}, paid digitally when you submit.</p><button class="govuk-button govuk-button--start" type="button" onclick="startTask()">Start</button><details class="govuk-details"><summary class="govuk-details__summary">Prefer to use paper?</summary><div class="govuk-details__text">You can still return the paper form. Using the digital service is optional.</div></details>${note("Reason, declaration, then the ask","<p>"+TN[c.task]+" "+c.n+"</p>"+qn("Medical","What will a healthcare professional put their name to? ‘Nothing in my records contradicts this’ is very different from ‘this patient is safe to drive’. Use the wording switch at the top to compare."))}`,{svc:"hcp",back:["navigate('#hcp-requests')","Back to your requests"]})}
+function paBox(p,c){const R=REL[p.id];if(R===undefined)return"";
+ const d=c.decl,rows=d[0][0]=="Declaration"?d:R=="ALL"?d:d.filter(x=>R.includes(x[0]));
+ return `<div class="govuk-inset-text" style="margin:0 0 20px"><strong>What the patient told us</strong>${rows.length?`<dl class="govuk-summary-list" style="margin:10px 0 0">${rows.map(([l,v])=>row(l,esc(v))).join("")}</dl>`:`<p class="govuk-body-s" style="margin:8px 0 0">The patient wasn’t asked about this. It’s a question only you can answer.</p>`}</div>${note("The patient’s answer beside the question","<p>Shows only the answers relevant to this question, so the clinician doesn’t have to go back to the start page. Where the patient wasn’t asked anything relevant, it says so, which marks a question only the clinician can answer.</p>"+qn("Medical","Does seeing the patient’s answer beside the question help, or does it make the clinician more likely to simply agree with it?"))}`}
+const hvis=()=>CASES[ci].pages().filter(p=>!p.s||p.s(ans[ci]));
+function startTask(){cur=hvis()[0].id;t0=Date.now();chk=false;err=null;navigate("#hcp-question")}
+function rHQ(){if(!CASES[ci])return rHReqs();const v=hvis();if(!v.find(p=>p.id==cur))cur=v[0].id;const p=v.find(x=>x.id==cur),c=CASES[ci];
+ return qpage(p,ans[ci],c.cond+": "+c.task.toLowerCase(),"hnext()","hback()","hcp",SHOWPA?paBox(p,c):"")}
+function hnext(){const p=hvis().find(x=>x.id==cur),v=readF(p);if(v==null){err=errMsg(p);route();return}
+ ans[ci][p.id]=v;err=null;const vs=hvis();
+ if(chk){const u=vs.find(x=>ans[ci][x.id]===undefined);if(u){cur=u.id;navigate("#hcp-question")}else{chk=false;navigate("#hcp-check")}return}
+ const i=vs.findIndex(x=>x.id==cur);if(i+1<vs.length){cur=vs[i+1].id;navigate("#hcp-question")}else navigate("#hcp-check")}
+function hback(){const v=hvis();err=null;if(chk){chk=false;navigate("#hcp-check");return}const i=v.findIndex(p=>p.id==cur);if(i>0){cur=v[i-1].id;navigate("#hcp-question")}else navigate("#hcp-request")}
+function hbackCheck(){const v=hvis();cur=v[v.length-1].id;navigate("#hcp-question")}
+function hchg(id){cur=id;chk=true;err=null;navigate("#hcp-question")}
+function sendH(){const a=ans[ci];a._sent=1;a._adm=adm()?1:0;navigate("#hcp-sent")}
+function rHCheck(){if(!CASES[ci])return rHReqs();const v=hvis(),a=ans[ci];
+ return chrome(`<h1 class="govuk-heading-xl">Check your answers before sending</h1><dl class="govuk-summary-list">${v.map(p=>row(esc(p.l),esc(val(a,p)),`<a href="#" onclick="hchg('${p.id}');return false;">Change<span class="govuk-visually-hidden"> ${esc(p.l)}</span></a>`)).join("")}</dl>${CASES[ci].task=="Attach"&&v.length<4?`<div class="govuk-inset-text">The letter covered everything we needed, so you were asked ${v.length} question${v.length==1?"":"s"}.</div>`:""}<h2 class="govuk-heading-m">${adm()?"Send for approval":"Now send your response"}</h2><p class="govuk-body">${adm()?"By sending this, you confirm the information is accurate to the best of your knowledge. "+esc(user.clin)+" must approve it before it goes to DVLA.":"By sending this, you confirm the information is accurate to the best of your professional knowledge and based on the patient’s records."}</p><button class="govuk-button" type="button" onclick="sendH()">${adm()?"Send to clinician for approval":"Accept and send"}</button>`,{svc:"hcp",back:["hbackCheck()","Back"]})}
+function rHSent(){if(!CASES[ci])return rHReqs();const s=Math.round((Date.now()-t0)/1000),tm=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+ return chrome(`<div class="govuk-panel"><h1 class="govuk-panel__title">${adm()?"Ready for approval":"Response sent"}</h1><div class="govuk-panel__body">${CASES[ci].ref}</div></div><p class="govuk-body">Prototype only: nothing has actually been sent.</p><h2 class="govuk-heading-m">What happens next</h2><p class="govuk-body">${adm()?esc(user.clin)+" will be asked to review and approve this before anything goes to DVLA.":"DVLA will review your response alongside the patient’s declaration. We’ll only contact you again if we need further clinical information."}</p><div class="govuk-inset-text"><strong>Payment.</strong> ${FEE} will be paid to the account on your profile ${adm()?"once the clinician approves":"when you submit"}. Prototype: no payment is made and the fee is a placeholder.</div><p class="govuk-body-s">Time on this task: ${tm}</p><div class="govuk-button-group"><button class="govuk-button" type="button" onclick="navigate('#hcp-requests')">Back to your requests</button>${ci==4?`<button class="govuk-button govuk-button--secondary" type="button" onclick="navigate('#dvla-record')">See the DVLA case record</button>`:""}</div>${note("Where the response goes","<p>In a real service it would go to the case owner’s queue so returns do not sit waiting to be scanned and indexed, and it would trigger payment. Not designed here.</p>"+qn("Policy","How do fees work when a confirmation takes minutes and a report takes half an hour?"))}`,{svc:"hcp"})}
+/* ---------- DVLA record ---------- */
+function rRec(){
+ if(!sub)return chrome(`<h1 class="govuk-heading-xl">DVLA case record</h1><p class="govuk-body">Nothing received yet. Complete the customer journey and send it, and this page shows where the information goes.</p><button class="govuk-button" type="button" onclick="navigate('#sign-in')">Start the customer journey</button>`,{});
+ const r=sub.r,c=CASES[4],a=ans[4],sent=c&&a._sent,pg=c?c.pages().filter(p=>!p.s||p.s(a)):[];
+ return chrome(`<span class="govuk-caption">Concept, not a designed caseworker tool</span><h1 class="govuk-heading-xl">DVLA case record</h1><p class="govuk-body">${REF}</p><h2 class="govuk-heading-m">1. Received from the customer</h2><dl class="govuk-summary-list">${sub.dl.map(([l,v])=>row(l,esc(v))).join("")}</dl><h2 class="govuk-heading-m">2. Evidence route</h2>${r?`<div class="govuk-inset-text">${tag(r.task,TC[r.task])} ${r.tag}<br>${r.why}</div>`:`<div class="govuk-inset-text">No request to the doctor. The declaration is enough to proceed.</div>`}<h2 class="govuk-heading-m">3. Doctor’s response</h2><p class="govuk-body">${!r?"Not needed.":!sent?"The request is waiting in the doctor’s evidence requests.":a._adm?"Completed by an admin. Awaiting clinician approval.":"Response received."}</p>${sent?`<dl class="govuk-summary-list">${pg.map(p=>row(esc(p.l),esc(val(a,p)))).join("")}</dl>`:""}<h2 class="govuk-heading-m">4. Random verification</h2><p class="govuk-body">A sample of declarations is checked to keep them honest and measure accuracy. It only changes the route when no exception or risk indicator applies.</p><button class="govuk-button govuk-button--secondary" type="button" onclick="SAMPLE=!SAMPLE;buildCase();route()">${SAMPLE?"Remove from random sample":"Select for random verification"}</button>${note("A concept view","<p>Shows the chain end to end. Not a designed caseworker tool.</p>")}`,{})}
+/* ---------- router ---------- */
+const ROUTES={"all-screens":rAll,"sign-in":rSignIn,"account":rAccount,"declare-start":rDStart,"declare-question":rDQ,"declare-check":rDCheck,"declare-sent":rDSent,"hcp-sign-in":rHSign,"hcp-requests":rHReqs,"hcp-request":rHReq,"hcp-question":rHQ,"hcp-check":rHCheck,"hcp-sent":rHSent,"dvla-record":rRec};
+function route(){let h=(location.hash||"#all-screens").slice(1);if(!ROUTES[h])h="all-screens";
+ if(["account","declare-start","declare-question","declare-check","declare-sent"].includes(h)&&!access)h="sign-in";
+ if(h.startsWith("hcp-")&&h!="hcp-sign-in"&&!user)h="hcp-sign-in";
+ if(h=="hcp-sign-in"&&user)h="hcp-requests";
+ document.getElementById("app").innerHTML=ROUTES[h]();window.scrollTo(0,0)}
+window.addEventListener("hashchange",route);route();
+</script>
+</body></html>
