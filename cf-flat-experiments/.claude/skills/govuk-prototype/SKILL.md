@@ -33,8 +33,8 @@ These are what separate a passable prototype from a correct one:
 5. **Accessibility is not optional.** Labels on every input, `autocomplete` where it applies,
    `govuk-visually-hidden` for icon/search labels, one `<h1>` per page.
 6. **Real content, plain English.** Follow GDS content style: short sentences, active voice,
-   "You'll need…", contractions. (If deep content help is needed, the separate
-   `govuk-style-writer` skill in this repo covers writing style.)
+   "You'll need…", contractions. (For deeper content help, use the
+   `govuk-content` skill from the government communication skills.)
 7. **Phase banner** ("Alpha"/"Beta") on services under development.
 
 ## Workflow
