@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DM journey map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+<style>
+/* A canvas, not a prototype: the target-state customer journey on one page.
+   Stages, steps and outcomes come from whole-service-map-v2.html (CX map), today's figures from cx-vision.html.
+   Matches their look and reuses the v2 step illustrations. */
+:root {
+  --ink: #0b0c0c; --muted: #505a5f; --line: #b1b4b6; --line-soft: #e5e6e7; --tint: #f3f2f1;
+  --blue: #1d70b8; --blue-dark: #003078; --green: #00703c; --teal: #10605b; --red: #d4351c;
+  --yellow: #fff7bf; --focus: #ffdd00;
+  --col: 250px; --lab: 150px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: #ffffff; color: var(--ink); font-family: "Public Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.45; }
+a { color: var(--blue); } a:hover { color: var(--blue-dark); }
+a:focus-visible { outline: 3px solid var(--focus); background: var(--focus); color: var(--ink); }
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+
+.wrap { max-width: 1320px; margin: 0 auto; padding: 40px max(16px, 3vw) 24px; display: grid; gap: 24px; }
+.status { display: flex; flex-wrap: wrap; gap: 12px; font-size: 14px; color: var(--muted); }
+.status strong { color: var(--ink); border: 1px solid var(--line); background: var(--tint); padding: 0 8px; }
+h1 { margin: 0; font-size: 44px; line-height: 1.1; }
+.lede { font-size: 19px; max-width: 70ch; }
+.promise { font-size: 24px; font-weight: 700; line-height: 1.3; max-width: 44ch; border-left: 8px solid var(--green); padding-left: 18px; }
+@media (max-width: 680px) { h1 { font-size: 34px; } .promise { font-size: 20px; } }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; gap: 8px; align-items: center; }
+.sw { display: inline-block; width: 28px; height: 0; border-top: 4px solid var(--green); }
+.sw.today { border-top: 3px dashed var(--muted); }
+.sw.box { width: 14px; height: 14px; border: 0; }
+.sw.box.tbc { background: repeating-linear-gradient(45deg, #fff, #fff 3px, var(--line-soft) 3px, var(--line-soft) 6px); border: 1px solid var(--line); }
+.sw.box.q { background: var(--yellow); }
+
+/* The map scrolls sideways inside its own box; the page does not. */
+.scroller { overflow-x: auto; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.map { position: relative; display: grid; grid-template-columns: var(--lab) repeat(9, var(--col)); width: max-content; padding: 0 max(16px, 3vw) 0 0; }
+.map > div { padding: 12px 14px; border-left: 1px solid var(--line-soft); }
+.map > .lab { position: sticky; left: 0; z-index: 2; background: var(--tint); border-left: 0; border-right: 1px solid var(--line);
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.map > div:not(.phase) { border-top: 1px solid var(--line-soft); }
+
+/* Phase bands across the top */
+.phase { grid-row: 1; font-size: 13px; font-weight: 700; padding: 10px 14px; border-left: 1px solid #fff !important; }
+.phase.p1 { background: #e8f1ee; color: var(--teal); }
+.phase.p2 { background: #d2e2f1; color: var(--blue-dark); }
+.phase.p3 { background: var(--tint); color: var(--ink); }
+.phase .sub { display: block; font-weight: 400; font-size: 13px; }
+
+.stage { border-top: 6px solid var(--green); }
+.stage.tbc { border-top-color: var(--line); background: repeating-linear-gradient(45deg, #fff, #fff 6px, #f8f8f8 6px, #f8f8f8 12px); }
+.stage .num { font-size: 14px; font-weight: 700; color: var(--green); }
+.stage.tbc .num { color: var(--muted); }
+.stage h2 { margin: 2px 0 0; font-size: 22px; line-height: 1.2; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 6px; border: 1px solid var(--line); color: var(--muted); margin-top: 6px; }
+
+.pic img { display: block; width: 100%; height: 200px; object-fit: cover; object-position: center 30%; }
+.quote { font-size: 17px; font-weight: 700; line-height: 1.3; }
+.does li { padding-left: 14px; position: relative; font-size: 15px; margin-bottom: 6px; }
+.does li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 6px; height: 6px; background: var(--ink); }
+.chans { display: flex; flex-wrap: wrap; gap: 6px; }
+.chans li { font-size: 13px; border: 1px solid var(--line); padding: 1px 6px; background: #fff; }
+
+.curve { grid-column: 2 / span 9; padding: 0 !important; border-left: 0 !important; }
+.curve svg { display: block; }
+.curve text { font-family: inherit; }
+
+.today { font-size: 15px; }
+.today .fig { font-weight: 700; }
+.better { font-size: 15px; border-left: 4px solid var(--green); padding-left: 10px; }
+.measures { display: flex; flex-wrap: wrap; gap: 6px; }
+.measures li { background: #e8f1ee; color: var(--teal); font-weight: 700; font-size: 13px; padding: 2px 8px; }
+.q { background: var(--yellow); font-size: 14px; padding: 8px 10px; }
+.q strong { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.loops { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 900px) { .loops { grid-template-columns: 1fr; } }
+.loops > div { border: 1px solid var(--line); border-top: 6px solid var(--blue); padding: 16px 18px; display: grid; gap: 6px; align-content: start; }
+.loops h3 { margin: 0; font-size: 19px; }
+footer { font-size: 14px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="status"><strong>Working draft</strong> 13 November 2026 <span>CustomerFirst × DVLA Drivers Medical</span> <span>High-level. Not a screen design.</span></div>
+  <h1>Drive with a medical condition: the journey we're working towards</h1>
+  <p class="lede">One person's route through the target-state service, from wondering whether to tell DVLA to living with the decision. It is the customer row of the <a href="whole-service-map-v2.html#cx">whole-service map</a>, cut down to what someone would notice, with today beside it for contrast.</p>
+  <p class="promise">You always know whether you can drive, what happens next and roughly when, without having to ask.</p>
+  <div class="legend">
+    <span><i class="sw"></i> How it should feel in the target state</span>
+    <span><i class="sw today"></i> How it feels today</span>
+    <span><i class="sw box tbc"></i> Stage scope not yet agreed</span>
+    <span><i class="sw box q"></i> Open question</span>
+    <span>The feeling curve is a hypothesis for discussion, not research.</span>
+  </div>
+</div>
+
+<div class="scroller" tabindex="0" role="region" aria-label="Journey map, scrolls sideways">
+<div class="map" id="map"></div>
+</div>
+
+<div class="wrap">
+  <section>
+    <h2 style="margin:0 0 16px;font-size:28px">It is not a straight line</h2>
+    <div class="loops">
+      <div><h3>One case, three things at once</h3><p>Stay informed, provide what's needed and get help are not steps in order. They run side by side for as long as the case is open, and the quality of the first decides how much of the third happens.</p></div>
+      <div><h3>A decision is not the end</h3><p>Most people on a medical licence come back: to renew, to tell us something has changed, or to challenge. Each return should start from what we already know, not from a blank form.</p></div>
+      <div><h3>Bad news still needs a clear route</h3><p>Refused or revoked is the lowest point on the curve whatever we do. The target is that it is clear, reasoned and comes with what to do next, not that it feels good.</p></div>
+    </div>
+  </section>
+  <footer>
+    <p>Sources: stages, steps and outcome measures from <a href="whole-service-map-v2.html#cx">whole-service-map-v2.html</a>; today's figures from <a href="cx-vision.html">cx-vision.html</a>. Illustrations from <code>illustrations/v2/</code>; some steps still use stand-ins (see its BRIEF.md).</p>
+    <p>Complaints sit across every stage and are left off the map. Their scope is not yet agreed.</p>
+  </footer>
+</div>
+
+<script>
+// Stage data. Today's figures are the ones already used in cx-vision.html; nothing new is claimed here.
+// feel: 1 (worst) to 5 (best). A workshop hypothesis to be argued with, not measured.
+const PHASES = [
+  { cls: "p1", span: 2, name: "Before a case", sub: "Deciding to tell us, and telling us" },
+  { cls: "p2", span: 4, name: "While the case is open", sub: "03 to 05 run side by side until a decision" },
+  { cls: "p3", span: 3, name: "After the decision", sub: "Each can open a case again" }
+];
+
+const STAGES = [
+  { n: "01", name: "Find out", img: "cx-01",
+    quote: "Does my condition affect my licence, and can I keep driving?",
+    does: ["Checks the condition on GOV.UK or by asking", "Gets advice from their doctor or a charity", "Finds out whether they can drive while DVLA decides"],
+    chans: ["GOV.UK", "GOV.UK voice", "Phone and webchat", "GP or charity"],
+    today: "Guidance doesn't always match how cases are decided, so people tell us when they don't need to, or late.",
+    better: "A plain answer framed as an outcome: you need to tell DVLA, or you don't, and whether you can drive meanwhile.",
+    measures: ["Unnecessary notifications", "Late declarations"],
+    feelToday: 2, feelTarget: 3.4 },
+  { n: "02", name: "Tell us", img: "cx-04",
+    quote: "I want to tell you once and know you've got it.",
+    does: ["Signs in once, or tells us on paper or with an agent", "Tells us about one condition or several in one go", "Gets confirmation, and when to expect an update"],
+    chans: ["GOV.UK One Login", "DMSP", "Phone and webchat", "Post"],
+    today: "A D1, then much of it again on a questionnaire. <span class=\"fig\">~33,000</span> questionnaires a year rejected for missing information.",
+    better: "Asked only what decides the case, in any channel. Every channel lands in one intake and the case goes straight to the right route.",
+    measures: ["Complete first time", "Routed right first time"],
+    q: "Is the DVLA account separate from One Login? And how does someone notify for another person online?",
+    feelToday: 2, feelTarget: 4 },
+  { n: "03", name: "Stay informed", img: "cx-09",
+    quote: "Where is my case, and can I drive right now?",
+    does: ["Sees their case and letters in one place", "Hears when it moves, before they think to ask", "Sees plainly whether they can drive today"],
+    chans: ["Customer account", "Text and email", "Secure messages", "Letters"],
+    today: "<span class=\"fig\">~56%</span> of contacts are people chasing progress. Around <span class=\"fig\">296,000</span> letters a year only say \"we've written to your doctor\".",
+    better: "Updates built from the letters we already send. Quiet periods are said out loud, with how long this stage usually takes.",
+    measures: ["Progress-chasing calls", "Repeat calls"],
+    q: "\"Can I drive?\" has no owner on the capability map yet.",
+    link: { href: "../staying-informed/case-updates.html", text: "Case updates prototype" },
+    feelToday: 1, feelTarget: 3.6 },
+  { n: "04", name: "Provide what's needed", img: "cx-11",
+    quote: "Tell me exactly what you need and I'll send it.",
+    does: ["Gets one clear request, with a choice of how to reply", "Sends what they already have, or answers online or on paper", "Books an appointment if one is needed"],
+    chans: ["Secure messages", "GOV.UK forms", "Outbound calls", "Opticians and examiners"],
+    today: "<span class=\"fig\">50,000 to 55,000</span> letters a month to healthcare professionals, back in a median of <span class=\"fig\">~30 days</span>.",
+    better: "Evidence asked for only when it will change the decision. Clinicians reply online, and late evidence is chased by us, not the customer.",
+    measures: ["Evidence requests per case", "Days waiting on third parties"],
+    q: "Consent to share medical information: how it is asked online without changing what the paper form agrees to.",
+    feelToday: 1.5, feelTarget: 3.1 },
+  { n: "05", name: "Get help", img: "cx-15",
+    quote: "When I call, I want someone who knows my case.",
+    does: ["Calls or chats and is recognised", "Doesn't explain the case again", "Asks for a call back if nobody's free"],
+    chans: ["Phone", "Webchat", "Call back"],
+    today: "Calls mostly ask where the case is, and the person answering often can't say how long.",
+    better: "The call arrives with the case on screen, ideally at the team that owns it. Fewer calls, because 03 answered the question first.",
+    measures: ["Resolved first time", "Calls reaching the owning team"],
+    link: { href: "../ivr/newco-call-simulator.html", text: "Call simulator" },
+    feelToday: 1.5, feelTarget: 3.5 },
+  { n: "06", name: "Get a decision", img: "cx-17",
+    quote: "I need a clear decision, and the reasons.",
+    does: ["Receives the decision, on paper first", "Understands why, and what evidence was used", "Knows what happens next, including a review date"],
+    chans: ["Letter", "Customer account", "Text and email"],
+    today: "Simple cases wait in the same queue as complex ones, though <span class=\"fig\">86.5%</span> of online cases need no escalation or evidence.",
+    better: "A decision within a day where we can, a clear next step where we can't. Refused or revoked comes with reasons and a route.",
+    measures: ["Average days to decision", "Decision quality"],
+    q: "Decision language on first notifications may need policy sign-off: DVLA may not call it a decision.",
+    feelToday: 2.4, feelTarget: 3.6, low: true },
+  { n: "07", name: "Challenge", img: "cx-21",
+    quote: "I think the decision is wrong.",
+    does: ["Asks DVLA to look again", "Sends further evidence", "Appeals to a court if needed"],
+    chans: ["DVLA", "Magistrates' or sheriff court"],
+    today: "Heart, neurological and cognitive cases are decided without a written standard, so reasons are hard to give or test.",
+    better: "Decisions made against clear standards, so a challenge has something to argue with, and a simple way to ask.",
+    measures: ["Challenges and appeals", "Appeals won"],
+    q: "Is a challenged decision a closed case reopened, or a decided case with an action outstanding?",
+    feelToday: 1, feelTarget: 2.6 },
+  { n: "08", name: "Renew", img: "cx-22", tbc: true,
+    quote: "Remind me in time, and don't make me start again.",
+    does: ["Gets a reminder in time to renew without a gap", "Confirms nothing has changed, where policy allows", "Sends new evidence only when the route needs it"],
+    chans: ["Text and email", "DMSP", "Post", "With an agent"],
+    today: "Short licences bring the same people back within three years, and each renewal re-runs the same casework.",
+    better: "Effort in proportion to risk, starting from what we already know.",
+    measures: ["Effort per renewal", "Renewals without a gap"],
+    feelToday: 2, feelTarget: 4 },
+  { n: "09", name: "Tell us about a change", img: "cx-24", tbc: true,
+    quote: "My health has changed and I need to tell you.",
+    does: ["Reports a new condition or a change", "Adds to what we know, not a new start", "Pauses and resumes driving where policy allows"],
+    chans: ["DMSP", "Phone and webchat"],
+    today: "A new condition starts a new notification, as if we'd never met.",
+    better: "A change re-triggers the right level of review, and goes back into 03 to 06.",
+    measures: ["Changes reported before review"],
+    feelToday: 2, feelTarget: 3.5 }
+];
+
+const ROWS = [
+  ["stage", "Stage"], ["pic", ""], ["quote", "I'm thinking"], ["does", "What I do"], ["chans", "Where"],
+  ["curve", "How it feels"], ["today", "Today"], ["better", "What's different"], ["measures", "How we'll know"], ["q", "Still open"]
+];
+
+function cell(key, s) {
+  switch (key) {
+    case "stage": return `<div class="stage${s.tbc ? " tbc" : ""}"><div class="num">${s.n}</div><h2>${s.name}</h2>${s.tbc ? '<span class="tag">Scope tbc</span>' : ""}</div>`;
+    case "pic": return `<div class="pic" style="padding:0"><img src="illustrations/v2/${s.img}.webp" alt="" width="250" height="200" loading="lazy"></div>`;
+    case "quote": return `<div class="quote">“${s.quote}”</div>`;
+    case "does": return `<div><ul class="does">${s.does.map(d => `<li>${d}</li>`).join("")}</ul></div>`;
+    case "chans": return `<div><ul class="chans">${s.chans.map(c => `<li>${c}</li>`).join("")}</ul></div>`;
+    case "today": return `<div class="today">${s.today}</div>`;
+    case "better": return `<div><p class="better">${s.better}</p>${s.link ? `<p style="font-size:14px;margin-top:8px"><a href="${s.link.href}">${s.link.text}<span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"> for ${s.name}</span></a></p>` : ""}</div>`;
+    case "measures": return `<div><ul class="measures">${s.measures.map(m => `<li>${m}</li>`).join("")}</ul></div>`;
+    case "q": return `<div>${s.q ? `<p class="q"><strong>Open question</strong>${s.q}</p>` : ""}</div>`;
+  }
+}
+
+function curveSvg() {
+  const col = 250, h = 170, top = 22, bottom = 30;
+  const w = col * STAGES.length;
+  const y = v => top + (5 - v) / 4 * (h - top - bottom);
+  const x = i => col * i + col / 2;
+  const path = key => STAGES.map((s, i) => `${i ? "L" : "M"}${x(i)},${y(s[key])}`).join(" ");
+  let g = "";
+  [5, 3, 1].forEach(v => { g += `<line x1="0" x2="${w}" y1="${y(v)}" y2="${y(v)}" stroke="#e5e6e7"/>`; });
+  g += `<text x="8" y="${y(5) - 6}" font-size="12" fill="#505a5f">Confident</text>`;
+  g += `<text x="8" y="${y(1) + 16}" font-size="12" fill="#505a5f">Anxious, chasing</text>`;
+  g += `<path d="${path("feelToday")}" fill="none" stroke="#505a5f" stroke-width="3" stroke-dasharray="7 6"/>`;
+  g += `<path d="${path("feelTarget")}" fill="none" stroke="#00703c" stroke-width="4"/>`;
+  STAGES.forEach((s, i) => {
+    g += `<circle cx="${x(i)}" cy="${y(s.feelToday)}" r="5" fill="#fff" stroke="#505a5f" stroke-width="2"/>`;
+    g += `<circle cx="${x(i)}" cy="${y(s.feelTarget)}" r="7" fill="#00703c"/>`;
+    if (s.low) {
+      g += `<line x1="${x(i)}" x2="${x(i)}" y1="${y(s.feelTarget) + 9}" y2="${y(1.4)}" stroke="#00703c" stroke-width="2" stroke-dasharray="2 3"/>`;
+      g += `<text x="${x(i) + 8}" y="${y(1.4) + 4}" font-size="12" fill="#0b0c0c">If refused or revoked</text>`;
+    }
+  });
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="How it feels at each stage. Today the line sits low throughout, lowest while waiting and when challenging. In the target state it rises at every stage, staying lowest at challenge and for a refused or revoked decision.">${g}</svg>`;
+}
+
+function render() {
+  let html = `<div class="lab"></div>`;
+  PHASES.forEach(p => { html += `<div class="phase ${p.cls}" style="grid-column: span ${p.span}">${p.name}<span class="sub">${p.sub}</span></div>`; });
+  ROWS.forEach(([key, label]) => {
+    html += `<div class="lab">${label}</div>`;
+    html += key === "curve" ? `<div class="curve">${curveSvg()}</div>` : STAGES.map(s => cell(key, s)).join("");
+  });
+  document.getElementById("map").innerHTML = html;
+}
+render();
+</script>
+</body>
+</html>
