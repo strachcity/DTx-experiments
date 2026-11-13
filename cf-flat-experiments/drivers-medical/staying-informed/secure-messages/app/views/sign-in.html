@@ -1,0 +1,27 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set pageName = "Sign in with GOV.UK One Login (simulated)" %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back", href: "/start" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Simulated</span>
+    <h1 class="govuk-heading-l">Sign in with GOV.UK One Login</h1>
+
+    {{ govukInsetText({
+      text: "This stands in for GOV.UK One Login. It asks for no email address, password or code. Never enter real details into a prototype."
+    }) }}
+
+    {{ designNote("One Login is simulated with no credential fields. The prototype is about what happens either side of sign-in, not sign-in itself, and a fake password box would invite someone to type a real one.") }}
+
+    <form method="post" novalidate>
+      {{ govukButton({ text: "Continue as example customer" }) }}
+    </form>
+  </div>
+</div>
+{% endblock %}

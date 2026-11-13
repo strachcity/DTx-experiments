@@ -1,0 +1,19 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set pageName = "Download this letter" %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back to the letter", href: "/messages/" + message.id }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">This prototype does not make PDFs</h1>
+    <p class="govuk-body">In the real service, this link would download a PDF of “{{ message.title }}”, the same as the paper copy we posted on {{ message.paperPostedDate | longDate }}.</p>
+
+    {{ designNote("Downloading is behind sign-in too. A PDF is the most portable form of the letter, so it needs the same gate as reading it.") }}
+  </div>
+</div>
+{% endblock %}

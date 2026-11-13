@@ -1,0 +1,46 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set question = "How do you check your blood glucose before you drive?" %}
+{% set pageName = ("Error: " if errors.glucoseChecks) + question %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back", href: backLink }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errors.glucoseChecks %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: errors.glucoseChecks, href: "#glucose-checks" }] }) }}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {{ govukRadios({
+        idPrefix: "glucose-checks",
+        name: "reply[glucoseChecks]",
+        fieldset: {
+          legend: {
+            text: question,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        hint: { text: "If you use more than one way, choose the one you use most often." },
+        errorMessage: { text: errors.glucoseChecks } if errors.glucoseChecks,
+        value: data.reply.glucoseChecks,
+        items: [
+          { value: "meter", text: "With a finger-prick blood glucose meter" },
+          { value: "sensor", text: "With a sensor (a continuous or flash glucose monitor)" },
+          { divider: "or" },
+          { value: "none", text: "I do not check before I drive" }
+        ]
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    {{ designNote("“I do not check” is an answer, not an error. Leaving it out would force a false answer from exactly the person DVLA most needs a true one from.") }}
+  </div>
+</div>
+{% endblock %}

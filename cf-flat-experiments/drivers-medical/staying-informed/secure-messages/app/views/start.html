@@ -1,0 +1,44 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set pageName = "You have a secure message from DVLA" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">You have a secure message from DVLA</h1>
+
+    <p class="govuk-body">We use secure messages for letters about your health and your driving licence, so that only you can read them.</p>
+    <p class="govuk-body">You need to sign in to read your message, download a copy or reply. This is how we know it is you.</p>
+    <p class="govuk-body">We have also posted you a paper copy.</p>
+
+    {{ govukButton({
+      text: "Sign in with GOV.UK One Login",
+      href: "/sign-in/begin",
+      isStartButton: true
+    }) }}
+
+    {{ designNote("Sign-in is the gate for reading, downloading and replying. The page explains why before it asks, because a gate with no reason on it looks like friction or a scam.") }}
+
+    <h2 class="govuk-heading-m">If you have a letter from us with a code on it</h2>
+    <p class="govuk-body">You can use the code to reply to that letter without signing in. You will not be able to see your other messages.</p>
+    <p class="govuk-body">
+      <a class="govuk-link" href="/code">Use the code from your letter</a>
+    </p>
+
+    {{ designNote("The code route is a link, not a second green button. It exists for the customer who has only the paper, or whose sign-in fails, and it reaches the same reply on the same record.") }}
+
+    <h2 class="govuk-heading-m">Is this message genuine?</h2>
+    <p class="govuk-body">Our texts and emails about secure messages:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>never say what the message is about</li>
+      <li>never ask for bank details or payment</li>
+      <li>always link to a page on www.gov.uk</li>
+    </ul>
+    <p class="govuk-body">If you are not sure a text or email is from us, do not use the link in it. Go to GOV.UK and search for “DVLA secure messages” instead.</p>
+
+    {{ designNote("Every channel that pushes a link trains people to follow links. Saying plainly what DVLA never does is the counterweight, and it sits on the page the link leads to, where a doubtful person lands.") }}
+    {{ openQuestion("Where it lives", "Does this sit in the Dynamics customer account, or in the GOV.UK App Mailbox? The start page, the link in the text and the sign-in all change with the answer.") }}
+  </div>
+</div>
+{% endblock %}

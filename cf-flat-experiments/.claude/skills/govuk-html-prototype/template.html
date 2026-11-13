@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Example service (prototype)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+/* --- Palette. Values taken from govuk-frontend 6.0.0 (the GOV.UK
+       rebrand), read from its compiled custom properties rather than
+       guessed. GDS Transport is licence-restricted off gov.uk, so Inter
+       stands in for it, as in every prototype here. --- */
+:root{--black:#0b0c0c;--white:#fff;--blue:#1d70b8;--link:#1a65a6;--link-hover:#0f385c;--dark-blue:#0f385c;--green:#0f7a52;--green-hover:#0b5c3e;--green-shade:#083d29;--yellow:#fd0;--light-yellow:#fff7bf;--light-grey:#f4f8fb;--mid-grey:#cecece;--dark-grey:#484949;--red:#ca3535;--red-shade:#651b1b;--purple:#54319f;--focus:#fd0;--focus-text:#0b0c0c}
+*,*::before,*::after{box-sizing:border-box}
+body{font-family:"GDS Transport","Inter",Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--black);background:var(--white);margin:0;padding:0;line-height:1.5;font-size:19px}
+
+/* --- Header --- */
+.govuk-header{background:var(--blue);color:var(--white);padding:10px 0}
+.govuk-header__container{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:10px}
+.govuk-header__homepage-link{display:inline-flex;align-items:center;color:var(--white);text-decoration:none}
+.govuk-header__homepage-link:hover{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:3px}
+.govuk-header__logotype{height:30px;width:162px;fill:currentcolor}
+.govuk-header__signout{margin-left:auto;font-size:19px;font-weight:700;color:var(--white);text-decoration:none;cursor:pointer}
+.govuk-header__signout:hover{text-decoration:underline}
+.service-nav{border-bottom:1px solid var(--mid-grey);background:var(--white);padding:12px 0}
+.service-nav__wrapper{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.service-nav__name{font-weight:700;font-size:19px;color:var(--black);text-decoration:none}
+.govuk-phase-banner{border-bottom:1px solid var(--mid-grey);padding:10px 0}
+.govuk-phase-banner__wrapper{max-width:960px;margin:0 auto;padding:0 15px;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.govuk-phase-banner__tag{display:inline-block;background:var(--blue);color:var(--white);font-weight:700;font-size:14px;padding:2px 8px;text-transform:uppercase;letter-spacing:1px}
+.phase-actions{margin-left:auto;display:flex;gap:15px;align-items:center}
+.phase-actions a{font-size:16px;cursor:pointer}
+.prototype-warning{background:var(--light-yellow);border:4px solid var(--yellow);padding:15px 20px;margin-bottom:30px;font-size:16px;line-height:1.5}
+.prototype-warning strong{display:block;margin-bottom:4px}
+.govuk-width-container{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-main-wrapper{padding:30px 0 60px}
+.govuk-skip-link{position:absolute;left:-9999px;top:0;background:var(--yellow);color:var(--black);padding:10px 15px;font-weight:700;z-index:10}
+.govuk-skip-link:focus{left:0}
+
+/* --- Typography --- */
+h1,.govuk-heading-xl{font-size:48px;line-height:1.04;font-weight:700;margin:0 0 30px}
+h2,.govuk-heading-l{font-size:36px;line-height:1.11;font-weight:700;margin:30px 0 20px}
+h3,.govuk-heading-m{font-size:24px;line-height:1.25;font-weight:700;margin:20px 0 15px}
+h4,.govuk-heading-s{font-size:19px;line-height:1.3;font-weight:700;margin:15px 0 10px}
+p,.govuk-body{font-size:19px;margin:0 0 20px}
+.govuk-body-s{font-size:16px}
+.govuk-body-l{font-size:24px;line-height:1.25;margin:0 0 20px}
+.govuk-caption{font-size:24px;color:var(--dark-grey);display:block;margin-bottom:5px}
+a{color:var(--link)}a:hover{color:var(--link-hover)}
+a:visited{color:var(--purple)}
+a:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--focus-text);text-decoration:none}
+.govuk-list{margin:0 0 20px;padding:0;list-style:none}
+.govuk-list>li{margin-bottom:5px}
+.govuk-list--bullet{list-style:disc;padding-left:20px}
+.govuk-list--number{list-style:decimal;padding-left:20px}
+.govuk-visually-hidden{position:absolute!important;width:1px;height:1px;margin:0;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);border:0;white-space:nowrap}
+hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margin:30px 0}
+.govuk-back-link{display:inline-block;margin-bottom:15px;font-size:16px;color:var(--black);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.govuk-back-link::before{content:"\25c2 "}
+
+/* --- Buttons --- */
+.govuk-button{display:inline-block;padding:8px 20px;font-size:19px;font-weight:700;color:var(--white);background:var(--green);border:none;border-radius:0;border-bottom:2px solid var(--green-shade);cursor:pointer;text-decoration:none;line-height:1.2;-webkit-appearance:none;font-family:inherit}
+.govuk-button:hover{background:var(--green-hover);color:var(--white)}
+.govuk-button:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-button--start{font-size:24px;padding:12px 30px}
+.govuk-button--start::after{content:" \2192"}
+.govuk-button--secondary{background:#f3f3f3;color:var(--black);border-bottom-color:#858686}
+.govuk-button--secondary:hover{background:#dbdad9;color:var(--black)}
+.govuk-button--warning{background:var(--red);border-bottom-color:var(--red-shade)}
+.govuk-button--warning:hover{background:#a82b2b}
+.govuk-button-group{display:flex;gap:15px;flex-wrap:wrap;align-items:center;margin-top:20px}
+.button-row{display:flex;gap:15px;flex-wrap:wrap;margin-top:20px}
+
+/* --- Forms --- */
+.govuk-form-group{margin-bottom:30px}
+.govuk-fieldset__legend{font-weight:700;font-size:19px;margin-bottom:10px;display:block}
+.govuk-fieldset__legend--l{font-size:36px;line-height:1.11;margin-bottom:20px}
+.govuk-fieldset__legend--xl{font-size:48px;line-height:1.04;margin-bottom:25px}
+.govuk-fieldset__heading{font-size:inherit;line-height:inherit;font-weight:inherit;margin:0}
+.govuk-radios__item,.govuk-checkboxes__item{display:flex;align-items:flex-start;margin-bottom:15px;gap:12px}
+.govuk-radios__input,.govuk-checkboxes__input{width:44px;height:44px;min-width:44px;margin:0;cursor:pointer;accent-color:var(--black)}
+.govuk-radios__label,.govuk-checkboxes__label{font-size:19px;padding-top:10px;cursor:pointer}
+.govuk-radios__hint,.govuk-checkboxes__hint{font-size:16px;color:var(--dark-grey);margin-top:2px;display:block}
+.govuk-radios__conditional{margin:0 0 15px 22px;padding:15px 0 0 20px;border-left:4px solid var(--mid-grey)}
+.govuk-radios__divider,.govuk-checkboxes__divider{font-size:19px;margin:0 0 15px;color:var(--black)}
+.govuk-label{display:block;font-weight:700;margin-bottom:5px}
+.govuk-hint{font-size:16px;color:var(--dark-grey);margin-bottom:10px;display:block}
+.govuk-input{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;max-width:400px}
+.govuk-input:focus,.govuk-select:focus,.govuk-textarea:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-input--width-2{max-width:65px}.govuk-input--width-4{max-width:100px}.govuk-input--width-10{max-width:250px}.govuk-input--width-20{max-width:400px}
+.govuk-textarea{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;min-height:120px}
+.govuk-select{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);max-width:400px;background:var(--white)}
+.govuk-character-count__message{font-size:16px;color:var(--dark-grey);margin-top:5px}
+.govuk-character-count__message--over{color:var(--red);font-weight:700}
+.govuk-file-upload{font-family:inherit;font-size:19px;padding:5px 0;max-width:400px}
+.govuk-date-input{display:flex;gap:20px;flex-wrap:wrap}
+.govuk-date-input__item{flex:0 0 auto}
+.govuk-date-input__label{display:block;font-weight:700;margin-bottom:5px;font-size:19px}
+
+/* --- Summary list / table / task list --- */
+.govuk-summary-list{border-top:1px solid var(--mid-grey);margin:0 0 30px}
+.govuk-summary-list__row{display:flex;border-bottom:1px solid var(--mid-grey);padding:12px 0;gap:15px}
+.govuk-summary-list__key{flex:0 0 32%;font-weight:700}
+.govuk-summary-list__value{flex:1}
+.govuk-summary-list__actions{flex:0 0 80px;text-align:right}
+@media(max-width:640px){.govuk-summary-list__row{flex-direction:column;gap:4px}.govuk-summary-list__key{flex:auto}.govuk-summary-list__actions{text-align:left}}
+.govuk-table{width:100%;border-collapse:collapse;margin-bottom:30px}
+.govuk-table th{text-align:left;font-weight:700;padding:10px 15px 10px 0;border-bottom:2px solid var(--black)}
+.govuk-table td{padding:10px 15px 10px 0;border-bottom:1px solid var(--mid-grey);vertical-align:top}
+.govuk-task-list{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--mid-grey)}
+.govuk-task-list__item{display:flex;gap:15px;align-items:flex-start;padding:15px 0;border-bottom:1px solid var(--mid-grey)}
+.govuk-task-list__name-and-hint{flex:1}
+.govuk-task-list__hint{font-size:16px;color:var(--dark-grey);margin-top:2px}
+.govuk-task-list__status{flex:0 0 auto;text-align:right;padding-top:2px}
+
+/* --- Tags / panels / content --- */
+.govuk-tag{display:inline-block;font-size:19px;line-height:1.32;font-weight:700;padding:2px 8px 3px;border-radius:1px;max-width:160px;overflow-wrap:break-word;color:#0f385c;background:#d2e2f1}
+.govuk-tag--blue{color:#0f385c;background:#d2e2f1}
+.govuk-tag--green{color:#083d29;background:#cfe4dc}
+.govuk-tag--purple{color:#2a1950;background:#ddd6ec}
+.govuk-tag--red{color:#651b1b;background:#f4d7d7}
+.govuk-tag--orange{color:#7a3c1c;background:#fde4d7}
+.govuk-tag--teal{color:#0b4144;background:#d0e6e7}
+.govuk-tag--magenta{color:#651b3e;background:#f4d7e5}
+.govuk-tag--yellow{color:#7a3c1c;background:#ffee80}
+.govuk-tag--grey{color:#0b0c0c;background:#cecece}
+.govuk-inset-text{border-left:10px solid var(--mid-grey);padding:15px 20px;margin:0 0 30px}
+.govuk-panel{background:var(--green);color:var(--white);padding:35px;text-align:center;margin-bottom:30px}
+.govuk-panel__title{font-size:48px;font-weight:700;margin:0 0 15px}
+.govuk-panel__body{font-size:36px}
+.govuk-warning-text{display:flex;gap:15px;align-items:flex-start;margin-bottom:30px}
+.govuk-warning-text__icon{flex:0 0 35px;height:35px;background:var(--black);color:var(--white);border-radius:50%;text-align:center;font-weight:700;line-height:35px;font-size:24px}
+.govuk-warning-text__text{font-weight:700}
+.govuk-details{margin-bottom:30px;display:block}
+.govuk-details__summary{color:var(--link);cursor:pointer;text-decoration:underline;font-size:19px;margin-bottom:5px}
+.govuk-details__summary:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--focus-text);text-decoration:none}
+.govuk-details__text{border-left:5px solid var(--mid-grey);padding:15px 20px;font-size:19px}
+.govuk-details__text p{margin:0 0 10px}
+.govuk-details__text p:last-child{margin:0}
+.govuk-notification-banner{border:5px solid var(--blue);margin-bottom:30px}
+.govuk-notification-banner__header{background:var(--blue);color:var(--white);padding:8px 15px;font-size:19px;font-weight:700}
+.govuk-notification-banner__title{margin:0;font-size:19px}
+.govuk-notification-banner__content{padding:20px 15px;font-size:19px}
+.govuk-notification-banner__heading{font-size:24px;font-weight:700;margin:0 0 10px}
+.govuk-notification-banner__content p{margin:0 0 10px}
+.govuk-notification-banner__content p:last-child{margin:0}
+.govuk-notification-banner--success{border-color:var(--green)}
+.govuk-notification-banner--success .govuk-notification-banner__header{background:var(--green)}
+
+/* --- Errors --- */
+.govuk-error-summary{border:5px solid var(--red);padding:20px 25px;margin-bottom:30px}
+.govuk-error-summary h2{margin:0 0 10px;font-size:24px}
+.govuk-error-summary ul{margin:0;padding-left:20px}
+.govuk-error-summary li{margin-bottom:6px}
+.govuk-error-summary a{color:var(--red);font-weight:700}
+.govuk-form-group--error{border-left:5px solid var(--red);padding-left:15px}
+.govuk-error-message{color:var(--red);font-weight:700;display:block;margin-bottom:10px}
+.govuk-input--error,.govuk-select--error,.govuk-textarea--error{border-color:var(--red)}
+
+/* --- Grid --- */
+.govuk-grid-row{display:flex;flex-wrap:wrap;margin:0 -15px}
+.govuk-grid-column-two-thirds{flex:0 0 66.66%;max-width:66.66%;padding:0 15px}
+.govuk-grid-column-one-third{flex:0 0 33.33%;max-width:33.33%;padding:0 15px}
+.govuk-grid-column-full{flex:0 0 100%;max-width:100%;padding:0 15px}
+@media(max-width:640px){.govuk-grid-column-two-thirds,.govuk-grid-column-one-third{flex:0 0 100%;max-width:100%}}
+
+/* --- Footer --- */
+.govuk-footer{background:var(--light-grey);border-top:10px solid var(--blue);padding:30px 0;margin-top:60px}
+.govuk-footer__wrapper{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-footer__meta-item{font-size:16px;color:var(--dark-grey)}
+
+/* --- Design notes. Prototype annotation, never service UI. --- */
+.design-note{border:2px dashed var(--purple);background:#f7f4fc;padding:15px 20px;margin:0 0 25px;font-size:16px}
+.design-note strong{display:block;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-size:14px;margin-bottom:6px}
+.design-note p{font-size:16px;margin:0 0 8px}
+.design-note p:last-child{margin:0}
+
+/* --- Reference-file furniture. Not part of the design system: these
+       classes exist only to lay this catalogue out, and must not be
+       copied into a service prototype. --- */
+.ref-index{list-style:none;margin:0 0 30px;padding:0}
+.ref-index li{margin-bottom:18px}
+.ref-index a{font-size:24px;font-weight:700}
+.ref-index p{margin:2px 0 0;font-size:16px;color:var(--dark-grey);max-width:44em}
+.ref-block{border-top:2px solid var(--black);padding-top:20px;margin-bottom:45px}
+.ref-block__title{margin:0 0 5px}
+.ref-demo{background:var(--light-grey);border:1px solid var(--mid-grey);padding:25px 25px 10px;margin-bottom:15px}
+.ref-demo--plain{background:var(--white)}
+.ref-code{background:#0b0c0c;color:#e8e8e8;padding:15px 20px;margin:0 0 25px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.ref-swatches{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:25px;padding:0;list-style:none}
+.ref-swatch{flex:0 0 auto;width:150px;font-size:14px}
+.ref-swatch__chip{height:48px;border:1px solid var(--mid-grey)}
+.ref-swatch__name{display:block;font-weight:700;margin-top:4px}
+.ref-swatch__hex{display:block;color:var(--dark-grey);font-family:ui-monospace,Menlo,Consolas,monospace}
+</style>
+</head>
+<body>
+<a class="govuk-skip-link" href="#main">Skip to main content</a>
+<div id="app"></div>
+<footer class="govuk-footer" role="contentinfo">
+  <div class="govuk-footer__wrapper">
+    <p class="govuk-footer__meta-item">Fictional prototype for workshop use only. Not a real GOV.UK service. All personal details shown are invented.</p>
+  </div>
+</footer>
+
+<script>
+/* ================================================================
+   STARTER TEMPLATE: single-file GOV.UK prototype.
+   Copy this file, rename it for what it shows, and replace the
+   example journey. The <style> block is copied from components.html
+   at the repo root; recopy it from there rather than editing it here.
+   ================================================================ */
+
+/* === FICTIONAL DATA. Invented, belongs to nobody. === */
+const PERSON = { name:'Ada Hollowell', email:'ada.hollowell@example.com' };
+const SERVICE_NAME = 'Example service';
+
+const LOGO = '<svg focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 324 60" height="30" width="162" fill="currentcolor" class="govuk-header__logotype" aria-label="GOV.UK" ><title>GOV.UK</title><g><circle cx="20" cy="17.6" r="3.7"/><circle cx="10.2" cy="23.5" r="3.7"/><circle cx="3.7" cy="33.2" r="3.7"/><circle cx="31.7" cy="30.6" r="3.7"/><circle cx="43.3" cy="17.6" r="3.7"/><circle cx="53.2" cy="23.5" r="3.7"/><circle cx="59.7" cy="33.2" r="3.7"/><circle cx="31.7" cy="30.6" r="3.7"/><path d="M33.1,9.8c.2-.1.3-.3.5-.5l4.6,2.4v-6.8l-4.6,1.5c-.1-.2-.3-.3-.5-.5l1.9-5.9h-6.7l1.9,5.9c-.2.1-.3.3-.5.5l-4.6-1.5v6.8l4.6-2.4c.1.2.3.3.5.5l-2.6,8c-.9,2.8,1.2,5.7,4.1,5.7h0c3,0,5.1-2.9,4.1-5.7l-2.6-8ZM37,37.9s-3.4,3.8-4.1,6.1c2.2,0,4.2-.5,6.4-2.8l-.7,8.5c-2-2.8-4.4-4.1-5.7-3.8.1,3.1.5,6.7,5.8,7.2,3.7.3,6.7-1.5,7-3.8.4-2.6-2-4.3-3.7-1.6-1.4-4.5,2.4-6.1,4.9-3.2-1.9-4.5-1.8-7.7,2.4-10.9,3,4,2.6,7.3-1.2,11.1,2.4-1.3,6.2,0,4,4.6-1.2-2.8-3.7-2.2-4.2.2-.3,1.7.7,3.7,3,4.2,1.9.3,4.7-.9,7-5.9-1.3,0-2.4.7-3.9,1.7l2.4-8c.6,2.3,1.4,3.7,2.2,4.5.6-1.6.5-2.8,0-5.3l5,1.8c-2.6,3.6-5.2,8.7-7.3,17.5-7.4-1.1-15.7-1.7-24.5-1.7h0c-8.8,0-17.1.6-24.5,1.7-2.1-8.9-4.7-13.9-7.3-17.5l5-1.8c-.5,2.5-.6,3.7,0,5.3.8-.8,1.6-2.3,2.2-4.5l2.4,8c-1.5-1-2.6-1.7-3.9-1.7,2.3,5,5.2,6.2,7,5.9,2.3-.4,3.3-2.4,3-4.2-.5-2.4-3-3.1-4.2-.2-2.2-4.6,1.6-6,4-4.6-3.7-3.7-4.2-7.1-1.2-11.1,4.2,3.2,4.3,6.4,2.4,10.9,2.5-2.8,6.3-1.3,4.9,3.2-1.8-2.7-4.1-1-3.7,1.6.3,2.3,3.3,4.1,7,3.8,5.4-.5,5.7-4.2,5.8-7.2-1.3-.2-3.7,1-5.7,3.8l-.7-8.5c2.2,2.3,4.2,2.7,6.4,2.8-.7-2.3-4.1-6.1-4.1-6.1h10.6,0Z"/></g><circle class="govuk-logo-dot" cx="226" cy="36" r="7.3"/><path d="M93.94 41.25c.4 1.81 1.2 3.21 2.21 4.62 1 1.4 2.21 2.41 3.61 3.21s3.21 1.2 5.22 1.2 3.61-.4 4.82-1c1.4-.6 2.41-1.4 3.21-2.41.8-1 1.4-2.01 1.61-3.01s.4-2.01.4-3.01v.14h-10.86v-7.02h20.07v24.08h-8.03v-5.56c-.6.8-1.38 1.61-2.19 2.41-.8.8-1.81 1.2-2.81 1.81-1 .4-2.21.8-3.41 1.2s-2.41.4-3.81.4a18.56 18.56 0 0 1-14.65-6.63c-1.6-2.01-3.01-4.41-3.81-7.02s-1.4-5.62-1.4-8.83.4-6.02 1.4-8.83a20.45 20.45 0 0 1 19.46-13.65c3.21 0 4.01.2 5.82.8 1.81.4 3.61 1.2 5.02 2.01 1.61.8 2.81 2.01 4.01 3.21s2.21 2.61 2.81 4.21l-7.63 4.41c-.4-1-1-1.81-1.61-2.61-.6-.8-1.4-1.4-2.21-2.01-.8-.6-1.81-1-2.81-1.4-1-.4-2.21-.4-3.61-.4-2.01 0-3.81.4-5.22 1.2-1.4.8-2.61 1.81-3.61 3.21s-1.61 2.81-2.21 4.62c-.4 1.81-.6 3.71-.6 5.42s.8 5.22.8 5.22Zm57.8-27.9c3.21 0 6.22.6 8.63 1.81 2.41 1.2 4.82 2.81 6.62 4.82S170.2 24.39 171 27s1.4 5.62 1.4 8.83-.4 6.02-1.4 8.83-2.41 5.02-4.01 7.02-4.01 3.61-6.62 4.82-5.42 1.81-8.63 1.81-6.22-.6-8.63-1.81-4.82-2.81-6.42-4.82-3.21-4.41-4.01-7.02-1.4-5.62-1.4-8.83.4-6.02 1.4-8.83 2.41-5.02 4.01-7.02 4.01-3.61 6.42-4.82 5.42-1.81 8.63-1.81Zm0 36.73c1.81 0 3.61-.4 5.02-1s2.61-1.81 3.61-3.01 1.81-2.81 2.21-4.41c.4-1.81.8-3.61.8-5.62 0-2.21-.2-4.21-.8-6.02s-1.2-3.21-2.21-4.62c-1-1.2-2.21-2.21-3.61-3.01s-3.21-1-5.02-1-3.61.4-5.02 1c-1.4.8-2.61 1.81-3.61 3.01s-1.81 2.81-2.21 4.62c-.4 1.81-.8 3.61-.8 5.62 0 2.41.2 4.21.8 6.02.4 1.81 1.2 3.21 2.21 4.41s2.21 2.21 3.61 3.01c1.4.8 3.21 1 5.02 1Zm36.32 7.96-12.24-44.15h9.83l8.43 32.77h.4l8.23-32.77h9.83L200.3 58.04h-12.24Zm74.14-7.96c2.18 0 3.51-.6 3.51-.6 1.2-.6 2.01-1 2.81-1.81s1.4-1.81 1.81-2.81a13 13 0 0 0 .8-4.01V13.9h8.63v28.15c0 2.41-.4 4.62-1.4 6.62-.8 2.01-2.21 3.61-3.61 5.02s-3.41 2.41-5.62 3.21-4.62 1.2-7.02 1.2-5.02-.4-7.02-1.2c-2.21-.8-4.01-1.81-5.62-3.21s-2.81-3.01-3.61-5.02-1.4-4.21-1.4-6.62V13.9h8.63v26.95c0 1.61.2 3.01.8 4.01.4 1.2 1.2 2.21 2.01 2.81.8.8 1.81 1.4 2.81 1.81 0 0 1.34.6 3.51.6Zm34.22-36.18v18.92l15.65-18.92h10.82l-15.03 17.32 16.03 26.83h-10.21l-11.44-20.21-5.62 6.22v13.99h-8.83V13.9"/></svg>';
+
+/* One entry per screen. The All screens index is built from this. */
+const SCREENS = {
+  'start':        {title:'Start page'},
+  'question':     {title:'How would you like us to contact you?'},
+  'check':        {title:'Check your answers'},
+  'confirmation': {title:'Request sent'}
+};
+
+let state;
+function resetState(){
+  state = { screen:'all-screens', showNotes:false, answers:{ contact:'' } };
+}
+resetState();
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function go(screen){ location.hash = '#/'+screen; }
+function note(title, body){
+  if(!state.showNotes) return '';
+  return '<div class="design-note"><strong>Design note: '+esc(title)+'</strong>'+body+'</div>';
+}
+function toggleNotes(){ state.showNotes = !state.showNotes; route(); }
+function warn(){
+  return '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>'
+    +'This is a fictional prototype. It is not a real GOV.UK service and all personal details shown are invented.</div>';
+}
+
+/* ---------------------------------------------------------------- */
+
+function renderStart(){
+  return '<h1 class="govuk-heading-xl">'+esc(SERVICE_NAME)+'</h1>'
+    +'<p class="govuk-body">Use this service to tell us how you want to be contacted.</p>'
+    + note('Why this page exists','<p>Replace with the argument this screen is making.</p>')
+    +'<a href="#/question" class="govuk-button govuk-button--start" role="button">Start now</a>';
+}
+
+function renderQuestion(){
+  const opt = (v, label) => '<div class="govuk-radios__item"><input class="govuk-radios__input" id="contact-'+v+'" name="contact" type="radio" value="'+v+'"'+(state.answers.contact===v?' checked':'')+'><label class="govuk-label govuk-radios__label" for="contact-'+v+'">'+label+'</label></div>';
+  return '<form onsubmit="saveQuestion(event)" novalidate><div class="govuk-form-group"><fieldset class="govuk-fieldset">'
+    +'<legend class="govuk-fieldset__legend govuk-fieldset__legend--l"><h1 class="govuk-fieldset__heading">How would you like us to contact you?</h1></legend>'
+    +'<div class="govuk-radios">'+opt('email','Email')+opt('post','Post')+'</div>'
+    +'</fieldset></div><button type="submit" class="govuk-button">Continue</button></form>';
+}
+function saveQuestion(e){
+  e.preventDefault();
+  const picked = document.querySelector('input[name="contact"]:checked');
+  state.answers.contact = picked ? picked.value : '';
+  go('check');
+}
+
+function renderCheck(){
+  const label = {email:'Email', post:'Post'}[state.answers.contact] || 'Not answered';
+  return '<h1 class="govuk-heading-l">Check your answers</h1>'
+    +'<dl class="govuk-summary-list"><div class="govuk-summary-list__row">'
+    +'<dt class="govuk-summary-list__key">Contact by</dt>'
+    +'<dd class="govuk-summary-list__value">'+esc(label)+'</dd>'
+    +'<dd class="govuk-summary-list__actions"><a class="govuk-link" href="#/question">Change<span class="govuk-visually-hidden"> how we contact you</span></a></dd>'
+    +'</div></dl>'
+    +'<button class="govuk-button" onclick="go(\'confirmation\')">Send request</button>';
+}
+
+function renderConfirmation(){
+  return '<div class="govuk-panel govuk-panel--confirmation"><h1 class="govuk-panel__title">Request sent</h1>'
+    +'<div class="govuk-panel__body">Your reference number<br><strong>EX-4821-9930</strong></div></div>'
+    +'<h2 class="govuk-heading-m">What happens next</h2>'
+    +'<p class="govuk-body">We will contact '+esc(PERSON.name)+' within 10 working days.</p>';
+}
+
+function renderAllScreens(){
+  let items = '';
+  Object.keys(SCREENS).forEach(k=>{ items += '<li><a href="#/'+k+'">'+esc(SCREENS[k].title)+'</a></li>'; });
+  return '<h1 class="govuk-heading-l">All screens</h1><ul class="ref-index">'+items+'</ul>'
+    +'<button class="govuk-button govuk-button--secondary" onclick="resetState();route()">Reset prototype</button>';
+}
+
+const RENDER = {
+  'all-screens': renderAllScreens,
+  'start': renderStart,
+  'question': renderQuestion,
+  'check': renderCheck,
+  'confirmation': renderConfirmation
+};
+
+function renderChrome(inner){
+  return '<header class="govuk-header" role="banner"><div class="govuk-header__container">'
+    +'<a href="#/start" class="govuk-header__homepage-link">'+LOGO+'</a></div></header>'
+    +'<div class="service-nav"><div class="service-nav__wrapper">'
+    +'<a class="service-nav__name" href="#/start">'+esc(SERVICE_NAME)+'</a></div></div>'
+    +'<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper">'
+    +'<span class="govuk-phase-banner__tag">Prototype</span><span>This is not a real service.</span>'
+    +'<span class="phase-actions"><a href="#" onclick="toggleNotes();return false;">'+(state.showNotes?'Hide':'Show')+' design notes</a>'
+    +'<a href="#/all-screens">All screens</a></span></div></div>'
+    +'<div class="govuk-width-container"><main class="govuk-main-wrapper" id="main">'+warn()
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'+inner+'</div></div></main></div>';
+}
+
+function route(){
+  const key = (location.hash || '#/all-screens').replace(/^#\/?/, '') || 'all-screens';
+  state.screen = RENDER[key] ? key : 'all-screens';
+  document.getElementById('app').innerHTML = renderChrome(RENDER[state.screen]());
+  document.title = (SCREENS[state.screen] ? SCREENS[state.screen].title : 'All screens') + ' – ' + SERVICE_NAME + ' (prototype)';
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', route);
+window.addEventListener('DOMContentLoaded', route);
+</script>
+</body>
+</html>

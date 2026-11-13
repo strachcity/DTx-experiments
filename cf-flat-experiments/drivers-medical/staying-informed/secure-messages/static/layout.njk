@@ -1,0 +1,13 @@
+{#
+  Static stand-in for govuk-prototype-kit/layouts/govuk-branded.njk.
+  The build prepends the GOV.UK Frontend macro imports to it, as the kit
+  does. The stylesheet and scripts are loaded once by the page shell, and
+  the footer has no "Manage your prototype" links because there is no
+  kit server behind it.
+#}
+
+{% extends "govuk/template.njk" %}
+
+{% block pageTitle %}
+  {% if pageName %}{{ pageName }} - {% endif %}{{ serviceName }} - GOV.UK
+{% endblock %}

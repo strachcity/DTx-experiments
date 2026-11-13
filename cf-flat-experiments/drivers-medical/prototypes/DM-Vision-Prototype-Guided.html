@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drivers Medical — Future state guided journeys</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+:root{--black:#0b0c0c;--white:#fff;--blue:#1d70b8;--dark-blue:#003078;--green:#00703c;--green-hover:#005a30;--yellow:#ffdd00;--light-yellow:#fff7bf;--light-grey:#f3f2f1;--mid-grey:#b1b4b6;--dark-grey:#505a5f;--red:#d4351c;--purple:#4c2c92;--focus:#ffdd00;--focus-text:#0b0c0c}
+*,*::before,*::after{box-sizing:border-box}
+body{font-family:"GDS Transport","Inter",Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--black);background:var(--white);margin:0;padding:0;line-height:1.5;font-size:19px}
+
+/* --- Header --- */
+.govuk-header{background:var(--blue);color:var(--white);padding:10px 0}
+.govuk-header__container{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:10px}
+.govuk-header__logotype-text{font-size:30px;font-weight:700;color:var(--white);text-decoration:none}
+.govuk-header__logotype-text:hover{text-decoration:underline}
+.govuk-header__signout{margin-left:auto;font-size:19px;font-weight:700;color:var(--white);text-decoration:none;cursor:pointer}
+.govuk-header__signout:hover{text-decoration:underline}
+.govuk-crown{width:36px;height:32px;vertical-align:middle;margin-right:4px}
+.service-nav{border-bottom:1px solid var(--mid-grey);background:var(--white);padding:12px 0}
+.service-nav__wrapper{max-width:960px;margin:0 auto;padding:0 15px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+.service-nav__name{font-weight:700;font-size:19px;color:var(--black);text-decoration:none}
+.service-nav__links{margin-left:auto;display:flex;gap:20px;align-items:center}
+.service-nav__link{font-size:19px;color:var(--blue);cursor:pointer}
+.service-nav__count{display:inline-block;background:var(--red);color:var(--white);font-size:14px;font-weight:700;border-radius:20px;padding:1px 8px;margin-left:6px}
+.govuk-phase-banner{border-bottom:1px solid var(--mid-grey);padding:10px 0}
+.govuk-phase-banner__wrapper{max-width:960px;margin:0 auto;padding:0 15px;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.govuk-phase-banner__tag{display:inline-block;background:var(--blue);color:var(--white);font-weight:700;font-size:14px;padding:2px 8px;text-transform:uppercase;letter-spacing:1px}
+.phase-actions{margin-left:auto;display:flex;gap:15px;align-items:center}
+.phase-actions a{font-size:16px;cursor:pointer}
+.prototype-warning{background:var(--light-yellow);border:4px solid var(--yellow);padding:15px 20px;margin-bottom:30px;font-size:16px;line-height:1.5}
+.prototype-warning strong{display:block;margin-bottom:4px}
+.govuk-width-container{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-main-wrapper{padding:30px 0 60px}
+
+/* --- Typography --- */
+h1,.govuk-heading-xl{font-size:48px;line-height:1.04;font-weight:700;margin:0 0 30px}
+h2,.govuk-heading-l{font-size:36px;line-height:1.11;font-weight:700;margin:30px 0 20px}
+h3,.govuk-heading-m{font-size:24px;line-height:1.25;font-weight:700;margin:20px 0 15px}
+h4,.govuk-heading-s{font-size:19px;line-height:1.3;font-weight:700;margin:15px 0 10px}
+p,.govuk-body{font-size:19px;margin:0 0 20px}
+.govuk-body-s{font-size:16px}
+.govuk-body-l{font-size:24px;line-height:1.25;margin:0 0 20px}
+.govuk-caption{font-size:24px;color:var(--dark-grey);display:block;margin-bottom:5px}
+a{color:var(--blue)}a:hover{color:var(--dark-blue)}
+a:focus{outline:3px solid var(--focus);background:var(--focus);color:var(--focus-text);text-decoration:none}
+.govuk-back-link{display:inline-block;margin-bottom:15px;font-size:16px;color:var(--black);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.govuk-back-link::before{content:"\25c2 "}
+
+/* --- Buttons --- */
+.govuk-button{display:inline-block;padding:8px 20px;font-size:19px;font-weight:700;color:var(--white);background:var(--green);border:none;border-radius:0;border-bottom:2px solid #002d18;cursor:pointer;text-decoration:none;line-height:1.2;-webkit-appearance:none;font-family:inherit}
+.govuk-button:hover{background:var(--green-hover);color:var(--white)}
+.govuk-button:focus{outline:3px solid var(--focus);outline-offset:0}
+.govuk-button--start{font-size:24px;padding:12px 30px}
+.govuk-button--start::after{content:" \2192"}
+.govuk-button--secondary{background:var(--light-grey);color:var(--black);border-bottom-color:var(--mid-grey)}
+.govuk-button--secondary:hover{background:#dbdad9;color:var(--black)}
+.govuk-button--warning{background:var(--red);border-bottom-color:#55150b}
+.govuk-button--warning:hover{background:#aa2716}
+.button-row{display:flex;gap:15px;flex-wrap:wrap;margin-top:20px}
+
+/* --- Forms --- */
+.govuk-form-group{margin-bottom:30px}
+.govuk-fieldset__legend{font-weight:700;font-size:19px;margin-bottom:10px;display:block}
+.govuk-fieldset__legend--l{font-size:36px;line-height:1.11;margin-bottom:20px}
+.govuk-fieldset__heading{font-size:inherit;line-height:inherit;font-weight:inherit;margin:0}
+.govuk-radios__item,.govuk-checkboxes__item{display:flex;align-items:flex-start;margin-bottom:15px;gap:12px}
+.govuk-radios__input,.govuk-checkboxes__input{width:44px;height:44px;min-width:44px;margin:0;cursor:pointer;accent-color:var(--black)}
+.govuk-radios__label,.govuk-checkboxes__label{font-size:19px;padding-top:10px;cursor:pointer}
+.govuk-radios__hint{font-size:16px;color:var(--dark-grey);margin-top:2px;display:block}
+.govuk-label{display:block;font-weight:700;margin-bottom:5px}
+.govuk-hint{font-size:16px;color:var(--dark-grey);margin-bottom:10px;display:block}
+.govuk-input{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;max-width:400px}
+.govuk-input:focus{outline:3px solid var(--focus)}
+.govuk-textarea{font-family:inherit;font-size:19px;padding:5px 10px;border:2px solid var(--black);width:100%;min-height:120px}
+
+/* --- Summary / table --- */
+.govuk-summary-list{border-top:1px solid var(--mid-grey);margin:0 0 30px}
+.govuk-summary-list__row{display:flex;border-bottom:1px solid var(--mid-grey);padding:12px 0;gap:15px}
+.govuk-summary-list__key{flex:0 0 32%;font-weight:700}
+.govuk-summary-list__value{flex:1}
+.govuk-summary-list__actions{flex:0 0 80px;text-align:right}
+@media(max-width:640px){.govuk-summary-list__row{flex-direction:column;gap:4px}.govuk-summary-list__key{flex:auto}.govuk-summary-list__actions{text-align:left}}
+.govuk-table{width:100%;border-collapse:collapse;margin-bottom:30px}
+.govuk-table th{text-align:left;font-weight:700;padding:10px 15px 10px 0;border-bottom:2px solid var(--black)}
+.govuk-table td{padding:10px 15px 10px 0;border-bottom:1px solid var(--mid-grey);vertical-align:top}
+
+/* --- Tags / panels --- */
+.govuk-tag{display:inline-block;font-size:14px;font-weight:700;padding:2px 8px;text-transform:uppercase;letter-spacing:1px;color:var(--white)}
+.govuk-tag--green{background:var(--green)}.govuk-tag--yellow{background:#b58840}.govuk-tag--orange{background:#b84605}.govuk-tag--red{background:var(--red)}.govuk-tag--blue{background:var(--blue)}.govuk-tag--grey{background:var(--dark-grey)}.govuk-tag--purple{background:var(--purple)}
+.govuk-inset-text{border-left:10px solid var(--mid-grey);padding:15px 20px;margin:0 0 30px}
+.govuk-panel{background:var(--green);color:var(--white);padding:35px;text-align:center;margin-bottom:30px}
+.govuk-panel__title{font-size:48px;font-weight:700;margin:0 0 15px}
+.govuk-panel__body{font-size:36px}
+.govuk-warning-text{display:flex;gap:15px;align-items:flex-start;margin-bottom:30px}
+.govuk-warning-text__icon{flex:0 0 35px;height:35px;background:var(--black);color:var(--white);border-radius:50%;text-align:center;font-weight:700;line-height:35px;font-size:24px}
+.govuk-warning-text__text{font-weight:700}
+.govuk-notification-banner{border:5px solid var(--blue);margin-bottom:30px}
+.govuk-notification-banner__header{background:var(--blue);color:var(--white);padding:8px 15px;font-size:19px;font-weight:700}
+.govuk-notification-banner__content{padding:20px 15px;font-size:19px}
+.govuk-notification-banner__content p{margin:0 0 10px}
+.govuk-notification-banner__content p:last-child{margin:0}
+.govuk-notification-banner--success{border-color:var(--green)}
+.govuk-notification-banner--success .govuk-notification-banner__header{background:var(--green)}
+
+/* --- Grid --- */
+.govuk-grid-row{display:flex;flex-wrap:wrap;margin:0 -15px}
+.govuk-grid-column-two-thirds{flex:0 0 66.66%;max-width:66.66%;padding:0 15px}
+.govuk-grid-column-one-third{flex:0 0 33.33%;max-width:33.33%;padding:0 15px}
+.govuk-grid-column-full{flex:0 0 100%;max-width:100%;padding:0 15px}
+@media(max-width:640px){.govuk-grid-column-two-thirds,.govuk-grid-column-one-third{flex:0 0 100%;max-width:100%}}
+
+/* --- Account cards --- */
+.account-card{border:1px solid var(--mid-grey);border-top:5px solid var(--blue);background:var(--white);padding:20px 25px;margin-bottom:30px}
+.account-card h3{margin-top:0}
+.account-card__head{display:flex;align-items:baseline;gap:15px;flex-wrap:wrap}
+.account-card__head h3{flex:1}
+.account-panel{border:1px solid var(--mid-grey);border-top:5px solid var(--blue);background:var(--light-grey);padding:20px;margin-bottom:30px}
+.account-panel h3{margin-top:0}
+.service-btn{display:flex;justify-content:space-between;align-items:center;width:100%;background:var(--green);color:var(--white);font-weight:700;font-size:19px;padding:10px 15px;margin-bottom:10px;text-decoration:none;border:none;border-bottom:2px solid #002d18;cursor:pointer;text-align:left;font-family:inherit}
+.service-btn:hover{background:var(--green-hover);color:var(--white)}
+.service-btn::after{content:"\203a";font-size:24px;line-height:1}
+.detail-list{border:none;margin:0}
+.detail-list__row{display:flex;border-bottom:1px solid var(--mid-grey);padding:12px 0;gap:15px}
+.detail-list__row:last-child{border-bottom:none}
+.detail-list__key{flex:0 0 40%;font-weight:700}
+.detail-list__value{flex:1}
+@media(max-width:640px){.detail-list__row{flex-direction:column;gap:2px}.detail-list__key{flex:auto}}
+
+/* --- Journey hub --- */
+.hub-hero{background:var(--light-grey);border-left:10px solid var(--blue);padding:30px 35px;margin-bottom:40px}
+.hub-hero h1{margin-bottom:15px}
+.hub-hero p:last-child{margin-bottom:0}
+.journey-group{margin-bottom:45px}
+.journey-group__title{border-bottom:2px solid var(--black);padding-bottom:8px;margin-bottom:8px}
+.journey-group__desc{font-size:16px;color:var(--dark-grey);margin-bottom:20px}
+.journey-links{list-style:none;margin:0;padding:0}
+.journey-links li{margin-bottom:22px}
+.journey-links a{font-size:24px;font-weight:700}
+.journey-links p{margin:4px 0 0;font-size:16px;color:var(--dark-grey);max-width:44em}
+
+/* --- Design notes --- */
+.design-note{border:2px dashed var(--purple);background:#f7f4fc;padding:15px 20px;margin:0 0 25px;font-size:16px}
+.design-note strong{display:block;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-size:14px;margin-bottom:6px}
+.design-note p{font-size:16px;margin:0 0 8px}
+.design-note p:last-child{margin:0}
+
+/* --- Dropzone --- */
+.dropzone{border:3px dashed var(--mid-grey);background:var(--light-grey);padding:35px 25px;text-align:center;margin-bottom:20px;cursor:pointer}
+.dropzone.is-over{border-color:var(--green);background:#e8f0e8}
+.dropzone__title{font-weight:700;font-size:19px;margin-bottom:8px}
+.dropzone__hint{font-size:16px;color:var(--dark-grey)}
+.file-list{list-style:none;margin:0 0 20px;padding:0}
+.file-list__item{display:flex;justify-content:space-between;align-items:center;gap:15px;background:var(--light-grey);padding:10px 15px;margin-bottom:10px;font-size:16px}
+.file-list__remove{background:none;border:none;color:var(--red);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:16px}
+
+/* --- Option cards --- */
+.option-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:30px}
+@media(max-width:900px){.option-cards{grid-template-columns:1fr}}
+.option-card{border:2px solid var(--mid-grey);padding:20px;cursor:pointer;background:var(--white);text-align:left;font-family:inherit;font-size:19px}
+.option-card:hover{border-color:var(--black)}
+.option-card h3{margin:8px 0;font-size:19px}
+.option-card p{margin:0;font-size:16px;color:var(--dark-grey)}
+
+/* --- Provider / branch cards --- */
+.choice-list{list-style:none;margin:0 0 30px;padding:0}
+.choice-list__item{border:2px solid var(--mid-grey);padding:18px 20px;margin-bottom:12px;cursor:pointer;background:var(--white);display:flex;gap:15px;align-items:flex-start;width:100%;text-align:left;font-family:inherit;font-size:19px}
+.choice-list__item:hover{border-color:var(--black)}
+.choice-list__body{flex:1}
+.choice-list__body strong{display:block}
+.choice-list__body span{font-size:16px;color:var(--dark-grey)}
+
+/* --- Time slots --- */
+.slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:25px}
+@media(max-width:640px){.slot-grid{grid-template-columns:repeat(2,1fr)}}
+.slot{border:2px solid var(--mid-grey);background:var(--white);padding:10px;font-family:inherit;font-size:19px;cursor:pointer}
+.slot:hover{border-color:var(--black)}
+.slot.is-selected{background:var(--green);color:var(--white);border-color:var(--green)}
+
+/* --- Timeline / task list --- */
+.timeline{list-style:none;margin:0 0 30px;padding:0 0 0 25px;border-left:4px solid var(--mid-grey)}
+.timeline__item{position:relative;padding:0 0 25px 20px}
+.timeline__item::before{content:"";position:absolute;left:-32px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--mid-grey);border:3px solid var(--white)}
+.timeline__item--done::before{background:var(--green)}
+.timeline__item--now::before{background:var(--blue)}
+.timeline__date{font-size:16px;color:var(--dark-grey);display:block}
+.timeline__title{font-weight:700;display:block}
+.task-list{border-top:1px solid var(--mid-grey);margin:0 0 30px;padding:0;list-style:none}
+.task-list__item{display:flex;align-items:center;gap:15px;border-bottom:1px solid var(--mid-grey);padding:15px 0;flex-wrap:wrap}
+.task-list__name{flex:1;min-width:200px}
+.task-list__name strong{display:block}
+.task-list__hint{font-size:16px;color:var(--dark-grey)}
+.message-list{list-style:none;margin:0 0 30px;padding:0;border-top:1px solid var(--mid-grey)}
+.message-list__item{border-bottom:1px solid var(--mid-grey);padding:15px 0}
+.message-list__item--unread{border-left:5px solid var(--blue);padding-left:15px}
+.message-list__meta{font-size:16px;color:var(--dark-grey)}
+
+/* --- Screen index --- */
+.index-group{margin-bottom:30px}
+.index-group h3{margin-bottom:10px}
+.index-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:800px){.index-list{grid-template-columns:1fr}}
+.index-list a{display:block;padding:8px 12px;background:var(--light-grey);text-decoration:none;font-size:16px;border-left:4px solid var(--blue)}
+.index-list a:hover{background:#e4e3e2}
+
+hr.govuk-section-break{border:none;border-bottom:1px solid var(--mid-grey);margin:30px 0}
+.govuk-footer{background:var(--light-grey);border-top:1px solid var(--mid-grey);padding:30px 0;margin-top:60px}
+.govuk-footer__wrapper{max-width:960px;margin:0 auto;padding:0 15px}
+.govuk-footer__meta-item{font-size:16px;color:var(--dark-grey)}
+</style>
+</head>
+<body>
+<div id="chrome"></div>
+<div class="govuk-width-container">
+  <main class="govuk-main-wrapper" id="app" role="main"></main>
+</div>
+<footer class="govuk-footer" role="contentinfo">
+  <div class="govuk-footer__wrapper">
+    <p class="govuk-footer__meta-item">Drivers Medical future state prototype &mdash; Fictional, for workshop use only. Not a real DVLA or GOV.UK service. All personal details shown are invented.</p>
+  </div>
+</footer>
+
+<script>
+/* ================================================================
+   DRIVERS MEDICAL — FUTURE STATE GUIDED JOURNEYS
+   A single-file prototype presenting several guided journeys
+   through the designed future state service, plus a free-roam mode.
+   ================================================================ */
+
+/* === FICTIONAL PERSONA === */
+const person = {
+  title:'MR', name:'SAM TAYLOR MORGAN', dob:'1 August 1986',
+  email:'sam.morgan@example.com', phone:'07700 900123',
+  licenceStatus:'You have a full driving licence',
+  licenceFrom:'17 February 2024', licenceTo:'16 February 2034',
+  licenceNo:'MORGA808016ST9AB'
+};
+const caseRef = 'DM-2026-482910';
+const caseworker = { name:'Ceri Hughes', team:'Medical Casework Team 4 (Neurological)', responseTime:'1 to 2 working days' };
+
+/* === CONDITIONS === */
+const conditions = {
+  epilepsy:{ name:'Epilepsy or seizures', hint:'Including blackouts and loss of consciousness',
+    prescreen:'Have you had a seizure, blackout or loss of consciousness in the last 5 years?',
+    questions:[
+      {id:'lastSeizure',type:'text',label:'When was your most recent seizure?',hint:'For example, 3 March 2026'},
+      {id:'awake',type:'radio',label:'Did it happen while you were awake?',options:{yes:'Yes',no:'No, I was asleep',unsure:'I am not sure'}},
+      {id:'medication',type:'radio',label:'Are you taking anti-epileptic medication as prescribed?',options:{yes:'Yes',no:'No',changed:'My medication has recently changed'}}
+    ]},
+  diabetes:{ name:'Diabetes', hint:'Treated with insulin, tablets or diet',
+    prescreen:'Is your diabetes treated with insulin, or have you had a hypoglycaemic episode that needed the help of another person?',
+    questions:[
+      {id:'hypo',type:'radio',label:'Have you had more than one episode of severe hypoglycaemia in the last 12 months?',options:{yes:'Yes',no:'No'}},
+      {id:'monitoring',type:'radio',label:'Do you check your blood glucose at least twice a day and before driving?',options:{yes:'Yes',no:'No'}}
+    ]},
+  visual:{ name:'Visual impairment or eye condition', hint:'Including glaucoma, cataracts and loss of visual field',
+    prescreen:'Does your eye condition affect both eyes, or is it not fully corrected by glasses or contact lenses?',
+    questions:[
+      {id:'plate',type:'radio',label:'Can you read a car number plate from 20 metres, wearing glasses or lenses if you need them?',options:{yes:'Yes',no:'No'}},
+      {id:'field',type:'radio',label:'Have you been told you have any loss of visual field?',options:{yes:'Yes',no:'No',unsure:'I am not sure'}}
+    ]},
+  heart:{ name:'Heart condition', hint:'Including heart attack, surgery, pacemaker or ICD',
+    prescreen:'Have you had a heart attack, heart surgery, or a device fitted such as a pacemaker or ICD in the last 12 months?',
+    questions:[
+      {id:'device',type:'radio',label:'Do you have an implanted device?',options:{icd:'Yes, an implantable cardioverter defibrillator (ICD)',pacemaker:'Yes, a pacemaker',none:'No device fitted'}},
+      {id:'symptoms',type:'radio',label:'Do you get symptoms such as dizziness, chest pain or blackouts?',options:{yes:'Yes',no:'No'}}
+    ]},
+  sleep:{ name:'Sleep apnoea', hint:'Obstructive sleep apnoea syndrome',
+    prescreen:'Have you been diagnosed with sleep apnoea that causes excessive sleepiness during the day?',
+    questions:[
+      {id:'treatment',type:'radio',label:'Are you receiving treatment, such as CPAP?',options:{yes:'Yes',no:'No',waiting:'I am waiting to start treatment'}},
+      {id:'sleepy',type:'radio',label:'Do you still feel excessively sleepy during the day?',options:{yes:'Yes',no:'No'}}
+    ]},
+  neuro:{ name:'Neurological condition', hint:'Including stroke, Parkinson’s disease and multiple sclerosis',
+    prescreen:'Has your neurological condition affected your movement, memory or concentration?',
+    questions:[
+      {id:'diagnosis',type:'text',label:'What is your diagnosis?',hint:'For example, transient ischaemic attack (TIA)'},
+      {id:'affects',type:'radio',label:'Does the condition affect your ability to control a vehicle?',options:{yes:'Yes',no:'No',unsure:'I am not sure'}}
+    ]}
+};
+
+const secondSeriesReasons = {
+  epilepsy:'You told us you had a seizure while awake in the last 12 months. Before we can make a decision we need clinical confirmation of your current treatment and how well your seizures are controlled.',
+  diabetes:'You told us about a diabetes-related complication. Before we can make a decision we need a recent report on your eyesight and blood glucose control.',
+  visual:'You told us you may have some loss of visual field. Before we can make a decision we need a visual field test carried out to DVLA standards.',
+  heart:'You told us you still get symptoms since your procedure. Before we can make a decision we need a report from the clinician who treated you.',
+  sleep:'You told us you still feel excessively sleepy during the day. Before we can make a decision we need confirmation that your treatment is working.',
+  neuro:'You told us your condition may affect your ability to control a vehicle. Before we can make a decision we need a report from your specialist.'
+};
+const evidenceNeeded = {
+  epilepsy:'A report from your neurologist confirming your seizure history and current medication',
+  diabetes:'A recent retinal screening result and your HbA1c reading',
+  visual:'A visual field test carried out to DVLA standards',
+  heart:'A report from your cardiologist covering your most recent procedure',
+  sleep:'Confirmation of your CPAP compliance data from your sleep clinic',
+  neuro:'A report from your specialist about how your condition affects your driving'
+};
+/* Guidance on what a good document looks like, per condition. */
+const evidenceGuidance = {
+  epilepsy:['dated within the last 12 months','shows your consultant’s name and the clinic','states the date of your most recent seizure','lists your current medication and dose'],
+  diabetes:['dated within the last 12 months','shows your HbA1c result','includes your most recent retinal screening outcome'],
+  visual:['a full visual field test printout, both eyes','carried out on DVLA-approved equipment','shows the testing optician’s details'],
+  heart:['dated after your most recent procedure','states your ejection fraction if measured','confirms whether you have symptoms'],
+  sleep:['covers at least the last 3 months of CPAP use','shows average hours of use per night'],
+  neuro:['dated within the last 12 months','states your diagnosis','comments on your ability to drive']
+};
+
+/* === THIRD PARTY PROVIDERS (condition specific) === */
+const providersByCondition = {
+  visual:[
+    {id:'specsavers',name:'Specsavers',desc:'Free DVLA visual field test. Over 700 branches.',tag:'Most popular'},
+    {id:'visionexpress',name:'Vision Express',desc:'Free DVLA visual field test. Appointments usually within 5 days.'},
+    {id:'boots',name:'Boots Opticians',desc:'Free DVLA visual field test. Evening appointments available.'}
+  ],
+  _default:[
+    {id:'dvla',name:'DVLA Assessment Centre',desc:'Assessment carried out by DVLA’s own clinical team.',tag:'Most popular'},
+    {id:'medicheck',name:'Medicheck Health Partners',desc:'Independent practitioners across England and Wales.'},
+    {id:'nuffield',name:'Nuffield Community Clinics',desc:'Weekend appointments available in most regions.'}
+  ]
+};
+const branchesByProvider = {
+  specsavers:[
+    {id:'sw',name:'Specsavers Swansea',addr:'Oxford Street, Swansea, SA1 3AQ',dist:'1.2 miles'},
+    {id:'cf',name:'Specsavers Cardiff Queen Street',addr:'Queen Street, Cardiff, CF10 2BY',dist:'8.4 miles'},
+    {id:'np',name:'Specsavers Newport',addr:'Commercial Street, Newport, NP20 1YB',dist:'14.1 miles'}
+  ],
+  visionexpress:[
+    {id:'cf2',name:'Vision Express Cardiff',addr:'Kingsway, Cardiff, CF10 3PB',dist:'8.9 miles'},
+    {id:'br',name:'Vision Express Bridgend',addr:'Caroline Street, Bridgend, CF31 1DD',dist:'11.0 miles'}
+  ],
+  boots:[
+    {id:'sw2',name:'Boots Opticians Swansea',addr:'St Mary Street, Swansea, SA1 3LP',dist:'1.6 miles'},
+    {id:'cf3',name:'Boots Opticians Cardiff',addr:'Working Street, Cardiff, CF10 1GS',dist:'8.7 miles'}
+  ],
+  dvla:[
+    {id:'dv1',name:'DVLA Assessment Centre, Swansea',addr:'Longview Road, Morriston, Swansea, SA6 7JL',dist:'2.8 miles'}
+  ],
+  medicheck:[
+    {id:'mc1',name:'Medicheck Cardiff',addr:'Churchill Way, Cardiff, CF10 2HE',dist:'8.5 miles'},
+    {id:'mc2',name:'Medicheck Bristol',addr:'Queen Square, Bristol, BS1 4LH',dist:'42 miles'}
+  ],
+  nuffield:[
+    {id:'nf1',name:'Nuffield Clinic Newport',addr:'Bridge Street, Newport, NP20 4AQ',dist:'13.6 miles'}
+  ]
+};
+const apptDates = ['Monday 8 June 2026','Wednesday 10 June 2026','Friday 12 June 2026','Tuesday 16 June 2026','Thursday 18 June 2026'];
+const apptTimes = ['9:00am','10:30am','12:00pm','2:00pm','3:30pm','4:45pm'];
+
+/* ================================================================
+   JOURNEY DEFINITIONS
+   Each guided journey is an ordered list of screens, plus a preset
+   that puts the prototype into the right starting state.
+   ================================================================ */
+const JOURNEYS = {
+  'first-series':{
+    group:'first',
+    name:'First series only — licence issued straight away',
+    blurb:'The shortest possible path. One set of condition questions, no further evidence needed, and the licence decision is issued and accepted digitally.',
+    tag:'Happy path', tagClass:'green',
+    shows:[
+      'Setting up an account and communication preferences',
+      'Reporting more than one condition in a single notification',
+      'Pre-screening that filters out people who do not need to notify',
+      'A decision with no second series questions',
+      'Digital replacement for the paper revocation notice and acceptance form'
+    ],
+    preset(){
+      resetState();
+      state.conditions=['diabetes','sleep'];
+      state.prescreen={diabetes:'yes',sleep:'yes'};
+      state.answers={diabetes:{hypo:'no',monitoring:'yes'},sleep:{treatment:'yes',sleepy:'no'}};
+      state.secondNeeded=false;
+    },
+    steps:[
+      {h:'#/signin',label:'Sign in'},
+      {h:'#/account-setup',label:'Set up account'},
+      {h:'#/account',label:'Your account'},
+      {h:'#/report-start',label:'Before you start'},
+      {h:'#/conditions',label:'Your conditions'},
+      {h:'#/prescreen',label:'Pre-screening'},
+      {h:'#/questionnaire/0',label:'Condition questions'},
+      {h:'#/check-answers',label:'Check answers'},
+      {h:'#/decision-issue',label:'Your decision'},
+      {h:'#/accept-licence',label:'Accept licence'},
+      {h:'#/licence-next-steps',label:'What happens next'}
+    ]
+  },
+  'second-upload':{
+    group:'second',
+    name:'Second series — upload evidence digitally',
+    blurb:'DVLA asks for one specific piece of clinical evidence. The customer photographs or drags in the document, sees guidance on what is acceptable, and reviews it before sending.',
+    tag:'Digital upload', tagClass:'blue',
+    shows:['Why a second series is needed, in plain English','Choosing between all three response routes','Drag and drop or browse to upload','Condition-specific guidance on acceptable documents','Reviewing evidence before submitting'],
+    preset(){
+      resetState();
+      state.conditions=['epilepsy'];
+      state.prescreen={epilepsy:'yes'};
+      state.answers={epilepsy:{lastSeizure:'3 March 2026',awake:'yes',medication:'yes'}};
+      state.secondNeeded=true; state.route='upload';
+    },
+    steps:[
+      {h:'#/signin',label:'Sign in'},
+      {h:'#/account',label:'Your account'},
+      {h:'#/report-start',label:'Before you start'},
+      {h:'#/conditions',label:'Your condition'},
+      {h:'#/prescreen',label:'Pre-screening'},
+      {h:'#/questionnaire/0',label:'Condition questions'},
+      {h:'#/second-series-info',label:'More information needed'},
+      {h:'#/second-series-choose',label:'Choose how to respond'},
+      {h:'#/upload',label:'Upload evidence'},
+      {h:'#/upload-review',label:'Review evidence'},
+      {h:'#/second-confirm',label:'Confirmation'},
+      {h:'#/status',label:'Track your case'}
+    ]
+  },
+  'second-appointment':{
+    group:'second',
+    name:'Second series — book and manage an appointment',
+    blurb:'For an eyesight case, DVLA-approved providers such as Specsavers are surfaced directly in the service. The customer books a branch, date and time, then manages the appointment from their account.',
+    tag:'Book appointment', tagClass:'blue',
+    shows:['Condition-specific third party providers','Choosing a branch by distance','Picking a date and time slot','Reviewing and confirming the booking','Appointment details and reminders in the account','Changing or cancelling an appointment'],
+    preset(){
+      resetState();
+      state.conditions=['visual'];
+      state.prescreen={visual:'yes'};
+      state.answers={visual:{plate:'yes',field:'unsure'}};
+      state.secondNeeded=true; state.route='appointment';
+    },
+    steps:[
+      {h:'#/signin',label:'Sign in'},
+      {h:'#/account',label:'Your account'},
+      {h:'#/report-start',label:'Before you start'},
+      {h:'#/conditions',label:'Your condition'},
+      {h:'#/prescreen',label:'Pre-screening'},
+      {h:'#/questionnaire/0',label:'Condition questions'},
+      {h:'#/second-series-info',label:'More information needed'},
+      {h:'#/second-series-choose',label:'Choose how to respond'},
+      {h:'#/appt-company',label:'Choose provider'},
+      {h:'#/appt-branch',label:'Choose branch'},
+      {h:'#/appt-datetime',label:'Date and time'},
+      {h:'#/appt-review',label:'Review booking'},
+      {h:'#/messages',label:'Confirmation in messages'},
+      {h:'#/status',label:'Track your case'},
+      {h:'#/appt-manage',label:'Manage appointment'}
+    ]
+  },
+  'second-gp':{
+    group:'second',
+    name:'Second series — GP or NHS record with consent',
+    blurb:'The customer asks DVLA to get the information for them, either by contacting their GP or by linking their NHS record. Consent is explicit, explained, and can be withdrawn.',
+    tag:'GP and NHS', tagClass:'blue',
+    shows:['Giving GP or specialist details','Linking an NHS health record for faster access','Informed consent, in plain English','The ability to withdraw consent later','Nothing further for the customer to do'],
+    preset(){
+      resetState();
+      state.conditions=['heart'];
+      state.prescreen={heart:'yes'};
+      state.answers={heart:{device:'icd',symptoms:'yes'}};
+      state.secondNeeded=true; state.route='gp';
+    },
+    steps:[
+      {h:'#/signin',label:'Sign in'},
+      {h:'#/account',label:'Your account'},
+      {h:'#/report-start',label:'Before you start'},
+      {h:'#/conditions',label:'Your condition'},
+      {h:'#/prescreen',label:'Pre-screening'},
+      {h:'#/questionnaire/0',label:'Condition questions'},
+      {h:'#/second-series-info',label:'More information needed'},
+      {h:'#/second-series-choose',label:'Choose how to respond'},
+      {h:'#/gp-details',label:'Your GP details'},
+      {h:'#/nhs-link',label:'Link NHS record'},
+      {h:'#/consent-share',label:'Your consent'},
+      {h:'#/second-confirm',label:'Confirmation'},
+      {h:'#/status',label:'Track your case'}
+    ]
+  },
+  'renewal':{
+    group:'manage',
+    name:'Renewal — nothing has changed',
+    blurb:'A renewal notice arrives. Because nothing about the condition has changed, the licence is renewed without a new medical assessment — and the customer is offered automatic renewal for next time.',
+    tag:'Automatic renewal', tagClass:'green',
+    shows:['Arriving from a renewal reminder','Confirming nothing has changed','Renewal with no further action needed','Being offered automatic renewal at the end of the journey'],
+    preset(){
+      resetState();
+      state.conditions=['diabetes'];
+      state.hasMedicalLicence=true;
+      state.stage=5;
+    },
+    steps:[
+      {h:'#/renewal-notice',label:'Renewal reminder'},
+      {h:'#/signin',label:'Sign in'},
+      {h:'#/account',label:'Your account'},
+      {h:'#/renewal-start',label:'Start your review'},
+      {h:'#/renewal-changed',label:'Has anything changed?'},
+      {h:'#/renewal-done',label:'Licence renewed'},
+      {h:'#/auto-renew-offer',label:'Automatic renewals'},
+      {h:'#/auto-renew-done',label:'Preference saved'}
+    ]
+  },
+  'manage-licence':{
+    group:'manage',
+    name:'Managing your licence — pause, resume and auto-renew',
+    blurb:'Self-service control of a medical licence from the account: pause it while not driving, resume it without reapplying, and switch automatic renewals on or off.',
+    tag:'Self service', tagClass:'green',
+    shows:['Pausing a licence and keeping the entitlement open','The account reflecting a paused licence','Resuming without reapplying','Turning automatic renewals on or off at any time'],
+    preset(){
+      resetState();
+      state.conditions=['diabetes'];
+      state.hasMedicalLicence=true;
+      state.stage=5;
+    },
+    steps:[
+      {h:'#/account',label:'Your account'},
+      {h:'#/manage',label:'Manage your licence'},
+      {h:'#/pause',label:'Pause your licence'},
+      {h:'#/pause-done',label:'Licence paused'},
+      {h:'#/account',label:'Account (paused)'},
+      {h:'#/resume',label:'Resume your licence'},
+      {h:'#/resume-done',label:'Licence resumed'},
+      {h:'#/renewal-preferences',label:'Automatic renewals'},
+      {h:'#/auto-renew-done',label:'Preference saved'}
+    ]
+  }
+};
+
+const JOURNEY_GROUPS = [
+  {id:'first', title:'First series', desc:'Notifying a condition and getting a decision without any further evidence.'},
+  {id:'second', title:'Second series', desc:'When DVLA needs more clinical information, there are three ways to provide it. Each is shown as its own journey.'},
+  {id:'manage', title:'Managing a licence', desc:'Renewing, pausing, resuming, and controlling automatic renewals from the account.'}
+];
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let state = {};
+function resetState(){
+  state = {
+    journey:null, stepIndex:0, showNotes:state.showNotes||false,
+    stage:0, conditions:[], prescreen:{}, answers:{},
+    contactPref:'email', consentShare:'yes',
+    secondNeeded:false, route:'',
+    uploads:[], apptProvider:'', apptBranch:'', apptDate:'', apptTime:'',
+    gpName:'', gpPractice:'', gpAddress:'', nhsLinked:'', consentGiven:false,
+    hasMedicalLicence:false, licencePaused:false, autoRenew:'',
+    renewalChanged:'', messagesRead:false, licenceAccepted:false
+  };
+}
+resetState();
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+const app = () => document.getElementById('app');
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function navigate(h){ if(location.hash===h){ route(); } else { location.hash = h; } }
+function primaryCondition(){ return state.conditions[0] || 'epilepsy'; }
+function conditionNames(){ return state.conditions.map(c=>conditions[c].name).join(', ') || '—'; }
+function j(){ return state.journey ? JOURNEYS[state.journey] : null; }
+
+function warn(){
+  return '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>This is a fictional prototype showing the future state Drivers Medical customer journey. It does not make real DVLA licensing decisions, and all personal details shown are invented.</div>';
+}
+/* Design notes are prototype annotations, not part of the service UI. */
+function note(title, body){
+  if(!state.showNotes) return '';
+  return '<div class="design-note"><strong>Design note — '+esc(title)+'</strong>'+body+'</div>';
+}
+function back(fallback){
+  const jj = j();
+  if(jj && state.stepIndex>0) return '<button class="govuk-back-link" onclick="stepBack()">Back</button>';
+  if(jj) return '<a class="govuk-back-link" href="#/hub">Back to journeys</a>';
+  return fallback ? '<a class="govuk-back-link" href="'+fallback+'">Back</a>' : '';
+}
+
+/* --- journey control --- */
+function startJourney(id){
+  const jj = JOURNEYS[id];
+  if(!jj) return navigate('#/hub');
+  const keepNotes = state.showNotes;
+  jj.preset();
+  state.showNotes = keepNotes;
+  state.journey = id;
+  state.stepIndex = 0;
+  navigate(jj.steps[0].h);
+}
+function advance(fallbackHash){
+  const jj = j();
+  if(jj){
+    if(state.stepIndex + 1 < jj.steps.length){
+      state.stepIndex++;
+      navigate(jj.steps[state.stepIndex].h);
+    } else {
+      navigate('#/journey-complete');
+    }
+    return;
+  }
+  if(fallbackHash) navigate(fallbackHash);
+}
+function stepBack(){
+  const jj = j();
+  if(jj && state.stepIndex>0){
+    state.stepIndex--;
+    navigate(jj.steps[state.stepIndex].h);
+  } else { navigate('#/hub'); }
+}
+function exitJourney(){
+  state.journey = null;
+  navigate('#/hub');
+}
+
+/* --- page chrome --- */
+function unreadCount(){
+  if(state.messagesRead) return 0;
+  if(state.stage===2 || state.stage===4) return 1;
+  return 0;
+}
+function renderChrome(){
+  const onHub = (location.hash||'#/hub')==='#/hub' || location.hash==='';
+  let html = '';
+
+  html += '<header class="govuk-header" role="banner"><div class="govuk-header__container">'
+    +'<a href="#/hub" class="govuk-header__logotype-text">'
+    +'<svg class="govuk-crown" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 97" fill="white" role="img" aria-label="GOV.UK Crown">'
+    +'<path d="M25 30.2c3.5 1.5 7.7-.2 9.1-3.7 1.5-3.6-.2-7.8-3.9-9.2-3.6-1.4-7.6.3-9.1 3.9-1.4 3.5.3 7.5 3.9 9zM9 39.5c3.6 1.5 7.8-.2 9.2-3.7 1.5-3.6-.2-7.8-3.9-9.1-3.6-1.5-7.6.2-9.1 3.8-1.4 3.5.3 7.5 3.8 9zM4.4 57.2c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.5-1.5-7.6.3-9.1 3.8-1.4 3.5.3 7.6 3.9 9.1zm38.3-21.4c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.6-1.5-7.6.3-9.1 3.8-1.3 3.6.4 7.7 3.9 9.1zm64.4-5.6c-3.6 1.5-7.8-.2-9.1-3.7-1.5-3.6.2-7.8 3.8-9.2 3.6-1.4 7.7.3 9.2 3.9 1.3 3.5-.4 7.5-3.9 9zm15.9 9.3c-3.6 1.5-7.7-.2-9.1-3.7-1.5-3.6.2-7.8 3.7-9.1 3.6-1.5 7.7.2 9.2 3.8 1.5 3.5-.3 7.5-3.8 9zm4.7 17.7c-3.6 1.5-7.8-.2-9.2-3.8-1.5-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.3 3.5-.4 7.6-3.9 9.1zM89.3 35.8c-3.6 1.5-7.8-.2-9.2-3.8-1.4-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.4 3.6-.3 7.7-3.9 9.1zM69.7 17.7l8.9 4.7V9.3l-8.9 2.8c-.2-.3-.5-.6-.9-.9L72.4 0H59.6l3.5 11.2c-.3.3-.6.5-.9.9l-8.8-2.8v13.1l8.8-4.7c.3.3.6.7.9.9l-5 15.4v.1c-.2.8-.4 1.6-.4 2.4 0 4.1 3.1 7.5 7 8.1h.2c.3 0 .7.1 1 .1.4 0 .7 0 1-.1h.2c4-.6 7.1-4 7.1-8.1 0-.8-.1-1.7-.4-2.4V34l-5.1-15.4c.4-.2.7-.6 1-.9zM66 92.8c16.9 0 32.8 1.1 47.1 3.2 4-16.9 8.9-26.7 14-33.5l-9.6-3.4c1 4.9 1.1 7.2 0 10.2-1.5-1.4-3-4.3-4.2-8.7L108.6 76c2.8-2 5-3.2 7.5-3.3-4.4 9.4-10 11.9-13.6 11.2-4.3-.8-6.3-4.6-5.6-7.9 1-4.7 5.7-5.9 8-.5 4.3-8.7-3-11.4-7.6-8.8 7.1-7.2 7.9-13.5 2.1-21.1-8 6.1-8.1 12.3-4.5 20.8-4.7-5.4-12.1-2.5-9.5 6.2 3.4-5.2 7.9-2 7.2 3.1-.6 4.3-6.4 7.8-13.5 7.2-10.3-.9-10.9-8-11.2-13.8 2.5-.5 7.1 1.8 11 7.3L80.2 47c-4.6-5.5-10.3-8-14.1-8s-9.5 2.5-14.1 8l.7-18c3.9-5.5 8.5-7.7 11-7.3-.3 5.8-.9 12.8-11.1 13.8-7.2.6-12.9-2.9-13.5-7.2-.7-5 3.8-8.3 7.1-3.1 2.7-8.7-4.8-11.6-9.4-6.2 3.7-8.5 3.6-14.7-4.6-20.8-5.8 7.6-5 13.9 2.2 21.1-4.7-2.6-11.9.1-7.7 8.8 2.3-5.5 7.1-4.2 8.1.5.7 3.3-1.3 7.1-5.7 7.9-3.5.7-9-1.8-13.5-11.2 2.5.1 4.7 1.3 7.5 3.3l-4.7-15.4c-1.2 4.4-2.7 7.2-4.3 8.7-1.1-3-.9-5.3 0-10.2l-9.5 3.4c5 6.9 9.9 16.7 14 33.5 14.8-2.1 30.8-3.2 47.7-3.2z"/></svg>'
+    +'GOV.UK</a>';
+  if(!onHub) html += '<a class="govuk-header__signout" href="#/hub">Sign out</a>';
+  html += '</div></header>';
+
+  if(!onHub){
+    const n = unreadCount();
+    html += '<div class="service-nav"><div class="service-nav__wrapper">'
+      +'<a class="service-nav__name" href="#/account">Driver and vehicles account</a>'
+      +'<div class="service-nav__links">';
+    if(state.stage>0) html += '<a class="service-nav__link" href="#/messages">Messages'+(n?'<span class="service-nav__count">'+n+'</span>':'')+'</a>';
+    html += '<a class="service-nav__link" href="#/account">Manage your account</a>'
+      +'</div></div></div>';
+  }
+
+  html += '<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper">'
+    +'<span class="govuk-phase-banner__tag">Prototype</span>'
+    +'<span>This is not a real service. It is a fictional prototype for internal workshops.</span>'
+    +'<span class="phase-actions">'
+    +'<a href="#" onclick="toggleNotes();return false;">'+(state.showNotes?'Hide':'Show')+' design notes</a>'
+    +'<a href="#/all-screens">All screens</a>'
+    +'<a href="#/hub">Journeys</a>'
+    +'</span></div></div>';
+
+  document.getElementById('chrome').innerHTML = html;
+}
+function toggleNotes(){ state.showNotes = !state.showNotes; route(); }
+
+/* --- reusable form page --- */
+function radioPage(opts){
+  const {caption,title,hint,name,options,richOptions,stateKey,fallbackBack,fallbackNext,onNext} = opts;
+  let html = warn()+back(fallbackBack);
+  if(opts.note) html += opts.note;
+  html += '<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">';
+  html += '<div class="govuk-form-group"><fieldset>';
+  if(caption) html += '<span class="govuk-caption">'+esc(caption)+'</span>';
+  html += '<legend class="govuk-fieldset__legend govuk-fieldset__legend--l"><h1 class="govuk-fieldset__heading">'+esc(title)+'</h1></legend>';
+  if(hint) html += '<span class="govuk-hint">'+esc(hint)+'</span>';
+  html += '<div style="margin-top:20px;">';
+  const list = richOptions || Object.entries(options).map(([value,label])=>({value,label}));
+  list.forEach(o=>{
+    const checked = state[stateKey]===o.value?' checked':'';
+    html += '<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="'+name+'" id="'+name+'-'+o.value+'" value="'+o.value+'"'+checked+'>'
+      +'<div><label class="govuk-radios__label" for="'+name+'-'+o.value+'">'+(o.hint?'<strong>'+esc(o.label)+'</strong>':esc(o.label))+'</label>'
+      +(o.hint?'<span class="govuk-radios__hint">'+esc(o.hint)+'</span>':'')+'</div></div>';
+  });
+  html += '</div></fieldset></div><button class="govuk-button" id="continue-btn">Continue</button></div></div>';
+  app().innerHTML = html;
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const sel = document.querySelector('input[name="'+name+'"]:checked');
+    if(!sel){alert('Please select an option.');return;}
+    if(stateKey) state[stateKey]=sel.value;
+    if(onNext) onNext(sel.value); else advance(fallbackNext);
+  });
+}
+
+/* ================================================================
+   HUB — front page
+   ================================================================ */
+function renderHub(){
+  state.journey = null;
+  let groups = '';
+  JOURNEY_GROUPS.forEach(g=>{
+    let links = '';
+    Object.entries(JOURNEYS).filter(([,v])=>v.group===g.id).forEach(([id,v])=>{
+      links += '<li><a href="#" onclick="startJourney(\''+id+'\');return false;">'+esc(v.name)+'</a>'
+        +'<p>'+esc(v.blurb)+'</p></li>';
+    });
+    groups += '<section class="journey-group"><h2 class="journey-group__title">'+esc(g.title)+'</h2>'
+      +'<p class="journey-group__desc">'+esc(g.desc)+'</p>'
+      +'<ul class="journey-links">'+links+'</ul></section>';
+  });
+
+  app().innerHTML = warn()
+    +'<div class="hub-hero">'
+    +'<h1 class="govuk-heading-xl">Drivers Medical: the future state</h1>'
+    +'<p class="govuk-body-l">A working prototype of how notifying DVLA about a medical condition could feel — reported once, answered in a couple of clicks, and resolved without paper wherever possible.</p>'
+    +'<p class="govuk-body">Pick a guided journey below to be walked through a single scenario end to end, or explore the whole prototype freely. Every journey is fictional and makes no real licensing decisions.</p>'
+    +'</div>'
+    + groups
+    +'<section class="journey-group"><h2 class="journey-group__title">Explore freely</h2>'
+    +'<p class="journey-group__desc">No guide rails — move through the service in any order.</p>'
+    +'<ul class="journey-links">'
+    +'<li><a href="#" onclick="openFree();return false;">Open the full prototype</a>'
+    +'<p>Start at the account dashboard and navigate the service yourself, including branches the guided journeys do not cover — challenge, appeal, surrender and the caseworker-facing messages.</p></li>'
+    +'<li><a href="#/all-screens">Jump to any screen</a>'
+    +'<p>A full index of every screen in the prototype, grouped by stage of the journey. Useful for reviewing a single page in a workshop.</p></li>'
+    +'</ul></section>';
+}
+function openFree(){
+  const keepNotes = state.showNotes;
+  resetState();
+  state.showNotes = keepNotes;
+  state.stage = 0;
+  navigate('#/account');
+}
+
+/* === ALL SCREENS INDEX === */
+function renderAllScreens(){
+  const groups = [
+    ['Set up',[['#/signin','Sign in'],['#/account-setup','Set up your account'],['#/account','Account dashboard']]],
+    ['First series',[['#/report-start','Before you start'],['#/conditions','Choose conditions'],['#/prescreen','Pre-screening questions'],['#/prescreen-exit','You do not need to tell DVLA'],['#/questionnaire/0','Condition questionnaire'],['#/check-answers','Check your answers']]],
+    ['Second series',[['#/second-series-info','We need more information'],['#/second-series-choose','Choose how to respond'],['#/upload','Upload evidence'],['#/upload-review','Review evidence'],['#/appt-company','Choose provider'],['#/appt-branch','Choose branch'],['#/appt-datetime','Choose date and time'],['#/appt-review','Review booking'],['#/appt-manage','Manage appointment'],['#/gp-details','GP details'],['#/nhs-link','Link NHS record'],['#/consent-share','Your consent'],['#/second-confirm','Information sent']]],
+    ['Staying informed',[['#/status','Case status'],['#/messages','Messages']]],
+    ['Receive or revoke',[['#/decision-issue','Decision — licence issued'],['#/accept-licence','Accept your licence'],['#/licence-next-steps','What happens next'],['#/decision-revoke','Decision — licence revoked'],['#/challenge','Challenge a decision'],['#/appeal','Appeal to a tribunal']]],
+    ['Managing your licence',[['#/renewal-notice','Renewal reminder'],['#/renewal-start','Start your review'],['#/renewal-changed','Has anything changed?'],['#/renewal-done','Licence renewed'],['#/auto-renew-offer','Automatic renewals offer'],['#/renewal-preferences','Automatic renewal settings'],['#/auto-renew-done','Preference saved'],['#/manage','Manage your licence'],['#/pause','Pause your licence'],['#/pause-done','Licence paused'],['#/resume','Resume your licence'],['#/resume-done','Licence resumed'],['#/surrender','Surrender your licence'],['#/surrender-done','Licence surrendered'],['#/update-condition','Tell us your condition changed']]]
+  ];
+  let html = warn()+'<a class="govuk-back-link" href="#/hub">Back to journeys</a>'
+    +'<h1 class="govuk-heading-l">All screens</h1>'
+    +'<p class="govuk-body">Every screen in the prototype. Opening one directly will use whatever data is currently in the prototype, so some screens read best after walking a journey.</p>';
+  groups.forEach(([title,items])=>{
+    html += '<div class="index-group"><h3 class="govuk-heading-m">'+esc(title)+'</h3><ul class="index-list">';
+    items.forEach(([h,label])=>{ html += '<li><a href="'+h+'">'+esc(label)+'</a></li>'; });
+    html += '</ul></div>';
+  });
+  app().innerHTML = html;
+}
+
+function renderJourneyComplete(){
+  const jj = JOURNEYS[state.journey] || null;
+  const name = jj ? jj.name : 'Journey';
+  state.journey = null;
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">End of journey</h1><div class="govuk-panel__body">'+esc(name)+'</div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<p class="govuk-body-l">That is the end of this guided journey.</p>'
+    +'<p class="govuk-body">You can walk another journey, or explore the rest of the prototype freely — including the branches this journey did not cover.</p>'
+    +'<div class="button-row">'
+    +'<a class="govuk-button" href="#/hub" style="text-decoration:none;">Choose another journey</a>'
+    +'<button class="govuk-button govuk-button--secondary" onclick="openFree()">Explore the full prototype</button>'
+    +'</div></div></div>';
+}
+
+/* ================================================================
+   SET UP
+   ================================================================ */
+function renderSignIn(){
+  app().innerHTML = warn()+back('#/hub')
+    +note('Set up','<p>The blueprint has the customer creating or reusing a <strong>GOV.UK One Login</strong>. Reusing One Login means most people arrive already identified, and DVLA does not have to re-collect identity data.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Sign in to your driver and vehicles account</h1>'
+    +'<p class="govuk-body">You will use GOV.UK One Login to sign in. If you have used One Login for another government service, you can use the same details.</p>'
+    +'<div class="govuk-form-group"><label class="govuk-label" for="email">Email address</label>'
+    +'<input class="govuk-input" type="email" id="email" value="'+esc(person.email)+'"></div>'
+    +'<div class="govuk-form-group"><label class="govuk-label" for="password">Password</label>'
+    +'<span class="govuk-hint">This is a prototype. Any value will work.</span>'
+    +'<input class="govuk-input" type="password" id="password" value="prototype"></div>'
+    +'<button class="govuk-button" id="continue-btn">Sign in with GOV.UK One Login</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/account'));
+}
+
+function renderAccountSetup(){
+  app().innerHTML = warn()+back('#/signin')
+    +note('Set up','<p>The blueprint captures three things once, at account level, rather than per notification: <strong>personal details and licence number</strong>, <strong>consent to communicate</strong>, and <strong>channel preferences</strong>. Everything downstream reuses them.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Set up</span>'
+    +'<h1 class="govuk-heading-l">Confirm your details</h1>'
+    +'<p class="govuk-body">We have taken these from your driving licence record. Check they are right before you continue.</p>'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Name</dt><dd class="govuk-summary-list__value">'+esc(person.name)+'</dd><dd class="govuk-summary-list__actions"><a href="#/account-setup">Change</a></dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Date of birth</dt><dd class="govuk-summary-list__value">'+esc(person.dob)+'</dd><dd class="govuk-summary-list__actions"><a href="#/account-setup">Change</a></dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Driving licence number</dt><dd class="govuk-summary-list__value">'+esc(person.licenceNo)+'</dd><dd class="govuk-summary-list__actions"><a href="#/account-setup">Change</a></dd></div>'
+    +'</dl>'
+    +'<h2 class="govuk-heading-m">How should we contact you?</h2>'
+    +'<div class="govuk-form-group"><fieldset>'
+    +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="pref" id="pref-email" value="email" checked>'
+    +'<div><label class="govuk-radios__label" for="pref-email"><strong>Email and account notifications</strong></label><span class="govuk-radios__hint">'+esc(person.email)+'</span></div></div>'
+    +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="pref" id="pref-text" value="text">'
+    +'<div><label class="govuk-radios__label" for="pref-text"><strong>Text message</strong></label><span class="govuk-radios__hint">'+esc(person.phone)+'</span></div></div>'
+    +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="pref" id="pref-post" value="post">'
+    +'<div><label class="govuk-radios__label" for="pref-post"><strong>Post</strong></label><span class="govuk-radios__hint">This will take longer</span></div></div>'
+    +'</fieldset></div>'
+    +'<div class="govuk-form-group"><div class="govuk-checkboxes__item">'
+    +'<input class="govuk-checkboxes__input" type="checkbox" id="consentComms" checked>'
+    +'<label class="govuk-checkboxes__label" for="consentComms">I agree to DVLA contacting me about my driving licence using the option above</label></div></div>'
+    +'<button class="govuk-button" id="continue-btn">Save and continue</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const p = document.querySelector('input[name="pref"]:checked');
+    state.contactPref = p ? p.value : 'email';
+    advance('#/account');
+  });
+}
+
+function renderAccount(){
+  const paused = state.licencePaused;
+  let banner = '';
+  if(state.stage===2 && !state.messagesRead){
+    banner = '<div class="govuk-notification-banner"><div class="govuk-notification-banner__header">Important</div>'
+      +'<div class="govuk-notification-banner__content"><p><strong>We need more information about your medical condition.</strong></p>'
+      +'<p><a href="#/second-series-info">Read the message and respond</a></p></div></div>';
+  } else if(state.stage===4 && !state.messagesRead){
+    banner = '<div class="govuk-notification-banner govuk-notification-banner--success"><div class="govuk-notification-banner__header">Update</div>'
+      +'<div class="govuk-notification-banner__content"><p><strong>We have made a decision about your driving licence.</strong></p>'
+      +'<p><a href="#/decision-issue">Read your decision</a></p></div></div>';
+  } else if(paused){
+    banner = '<div class="govuk-notification-banner"><div class="govuk-notification-banner__header">Important</div>'
+      +'<div class="govuk-notification-banner__content"><p><strong>Your licence is paused. You must not drive.</strong></p>'
+      +'<p><a href="#/resume">Resume your licence</a></p></div></div>';
+  }
+
+  let caseCard = '';
+  if(state.stage>0 && state.stage<5){
+    const s = state.stage===2?['Action needed','orange']:state.stage===3?['Under review','yellow']:state.stage===4?['Decision ready','green']:['Received','blue'];
+    caseCard = '<div class="account-card"><div class="account-card__head"><h3 class="govuk-heading-m">Your medical condition case</h3>'
+      +'<span class="govuk-tag govuk-tag--'+s[1]+'">'+s[0]+'</span></div>'
+      +'<dl class="detail-list">'
+      +'<div class="detail-list__row"><dt class="detail-list__key">Case reference</dt><dd class="detail-list__value">'+caseRef+'</dd></div>'
+      +'<div class="detail-list__row"><dt class="detail-list__key">Condition reported</dt><dd class="detail-list__value">'+esc(conditionNames())+'</dd></div>'
+      +'</dl><a class="govuk-button" href="#/status" style="text-decoration:none;">View case status</a></div>';
+  }
+
+  /* Once a medical licence is in place, managing it is a primary card in
+     the main column — it does not replace the report a condition service. */
+  let medicalCard = '';
+  if(state.hasMedicalLicence){
+    medicalCard = '<div class="account-card"><div class="account-card__head"><h3 class="govuk-heading-m">Your medical licence</h3>'
+      +(paused?'<span class="govuk-tag govuk-tag--orange">Paused</span>':'<span class="govuk-tag govuk-tag--green">Active</span>')+'</div>'
+      +'<dl class="detail-list">'
+      +'<div class="detail-list__row"><dt class="detail-list__key">Licence</dt><dd class="detail-list__value">Group 1, 3 year medical review</dd></div>'
+      +'<div class="detail-list__row"><dt class="detail-list__key">Conditions on record</dt><dd class="detail-list__value">'+esc(conditionNames())+'</dd></div>'
+      +'<div class="detail-list__row"><dt class="detail-list__key">Next review</dt><dd class="detail-list__value">7 August 2029</dd></div>'
+      +'<div class="detail-list__row"><dt class="detail-list__key">Automatic review</dt><dd class="detail-list__value">'+(state.autoRenew==='yes'?'On':state.autoRenew==='no'?'Off':'Not set')+'</dd></div>'
+      +'</dl>'
+      +'<a class="govuk-button" href="#/manage" style="text-decoration:none;">Manage your medical licence</a></div>';
+  }
+
+  const licStatus = paused ? 'Paused — you must not drive'
+    : state.hasMedicalLicence ? 'Full driving licence with a 3 year medical review'
+    : person.licenceStatus;
+
+  app().innerHTML = warn()+ (j()? back():'')  + banner
+    + note('Account','<p>The account is the single place the customer returns to. Its content changes with case state — a live case card, an action-needed banner, or licence management once a medical licence is in place.</p>')
+    +'<h1 class="govuk-heading-xl">Welcome, '+esc(person.name)+'</h1>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<div class="account-card"><h3 class="govuk-heading-m">Your personal details</h3><dl class="detail-list">'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Name</dt><dd class="detail-list__value">'+esc(person.name)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Date of birth</dt><dd class="detail-list__value">'+esc(person.dob)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Email address</dt><dd class="detail-list__value">'+esc(person.email)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Mobile phone number</dt><dd class="detail-list__value">'+esc(person.phone)+'</dd></div>'
+    +'</dl></div>'
+    + caseCard
+    + medicalCard
+    +'<div class="account-card"><div class="account-card__head"><h3 class="govuk-heading-m">Your driving licence</h3>'
+    +'<a href="#/manage">View and manage licence details</a></div><dl class="detail-list">'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Licence status</dt><dd class="detail-list__value">'+esc(licStatus)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Licence valid from</dt><dd class="detail-list__value">'+esc(person.licenceFrom)+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Licence valid to</dt><dd class="detail-list__value">'+(state.hasMedicalLicence?'7 August 2029':esc(person.licenceTo))+'</dd></div>'
+    +'<div class="detail-list__row"><dt class="detail-list__key">Driving licence number</dt><dd class="detail-list__value">'+esc(person.licenceNo)+'</dd></div>'
+    +(state.autoRenew?'<div class="detail-list__row"><dt class="detail-list__key">Automatic review</dt><dd class="detail-list__value">'+(state.autoRenew==='yes'?'On':'Off')+'</dd></div>':'')
+    +'</dl></div>'
+    +'</div><div class="govuk-grid-column-one-third">'
+    +'<div class="account-panel"><h3 class="govuk-heading-m">Available services</h3>'
+    +'<a class="service-btn" href="#/account">Add vehicle</a>'
+    +'<a class="service-btn" href="#/account">Get your check code</a>'
+    +'<a class="service-btn" href="#/report-start">Report a medical condition</a></div>'
+    +'<div class="account-panel"><h3 class="govuk-heading-m">Your reminders</h3>'
+    +'<a class="service-btn" href="#/account">Manage reminders</a></div>'
+    +'</div></div>'
+    + (j()? '<div class="button-row"><button class="govuk-button" onclick="advance()">Continue</button></div>' : '');
+}
+
+/* ================================================================
+   FIRST SERIES
+   ================================================================ */
+function renderReportStart(){
+  app().innerHTML = warn()+back('#/account')
+    +note('Notify a condition','<p>Pre-screening happens <em>before</em> the medical questionnaire, so people whose condition does not meet the notification threshold are filtered out early instead of entering the casework queue.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">First series notification</span>'
+    +'<h1 class="govuk-heading-l">Report a medical condition</h1>'
+    +'<p class="govuk-body">Tell us about any medical condition that could affect your driving. You can report more than one condition at the same time.</p>'
+    +'<h2 class="govuk-heading-m">What you will need</h2>'
+    +'<ul class="govuk-body"><li>the name of your condition or conditions</li>'
+    +'<li>dates of any recent episodes, treatment or tests</li>'
+    +'<li>details of the healthcare professionals treating you</li></ul>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">We will ask you a few short questions first. For some conditions you will not need to tell us anything further, and we will let you know straight away.</p></div>'
+    +'<button class="govuk-button govuk-button--start" id="continue-btn">Start</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/conditions'));
+}
+
+function renderConditions(){
+  let items = '';
+  Object.entries(conditions).forEach(([key,c])=>{
+    const checked = state.conditions.indexOf(key)>-1?' checked':'';
+    items += '<div class="govuk-checkboxes__item"><input class="govuk-checkboxes__input" type="checkbox" id="cond-'+key+'" value="'+key+'"'+checked+'>'
+      +'<div><label class="govuk-checkboxes__label" for="cond-'+key+'"><strong>'+esc(c.name)+'</strong></label>'
+      +'<span class="govuk-radios__hint">'+esc(c.hint)+'</span></div></div>';
+  });
+  app().innerHTML = warn()+back('#/report-start')
+    +note('Multiple conditions','<p>The blueprint requires a single journey that copes with several conditions at once and still leads to immediate issue where possible — rather than forcing a separate notification per condition.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<div class="govuk-form-group"><fieldset>'
+    +'<span class="govuk-caption">First series notification</span>'
+    +'<legend class="govuk-fieldset__legend govuk-fieldset__legend--l"><h1 class="govuk-fieldset__heading">What condition do you want to tell us about?</h1></legend>'
+    +'<span class="govuk-hint">Select all that apply.</span>'
+    +'<div style="margin-top:20px;">'+items+'</div></fieldset></div>'
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const sel = Array.from(document.querySelectorAll('.govuk-checkboxes__input:checked')).map(i=>i.value);
+    if(!sel.length){alert('Please select at least one condition.');return;}
+    state.conditions = sel;
+    advance('#/prescreen');
+  });
+}
+
+function renderPrescreen(){
+  let qs = '';
+  state.conditions.forEach(key=>{
+    const c = conditions[key];
+    const val = state.prescreen[key];
+    qs += '<div class="govuk-form-group"><fieldset>'
+      +'<legend class="govuk-fieldset__legend">'+esc(c.name)+'</legend>'
+      +'<span class="govuk-hint">'+esc(c.prescreen)+'</span>'
+      +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="ps-'+key+'" id="ps-'+key+'-yes" value="yes"'+(val==='yes'?' checked':'')+'><label class="govuk-radios__label" for="ps-'+key+'-yes">Yes</label></div>'
+      +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="ps-'+key+'" id="ps-'+key+'-no" value="no"'+(val==='no'?' checked':'')+'><label class="govuk-radios__label" for="ps-'+key+'-no">No</label></div>'
+      +'</fieldset></div>';
+  });
+  app().innerHTML = warn()+back('#/conditions')
+    +note('Filtering out','<p>Answering “no” to every pre-screening question exits the service without creating a case at all. In the current service these people still write in and still take up casework capacity.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">First series notification</span>'
+    +'<h1 class="govuk-heading-l">A few questions before we start</h1>'
+    +'<p class="govuk-body">Your answers tell us whether you need to notify us at all. Many people do not.</p>'
+    + qs
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const answers = {};
+    for(const key of state.conditions){
+      const sel = document.querySelector('input[name="ps-'+key+'"]:checked');
+      if(!sel){alert('Please answer the question about '+conditions[key].name+'.');return;}
+      answers[key]=sel.value;
+    }
+    state.prescreen = answers;
+    const needed = state.conditions.filter(k=>answers[k]==='yes');
+    if(!needed.length){ navigate('#/prescreen-exit'); return; }
+    state.conditions = needed;
+    advance('#/questionnaire/0');
+  });
+}
+
+function renderPrescreenExit(){
+  app().innerHTML = warn()+back('#/prescreen')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">You do not need to tell DVLA</h1><div class="govuk-panel__body">Based on your answers</div></div>'
+    +'<p class="govuk-body">From what you have told us, your condition does not currently meet the threshold for notifying DVLA. You do not need to do anything else.</p>'
+    +'<h2 class="govuk-heading-m">If things change</h2>'
+    +'<p class="govuk-body">Tell us straight away if your condition gets worse, your treatment changes, or you have an episode that affects your driving. You must also tell your insurer.</p>'
+    +'<div class="button-row"><a class="govuk-button" href="#/account" style="text-decoration:none;">Return to your account</a>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/conditions" style="text-decoration:none;">Change my answers</a></div>'
+    +'</div></div>';
+}
+
+function renderQuestionnaire(idx){
+  const i = parseInt(idx,10)||0;
+  if(i>=state.conditions.length){ advance('#/check-answers'); return; }
+  const key = state.conditions[i];
+  const c = conditions[key];
+  const stored = state.answers[key] || {};
+
+  let fields = '';
+  c.questions.forEach(q=>{
+    fields += '<div class="govuk-form-group">';
+    if(q.type==='radio'){
+      fields += '<fieldset><legend class="govuk-fieldset__legend">'+esc(q.label)+'</legend>';
+      if(q.hint) fields += '<span class="govuk-hint">'+esc(q.hint)+'</span>';
+      Object.entries(q.options).forEach(([val,label])=>{
+        fields += '<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="q-'+q.id+'" id="q-'+q.id+'-'+val+'" value="'+val+'"'+(stored[q.id]===val?' checked':'')+'>'
+          +'<label class="govuk-radios__label" for="q-'+q.id+'-'+val+'">'+esc(label)+'</label></div>';
+      });
+      fields += '</fieldset>';
+    } else {
+      fields += '<label class="govuk-label" for="q-'+q.id+'">'+esc(q.label)+'</label>';
+      if(q.hint) fields += '<span class="govuk-hint">'+esc(q.hint)+'</span>';
+      fields += '<input class="govuk-input" type="text" id="q-'+q.id+'" value="'+esc(stored[q.id]||'')+'">';
+    }
+    fields += '</div>';
+  });
+
+  app().innerHTML = warn()
+    + (i===0 ? back('#/prescreen') : '<a class="govuk-back-link" href="#/questionnaire/'+(i-1)+'">Back</a>')
+    
+    + note('One or two clicks','<p>The blueprint asks for a condition-specific first-series questionnaire answerable in <strong>one or two clicks</strong>, for single or multiple conditions. Keeping each set this short is what makes same-session decisions possible.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">First series notification — condition '+(i+1)+' of '+state.conditions.length+'</span>'
+    +'<h1 class="govuk-heading-l">About your '+esc(c.name.toLowerCase())+'</h1>'
+    + fields
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const out = {};
+    for(const q of c.questions){
+      if(q.type==='radio'){
+        const sel = document.querySelector('input[name="q-'+q.id+'"]:checked');
+        if(!sel){alert('Please answer: '+q.label);return;}
+        out[q.id]=sel.value;
+      } else {
+        const v = document.getElementById('q-'+q.id).value.trim();
+        if(!v){alert('Please answer: '+q.label);return;}
+        out[q.id]=v;
+      }
+    }
+    state.answers[key]=out;
+    /* More conditions to answer? Stay on this step of the journey. */
+    if(i+1 < state.conditions.length){ navigate('#/questionnaire/'+(i+1)); return; }
+    advance(state.secondNeeded ? '#/second-series-info' : '#/check-answers');
+  });
+}
+
+function renderCheckAnswers(){
+  let rows = '<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions reported</dt>'
+    +'<dd class="govuk-summary-list__value">'+esc(conditionNames())+'</dd>'
+    +'<dd class="govuk-summary-list__actions"><a href="#/conditions">Change</a></dd></div>';
+  state.conditions.forEach((key,i)=>{
+    const c = conditions[key]; const stored = state.answers[key]||{};
+    c.questions.forEach(q=>{
+      const raw = stored[q.id];
+      const val = q.type==='radio' ? (q.options[raw]||'—') : (raw||'—');
+      rows += '<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">'+esc(q.label)+'</dt>'
+        +'<dd class="govuk-summary-list__value">'+esc(val)+'</dd>'
+        +'<dd class="govuk-summary-list__actions"><a href="#/questionnaire/'+i+'">Change</a></dd></div>';
+    });
+  });
+  app().innerHTML = warn()+back('#/questionnaire/0')
+    +note('Check answers','<p>Check answers appears only when the first series is enough on its own. If a second series is needed, the blueprint deliberately skips it — there is no point confirming answers that are about to be superseded by clinical evidence.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Check your answers before sending</h1>'
+    +'<dl class="govuk-summary-list">'+rows+'</dl>'
+    +'<h2 class="govuk-heading-m">Declaration</h2>'
+    +'<p class="govuk-body">By sending this notification you confirm that the information you have given is correct to the best of your knowledge. It is an offence to give false information.</p>'
+    +'<button class="govuk-button" id="continue-btn">Accept and send</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{ state.stage=4; advance('#/decision-issue'); });
+}
+
+/* ================================================================
+   RECEIVE OR REVOKE
+   ================================================================ */
+function renderDecisionIssue(){
+  state.messagesRead = true;
+  app().innerHTML = warn()+ (j()? back():'<a class="govuk-back-link" href="#/status">Back</a>') 
+    +note('Replacing D203 and D202','<p>This single screen replaces two paper artefacts: the notice that the existing licence is being revoked, and the form accepting a short-term medical licence. The blueprint is explicit that <strong>none of that language appears in the front-end experience</strong> — the customer sees plain English about what they can do.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Your decision</span>'
+    +'<h1 class="govuk-heading-l">You can keep driving</h1>'
+    +'<div class="govuk-inset-text" style="border-left-color:var(--green);">'
+    +'<p style="margin:0 0 10px;"><strong>We are replacing your current licence with a medical driving licence, valid for 3 years.</strong></p>'
+    +'<p style="margin:0;">Your entitlement to drive is unchanged. We will review it again before it expires.</p></div>'
+    +'<h2 class="govuk-heading-m">Your decision in full</h2>'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Decision</dt><dd class="govuk-summary-list__value"><span class="govuk-tag govuk-tag--green">Licence issued</span></dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Licence type</dt><dd class="govuk-summary-list__value">Group 1 (car and motorcycle), with a 3 year medical review</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Valid until</dt><dd class="govuk-summary-list__value">7 August 2029</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions considered</dt><dd class="govuk-summary-list__value">'+esc(conditionNames())+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Decided by</dt><dd class="govuk-summary-list__value">'+esc(caseworker.name)+', '+esc(caseworker.team)+'</dd></div>'
+    +'</dl>'
+    +'<p class="govuk-body">To put this in place you need to accept it. You can do that online now — there is nothing to print, sign or post.</p>'
+    +'<button class="govuk-button" id="continue-btn">Accept your medical licence</button>'
+    +'<hr class="govuk-section-break">'
+    +'<h2 class="govuk-heading-m">If you disagree with this decision</h2>'
+    +'<p class="govuk-body">You can ask us to look at it again, or appeal to an independent tribunal.</p>'
+    +'<div class="button-row">'
+    +'<a class="govuk-button govuk-button--secondary" href="#/challenge" style="text-decoration:none;">Challenge this decision</a>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/appeal" style="text-decoration:none;">Appeal to a tribunal</a>'
+    +'</div></div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/accept-licence'));
+}
+
+function renderAcceptLicence(){
+  app().innerHTML = warn()+back('#/decision-issue')
+    +note('Digital acceptance','<p>Accepting online is the digital replacement for returning a signed D202 by post. The blueprint also notes the customer should be able to return it digitally — the acceptance <em>is</em> the return.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Accept your medical driving licence</h1>'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Licence</dt><dd class="govuk-summary-list__value">Group 1, 3 year medical review</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Valid until</dt><dd class="govuk-summary-list__value">7 August 2029</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions considered</dt><dd class="govuk-summary-list__value">'+esc(conditionNames())+'</dd></div>'
+    +'</dl>'
+    +'<div class="govuk-form-group"><div class="govuk-checkboxes__item">'
+    +'<input class="govuk-checkboxes__input" type="checkbox" id="acceptTerms">'
+    +'<label class="govuk-checkboxes__label" for="acceptTerms">I accept this medical driving licence and understand I must tell DVLA if my condition changes</label></div></div>'
+    +'<button class="govuk-button" id="continue-btn">Accept licence</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    if(!document.getElementById('acceptTerms').checked){alert('Please confirm you accept the licence.');return;}
+    state.hasMedicalLicence = true; state.licenceAccepted = true; state.stage = 5;
+    advance('#/licence-next-steps');
+  });
+}
+
+function renderLicenceNextSteps(){
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">Licence accepted</h1><div class="govuk-panel__body">Valid until 7 August 2029</div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +note('Next steps','<p>The blueprint calls for the customer to be told exactly what happens next: the new licence arrives within <strong>5 working days</strong>, and the expired one must come back. Saying both here removes the most common follow-up contact.</p>')
+    +'<h2 class="govuk-heading-m">What happens now</h2>'
+    +'<ul class="govuk-body">'
+    +'<li>your new licence will arrive in the post <strong>within 5 working days</strong></li>'
+    +'<li>once it arrives, please return your old licence to us in the prepaid envelope</li>'
+    +'<li>you can keep driving in the meantime</li>'
+    +'<li>we will remind you 8 weeks before your review is due in 2029</li>'
+    +'</ul>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">Your account has been updated. You can tell us at any time if your condition changes, or pause your licence if you stop driving.</p></div>'
+    +'<div class="button-row">'
+    +'<button class="govuk-button" onclick="advance(\'#/manage\')">Continue</button>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/account" style="text-decoration:none;">Return to your account</a>'
+    +'</div></div></div>';
+}
+
+function renderDecisionRevoke(){
+  app().innerHTML = warn()+'<a class="govuk-back-link" href="#/status">Back</a>'
+    +note('The revoke branch','<p>The blueprint’s issue/revoke decision point has a second outcome. Even here the language stays plain, and the customer can complete everything online rather than waiting for post.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Your decision</span>'
+    +'<h1 class="govuk-heading-l">You must stop driving</h1>'
+    +'<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span>'
+    +'<span class="govuk-warning-text__text">You must stop driving now and return your licence to us.</span></div>'
+    +'<p class="govuk-body">Based on the medical information we received, you do not currently meet the medical standard for driving. We have to withdraw your licence.</p>'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Decision</dt><dd class="govuk-summary-list__value"><span class="govuk-tag govuk-tag--red">Licence withdrawn</span></dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">You may reapply from</dt><dd class="govuk-summary-list__value">7 February 2027</dd></div>'
+    +'</dl>'
+    +'<h2 class="govuk-heading-m">What you need to do</h2>'
+    +'<p class="govuk-body">Confirm below that you have stopped driving. You do not need to post your photocard — destroy it and we will update your record.</p>'
+    +'<div class="button-row">'
+    +'<a class="govuk-button" href="#/account" style="text-decoration:none;">Confirm and return my licence</a>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/challenge" style="text-decoration:none;">Challenge this decision</a>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/appeal" style="text-decoration:none;">Appeal to a tribunal</a>'
+    +'</div></div></div>';
+}
+
+/* ================================================================
+   SECOND SERIES
+   ================================================================ */
+function renderSecondSeriesInfo(){
+  state.stage = 2; state.messagesRead = true;
+  const cond = primaryCondition();
+  app().innerHTML = warn()+back('#/status')
+    +note('Why, before what','<p>The blueprint puts a specific, condition-driven reason in front of the customer before asking for anything. Explaining <em>why</em> is what makes the request feel proportionate rather than bureaucratic.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Second series notification</span>'
+    +'<h1 class="govuk-heading-l">We need more information</h1>'
+    +'<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span>'
+    +'<span class="govuk-warning-text__text">We cannot make a decision about your licence until we have this.</span></div>'
+    +'<h2 class="govuk-heading-m">Why we are asking</h2>'
+    +'<p class="govuk-body">'+esc(secondSeriesReasons[cond])+'</p>'
+    +'<h2 class="govuk-heading-m">What we need</h2>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">'+esc(evidenceNeeded[cond])+'</p></div>'
+    +'<p class="govuk-body">There are three ways to give us this. Choose whichever is easiest for you — they all take the same time to process.</p>'
+    +'<button class="govuk-button" id="continue-btn">Choose how to provide this</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/second-series-choose'));
+}
+
+function renderSecondSeriesChoose(){
+  app().innerHTML = warn()+back('#/second-series-info')
+    +note('All three, always','<p>In the live service the options offered would be condition-specific — some conditions only support one or two. For this prototype all three are always shown so each can be demonstrated.</p>')
+    +'<span class="govuk-caption">Second series notification</span>'
+    +'<h1 class="govuk-heading-l">How do you want to give us this information?</h1>'
+    +'<div class="option-cards">'
+    +'<button class="option-card" data-route="upload"><span class="govuk-tag govuk-tag--green">Fastest</span>'
+    +'<h3>Upload it yourself</h3><p>You already have the report, test result or letter and can upload a photo or file now.</p></button>'
+    +'<button class="option-card" data-route="appointment"><span class="govuk-tag govuk-tag--blue">No cost to you</span>'
+    +'<h3>Book an appointment</h3><p>See an approved practitioner near you who will assess you and send us the results directly.</p></button>'
+    +'<button class="option-card" data-route="gp"><span class="govuk-tag govuk-tag--grey">Nothing for you to do</span>'
+    +'<h3>Ask your GP or specialist</h3><p>We contact your GP or specialist for you, or use your NHS record, and chase them until they reply.</p></button>'
+    +'</div>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">You can change your mind later. If one route stalls, we will offer you another.</p></div>';
+  document.querySelectorAll('.option-card').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      state.route = btn.dataset.route;
+      const jj = j();
+      if(jj){ advance(); return; }
+      navigate(btn.dataset.route==='upload'?'#/upload':btn.dataset.route==='appointment'?'#/appt-company':'#/gp-details');
+    });
+  });
+}
+
+/* --- Route A: digital upload --- */
+function renderUpload(){
+  const cond = primaryCondition();
+  let files = '';
+  if(state.uploads.length){
+    state.uploads.forEach((f,i)=>{
+      files += '<li class="file-list__item"><span>'+esc(f)+'</span><button class="file-list__remove" data-remove="'+i+'">Remove</button></li>';
+    });
+    files = '<h2 class="govuk-heading-m">Files you have added</h2><ul class="file-list">'+files+'</ul>';
+  }
+  const guide = (evidenceGuidance[cond]||[]).map(g=>'<li>'+esc(g)+'</li>').join('');
+  app().innerHTML = warn()+back('#/second-series-choose')
+    +note('Guidance at the point of need','<p>The blueprint asks for guidance on what documents are accepted for that specific condition, shown where the customer is uploading — not buried in a separate help page.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Second series notification</span>'
+    +'<h1 class="govuk-heading-l">Upload your evidence</h1>'
+    +'<div class="govuk-inset-text"><p style="margin:0;"><strong>What we need:</strong> '+esc(evidenceNeeded[cond])+'</p></div>'
+    +'<h2 class="govuk-heading-m">What makes a document acceptable</h2>'
+    +'<ul class="govuk-body">'+guide+'</ul>'
+    +'<div class="dropzone" id="dropzone">'
+    +'<div class="dropzone__title">Drag and drop your files here</div>'
+    +'<div class="dropzone__hint">or <a href="#" id="browse">choose a file from your device</a><br>PDF, JPG or PNG, up to 10MB each. Most people photograph the letter with their phone.</div>'
+    +'</div>'
+    +'<input type="file" id="fileInput" multiple style="display:none;">'
+    + files
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+
+  const dz = document.getElementById('dropzone');
+  const fi = document.getElementById('fileInput');
+  document.getElementById('browse').addEventListener('click',e=>{e.preventDefault();fi.click();});
+  dz.addEventListener('click',()=>fi.click());
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('is-over');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('is-over'));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault(); dz.classList.remove('is-over');
+    Array.from(e.dataTransfer.files).forEach(f=>state.uploads.push(f.name));
+    route();
+  });
+  fi.addEventListener('change',e=>{
+    Array.from(e.target.files).forEach(f=>state.uploads.push(f.name));
+    route();
+  });
+  document.querySelectorAll('[data-remove]').forEach(b=>{
+    b.addEventListener('click',()=>{ state.uploads.splice(parseInt(b.dataset.remove,10),1); route(); });
+  });
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    if(!state.uploads.length){
+      if(!confirm('No file added. Add a sample document so the prototype can continue?')) return;
+      state.uploads.push('neurology-report-march-2026.pdf');
+    }
+    advance('#/upload-review');
+  });
+}
+
+function renderUploadReview(){
+  let files = '';
+  state.uploads.forEach((f,i)=>{
+    files += '<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Document '+(i+1)+'</dt>'
+      +'<dd class="govuk-summary-list__value">'+esc(f)+'</dd>'
+      +'<dd class="govuk-summary-list__actions"><a href="#/upload">Change</a></dd></div>';
+  });
+  app().innerHTML = warn()+back('#/upload')
+    +note('Review before sending','<p>The blueprint calls out that customers should be able to <strong>review the evidence they uploaded</strong>. A blurry photo caught here saves a full round trip and several days.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Check what you are sending us</h1>'
+    +'<p class="govuk-body">Make sure each document is readable and shows the whole page. If something is unclear we will have to ask you again.</p>'
+    +'<dl class="govuk-summary-list">'+files+'</dl>'
+    +'<div class="govuk-form-group"><label class="govuk-label" for="note">Is there anything else we should know? (optional)</label>'
+    +'<textarea class="govuk-textarea" id="note"></textarea></div>'
+    +'<button class="govuk-button" id="continue-btn">Send to DVLA</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{ state.stage=3; advance('#/second-confirm'); });
+}
+
+/* --- Route B: appointment --- */
+function providersFor(cond){ return providersByCondition[cond] || providersByCondition._default; }
+
+function renderApptCompany(){
+  const cond = primaryCondition();
+  const list = providersFor(cond);
+  let items = '';
+  list.forEach(p=>{
+    items += '<button class="choice-list__item" data-id="'+p.id+'">'
+      +'<div class="choice-list__body"><strong>'+esc(p.name)+(p.tag?' <span class="govuk-tag govuk-tag--blue" style="margin-left:8px;">'+esc(p.tag)+'</span>':'')+'</strong>'
+      +'<span>'+esc(p.desc)+'</span></div><span aria-hidden="true">›</span></button>';
+  });
+  app().innerHTML = warn()+back('#/second-series-choose')
+    +note('Condition-specific partners','<p>The blueprint surfaces third party partners as a choice, chosen by condition. For an eyesight case that means high-street opticians such as Specsavers, which most people can reach easily and at no cost.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Second series notification</span>'
+    +'<h1 class="govuk-heading-l">Choose who you would like to see</h1>'
+    +'<p class="govuk-body">These providers are approved to carry out the test DVLA needs for your condition. There is no cost to you, and they send the results straight to us.</p>'
+    +'<div class="choice-list">'+items+'</div>'
+    +'</div></div>';
+  document.querySelectorAll('.choice-list__item').forEach(b=>{
+    b.addEventListener('click',()=>{ state.apptProvider = b.dataset.id; advance('#/appt-branch'); });
+  });
+}
+
+function renderApptBranch(){
+  const branches = branchesByProvider[state.apptProvider] || branchesByProvider.dvla;
+  let items = '';
+  branches.forEach(b=>{
+    items += '<button class="choice-list__item" data-id="'+b.id+'">'
+      +'<div class="choice-list__body"><strong>'+esc(b.name)+'</strong>'
+      +'<span>'+esc(b.addr)+' &nbsp;·&nbsp; '+esc(b.dist)+' away</span></div><span aria-hidden="true">›</span></button>';
+  });
+  app().innerHTML = warn()+back('#/appt-company')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Second series notification</span>'
+    +'<h1 class="govuk-heading-l">Choose a branch</h1>'
+    +'<p class="govuk-body">Sorted by distance from your home address.</p>'
+    +'<div class="choice-list">'+items+'</div>'
+    +'</div></div>';
+  document.querySelectorAll('.choice-list__item').forEach(b=>{
+    b.addEventListener('click',()=>{ state.apptBranch = b.dataset.id; advance('#/appt-datetime'); });
+  });
+}
+
+function branchName(){
+  for(const k in branchesByProvider){
+    const found = branchesByProvider[k].find(b=>b.id===state.apptBranch);
+    if(found) return found;
+  }
+  return {name:'—',addr:''};
+}
+
+function renderApptDateTime(){
+  let dates = '';
+  apptDates.forEach((d,i)=>{
+    dates += '<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="apptDate" id="d'+i+'" value="'+esc(d)+'"'+(state.apptDate===d?' checked':'')+'>'
+      +'<label class="govuk-radios__label" for="d'+i+'">'+esc(d)+'</label></div>';
+  });
+  let slots = '';
+  apptTimes.forEach((t,i)=>{
+    slots += '<button class="slot'+(state.apptTime===t?' is-selected':'')+'" data-time="'+esc(t)+'">'+esc(t)+'</button>';
+  });
+  app().innerHTML = warn()+back('#/appt-branch')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Second series notification</span>'
+    +'<h1 class="govuk-heading-l">Choose a date and time</h1>'
+    +'<p class="govuk-body">Appointments at <strong>'+esc(branchName().name)+'</strong>. The test takes about 20 minutes.</p>'
+    +'<div class="govuk-form-group"><fieldset><legend class="govuk-fieldset__legend">Available dates</legend>'+dates+'</fieldset></div>'
+    +'<div class="govuk-form-group"><fieldset><legend class="govuk-fieldset__legend">Available times</legend>'
+    +'<div class="slot-grid">'+slots+'</div></fieldset></div>'
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+  document.querySelectorAll('.slot').forEach(s=>{
+    s.addEventListener('click',()=>{
+      state.apptTime = s.dataset.time;
+      document.querySelectorAll('.slot').forEach(x=>x.classList.remove('is-selected'));
+      s.classList.add('is-selected');
+    });
+  });
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const d = document.querySelector('input[name="apptDate"]:checked');
+    if(!d){alert('Please choose a date.');return;}
+    if(!state.apptTime){alert('Please choose a time.');return;}
+    state.apptDate = d.value;
+    advance('#/appt-review');
+  });
+}
+
+function renderApptReview(){
+  const b = branchName();
+  app().innerHTML = warn()+back('#/appt-datetime')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Check your appointment</h1>'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Where</dt><dd class="govuk-summary-list__value"><strong>'+esc(b.name)+'</strong><br><span class="govuk-body-s" style="color:var(--dark-grey);">'+esc(b.addr)+'</span></dd><dd class="govuk-summary-list__actions"><a href="#/appt-branch">Change</a></dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Date</dt><dd class="govuk-summary-list__value">'+esc(state.apptDate)+'</dd><dd class="govuk-summary-list__actions"><a href="#/appt-datetime">Change</a></dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Time</dt><dd class="govuk-summary-list__value">'+esc(state.apptTime)+'</dd><dd class="govuk-summary-list__actions"><a href="#/appt-datetime">Change</a></dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Cost</dt><dd class="govuk-summary-list__value">Free — paid for by DVLA</dd></div>'
+    +'</dl>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">Your results come straight to us. You do not need to collect or post anything.</p></div>'
+    +'<button class="govuk-button" id="continue-btn">Confirm appointment</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{ state.stage=3; advance('#/messages'); });
+}
+
+function renderApptManage(){
+  const b = branchName();
+  app().innerHTML = warn()+back('#/status')
+    +note('Reminders and updates','<p>The blueprint asks for appointment details, reminders and updates to live in the account. Managing the booking here rather than by phone is what keeps the appointment from being silently missed.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Your appointment</h1>'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Where</dt><dd class="govuk-summary-list__value"><strong>'+esc(b.name)+'</strong><br><span class="govuk-body-s" style="color:var(--dark-grey);">'+esc(b.addr)+'</span></dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">When</dt><dd class="govuk-summary-list__value">'+esc(state.apptDate)+' at '+esc(state.apptTime)+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Reminders</dt><dd class="govuk-summary-list__value">7 days and 1 day before, by '+(state.contactPref==='text'?'text message':'email')+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Status</dt><dd class="govuk-summary-list__value"><span class="govuk-tag govuk-tag--blue">Booked</span></dd></div>'
+    +'</dl>'
+    +'<h2 class="govuk-heading-m">Need to change it?</h2>'
+    +'<p class="govuk-body">You can move or cancel your appointment up to 24 hours beforehand. If you cancel, we will ask you to choose another way to give us the information.</p>'
+    +'<div class="button-row">'
+    +'<a class="govuk-button govuk-button--secondary" href="#/appt-datetime" style="text-decoration:none;">Change date or time</a>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/second-series-choose" style="text-decoration:none;">Cancel and choose another way</a>'
+    +'</div>'
+    + (j()?'<div class="button-row"><button class="govuk-button" onclick="advance()">Continue</button></div>':'')
+    +'</div></div>';
+}
+
+/* --- Route C: GP / NHS --- */
+function renderGpDetails(){
+  app().innerHTML = warn()+back('#/second-series-choose')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Second series notification</span>'
+    +'<h1 class="govuk-heading-l">Who should we ask?</h1>'
+    +'<p class="govuk-body">Give us the details of the GP, consultant or clinic who knows most about your condition. We will contact them for you and chase them if they do not reply.</p>'
+    +'<div class="govuk-form-group"><label class="govuk-label" for="gpName">Name of the healthcare professional</label>'
+    +'<span class="govuk-hint">For example, Dr Alex Bennett</span>'
+    +'<input class="govuk-input" type="text" id="gpName" value="'+esc(state.gpName||'Dr Alex Bennett')+'"></div>'
+    +'<div class="govuk-form-group"><label class="govuk-label" for="gpPractice">Practice, clinic or hospital</label>'
+    +'<span class="govuk-hint">For example, Riverside Medical Practice</span>'
+    +'<input class="govuk-input" type="text" id="gpPractice" value="'+esc(state.gpPractice||'Riverside Medical Practice')+'"></div>'
+    +'<div class="govuk-form-group"><label class="govuk-label" for="gpAddress">Address or postcode</label>'
+    +'<input class="govuk-input" type="text" id="gpAddress" value="'+esc(state.gpAddress||'CF10 1AA')+'"></div>'
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const n=document.getElementById('gpName').value.trim();
+    const p=document.getElementById('gpPractice').value.trim();
+    if(!n){alert('Please enter the name of the healthcare professional.');return;}
+    if(!p){alert('Please enter the practice, clinic or hospital.');return;}
+    state.gpName=n; state.gpPractice=p; state.gpAddress=document.getElementById('gpAddress').value.trim();
+    advance('#/nhs-link');
+  });
+}
+
+function renderNhsLink(){
+  radioPage({
+    caption:'Second series notification',
+    title:'Would you like to share your NHS health record?',
+    hint:'Sharing your record usually means we do not need to write to anyone, which can save several weeks.',
+    name:'nhsLinked',
+    stateKey:'nhsLinked',
+    note:note('Future journey','<p>The blueprint marks NHS record sharing as a <strong>future journey</strong> — dependent on integration that does not exist yet. It is shown here so the target experience can be discussed alongside what is deliverable now.</p>'),
+    richOptions:[
+      {value:'yes',label:'Yes, link my NHS health record',hint:'You will be asked to sign in to the NHS App to approve this'},
+      {value:'no',label:'No, just contact my GP',hint:'We will write to '+(state.gpName||'your GP')+' instead'}
+    ],
+    fallbackBack:'#/gp-details',
+    fallbackNext:'#/consent-share'
+  });
+}
+
+function renderConsentShare(){
+  app().innerHTML = warn()+back('#/nhs-link')
+    +note('Informed consent','<p>The blueprint is specific: consent must be <strong>informed</strong>, it must be clear what is being shared and why, and it must be possible to <strong>withdraw</strong> it later. That last point is shown on this screen and repeated in the account.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Second series notification</span>'
+    +'<h1 class="govuk-heading-l">Your consent</h1>'
+    +'<p class="govuk-body">Before we can ask for medical information about you, we need your permission.</p>'
+    +'<h2 class="govuk-heading-m">What you are agreeing to</h2>'
+    +'<ul class="govuk-body">'
+    +'<li>we will ask <strong>'+esc(state.gpName||'your GP')+'</strong> only for information relevant to your driving</li>'
+    +(state.nhsLinked==='yes'?'<li>we will read the parts of your NHS record that relate to <strong>'+esc(conditionNames())+'</strong></li>':'')
+    +'<li>we will not share your medical information with anyone outside DVLA</li>'
+    +'<li>we will keep it only as long as we need it to make a decision</li>'
+    +'</ul>'
+    +'<div class="govuk-inset-text"><p style="margin:0;"><strong>You can withdraw your consent at any time</strong> from your account. If you do, we will stop the request — but we may not be able to make a decision without the information, and may have to ask you for it another way.</p></div>'
+    +'<div class="govuk-form-group"><div class="govuk-checkboxes__item">'
+    +'<input class="govuk-checkboxes__input" type="checkbox" id="consentGiven">'
+    +'<label class="govuk-checkboxes__label" for="consentGiven">I understand and give my consent</label></div></div>'
+    +'<button class="govuk-button" id="continue-btn">Send request</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    if(!document.getElementById('consentGiven').checked){alert('We need your consent before we can contact anyone.');return;}
+    state.consentGiven = true; state.stage = 3;
+    advance('#/second-confirm');
+  });
+}
+
+function renderSecondConfirm(){
+  let detail = '';
+  if(state.route==='upload'){
+    let files=''; state.uploads.forEach(f=>{files+='<li class="file-list__item"><span>'+esc(f)+'</span><span class="govuk-tag govuk-tag--green">Received</span></li>';});
+    detail = '<h2 class="govuk-heading-m">What you sent us</h2><ul class="file-list">'+files+'</ul>'
+      +'<p class="govuk-body">A receipt has been sent to '+esc(person.email)+'. You do not need to post the originals.</p>';
+  } else if(state.route==='appointment'){
+    const b = branchName();
+    detail = '<h2 class="govuk-heading-m">Your appointment</h2><dl class="govuk-summary-list">'
+      +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Where</dt><dd class="govuk-summary-list__value"><strong>'+esc(b.name)+'</strong><br><span class="govuk-body-s" style="color:var(--dark-grey);">'+esc(b.addr)+'</span></dd></div>'
+      +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">When</dt><dd class="govuk-summary-list__value">'+esc(state.apptDate)+' at '+esc(state.apptTime)+'</dd></div>'
+      +'</dl><p class="govuk-body">We will remind you 7 days and 1 day before. Your results come straight to us.</p>';
+  } else {
+    detail = '<h2 class="govuk-heading-m">Your request</h2><dl class="govuk-summary-list">'
+      +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">We will contact</dt><dd class="govuk-summary-list__value">'+esc(state.gpName)+', '+esc(state.gpPractice)+'</dd></div>'
+      +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">NHS health record</dt><dd class="govuk-summary-list__value">'+(state.nhsLinked==='yes'?'Linked and shared with DVLA':'Not shared')+'</dd></div>'
+      +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Consent</dt><dd class="govuk-summary-list__value">Given — <a href="#/account">withdraw consent</a></dd></div>'
+      +'</dl><p class="govuk-body">There is nothing else for you to do. We will chase your GP if they do not reply, and keep you updated.</p>';
+  }
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">Information sent</h1>'
+    +'<div class="govuk-panel__body">Case reference<br><strong>'+caseRef+'</strong></div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    + detail
+    +'<h2 class="govuk-heading-m">What happens next</h2>'
+    +'<p class="govuk-body">Your case is with <strong>'+esc(caseworker.name)+'</strong>, '+esc(caseworker.team)+'. For cases like yours we usually make a decision within <strong>'+esc(caseworker.responseTime)+'</strong>.</p>'
+    +'<button class="govuk-button" id="continue-btn">View your case status</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/status'));
+}
+
+/* ================================================================
+   STAYING INFORMED
+   ================================================================ */
+function renderStatus(){
+  const s = state.stage===2?['Action needed','orange','We need more information from you before we can make a decision.']
+    : state.stage===3?['Under review','yellow','We have everything we need and your case is with a caseworker.']
+    : state.stage===4?['Decision ready','green','We have made a decision about your driving licence.']
+    : state.stage>=5?['Complete','green','Your medical licence is in place.']
+    : ['Received','blue','We have your notification and are reviewing it.'];
+
+  let timeline = '<li class="timeline__item timeline__item--done"><span class="timeline__date">7 August 2026</span>'
+    +'<span class="timeline__title">Notification received</span>We received your notification about '+esc(conditionNames())+'.</li>';
+  if(state.stage>=2) timeline += '<li class="timeline__item timeline__item--'+(state.stage===2?'now':'done')+'"><span class="timeline__date">8 August 2026</span>'
+    +'<span class="timeline__title">More information requested</span>We asked you for further information.</li>';
+  if(state.stage>=3){
+    const how = state.route==='upload'?'You uploaded '+state.uploads.length+' document'+(state.uploads.length===1?'':'s')+'.'
+      : state.route==='appointment'?'You booked an assessment appointment.'
+      : 'You asked us to request information from your GP.';
+    timeline += '<li class="timeline__item timeline__item--'+(state.stage===3?'now':'done')+'"><span class="timeline__date">8 August 2026</span>'
+      +'<span class="timeline__title">Information provided</span>'+esc(how)+'</li>';
+  }
+  if(state.stage>=4) timeline += '<li class="timeline__item timeline__item--done"><span class="timeline__date">10 August 2026</span>'
+    +'<span class="timeline__title">Decision made</span>We have made a decision about your driving licence.</li>';
+  if(state.stage<4) timeline += '<li class="timeline__item"><span class="timeline__date">Expected within '+esc(caseworker.responseTime)+'</span>'
+    +'<span class="timeline__title">Decision</span>We will tell you as soon as we have made a decision.</li>';
+
+  let apptBlock = '';
+  if(state.route==='appointment' && state.apptBranch){
+    const b = branchName();
+    apptBlock = '<h2 class="govuk-heading-m">Your appointment</h2><dl class="govuk-summary-list">'
+      +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Where</dt><dd class="govuk-summary-list__value">'+esc(b.name)+'</dd></div>'
+      +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">When</dt><dd class="govuk-summary-list__value">'+esc(state.apptDate)+' at '+esc(state.apptTime)+'</dd></div>'
+      +'</dl><p class="govuk-body"><a href="#/appt-manage">Manage this appointment</a></p>';
+  }
+  let action = '';
+  if(state.stage===2){
+    action = '<div class="govuk-notification-banner"><div class="govuk-notification-banner__header">Action needed</div>'
+      +'<div class="govuk-notification-banner__content"><p><strong>We need more information before we can make a decision.</strong></p>'
+      +'<p><a href="#/second-series-info">Tell us how you want to provide this</a></p></div></div>';
+  }
+  if(state.stage===4){
+    action = '<div class="govuk-notification-banner govuk-notification-banner--success"><div class="govuk-notification-banner__header">Decision ready</div>'
+      +'<div class="govuk-notification-banner__content"><p><strong>We have made a decision about your driving licence.</strong></p>'
+      +'<p><a href="#/decision-issue">View your decision</a></p></div></div>';
+  }
+
+  app().innerHTML = warn()+ (j()? back():'<a class="govuk-back-link" href="#/account">Back</a>')  + action
+    +note('A real timescale','<p>The blueprint asks for a <strong>true</strong> estimated time to update, based on cases like this one — not a generic service standard. Naming the team, and the person, is what turns a queue into an accountable commitment.</p>')
+    +'<h1 class="govuk-heading-l">Your medical condition case</h1>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Case reference</dt><dd class="govuk-summary-list__value">'+caseRef+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Status</dt><dd class="govuk-summary-list__value"><span class="govuk-tag govuk-tag--'+s[1]+'">'+s[0]+'</span> '+esc(s[2])+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions reported</dt><dd class="govuk-summary-list__value">'+esc(conditionNames())+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Expected update</dt><dd class="govuk-summary-list__value">'+(state.stage>=4?'Complete':'Usually within <strong>'+esc(caseworker.responseTime)+'</strong> for cases like yours')+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Who is dealing with your case</dt><dd class="govuk-summary-list__value"><strong>'+esc(caseworker.name)+'</strong><br>'+esc(caseworker.team)+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Can you drive?</dt><dd class="govuk-summary-list__value">'+(state.stage>=5?'Yes, under your medical driving licence.':'Yes, while we consider your case — unless your doctor has told you to stop.')+'</dd></div>'
+    +'</dl>'
+    + apptBlock
+    +'<h2 class="govuk-heading-m">Case history</h2><ul class="timeline">'+timeline+'</ul>'
+    +'<div class="button-row">'
+    + (j()?'<button class="govuk-button" onclick="advance()">Continue</button>':'')
+    +'<a class="govuk-button govuk-button--secondary" href="#/messages" style="text-decoration:none;">View messages</a>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/account" style="text-decoration:none;">Return to your account</a>'
+    +'</div>'
+    + (!j() && state.stage===3 ? '<hr class="govuk-section-break"><div class="govuk-inset-text"><p style="margin:0;"><strong>Prototype control:</strong> <a href="#/decision-ready">simulate DVLA making a decision</a>.</p></div>' : '')
+    +'</div></div>';
+}
+
+function renderMessages(){
+  state.messagesRead = true;
+  let items = '';
+  if(state.stage>=4){
+    items += '<li class="message-list__item message-list__item--unread"><span class="message-list__meta">10 August 2026, 9:14am — '+esc(caseworker.team)+'</span>'
+      +'<h3 class="govuk-heading-s" style="margin:5px 0;">A decision has been made about your driving licence</h3>'
+      +'<p class="govuk-body" style="margin:0 0 10px;">You can now view your decision and accept your medical driving licence.</p>'
+      +'<a href="#/decision-issue">View your decision</a></li>';
+  }
+  if(state.stage>=3 && state.route==='appointment' && state.apptBranch){
+    const b = branchName();
+    items += '<li class="message-list__item message-list__item--unread"><span class="message-list__meta">8 August 2026, 3:02pm — Drivers Medical</span>'
+      +'<h3 class="govuk-heading-s" style="margin:5px 0;">Your appointment is booked</h3>'
+      +'<p class="govuk-body" style="margin:0 0 10px;"><strong>'+esc(b.name)+'</strong><br>'+esc(b.addr)+'<br>'
+      +esc(state.apptDate)+' at '+esc(state.apptTime)+'</p>'
+      +'<p class="govuk-body" style="margin:0 0 10px;">There is no cost to you. Your results come straight to us, so there is nothing to collect or post. We will remind you 7 days and 1 day before.</p>'
+      +'<a href="#/appt-manage">Change or cancel this appointment</a></li>';
+  } else if(state.stage>=3){
+    items += '<li class="message-list__item"><span class="message-list__meta">8 August 2026, 3:02pm — Drivers Medical</span>'
+      +'<h3 class="govuk-heading-s" style="margin:5px 0;">We have received your information</h3>'
+      +'<p class="govuk-body" style="margin:0;">Your case is with a caseworker and we will be in touch within '+esc(caseworker.responseTime)+'.</p></li>';
+  }
+  if(state.stage>=2){
+    items += '<li class="message-list__item"><span class="message-list__meta">8 August 2026, 10:31am — '+esc(caseworker.team)+'</span>'
+      +'<h3 class="govuk-heading-s" style="margin:5px 0;">We need more information about your condition</h3>'
+      +'<p class="govuk-body" style="margin:0 0 10px;">'+esc(evidenceNeeded[primaryCondition()])+'</p>'
+      +'<a href="#/second-series-info">Tell us how you want to provide this</a></li>';
+  }
+  items += '<li class="message-list__item"><span class="message-list__meta">7 August 2026, 4:47pm — Drivers Medical</span>'
+    +'<h3 class="govuk-heading-s" style="margin:5px 0;">We have received your notification</h3>'
+    +'<p class="govuk-body" style="margin:0;">Your case reference is '+caseRef+'.</p></li>';
+
+  app().innerHTML = warn()+'<a class="govuk-back-link" href="#/account">Back</a>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Messages</h1>'
+    +'<ul class="message-list">'+items+'</ul>'
+    +'<div class="button-row">'
+    + (j()?'<button class="govuk-button" onclick="advance()">Continue</button>':'')
+    +'<a class="govuk-button govuk-button--secondary" href="#/status" style="text-decoration:none;">View your case status</a>'
+    +'</div></div></div>';
+}
+
+/* ================================================================
+   MANAGING YOUR LICENCE
+   ================================================================ */
+function renderRenewalNotice(){
+  app().innerHTML = warn()+back('#/hub')
+    +note('Routes in','<p>Renewal journeys begin outside the service, with a reminder. The blueprint treats that reminder as part of the journey — it is where expectations are set, and where most people decide whether this will be easy.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Your medical licence is due for review</h1>'
+    +'<div class="govuk-notification-banner"><div class="govuk-notification-banner__header">Reminder</div>'
+    +'<div class="govuk-notification-banner__content">'
+    +'<p><strong>Sent to '+esc(person.email)+' on 1 June 2029</strong></p>'
+    +'<p>Your 3 year medical driving licence expires on <strong>7 August 2029</strong>. To keep driving you need to confirm whether anything about your condition has changed.</p>'
+    +'<p>Most people finish this in under two minutes.</p></div></div>'
+    +'<p class="govuk-body">You can start now, or sign in to your account later — we will remind you again in 4 weeks.</p>'
+    +'<button class="govuk-button govuk-button--start" id="continue-btn">Start your review</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/signin'));
+}
+
+function renderRenewalStart(){
+  app().innerHTML = warn()+back('#/account')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Managing your licence</span>'
+    +'<h1 class="govuk-heading-l">Review your medical driving licence</h1>'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Current licence</dt><dd class="govuk-summary-list__value">Group 1, 3 year medical review</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Expires</dt><dd class="govuk-summary-list__value">7 August 2029</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Condition on record</dt><dd class="govuk-summary-list__value">'+esc(conditionNames())+'</dd></div>'
+    +'</dl>'
+    +'<p class="govuk-body">We only need to ask you one thing: whether anything has changed since we last looked at your case.</p>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">If nothing has changed, we can usually renew your licence without a new medical assessment.</p></div>'
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/renewal-changed'));
+}
+
+function renderRenewalChanged(){
+  radioPage({
+    caption:'Managing your licence',
+    title:'Has anything changed since we last reviewed your licence?',
+    hint:'Tell us about new symptoms, a change in treatment, or anything your doctor has said about your driving.',
+    name:'renewalChanged',
+    stateKey:'renewalChanged',
+    note:note('The risk split','<p>This single question is the branch point in the blueprint. Combined with the risk level already held on the case, “nothing has changed” on a low-risk case can be renewed automatically — which is what makes true automation possible at scale.</p>'),
+    richOptions:[
+      {value:'no',label:'No, nothing has changed',hint:'Same condition, same treatment, no new symptoms'},
+      {value:'yes',label:'Yes, something has changed',hint:'We will ask you a few questions about what is different'}
+    ],
+    fallbackBack:'#/renewal-start',
+    onNext(val){
+      if(val==='yes'){
+        state.stage = 1; state.journey = null;
+        navigate('#/update-condition');
+        return;
+      }
+      advance('#/renewal-done');
+    }
+  });
+}
+
+function renderRenewalDone(){
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">Licence renewed</h1><div class="govuk-panel__body">Valid until 7 August 2032</div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +note('No news is good news','<p>The blueprint’s intent here is that the customer does nothing further. No forms, no assessment, no waiting — the outcome is delivered in the same session as the question.</p>')
+    +'<p class="govuk-body-l">You do not need to do anything else.</p>'
+    +'<p class="govuk-body">Because nothing has changed, we have renewed your medical driving licence for another 3 years without a new medical assessment.</p>'
+    +'<p class="govuk-body">Your new licence will arrive within 5 working days. You can keep driving in the meantime, and you do not need to return your current licence.</p>'
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/auto-renew-offer'));
+}
+
+function renderAutoRenewOffer(){
+  radioPage({
+    caption:'Managing your licence',
+    title:'Would you like us to review your licence automatically next time?',
+    hint:'Your next review is due in August 2032.',
+    name:'autoRenew',
+    stateKey:'autoRenew',
+    note:note('Offered at the end','<p>The blueprint places this offer at the <em>end</em> of the journey, once the customer has just experienced how simple the review was. Asking here converts far better than asking up front.</p>'),
+    richOptions:[
+      {value:'yes',label:'Yes, review it automatically',hint:'We check your record and renew without you doing anything, as long as nothing has changed. We will always tell you when we do.'},
+      {value:'no',label:'No, remind me and I will confirm',hint:'We will send you a reminder 8 weeks before, like this one'}
+    ],
+    fallbackBack:'#/renewal-done',
+    fallbackNext:'#/auto-renew-done'
+  });
+}
+
+function renderAutoRenewDone(){
+  const on = state.autoRenew==='yes';
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">'+(on?'Automatic review turned on':'Preference saved')+'</h1>'
+    +'<div class="govuk-panel__body">'+(on?'We will handle your next review':'We will remind you in June 2032')+'</div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<p class="govuk-body">'+(on
+      ? 'From now on we will review your licence for you. If nothing has changed, we will renew it and tell you. If something needs your attention, we will contact you first.'
+      : 'We will send you a reminder 8 weeks before your next review, and you can confirm it then.')+'</p>'
+    +'<p class="govuk-body">You can change this at any time from <a href="#/manage">manage your medical licence</a>.</p>'
+    +'<div class="button-row">'
+    +'<button class="govuk-button" onclick="advance(\'#/account\')">Finish</button>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/account" style="text-decoration:none;">Return to your account</a>'
+    +'</div></div></div>';
+}
+
+function renderManage(){
+  app().innerHTML = warn()+ (j()? back():'<a class="govuk-back-link" href="#/account">Back</a>') 
+    +note('Self service','<p>Everything on this list is currently a phone call or a letter. Moving it into the account is what turns “managing your licence” from a DVLA process into something the customer controls.</p>')
+    +'<h1 class="govuk-heading-l">Manage your medical licence</h1>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<dl class="govuk-summary-list">'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Current licence</dt><dd class="govuk-summary-list__value">Group 1, 3 year medical review</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Status</dt><dd class="govuk-summary-list__value">'+(state.licencePaused?'<span class="govuk-tag govuk-tag--orange">Paused</span>':'<span class="govuk-tag govuk-tag--green">Active</span>')+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Conditions on record</dt><dd class="govuk-summary-list__value">'+esc(conditionNames())+'</dd></div>'
+    +'<div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Automatic review</dt><dd class="govuk-summary-list__value">'+(state.autoRenew==='yes'?'On':state.autoRenew==='no'?'Off':'Not set')+'</dd></div>'
+    +'</dl>'
+    +'<h2 class="govuk-heading-m">What would you like to do?</h2>'
+    +'<ul class="task-list">'
+    +'<li class="task-list__item"><div class="task-list__name"><strong><a href="#/update-condition">Tell us your condition has changed</a></strong>'
+    +'<span class="task-list__hint">If it has got better or worse, or your treatment has changed</span></div><span class="govuk-tag govuk-tag--blue">Anytime</span></li>'
+    +'<li class="task-list__item"><div class="task-list__name"><strong><a href="#/renewal-preferences">Choose how your licence is reviewed</a></strong>'
+    +'<span class="task-list__hint">Automatically, or remind me to confirm</span></div><span class="govuk-tag govuk-tag--'+(state.autoRenew?'green':'grey')+'">'+(state.autoRenew?'Set':'Not set')+'</span></li>'
+    + (state.licencePaused
+      ? '<li class="task-list__item"><div class="task-list__name"><strong><a href="#/resume">Resume your licence</a></strong><span class="task-list__hint">Start driving again without reapplying</span></div><span class="govuk-tag govuk-tag--orange">Paused</span></li>'
+      : '<li class="task-list__item"><div class="task-list__name"><strong><a href="#/pause">Pause your licence</a></strong><span class="task-list__hint">If you are not driving at the moment</span></div><span class="govuk-tag govuk-tag--grey">Optional</span></li>')
+    +'<li class="task-list__item"><div class="task-list__name"><strong><a href="#/surrender">Surrender your licence</a></strong>'
+    +'<span class="task-list__hint">Give up your licence permanently</span></div><span class="govuk-tag govuk-tag--grey">Optional</span></li>'
+    +'</ul>'
+    + (j()?'<div class="button-row"><button class="govuk-button" onclick="advance()">Continue</button></div>':'')
+    +'</div></div>';
+}
+
+function renderPause(){
+  app().innerHTML = warn()+back('#/manage')
+    +note('Pause, not surrender','<p>Offering a pause is the blueprint’s alternative to people quietly surrendering a licence they could keep. The entitlement stays open, so returning to driving does not mean reapplying from scratch.</p>')
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Managing your licence</span>'
+    +'<h1 class="govuk-heading-l">Pause your licence</h1>'
+    +'<p class="govuk-body">Pausing keeps your entitlement open. You will not be able to drive while it is paused, but you can resume at any time without reapplying or having another medical assessment.</p>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">We will still remind you when your medical review is due, so your licence does not lapse while it is paused.</p></div>'
+    +'<div class="govuk-form-group"><fieldset>'
+    +'<legend class="govuk-fieldset__legend">Why are you pausing it?</legend>'
+    +'<span class="govuk-hint">This helps us understand how the service is working. It does not affect your entitlement.</span>'
+    +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="reason" id="r1" value="health" checked><label class="govuk-radios__label" for="r1">My health means I am not driving at the moment</label></div>'
+    +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="reason" id="r2" value="choice"><label class="govuk-radios__label" for="r2">I have chosen not to drive for now</label></div>'
+    +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="reason" id="r3" value="other"><label class="govuk-radios__label" for="r3">Another reason</label></div>'
+    +'</fieldset></div>'
+    +'<div class="govuk-form-group"><div class="govuk-checkboxes__item">'
+    +'<input class="govuk-checkboxes__input" type="checkbox" id="pauseConfirm">'
+    +'<label class="govuk-checkboxes__label" for="pauseConfirm">I understand I must not drive while my licence is paused</label></div></div>'
+    +'<button class="govuk-button" id="continue-btn">Pause my licence</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    if(!document.getElementById('pauseConfirm').checked){alert('Please confirm you understand before continuing.');return;}
+    state.licencePaused = true;
+    advance('#/pause-done');
+  });
+}
+
+function renderPauseDone(){
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">Licence paused</h1><div class="govuk-panel__body">You must not drive</div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<p class="govuk-body">Your entitlement is still yours — it is just on hold. You can resume it at any time from your account, without reapplying.</p>'
+    +'<p class="govuk-body">We have sent a confirmation to '+esc(person.email)+' and updated your driving record.</p>'
+    +'<div class="button-row">'
+    +'<button class="govuk-button" onclick="advance(\'#/account\')">Continue</button>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/account" style="text-decoration:none;">Return to your account</a>'
+    +'</div></div></div>';
+}
+
+function renderResume(){
+  app().innerHTML = warn()+ (j()? back():'<a class="govuk-back-link" href="#/manage">Back</a>') 
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<span class="govuk-caption">Managing your licence</span>'
+    +'<h1 class="govuk-heading-l">Resume your licence</h1>'
+    +'<p class="govuk-body">Your licence has been paused since 7 August 2026. To start driving again, confirm that nothing about your condition has changed while it was paused.</p>'
+    +'<div class="govuk-form-group"><fieldset>'
+    +'<legend class="govuk-fieldset__legend">Has anything changed since you paused your licence?</legend>'
+    +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="resumeChanged" id="rc-no" value="no" checked><label class="govuk-radios__label" for="rc-no">No, nothing has changed</label></div>'
+    +'<div class="govuk-radios__item"><input class="govuk-radios__input" type="radio" name="resumeChanged" id="rc-yes" value="yes"><label class="govuk-radios__label" for="rc-yes">Yes, something has changed</label></div>'
+    +'</fieldset></div>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">If nothing has changed, your licence is restored straight away and your review date is unaffected.</p></div>'
+    +'<button class="govuk-button" id="continue-btn">Resume my licence</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const sel = document.querySelector('input[name="resumeChanged"]:checked');
+    if(sel && sel.value==='yes'){ state.journey=null; navigate('#/update-condition'); return; }
+    state.licencePaused = false;
+    advance('#/resume-done');
+  });
+}
+
+function renderResumeDone(){
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">Licence resumed</h1><div class="govuk-panel__body">You can drive again from today</div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<p class="govuk-body">Your entitlement has been restored and your medical review date has not changed. You did not need to reapply or have another assessment.</p>'
+    +'<button class="govuk-button" id="continue-btn">Continue</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>advance('#/manage'));
+}
+
+function renderRenewalPreferences(){
+  radioPage({
+    caption:'Managing your licence',
+    title:'How would you like your licence to be reviewed?',
+    hint:'Your next review is due on 7 August 2029. You can change this at any time.',
+    name:'autoRenew',
+    stateKey:'autoRenew',
+    note:note('On or off, any time','<p>The blueprint treats automatic renewal as a customer-controlled setting rather than a one-off decision, so it can be switched off as easily as it was switched on.</p>'),
+    richOptions:[
+      {value:'yes',label:'Review it automatically',hint:'We check your record and renew without you doing anything, as long as nothing has changed'},
+      {value:'no',label:'Remind me and I will confirm',hint:'We will send you a reminder 8 weeks before'}
+    ],
+    fallbackBack:'#/manage',
+    fallbackNext:'#/auto-renew-done'
+  });
+}
+
+function renderUpdateCondition(){
+  radioPage({
+    caption:'Managing your licence',
+    title:'How has your condition changed?',
+    hint:'Telling us early usually means we can deal with it without you losing your licence.',
+    name:'conditionUpdate',
+    stateKey:'conditionUpdate',
+    richOptions:[
+      {value:'none',label:'Nothing has changed',hint:'You just want to confirm your details are still correct'},
+      {value:'better',label:'It has improved',hint:'For example, you have been free of symptoms, or your treatment has been reduced'},
+      {value:'worse',label:'It has got worse',hint:'For example, you have had a new episode, or your treatment has changed'},
+      {value:'new',label:'I have a new condition to report',hint:'This will start a new notification'}
+    ],
+    fallbackBack:'#/manage',
+    onNext(val){
+      if(val==='new'){ state.stage=0; navigate('#/conditions'); return; }
+      if(val!=='none') state.stage = 1;
+      navigate('#/update-sent');
+    }
+  });
+}
+
+function renderUpdateSent(){
+  if(state.conditionUpdate==='none'){
+    app().innerHTML = warn()
+      +'<div class="govuk-panel"><h1 class="govuk-panel__title">Details confirmed</h1><div class="govuk-panel__body">Nothing has changed</div></div>'
+      +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+      +'<p class="govuk-body">Thank you for confirming. Nothing about your licence changes, and there is nothing else for you to do.</p>'
+      +'<p class="govuk-body">Tell us straight away if that changes — reporting early usually means we can deal with it without you losing your licence.</p>'
+      +'<div class="button-row">'
+      +'<a class="govuk-button" href="#/manage" style="text-decoration:none;">Back to managing your licence</a>'
+      +'<a class="govuk-button govuk-button--secondary" href="#/account" style="text-decoration:none;">Return to your account</a>'
+      +'</div></div></div>';
+    return;
+  }
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">Update sent</h1><div class="govuk-panel__body">Case reference<br><strong>'+caseRef+'</strong></div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h2 class="govuk-heading-m">What happens next</h2>'
+    +'<p class="govuk-body">A caseworker will review your update and confirm whether anything about your licence needs to change. We will be in touch within '+esc(caseworker.responseTime)+'.</p>'
+    +'<p class="govuk-body">You can keep driving unless your doctor has told you to stop, or we write to tell you otherwise.</p>'
+    +'<div class="button-row">'
+    +'<a class="govuk-button" href="#/status" style="text-decoration:none;">View your case status</a>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/account" style="text-decoration:none;">Return to your account</a>'
+    +'</div></div></div>';
+}
+
+function renderSurrender(){
+  app().innerHTML = warn()+'<a class="govuk-back-link" href="#/manage">Back</a>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Surrender your licence</h1>'
+    +'<div class="govuk-warning-text"><span class="govuk-warning-text__icon" aria-hidden="true">!</span>'
+    +'<span class="govuk-warning-text__text">If you surrender your licence you must stop driving straight away, and you would need to reapply to drive again.</span></div>'
+    +'<div class="govuk-inset-text"><p style="margin:0;"><strong>Have you considered pausing instead?</strong> Pausing keeps your entitlement open so you can start driving again without reapplying. <a href="#/pause">Pause my licence instead</a>.</p></div>'
+    +'<p class="govuk-body">You do not need to post your licence to us. We will record the surrender as soon as you confirm it — destroy your photocard yourself.</p>'
+    +'<div class="govuk-form-group"><div class="govuk-checkboxes__item">'
+    +'<input class="govuk-checkboxes__input" type="checkbox" id="surrenderConfirm">'
+    +'<label class="govuk-checkboxes__label" for="surrenderConfirm">I confirm I want to surrender my licence and will stop driving now</label></div></div>'
+    +'<button class="govuk-button govuk-button--warning" id="continue-btn">Surrender my licence</button>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    if(!document.getElementById('surrenderConfirm').checked){alert('Please confirm before continuing.');return;}
+    state.hasMedicalLicence = false;
+    navigate('#/surrender-done');
+  });
+}
+
+function renderSurrenderDone(){
+  app().innerHTML = warn()
+    +'<div class="govuk-panel"><h1 class="govuk-panel__title">Licence surrendered</h1><div class="govuk-panel__body">Reference<br><strong>'+caseRef+'</strong></div></div>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<p class="govuk-body">You must stop driving now. Destroy your photocard — you do not need to post it to us.</p>'
+    +'<p class="govuk-body">If you want to drive again, you can reapply at any time from your account.</p>'
+    +'<a class="govuk-button" href="#/account" style="text-decoration:none;">Return to your account</a>'
+    +'</div></div>';
+}
+
+/* --- challenge / appeal --- */
+function renderChallenge(){
+  app().innerHTML = warn()+'<a class="govuk-back-link" href="#/decision-issue">Back</a>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Challenge this decision</h1>'
+    +'<p class="govuk-body">If you think we have got something wrong, or your circumstances have changed, ask us to look at your case again. A different caseworker will review it.</p>'
+    +'<p class="govuk-body">This is free and usually takes 10 working days. It does not affect your right to appeal to a tribunal later.</p>'
+    +'<div class="govuk-form-group"><label class="govuk-label" for="challengeReason">Tell us why you think the decision is wrong</label>'
+    +'<span class="govuk-hint">Include anything we may not have seen, such as a newer test result.</span>'
+    +'<textarea class="govuk-textarea" id="challengeReason"></textarea></div>'
+    +'<button class="govuk-button" id="continue-btn">Send challenge</button>'
+    +'<p class="govuk-body" style="margin-top:20px;"><a href="#/appeal">Or appeal directly to a tribunal</a></p>'
+    +'</div></div>';
+  document.getElementById('continue-btn').addEventListener('click',()=>{
+    const r = document.getElementById('challengeReason').value.trim();
+    if(!r){alert('Please tell us why you think the decision is wrong.');return;}
+    app().innerHTML = warn()
+      +'<div class="govuk-panel"><h1 class="govuk-panel__title">Challenge sent</h1><div class="govuk-panel__body">Case reference<br><strong>'+caseRef+'</strong></div></div>'
+      +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+      +'<p class="govuk-body">A different caseworker will review your case and we will be in touch within 10 working days. Your current licence is not affected while we review it.</p>'
+      +'<a class="govuk-button" href="#/account" style="text-decoration:none;">Return to your account</a>'
+      +'</div></div>';
+  });
+}
+
+function renderAppeal(){
+  app().innerHTML = warn()+'<a class="govuk-back-link" href="#/decision-issue">Back</a>'
+    +'<div class="govuk-grid-row"><div class="govuk-grid-column-two-thirds">'
+    +'<h1 class="govuk-heading-l">Appeal to a tribunal</h1>'
+    +'<p class="govuk-body">If you have challenged our decision and still disagree, you can appeal to an independent tribunal. In England and Wales this is a magistrates’ court. In Scotland it is the sheriff court.</p>'
+    +'<h2 class="govuk-heading-m">Before you appeal</h2>'
+    +'<ul class="govuk-body"><li>you must appeal within 6 months of our decision</li>'
+    +'<li>you should ask us to review the decision first — it is faster and free</li>'
+    +'<li>you may want to get independent advice</li></ul>'
+    +'<div class="govuk-inset-text"><p style="margin:0;">The tribunal is independent of DVLA. We will send them everything we hold about your case, and you can send them your own evidence.</p></div>'
+    +'<div class="button-row">'
+    +'<a class="govuk-button" href="#/appeal" style="text-decoration:none;">Start an appeal</a>'
+    +'<a class="govuk-button govuk-button--secondary" href="#/challenge" style="text-decoration:none;">Ask DVLA to review it first</a>'
+    +'</div></div></div>';
+}
+
+/* ================================================================
+   ROUTER
+   ================================================================ */
+function route(){
+  const hash = location.hash || '#/hub';
+  const parts = hash.split('/');
+  const base = '#/' + (parts[1] || 'hub');
+  const arg = parts[2];
+  window.scrollTo(0,0);
+  renderChrome();
+
+  switch(base){
+    case '#/hub':                 renderHub();break;
+    case '#/all-screens':         renderAllScreens();break;
+    case '#/journey-complete':    renderJourneyComplete();break;
+
+    case '#/signin':              renderSignIn();break;
+    case '#/account-setup':       renderAccountSetup();break;
+    case '#/account':             renderAccount();break;
+
+    case '#/report-start':        renderReportStart();break;
+    case '#/conditions':          renderConditions();break;
+    case '#/prescreen':           renderPrescreen();break;
+    case '#/prescreen-exit':      renderPrescreenExit();break;
+    case '#/questionnaire':       renderQuestionnaire(arg);break;
+    case '#/check-answers':       renderCheckAnswers();break;
+
+    case '#/second-series-info':  renderSecondSeriesInfo();break;
+    case '#/second-series-choose':renderSecondSeriesChoose();break;
+    case '#/upload':              renderUpload();break;
+    case '#/upload-review':       renderUploadReview();break;
+    case '#/appt-company':        renderApptCompany();break;
+    case '#/appt-branch':         renderApptBranch();break;
+    case '#/appt-datetime':       renderApptDateTime();break;
+    case '#/appt-review':         renderApptReview();break;
+    case '#/appt-manage':         renderApptManage();break;
+    case '#/gp-details':          renderGpDetails();break;
+    case '#/nhs-link':            renderNhsLink();break;
+    case '#/consent-share':       renderConsentShare();break;
+    case '#/second-confirm':      renderSecondConfirm();break;
+
+    case '#/status':              renderStatus();break;
+    case '#/messages':            renderMessages();break;
+    case '#/decision-ready':      state.stage=4; state.messagesRead=false; navigate('#/messages'); return;
+
+    case '#/decision-issue':      renderDecisionIssue();break;
+    case '#/accept-licence':      renderAcceptLicence();break;
+    case '#/licence-next-steps':  renderLicenceNextSteps();break;
+    case '#/decision-revoke':     renderDecisionRevoke();break;
+    case '#/challenge':           renderChallenge();break;
+    case '#/appeal':              renderAppeal();break;
+
+    case '#/renewal-notice':      renderRenewalNotice();break;
+    case '#/renewal-start':       renderRenewalStart();break;
+    case '#/renewal-changed':     renderRenewalChanged();break;
+    case '#/renewal-done':        renderRenewalDone();break;
+    case '#/auto-renew-offer':    renderAutoRenewOffer();break;
+    case '#/auto-renew-done':     renderAutoRenewDone();break;
+    case '#/renewal-preferences': renderRenewalPreferences();break;
+    case '#/manage':              renderManage();break;
+    case '#/pause':               renderPause();break;
+    case '#/pause-done':          renderPauseDone();break;
+    case '#/resume':              renderResume();break;
+    case '#/resume-done':         renderResumeDone();break;
+    case '#/update-condition':    renderUpdateCondition();break;
+    case '#/update-sent':         renderUpdateSent();break;
+    case '#/surrender':           renderSurrender();break;
+    case '#/surrender-done':      renderSurrenderDone();break;
+
+    default:                      renderHub();break;
+  }
+}
+window.addEventListener('hashchange',route);
+window.addEventListener('DOMContentLoaded',route);
+</script>
+</body>
+</html>

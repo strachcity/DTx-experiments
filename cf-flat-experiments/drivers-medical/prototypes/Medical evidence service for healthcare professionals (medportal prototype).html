@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Medical evidence service for healthcare professionals: prototype</title>
+<style>
+:root{--bg:#fff;--fg:#0b0c0c;--mut:#505a5f;--line:#b1b4b6;--link:#1d70b8;--panel:#f3f2f1;--btn:#00703c;--sh:#002d18;--err:#d4351c;--hd:#0b0c0c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0c0c;--fg:#f3f2f1;--mut:#b1b4b6;--line:#505a5f;--link:#5694ca;--panel:#1d1f20;--btn:#1a8a50;--sh:#000;--err:#ff6f5a;--hd:#1d1f20}}
+:root[data-theme="dark"]{--bg:#0b0c0c;--fg:#f3f2f1;--mut:#b1b4b6;--line:#505a5f;--link:#5694ca;--panel:#1d1f20;--btn:#1a8a50;--sh:#000;--err:#ff6f5a;--hd:#1d1f20}
+html,body{margin:0}body{background:var(--bg);color:var(--fg);font:19px/1.4 Arial,Helvetica,sans-serif}
+header{background:var(--hd);color:#fff;padding:14px 0;border-bottom:10px solid var(--link)}
+header .w{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:17px}header a{color:#fff}
+.w{max-width:760px;margin:0 auto;padding:0 16px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:16px auto}
+.lnk{font:inherit;font-size:15px;background:var(--panel);color:var(--fg);border:2px solid var(--line);padding:5px 10px;cursor:pointer}
+.phase{font-size:16px;border-bottom:1px solid var(--line);padding-bottom:10px;margin:0 0 20px;color:var(--mut)}
+.tag{background:var(--link);color:#fff;padding:2px 8px;font-size:14px;text-transform:uppercase;margin-right:8px}
+.pill{display:inline-block;border:2px solid var(--link);padding:0 8px;font-size:15px;font-weight:700;color:var(--link)}
+h1{font-size:34px;line-height:1.1;margin:0 0 20px}h2{font-size:24px;margin:28px 0 10px}legend h2{margin:0 0 8px}
+a{color:var(--link)}.back{display:inline-block;margin:0 0 20px;font-size:17px}
+.cap{display:block;font-size:19px;color:var(--mut);margin-bottom:6px;font-weight:400}
+fieldset{border:0;margin:0 0 24px;padding:0}legend{padding:0;margin-bottom:8px}legend h1{margin:0}
+.hint{color:var(--mut);margin:0 0 16px}small{color:var(--mut);font-size:15px}
+.opt{display:flex;gap:12px;align-items:center;margin:0 0 10px;cursor:pointer}
+.opt input{width:30px;height:30px;margin:0;accent-color:var(--btn);flex:none}
+.txt,textarea{font:inherit;color:var(--fg);background:var(--bg);border:2px solid var(--fg);padding:6px;width:100%;box-sizing:border-box}
+textarea{min-height:120px}
+.bad .txt,.bad textarea{border-color:var(--err)}.errm{color:var(--err);font-weight:700;margin:0 0 12px}
+.es{border:5px solid var(--err);padding:16px;margin-bottom:24px}.es h2{margin:0 0 8px}.es a{color:var(--err);font-weight:700}
+.btn{font:inherit;background:var(--btn);color:#fff;border:0;box-shadow:0 2px 0 var(--sh);padding:9px 16px;cursor:pointer;margin-top:8px}
+.sl>div{display:flex;gap:12px;border-bottom:1px solid var(--line);padding:10px 0}.sl dt{flex:2;font-weight:700}.sl dd{flex:2;margin:0}.sl .ch{flex:1;text-align:right}
+.vh{position:absolute;left:-9999px}
+.box{background:var(--panel);border-left:5px solid var(--link);padding:12px 16px;margin:0 0 24px}
+.conf{background:var(--btn);color:#fff;padding:28px;text-align:center;margin-bottom:24px}.conf h1{margin:0 0 12px}
+.scroll{overflow-x:auto}.tbl{width:100%;border-collapse:collapse;font-size:17px}.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+footer{border-top:1px solid var(--line);margin-top:40px;padding:16px 0 24px;font-size:15px;color:var(--mut)}
+:focus-visible{outline:3px solid #ffdd00;box-shadow:0 0 0 6px #0b0c0c}
+</style></head><body>
+<header><div class="w"><strong>Medical evidence service</strong><span id="who"></span></div></header>
+<div class="w">
+<div class="tools"><button class="lnk" id="rn" onclick="RN=!RN;render()"></button><button class="lnk" id="wv" onclick="flipWV()"></button><button class="lnk" onclick="ans=[{},{},{},{}];scr='inbox';if(!user)scr='signin';render()">Reset examples</button></div>
+<p class="phase"><strong class="tag">Research prototype</strong>A concept for a faster way for healthcare professionals to give DVLA medical evidence. Example patients and data. Not a live DVLA service.</p>
+<main id="app"></main>
+<footer>Concept: the patient’s declaration carries most of the decision; the healthcare professional is asked only to confirm exceptions, answer what the patient couldn’t, or attach what they already have. Nothing is saved or sent from this page.</footer>
+</div>
+<script>
+const FEE="£[fee to be decided]";
+const P=(id,q,t,o,x)=>Object.assign({id,q,t,o,l:q},x||{});
+const YN3=["Yes","No","Unable to say"],NYF=["No","Yes","Further assessment required"];
+const confirmP=()=>[
+P("k_conf","Does anything in the patient’s records contradict the declaration above?","radio",["No, nothing in my records contradicts it","Yes, something contradicts it","I can’t confirm either way"],{l:"Records contradict declaration",hint:"This is not a statement that the patient is fit to drive. DVLA makes that decision.",qb:"Based on your records, do you consider this patient safe to drive?",ob:["Yes","No","I can’t say"],hb:"Test wording only: this asks the HCP to put their name to a fitness judgement."}),
+P("k_fix","Tell us what contradicts it","area",0,{l:"What contradicts it",s:a=>a.k_conf&&(/^Yes, something/.test(a.k_conf)||(WV=="B"&&a.k_conf=="No"))})];
+const targetP=()=>[
+P("t_ass","Has a formal cognitive assessment been carried out?","radio",["Yes, in the last 12 months","Yes, more than 12 months ago","No"],{l:"Formal cognitive assessment"}),
+P("t_out","What was the outcome?","area",0,{l:"Assessment outcome",s:a=>/^Yes/.test(a.t_ass||"")}),
+P("t_cog","In your clinical opinion, is there cognitive impairment that could affect safe driving?","radio",NYF,{l:"Cognitive impairment affecting driving"}),
+P("t_cogd","Briefly describe the relevant impairment","area",0,{l:"Impairment",s:a=>a.t_cog=="Yes"}),
+P("t_stab","Is the patient’s condition stable enough for their declaration to reflect their usual condition?","radio",YN3,{l:"Condition stable"})];
+const COV=["Diagnosis and current treatment","Whether the condition is stable","Effect on driving-relevant function","Cognition or alertness"];
+const gap=(i,a)=>a.k_up&&(a.k_up.startsWith("No")||!(a.k_cov||[]).includes(COV[i]));
+const attachP=()=>[
+P("k_up","Do you have a recent clinic letter for this patient?","radio",["Yes, I’ll attach it","No, I’ll answer the questions instead"],{l:"Clinic letter",up:1,hint:"Prototype only: files are not uploaded."}),
+P("k_cov","What does the letter already cover?","check",COV,{l:"Letter covers",s:a=>(a.k_up||"").startsWith("Yes"),hint:"Select all that apply. We’ll only ask about what it leaves out."}),
+P("k_q0","Briefly describe the diagnosis and current treatment","area",0,{l:"Diagnosis and treatment",s:a=>gap(0,a)}),
+P("k_q1","Is the condition currently stable?","radio",YN3,{l:"Condition stable",s:a=>gap(1,a)}),
+P("k_q2","Does the condition create a clinically significant risk to safe vehicle control?","radio",["No","Yes","Unable to determine"],{l:"Risk to vehicle control",s:a=>gap(2,a)}),
+P("k_q3","Is there a clinical concern about cognition or alertness affecting safe driving?","radio",["No","Yes","Further assessment needed"],{l:"Cognition or alertness concern",s:a=>gap(3,a)})];
+const TD={Confirm:"Read the declaration above and tell us whether anything in your records contradicts it. You do not need to write a report.",Targeted:"Answer a few clinical questions. We’re not asking about anything the patient has already told us.",Attach:"Attach a clinic letter you already have, then answer only the questions it leaves out."};
+const TN={Confirm:"Review and verify, rather than provide. Open question: what an HCP will put their name to. Use the wording toggle at the top to compare ‘nothing contradicts this’ with ‘safe to drive’.",Targeted:"Only the questions the customer couldn’t answer. Tests H3: a short form that asks only what the customer can’t tell us.",Attach:"Existing evidence is reused. The HCP answers only what the letter leaves out. Tick all four topics to see zero extra questions."};
+const CASES=[
+{ref:"MED10000001",pt:"Patient A",cond:"Parkinson’s",task:"Confirm",tag:"Exception",why:"The patient’s declaration shows a change: they say their Parkinson’s has got worse and their medication has changed. We’d like you to check this against your records.",decl:[["Got worse since last review","Yes"],["Medication changed in last 6 months","Yes"],["Off periods or freezing","Yes"],["Sudden or unpredictable","No"],["Unusually sleepy","Yes"],["Sleepiness affected driving","No"],["Deep brain stimulator","No"]],pages:confirmP,n:"Exception route: the declaration shows something to check, so a short confirmation replaces a full report."},
+{ref:"MED10000002",pt:"Patient B",cond:"Cognitive impairment",task:"Targeted",tag:"Risk indicator",why:"The patient’s answers include a risk indicator that needs clinical judgement. We have not asked you anything the patient could tell us themselves.",decl:[["Memory or concentration difficulties","Yes"],["Diagnosis (as stated by patient)","Mild cognitive impairment"],["Has stopped driving","No"],["Takes regular medication","Yes"]],pages:targetP,n:"Defined risk indicators trigger a fuller request. The risk archetype work would define these."},
+{ref:"MED10000003",pt:"Patient C",cond:"Chronic neurological condition",task:"Attach",tag:"Existing evidence",why:"The patient told us they have a recent clinic letter. You can attach yours and answer only what it leaves out.",decl:[["Condition (example)","Multiple sclerosis"],["Most recent relapse","More than 2 years ago"],["Has a recent clinic letter","Yes"],["Affects use of vehicle controls","No"]],pages:attachP,n:"Reuses evidence that already exists instead of asking for it again."},
+{ref:"MED10000004",pt:"Patient D",cond:"Parkinson’s",task:"Confirm",tag:"Routine check",why:"We check a small sample of declarations to keep the service accurate. This is not a concern about this patient.",decl:[["Got worse since last review","No"],["Medication changed in last 6 months","No"],["Off periods or freezing","No"],["Unusually sleepy","No"],["Deep brain stimulator","No"]],pages:confirmP,n:"Random verification: keeps declarations honest and measures accuracy. Check the wording does not imply a concern about the patient."}];
+let RN=false,WV="A",user=null,U={role:"",name:"",reg:"",clin:""},scr="signin",ci=0,cur=null,err=null,chk=false,t0=0,ans=[{},{},{},{}];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const CS=()=>CASES[ci],AN=()=>ans[ci],adm=()=>user&&user.role=="admin";
+const vis=()=>CS().pages().filter(p=>!p.s||p.s(AN()));
+const Q=p=>WV=="B"&&p.qb?p.qb:p.q,O=p=>WV=="B"&&p.ob?p.ob:p.o,HN=p=>WV=="B"&&p.hb?p.hb:p.hint;
+const nb=t=>RN?`<div class="box"><strong>Researcher note</strong><br>${t}</div>`:"";
+const sv=p=>{const v=AN()[p.id];return Array.isArray(v)?v.join(", "):v};
+function flipWV(){WV=WV=="A"?"B":"A";ans[ci]={};if(scr=="task"||scr=="check")scr="case";render()}
+function openCase(i){ci=i;scr="case";err=null;render()}
+function startTask(){scr="task";cur=vis()[0].id;t0=Date.now();err=null;chk=false;render()}
+function back(){const v=vis();err=null;if(chk){scr="check";chk=false}else if(scr=="check"){scr="task";cur=v[v.length-1].id}else{const i=v.findIndex(p=>p.id==cur);if(i>0)cur=v[i-1].id;else scr="case"}render()}
+function chg(id){scr="task";cur=id;chk=true;err=null;render()}
+function read(p){
+ if(p.t=="radio"){const e=document.querySelector("input[name=f]:checked");return e?O(p)[e.value]:null}
+ if(p.t=="check"){const a=[...document.querySelectorAll("input[name=f]:checked")].map(e=>O(p)[e.value]);return a.length?a:null}
+ return $("tx").value.trim()||null}
+function next(){
+ const p=vis().find(x=>x.id==cur),v=read(p);
+ if(v==null){err=p.t=="radio"?`Select an answer for “${p.l}”`:p.t=="check"?`Select at least one option for “${p.l}”`:`Enter an answer for “${p.l}”`;render();return}
+ AN()[p.id]=v;err=null;const vs=vis();
+ if(chk){const u=vs.find(x=>AN()[x.id]===undefined);if(u)cur=u.id;else{scr="check";chk=false}render();return}
+ const i=vs.findIndex(x=>x.id==cur);if(i+1<vs.length)cur=vs[i+1].id;else scr="check";render()}
+function login(){
+ const r=document.querySelector("input[name=r]:checked");U.name=$("nm").value.trim();U.reg=$("rg").value.trim();U.clin=$("cl").value.trim();U.role=r?r.value:"";
+ if(!U.role||!U.name||!U.reg||(U.role=="admin"&&!U.clin)){err="Choose how you’re using the service and fill in every box"+(U.role=="admin"?" including the clinician’s name":"");render();return}
+ user=Object.assign({},U);err=null;scr="inbox";render()}
+const signin=()=>`<h1>Sign in to the medical evidence service</h1><p>For healthcare professionals, and the practice or hospital staff who complete requests for them.</p>${err?`<div class="es" role="alert"><h2>There is a problem</h2><a href="#nm">${err}</a></div>`:""}<fieldset><legend><h2>How are you using the service?</h2></legend><label class="opt"><input type="radio" name="r" value="hcp" ${U.role=="hcp"?"checked":""}><span>I’m a registered healthcare professional</span></label><label class="opt"><input type="radio" name="r" value="admin" ${U.role=="admin"?"checked":""}><span>I’m completing requests for a clinician (practice or hospital staff)</span></label></fieldset><p><label for="nm">Your name</label><br><input class="txt" id="nm" value="${esc(U.name)}"></p><p><label for="rg">Clinician’s professional registration number (for example a GMC number)</label><br><input class="txt" id="rg" value="${esc(U.reg)}"></p><p><label for="cl">Clinician’s name (only if you’re completing for a clinician)</label><br><input class="txt" id="cl" value="${esc(U.clin)}"></p><p class="hint">Prototype: no real check is made. A real service would verify the registration against the professional register.</p><button class="btn" onclick="login()">Continue</button>${nb("Open question: how we verify the person is a registered HCP, and how admin teams complete tasks for them. Admin route ends with the clinician approving before anything is sent.")}`;
+const inbox=()=>`<h1>Your evidence requests</h1><p>Each request says why we’re asking and what we need. We only ask for what the patient couldn’t tell us.</p><div class="scroll"><table class="tbl"><thead><tr><th>Patient</th><th>Condition</th><th>What we need</th><th>Status</th><th></th></tr></thead><tbody>${CASES.map((c,i)=>`<tr><td>${c.pt}<br><small>${c.ref}</small></td><td>${c.cond}</td><td><span class="pill">${c.task}</span><br><small>${c.tag}</small></td><td>${ans[i]._sent?"Sent":"New"}</td><td><a href="#" onclick="openCase(${i});return false">Open<span class="vh"> ${c.ref}</span></a></td></tr>`).join("")}</tbody></table></div><p class="hint">Prefer paper? You can still return the paper form. The digital service is optional.</p>${nb("Tasks are chosen by what each case needs, not by condition. If H1 holds, some of these cases would never be sent at all, because the declaration predicts the outcome.")}`;
+const casep=()=>{const c=CS();return `<a href="#" class="back" onclick="scr='inbox';render();return false">Back to your requests</a><h1>${c.cond}: ${c.task.toLowerCase()} request</h1><p class="hint">${c.pt} · ${c.ref}</p><div class="box"><strong>Why we’re asking you</strong><br>${c.why}</div><h2>What the patient declared</h2><dl class="sl">${c.decl.map(([l,v])=>`<div><dt>${l}</dt><dd>${v}</dd></div>`).join("")}</dl><p class="hint">Example data, held as structured answers so DVLA can spot exceptions and contradictions.</p><h2>What we need from you</h2><p>${TD[c.task]}</p><p>Fee: ${FEE}, paid digitally when you submit.</p><button class="btn" onclick="startTask()">Start</button>${nb(TN[c.task]+" "+c.n)}`};
+function field(p){
+ const val=AN()[p.id],o=O(p);let h="";
+ if(p.t=="radio"||p.t=="check")o.forEach((x,i)=>{const on=p.t=="radio"?val===x:(val||[]).includes(x);h+=`<label class="opt"><input type="${p.t=="radio"?"radio":"checkbox"}" name="f" value="${i}" ${on?"checked":""}><span>${x}</span></label>`});
+ else h=`<textarea id="tx">${esc(val)}</textarea>`;
+ if(p.up)h+=`<p class="hint"><input type="file"></p>`;
+ return h}
+function task(){const p=vis().find(x=>x.id==cur)||vis()[0],hn=HN(p);
+ return `<a href="#" class="back" onclick="back();return false">Back</a>${err?`<div class="es" role="alert"><h2>There is a problem</h2><a href="#f">${err}</a></div>`:""}<fieldset id="f" class="${err?"bad":""}"><legend><span class="cap">${CS().cond}: ${CS().task.toLowerCase()}</span><h1>${Q(p)}</h1></legend>${hn?`<div class="hint">${hn}</div>`:""}${err?`<p class="errm">Error: ${err}</p>`:""}${field(p)}</fieldset><button class="btn" onclick="next()">Continue</button>${nb(TN[CS().task])}`}
+function check(){const v=vis();return `<a href="#" class="back" onclick="back();return false">Back</a><h1>Check your answers before sending</h1><dl class="sl">${v.map(p=>`<div><dt>${p.l}</dt><dd>${esc(sv(p))}</dd><dd class="ch"><a href="#" onclick="chg('${p.id}');return false">Change<span class="vh"> ${p.l}</span></a></dd></div>`).join("")}</dl>${CS().task=="Attach"&&v.length<4?`<div class="box">The letter covered everything we needed, so you were asked ${v.length} question${v.length==1?"":"s"}.</div>`:""}<h2>${adm()?"Send for approval":"Now send your response"}</h2><p>${adm()?`By sending this, you confirm the information is accurate to the best of your knowledge. ${esc(user.clin)} must approve it before it goes to DVLA.`:"By sending this, you confirm the information is accurate to the best of your professional knowledge and based on the patient’s records."}</p><button class="btn" onclick="AN()._sent=1;scr='done';render()">${adm()?"Send to clinician for approval":"Accept and send"}</button>`}
+function done(){const s=Math.round((Date.now()-t0)/1000),tm=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+ return `<div class="conf"><h1>${adm()?"Ready for clinician approval":"Response sent"}</h1><p>Prototype only: nothing has actually been sent.</p></div><h2>What happens next</h2><p>${adm()?`${esc(user.clin)} will be asked to review and approve this before anything goes to DVLA.`:"DVLA will review your response alongside the patient’s declaration. We’ll only contact you again if we need further clinical information."}</p><div class="box"><strong>Payment</strong><br>${FEE} will be paid to the account on your profile ${adm()?"once the clinician approves":"when you submit"}. Prototype: no payment is made, and the fee is a placeholder.</div><p class="hint">Time on this task: ${tm}</p><button class="btn" onclick="scr='inbox';render()">Back to your requests</button>${nb("Open question: how fees work when a confirmation takes minutes and a report takes half an hour. For H3, measure days to reply, reply rate and clarifications. Time on task is only a rough proxy here.")}`}
+function render(){
+ $("rn").textContent="Researcher notes: "+(RN?"on":"off");$("wv").textContent="Confirmation wording: "+(WV=="A"?"A (consistency)":"B (safe to drive)");
+ $("who").innerHTML=user?`${esc(user.name)} · ${adm()?"Admin for "+esc(user.clin):"Verified healthcare professional"} · <a href="#" onclick="user=null;scr='signin';render();return false">Sign out</a>`:"";
+ $("app").innerHTML=({signin,inbox,case:casep,task,check,done})[scr]();window.scrollTo(0,0)}
+render();
+</script></body></html>

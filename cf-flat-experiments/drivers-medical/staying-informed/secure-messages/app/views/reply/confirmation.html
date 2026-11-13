@@ -1,0 +1,31 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set pageName = "Answers sent" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {{ govukPanel({
+      titleText: "Answers sent",
+      html: "We received them on " + (message.reply.submittedAt | longDate)
+    }) }}
+
+    <h2 class="govuk-heading-m">What happens next</h2>
+    <p class="govuk-body">We will read your answers alongside the report from your GP. One of our doctors may need to look at them too.</p>
+    <p class="govuk-body">This usually takes 2 to 4 weeks. We will write to you when we have decided{% if route == "oneLogin" %}, and send you a secure message{% endif %}.</p>
+    <p class="govuk-body">You can keep driving a car while we do this, as long as your own doctor has not told you to stop.</p>
+    <p class="govuk-body">You do not need to send the paper form as well. If you have already posted it, that is fine. We will match it to these answers.</p>
+
+    {% if route == "oneLogin" %}
+      <p class="govuk-body">A copy of your answers is in your messages.</p>
+      <p class="govuk-body"><a class="govuk-link" href="/messages">Go to your messages</a></p>
+    {% else %}
+      <p class="govuk-body">We will also post you a letter to say we have your answers.</p>
+      {{ designNote("A code user ends here, with no way into the message list. The code unlocked one reply and nothing else. If they sign in later, the acknowledgement is already in their messages, because the record is single.") }}
+    {% endif %}
+
+    {{ designNote("No reference number. The customer already has a case, and a number on its own is what generates the next call. What generates no call is saying what happens next, how long it usually takes, and whether they can drive in the meantime.") }}
+  </div>
+</div>
+{% endblock %}

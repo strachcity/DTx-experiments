@@ -1,0 +1,26 @@
+{#
+  Design notes and open questions. Prototype annotations, not service
+  UI, so they are styled to look nothing like a GOV.UK component and
+  are only rendered when notes are on.
+
+  designNote: the argument this screen makes.
+  openQuestion: a question this screen cannot answer yet, and who owns it.
+#}
+
+{% macro designNote(text) %}
+  {% if showNotes %}
+    <aside class="app-design-note" aria-label="Design note">
+      <p class="app-design-note__label">Design note</p>
+      <p class="app-design-note__text">{{ text }}</p>
+    </aside>
+  {% endif %}
+{% endmacro %}
+
+{% macro openQuestion(owner, text) %}
+  {% if showNotes %}
+    <aside class="app-design-note app-design-note--question" aria-label="Open question">
+      <p class="app-design-note__label">Open question · {{ owner }}</p>
+      <p class="app-design-note__text">{{ text }}</p>
+    </aside>
+  {% endif %}
+{% endmacro %}

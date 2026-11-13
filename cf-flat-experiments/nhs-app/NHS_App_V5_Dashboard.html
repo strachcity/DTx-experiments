@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NHS App Adoption Model</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f6f9;height:100vh;display:flex;flex-direction:column;overflow:hidden;color:#1e293b}
+#hdr{background:linear-gradient(135deg,#005eb8,#003087);color:#fff;padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:20}
+#hdr h1{font-size:16px;font-weight:700}
+.tabs{display:flex;gap:4px;margin-left:20px}
+.tab{padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;transition:all .15s}
+.tab:hover{background:rgba(255,255,255,.2)}
+.tab.active{background:#fff;color:#005eb8}
+.hbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px}
+.hbtn:hover{background:rgba(255,255,255,.25)}
+#tab-map{display:flex;flex:1;overflow:hidden}
+#canvas{flex:1;overflow:hidden;cursor:grab}
+#panel{width:280px;background:#fff;border-left:1px solid #e2e8f0;overflow-y:auto;flex-shrink:0}
+#pa{height:4px}
+#pt{padding:12px 16px;border-bottom:1px solid #e2e8f0}
+#pt h2{font-size:14px;font-weight:700}
+.tbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;color:#fff;font-weight:600;margin-top:3px}
+#pb{padding:10px 16px;font-size:12px}
+.note{background:#eff6ff;border-left:4px solid #005eb8;padding:8px 10px;border-radius:0 6px 6px 0;font-size:11px;color:#1e40af;margin-bottom:8px}
+.psec h4{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;font-weight:700;border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin:8px 0 4px}
+.prow{padding:4px 8px;border-left:3px solid #ddd;margin:3px 0;border-radius:0 4px 4px 0;background:#f8fafc;font-size:11px;cursor:pointer}
+.prow:hover{background:#e8f0fe}
+.link{fill:none;stroke-width:1.5;stroke-opacity:.35}
+.node-rect{cursor:pointer;rx:6;ry:6}
+.node-rect:hover{filter:brightness(1.08)}
+.node-text{cursor:pointer;pointer-events:none}
+#tab-dash{display:none;flex:1;overflow-y:auto;padding:20px;background:#f4f6f9}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1200px;margin:0 auto}
+.dc{background:#fff;border-radius:10px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.dc h3{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:2px}
+.dc .ds{font-size:11px;color:#94a3b8;margin-bottom:10px}
+.dc.fw{grid-column:1/-1}
+#ftr{background:#fff;border-top:1px solid #e2e8f0;padding:5px 20px;font-size:10.5px;color:#94a3b8;display:flex;justify-content:space-between;flex-shrink:0}
+#legend{position:absolute;bottom:14px;left:14px;background:rgba(255,255,255,.96);border-radius:10px;padding:12px 16px;box-shadow:0 2px 12px rgba(0,0,0,.08);font-size:10.5px;z-index:3}
+#legend h4{font-size:11px;margin-bottom:5px;font-weight:700}
+.lg{display:flex;align-items:center;gap:5px;margin:2px 0;color:#555}
+.ld{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="hdr">
+<div style="display:flex;align-items:center"><h1>NHS App Adoption Model</h1>
+<div class="tabs"><div class="tab active" onclick="switchTab('map')">Mind Map</div><div class="tab" onclick="switchTab('dash')">Dashboard</div></div></div>
+<div style="display:flex;gap:6px" id="mapbtns">
+<button class="hbtn" onclick="resetView()">&#8635; Reset</button>
+<button class="hbtn" onclick="expandAll()">Expand All</button>
+<button class="hbtn" onclick="collapseAll()">Collapse All</button>
+<button class="hbtn" onclick="fitView()">Fit</button>
+</div>
+</div>
+<div id="tab-map">
+<div id="canvas" style="position:relative">
+<div id="legend"><h4>Node types</h4>
+<div class="lg"><div class="ld" style="background:#005eb8"></div> NHS App</div>
+<div class="lg"><div class="ld" style="background:#c0392b"></div> Region</div>
+<div class="lg"><div class="ld" style="background:#2980b9"></div> ICB</div>
+<div class="lg"><div class="ld" style="background:#d35400"></div> Trust</div>
+<div class="lg"><div class="ld" style="background:#16a085"></div> GP Practice</div>
+<div class="lg"><div class="ld" style="background:#8e44ad"></div> PEP Vendor</div>
+<div class="lg"><div class="ld" style="background:#c2185b"></div> OC Vendor</div>
+<div class="lg"><div class="ld" style="background:#5d4037"></div> EPR System</div>
+<div class="lg"><div class="ld" style="background:#27ae60"></div> Feature</div>
+</div></div>
+<div id="panel">
+<div id="pa" style="background:#005eb8"></div>
+<div id="pt"><h2>Select a node</h2><div style="color:#94a3b8;font-size:11px;margin-top:3px">Click any node on the tree</div></div>
+<div id="pb"></div>
+</div>
+</div>
+<div id="tab-dash"><div class="dg">
+<div class="dc" style="border-top:4px solid #c0392b"><h3>Trust Adoption by Region</h3><p class="ds">Trusts live / total</p>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">London</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:84%;background:#c0392b;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">27/32 (84%)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">North West</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:83%;background:#c0392b;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">25/30 (83%)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">South East</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:81%;background:#c0392b;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">21/26 (81%)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">South West</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:78%;background:#c0392b;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">14/18 (78%)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">East of England</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:71%;background:#c0392b;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">15/21 (71%)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">NE and Yorkshire</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:74%;background:#c0392b;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">23/31 (74%)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Midlands</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:68%;background:#c0392b;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">26/38 (68%)</div></div>
+</div>
+<div class="dc" style="border-top:4px solid #2980b9"><h3>GP Fully Enabled by Region</h3><p class="ds">% GP practices fully enabled</p>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">London</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:58%;background:#2980b9;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">58%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">North West</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:52%;background:#2980b9;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">52%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">NE and Yorkshire</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:49%;background:#2980b9;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">49%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">South East</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:48%;background:#2980b9;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">48%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">East of England</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:40%;background:#2980b9;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">40%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">South West</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:40%;background:#2980b9;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">40%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Midlands</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:37%;background:#2980b9;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">37%</div></div>
+</div>
+<div class="dc" style="border-top:4px solid #27ae60"><h3>Feature Adoption (Trusts)</h3><p class="ds">Trusts with feature enabled</p>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">View Manage Appts</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:68%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">134</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Notifications</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:46%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">90</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Paperless Letters</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:36%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">70</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Questionnaires</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:22%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">44</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Paperless Prefs</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:21%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">42</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Digital PIFU</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:1%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">1</div></div>
+</div>
+<div class="dc" style="border-top:4px solid #16a085"><h3>Feature Adoption (GP %)</h3><p class="ds">% GP practices with feature</p>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">GP Registration</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:99%;background:#16a085;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">99%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Notifications</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:99%;background:#16a085;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">99%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Repeat Prescriptions</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:98%;background:#16a085;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">98%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Online Consultations</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:74%;background:#16a085;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">74%</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">GP Health Record</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:63%;background:#16a085;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">63%</div></div>
+</div>
+<div class="dc" style="border-top:4px solid #8e44ad"><h3>PEP Vendor Share</h3><p class="ds">Trusts per vendor (in model)</p>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">DrDoctor</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:26%;background:#8e44ad;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">5 trusts</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Netcall</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:26%;background:#8e44ad;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">5 trusts</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">MyChart</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:21%;background:#8e44ad;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">4 trusts</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">No PEP</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:26%;background:#8e44ad;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">5 trusts</div></div>
+</div>
+<div class="dc" style="border-top:4px solid #5d4037"><h3>EPR Landscape</h3><p class="ds">Trusts per EPR (in model)</p>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">EPIC</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:26%;background:#5d4037;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">5 trusts</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Cerner/Oracle</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:16%;background:#5d4037;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3 trusts</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Other</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:58%;background:#5d4037;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">11 trusts</div></div>
+</div>
+<div class="dc" style="border-top:4px solid #f39c12"><h3>R&amp;A Funding (FY25/26)</h3><p class="ds">Bids by sector - &#163;26.18m total</p>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Acute</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:100%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">&#163;10.04m (58)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Comm+MH</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:57%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">&#163;5.74m (14)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Community</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:35%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">&#163;3.55m (12)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Mental Health</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:32%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">&#163;3.21m (13)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">CIC</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:21%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">&#163;2.08m (7)</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Specialist</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:16%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">&#163;1.56m (8)</div></div>
+</div>
+<div class="dc" style="border-top:4px solid #005eb8"><h3>Monthly Usage (Mar 2026)</h3><p class="ds">NHS App national stats</p><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">
+<div style="text-align:center;background:#f0f7ff;border-radius:8px;padding:12px 6px"><div style="font-size:22px;font-weight:700;color:#005eb8">77.1m</div><div style="font-size:10px;color:#666;margin-top:2px">Logins</div></div>
+<div style="text-align:center;background:#f0f7ff;border-radius:8px;padding:12px 6px"><div style="font-size:22px;font-weight:700;color:#005eb8">27m</div><div style="font-size:10px;color:#666;margin-top:2px">GP Record Views</div></div>
+<div style="text-align:center;background:#f0f7ff;border-radius:8px;padding:12px 6px"><div style="font-size:22px;font-weight:700;color:#005eb8">31m</div><div style="font-size:10px;color:#666;margin-top:2px">Messages</div></div>
+<div style="text-align:center;background:#f0f7ff;border-radius:8px;padding:12px 6px"><div style="font-size:22px;font-weight:700;color:#005eb8">7.4m</div><div style="font-size:10px;color:#666;margin-top:2px">Prescriptions</div></div>
+<div style="text-align:center;background:#f0f7ff;border-radius:8px;padding:12px 6px"><div style="font-size:22px;font-weight:700;color:#005eb8">15m+</div><div style="font-size:10px;color:#666;margin-top:2px">Appt Views</div></div>
+<div style="text-align:center;background:#f0f7ff;border-radius:8px;padding:12px 6px"><div style="font-size:22px;font-weight:700;color:#005eb8">8.5m</div><div style="font-size:10px;color:#666;margin-top:2px">Secondary Care</div></div>
+</div></div>
+<div class="dc fw" style="border-top:4px solid #d35400"><h3>Provider Feature Depth</h3><p class="ds">Features per provider - sorted</p>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Archway MC</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:100%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">6</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Moorfields</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:83%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">5</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Leeds</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:83%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">5</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Chester</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:83%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">5</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Longsight GP</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:83%;background:#27ae60;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">5</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Shrewsbury</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:67%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">4</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Rotherham</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:67%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">4</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">R Berkshire</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:67%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">4</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Guys StT</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:67%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">4</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Kings</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:67%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">4</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Imperial</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Manchester</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">UHB</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Chesterfield</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Hampshire</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Cornwall</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">GOSH</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Prestwich GP</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Cambridge</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:50%;background:#f39c12;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">3</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Harrogate</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:17%;background:#e74c3c;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">1</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Derbys Comm</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:17%;background:#e74c3c;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">1</div></div>
+<div style="display:flex;align-items:center;margin:4px 0;gap:8px"><div style="width:170px;font-size:11px;flex-shrink:0;text-align:right;color:#555">Alder Hey</div><div style="flex:1;background:#e8ecf1;border-radius:4px;height:18px;overflow:hidden"><div style="height:100%;width:0%;background:#e74c3c;border-radius:4px"></div></div><div style="width:130px;font-size:11px;font-weight:600;color:#333;padding-left:6px">0</div></div>
+</div>
+<div class="dc fw" style="border-top:4px solid #005eb8"><h3>Data Coverage</h3><p class="ds">Model vs estimated total</p><table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px"><tr style="background:#f0f4f8"><th style="padding:6px 10px;text-align:left;border-bottom:2px solid #ddd">Entity</th><th style="padding:6px;text-align:center;border-bottom:2px solid #ddd">In Model</th><th style="padding:6px;text-align:center;border-bottom:2px solid #ddd">Est Total</th><th style="padding:6px;text-align:center;border-bottom:2px solid #ddd">Coverage</th></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">Regions</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">7</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">7</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#27ae60">100%</td></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">ICBs</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">19</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">42</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#f39c12">45%</td></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">Trusts</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">19</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">196</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#e74c3c">10%</td></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">GP Practices</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">3</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">~6500</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#e74c3c"><1%</td></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">PEP Vendors</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">5</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">5</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#27ae60">100%</td></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">OC Vendors</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">4</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">4</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#27ae60">100%</td></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">EPR Systems</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">6</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">6</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#27ae60">100%</td></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">Features</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">22</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">22</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#27ae60">100%</td></tr>
+<tr><td style="padding:5px 10px;border-bottom:1px solid #eee">Funding</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">5</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee">5</td><td style="padding:5px;text-align:center;border-bottom:1px solid #eee;font-weight:600;color:#27ae60">100%</td></tr>
+</table></div>
+
+</div></div>
+<div id="ftr">
+<div>Coverage: Regions &#10003; &middot; ICBs 19/42 &middot; Trusts 19/196 &middot; Vendors &#10003; &middot; Features &#10003;</div>
+<div id="breadcrumb">NHS App</div>
+</div>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+const DATA = {"name": "NHS App", "type": "root", "children": [{"name": "East of England", "type": "region", "tip": "15/21", "children": [{"name": "NHS Cambridgeshire", "type": "icb", "children": [{"name": "Cambridge Uni Hospitals", "type": "trust", "tip": "Acute", "children": [{"name": "EPIC", "type": "epr"}, {"name": "MyChart", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}]}]}, {"name": "NHS Norfolk", "type": "icb", "tip": "No providers yet"}]}, {"name": "London", "type": "region", "tip": "27/32", "children": [{"name": "NHS North Central London", "type": "icb", "children": [{"name": "Moorfields Eye Hospital", "type": "trust", "tip": "Specialist", "children": [{"name": "DrDoctor", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}, {"name": "Paperless Letters", "type": "feature"}, {"name": "Questionnaires", "type": "feature"}]}, {"name": "Great Ormond Street", "type": "trust", "tip": "Specialist", "children": [{"name": "EPIC", "type": "epr"}, {"name": "MyChart", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}]}, {"name": "Archway Medical Centre", "type": "gp", "tip": "SAMPLE", "children": [{"name": "EMIS Web", "type": "epr"}, {"name": "Accurx", "type": "oc"}, {"name": "Repeat Prescriptions", "type": "feature"}, {"name": "GP Health Record", "type": "feature"}, {"name": "Notifications", "type": "feature"}, {"name": "Online Consultations", "type": "feature"}]}]}, {"name": "NHS South East London", "type": "icb", "children": [{"name": "Guys and St Thomas", "type": "trust", "tip": "Acute", "children": [{"name": "EPIC", "type": "epr"}, {"name": "MyChart", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}]}, {"name": "Kings College Hospital", "type": "trust", "tip": "Acute", "children": [{"name": "EPIC", "type": "epr"}, {"name": "MyChart", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}]}]}, {"name": "NHS West North London", "type": "icb", "children": [{"name": "Imperial College Healthcare", "type": "trust", "tip": "Acute", "children": [{"name": "Cerner / Oracle Health", "type": "epr"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}]}]}]}, {"name": "Midlands", "type": "region", "tip": "26/38", "children": [{"name": "NHS Birmingham", "type": "icb", "children": [{"name": "Univ Hospitals Birmingham", "type": "trust", "tip": "Acute", "children": [{"name": "DrDoctor", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}]}]}, {"name": "NHS Nottingham", "type": "icb", "tip": "No providers yet"}, {"name": "NHS Derby Derbyshire", "type": "icb", "tip": "Bookings trial", "children": [{"name": "Chesterfield Royal", "type": "trust", "tip": "Acute", "children": [{"name": "Netcall", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}]}, {"name": "Derbyshire Community", "type": "trust", "tip": "Community", "children": [{"name": "Screening Appts", "type": "feature"}]}]}, {"name": "NHS Shropshire", "type": "icb", "children": [{"name": "Shrewsbury Telford", "type": "trust", "tip": "Acute", "children": [{"name": "DrDoctor", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}, {"name": "Paperless Letters", "type": "feature"}]}]}]}, {"name": "NE and Yorkshire", "type": "region", "tip": "23/31", "children": [{"name": "NHS West Yorkshire", "type": "icb", "children": [{"name": "Leeds Teaching Hospitals", "type": "trust", "tip": "Acute", "children": [{"name": "Netcall", "type": "pep"}, {"name": "Cerner / Oracle Health", "type": "epr"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}, {"name": "Paperless Letters", "type": "feature"}]}]}, {"name": "NHS South Yorkshire", "type": "icb", "children": [{"name": "Rotherham NHS FT", "type": "trust", "tip": "FIRST Digital PIFU", "children": [{"name": "Netcall", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}, {"name": "Digital PIFU", "type": "feature"}]}]}, {"name": "NHS Humber", "type": "icb", "children": [{"name": "Harrogate District", "type": "trust", "tip": "Custom PEP", "children": [{"name": "View Manage Appts", "type": "feature"}]}]}]}, {"name": "North West", "type": "region", "tip": "25/30", "children": [{"name": "NHS Greater Manchester", "type": "icb", "children": [{"name": "Manchester Univ NHS FT", "type": "trust", "tip": "Acute", "children": [{"name": "EPIC", "type": "epr"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}]}, {"name": "Longsight Medical Practice", "type": "gp", "tip": "SAMPLE", "children": [{"name": "EMIS Web", "type": "epr"}, {"name": "Accurx", "type": "oc"}, {"name": "Repeat Prescriptions", "type": "feature"}, {"name": "GP Health Record", "type": "feature"}, {"name": "Online Consultations", "type": "feature"}]}, {"name": "Prestwich Walk-in Centre", "type": "gp", "tip": "SAMPLE", "children": [{"name": "TPP SystmOne", "type": "epr"}, {"name": "Hero Health", "type": "oc"}, {"name": "Repeat Prescriptions", "type": "feature"}]}]}, {"name": "NHS Lancashire", "type": "icb", "tip": "No providers yet"}, {"name": "NHS Cheshire Merseyside", "type": "icb", "tip": "Highest allocation", "children": [{"name": "Countess of Chester", "type": "trust", "tip": "Acute", "children": [{"name": "DrDoctor", "type": "pep"}, {"name": "Cerner / Oracle Health", "type": "epr"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Paperless Letters", "type": "feature"}, {"name": "Digital PIFU", "type": "feature"}]}, {"name": "Alder Hey Childrens", "type": "trust", "tip": "Out of scope"}]}]}, {"name": "South East", "type": "region", "tip": "21/26", "children": [{"name": "NHS Hampshire", "type": "icb", "children": [{"name": "Hampshire Hospitals", "type": "trust", "tip": "Acute", "children": [{"name": "Netcall", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}]}]}, {"name": "NHS Kent Medway", "type": "icb", "children": [{"name": "Royal Berkshire NHS FT", "type": "trust", "tip": "Acute", "children": [{"name": "DrDoctor", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}, {"name": "Questionnaires", "type": "feature"}]}]}]}, {"name": "South West", "type": "region", "tip": "14/18", "children": [{"name": "NHS Devon", "type": "icb", "tip": "No providers yet"}, {"name": "NHS Cornwall", "type": "icb", "children": [{"name": "Royal Cornwall Hospitals", "type": "trust", "tip": "Acute", "children": [{"name": "Netcall", "type": "pep"}, {"name": "View Manage Appts", "type": "feature"}, {"name": "Notifications", "type": "feature"}]}]}]}]};
+const COL={root:'#005eb8',region:'#c0392b',icb:'#2980b9',trust:'#d35400',gp:'#16a085',pep:'#8e44ad',oc:'#c2185b',epr:'#5d4037',feature:'#27ae60',funding:'#f1c40f'};
+const TNAME={root:'NHS App',region:'Region',icb:'ICB',trust:'Trust',gp:'GP Practice',pep:'PEP Vendor',oc:'OC Vendor',epr:'EPR System',feature:'Feature'};
+
+function switchTab(tab){
+  document.getElementById('tab-map').style.display=tab==='map'?'flex':'none';
+  document.getElementById('tab-dash').style.display=tab==='dash'?'block':'none';
+  document.getElementById('mapbtns').style.display=tab==='map'?'flex':'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='map'?0:1)));
+}
+
+const svg=d3.select("#canvas").append("svg").attr("width","100%").attr("height","100%");
+const gAll=svg.append("g");
+const gLinks=gAll.append("g");
+const gNodes=gAll.append("g");
+const zoom=d3.zoom().scaleExtent([.1,3]).on("zoom",e=>{gAll.attr("transform",e.transform);});
+svg.call(zoom);
+
+const treeFn=d3.tree().nodeSize([26,260]);
+const root=d3.hierarchy(DATA);
+root.x0=0;root.y0=0;
+
+function cntDesc(d){let c=0;if(d.children)d.children.forEach(ch=>{c+=1+cntDesc(ch);});if(d._children)d._children.forEach(ch=>{c+=1+cntDesc(ch);});return c;}
+function collapseRec(d){if(d.children){d._children=d.children;d._children.forEach(collapseRec);d.children=null;}}
+root.children.forEach(collapseRec);
+
+const dur=450;
+let ni=0;
+
+update(root);
+setTimeout(()=>fitView(),600);
+
+function update(source){
+  const td=treeFn(root);
+  const nodes=td.descendants();
+  const links=td.links();
+
+  const link=gLinks.selectAll("path.link").data(links,d=>d.target.id||(d.target.id=++ni));
+  const linkEnter=link.enter().append("path").attr("class","link")
+    .attr("d",d=>{const o={x:source.x0,y:source.y0};return diag({source:o,target:o});})
+    .style("stroke",d=>COL[d.target.data.type]||"#ccc");
+  linkEnter.merge(link).transition().duration(dur).attr("d",d=>diag(d)).style("stroke",d=>COL[d.target.data.type]||"#ccc");
+  link.exit().transition().duration(dur).attr("d",d=>{const o={x:source.x,y:source.y};return diag({source:o,target:o});}).remove();
+
+  const node=gNodes.selectAll("g.node").data(nodes,d=>d.id||(d.id=++ni));
+  const nodeEnter=node.enter().append("g").attr("class","node")
+    .attr("transform",d=>"translate("+source.y0+","+source.x0+")")
+    .on("click",(ev,d)=>{
+      ev.stopPropagation();
+      if(d.children){d._children=d.children;d.children=null;}
+      else if(d._children){d.children=d._children;d._children=null;}
+      update(d);showPanel(d);
+    });
+  nodeEnter.append("rect").attr("class","node-rect").attr("height",22).attr("y",-11);
+  nodeEnter.append("text").attr("class","node-text").attr("dy","0.35em").attr("x",10).style("font-size","11px").style("fill","#fff");
+
+  const nodeUpdate=nodeEnter.merge(node);
+  nodeUpdate.transition().duration(dur).attr("transform",d=>"translate("+d.y+","+d.x+")");
+
+  nodeUpdate.select("text").text(d=>{
+    const desc=cntDesc(d);
+    if(d._children&&d._children.length)return d.data.name+" (+"+desc+")";
+    return d.data.name;
+  }).each(function(d){d._tw=Math.max(this.getComputedTextLength()+20,40);});
+
+  nodeUpdate.select("rect").attr("width",d=>d._tw||80)
+    .style("fill",d=>d.children&&d.children.length?"#fff":COL[d.data.type]||"#888")
+    .style("stroke",d=>COL[d.data.type]||"#888")
+    .style("stroke-width",d=>d.children?"2px":"0px");
+
+  nodeUpdate.select("text")
+    .style("fill",d=>d.children&&d.children.length?COL[d.data.type]||"#333":"#fff")
+    .style("font-weight",d=>d.depth<3?"600":"400")
+    .style("font-family","'Segoe UI',system-ui,sans-serif");
+
+  const nodeExit=node.exit().transition().duration(dur)
+    .attr("transform",d=>"translate("+source.y+","+source.x+")").remove();
+  nodeExit.select("rect").attr("width",0);
+  nodeExit.select("text").style("fill-opacity",0);
+  nodes.forEach(d=>{d.x0=d.x;d.y0=d.y;});
+}
+
+function diag(d){return "M"+d.source.y+","+d.source.x+"C"+(d.source.y+d.target.y)/2+","+d.source.x+" "+(d.source.y+d.target.y)/2+","+d.target.x+" "+d.target.y+","+d.target.x;}
+
+function resetView(){root.children.forEach(collapseRec);update(root);setTimeout(()=>fitView(),500);}
+function expandAllRec(d){if(d._children){d.children=d._children;d._children=null;}if(d.children)d.children.forEach(expandAllRec);}
+function expandAll(){expandAllRec(root);update(root);setTimeout(()=>fitView(),500);}
+function collapseAll(){if(root.children)root.children.forEach(collapseRec);update(root);setTimeout(()=>fitView(),500);}
+
+function fitView(){
+  const bounds=gAll.node().getBBox();
+  if(!bounds.width)return;
+  const cw=svg.node().clientWidth,ch=svg.node().clientHeight;
+  const scale=Math.min(cw/(bounds.width+100),ch/(bounds.height+60))*.9;
+  const tx=cw/2-(bounds.x+bounds.width/2)*scale;
+  const ty=ch/2-(bounds.y+bounds.height/2)*scale;
+  svg.transition().duration(500).call(zoom.transform,d3.zoomIdentity.translate(tx,ty).scale(scale));
+}
+
+function showPanel(d){
+  const col=COL[d.data.type]||"#888";
+  document.getElementById("pa").style.background=col;
+  document.getElementById("pt").innerHTML="<h2>"+d.data.name+'</h2><span class="tbadge" style="background:'+col+'">'+(TNAME[d.data.type]||d.data.type)+'</span>';
+  let h="";
+  if(d.data.tip)h+='<div class="note">'+d.data.tip+'</div>';
+  const kids=d.children||d._children||[];
+  if(kids.length){
+    const grp={};
+    kids.forEach(ch=>{const t=ch.data.type;if(!grp[t])grp[t]=[];grp[t].push(ch);});
+    ["region","icb","trust","gp","pep","oc","epr","feature"].forEach(t=>{
+      if(!grp[t])return;
+      h+='<div class="psec"><h4>'+(TNAME[t]||t)+' ('+grp[t].length+')</h4>';
+      grp[t].forEach(ch=>{h+='<div class="prow" style="border-left-color:'+COL[t]+'"><strong>'+ch.data.name+'</strong></div>';});
+      h+='</div>';
+    });
+  }
+  const path=d.ancestors().reverse().map(a=>a.data.name);
+  document.getElementById("breadcrumb").innerHTML=path.join(" &#8250; ");
+  if(!h)h='<div style="padding:20px;text-align:center;color:#94a3b8">Leaf node</div>';
+  document.getElementById("pb").innerHTML=h;
+}
+</script>
+</body>
+</html>

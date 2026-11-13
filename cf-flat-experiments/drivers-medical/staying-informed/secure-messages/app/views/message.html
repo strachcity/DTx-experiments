@@ -1,0 +1,65 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote, openQuestion with context %}
+
+{% set pageName = message.title %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back to your messages", href: "/messages" }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <span class="govuk-caption-l">Sent {{ message.sentDate | longDate }}</span>
+    <h1 class="govuk-heading-l">{{ message.title }}</h1>
+
+    {{ govukTag({ text: message.tag.text, classes: (message.tag.colour | tagClass) + " govuk-!-margin-bottom-6" }) }}
+
+    {{ designNote("The letter is the last thing on the page, not the first. The two questions people read a DVLA letter to answer, what this means for my driving and what I have to do, are answered in plain words before the letter that carries the legal wording.") }}
+
+    <h2 class="govuk-heading-m">What this means for your driving</h2>
+    <p class="govuk-body">{{ message.body.forYourDriving }}</p>
+
+    <h2 class="govuk-heading-m">What you need to do</h2>
+    <p class="govuk-body">{{ message.body.whatToDo }}</p>
+
+    {% if message.requiresAction %}
+      <p class="govuk-body">Reply by <strong>{{ message.replyBy | longDate }}</strong>.</p>
+      {{ govukButton({
+        text: "Answer the questions",
+        href: "/reply/" + message.id + "/severe-hypos"
+      }) }}
+      {{ designNote("The reply starts inside the message, so the customer never has to find a form somewhere else. The paper form still works: a reply by post lands on the same record.") }}
+    {% elif message.reply %}
+      {{ govukInsetText({
+        text: "You sent your answers on " + (message.reply.submittedAt | longDate) + "."
+      }) }}
+    {% endif %}
+
+    {{ govukInsetText({
+      text: "We have also posted a paper copy of this letter to you on " + (message.paperPostedDate | longDate) + ". It says the same thing. You do not need to do anything twice."
+    }) }}
+
+    {{ designNote("Paper still goes out, and the page says so plainly, because the next call otherwise is: I read it online, so why has a letter come, and do I need to reply again?") }}
+
+    {% if message.letterType == "servingNotice" %}
+      {{ openQuestion("Legal (Keya)", "This copy appeared once the notice was treated as delivered. The decision took effect on the paper, not here. Does showing the copy here in any way change what counts as served, or start the appeal clock differently?") }}
+    {% endif %}
+
+    <h2 class="govuk-heading-m">The full letter</h2>
+    <div class="govuk-inset-text">
+      {% for paragraph in message.body.letter %}
+        <p class="govuk-body">{{ paragraph }}</p>
+      {% endfor %}
+    </div>
+
+    <p class="govuk-body">
+      <a class="govuk-link" href="/messages/{{ message.id }}/pdf">Download this letter as a PDF<span class="govuk-visually-hidden">: {{ message.title }}</span></a>
+    </p>
+
+    {% if message.letterType == "driverQuestionnaire" %}
+      {{ openQuestion("Content", "Template codes such as D1V1 sit on the paper letter today for internal use. Should they appear anywhere a customer sees? This prototype keeps them out of customer text entirely.") }}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

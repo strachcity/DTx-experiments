@@ -1,0 +1,56 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set pageName = "Check your answers before sending them" %}
+{% set base = "/reply/" + message.id + "/" %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back", href: backLink }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Check your answers before sending them</h1>
+
+    {% set rows = [
+      {
+        key: { text: "Severe hypos while awake in the last 12 months" },
+        value: { text: data.reply.severeHypos },
+        actions: { items: [{ href: base + "severe-hypos?change=yes", text: "Change", visuallyHiddenText: "how many severe hypos you have had" }] }
+      }
+    ] %}
+    {% if data.reply.severeHypos != "0" %}
+      {% set rows = (rows.push({
+        key: { text: "Most recent severe hypo" },
+        value: { text: data.reply.mostRecentSevereHypo | longDate },
+        actions: { items: [{ href: base + "most-recent-severe-hypo?change=yes", text: "Change", visuallyHiddenText: "the date of your most recent severe hypo" }] }
+      }), rows) %}
+    {% endif %}
+    {% set rows = (rows.push(
+      {
+        key: { text: "Warning signs before a hypo" },
+        value: { text: data.reply.warningSigns | answerText("warningSigns") },
+        actions: { items: [{ href: base + "warning-signs?change=yes", text: "Change", visuallyHiddenText: "whether you get warning signs" }] }
+      },
+      {
+        key: { text: "How you check your blood glucose before driving" },
+        value: { text: data.reply.glucoseChecks | answerText("glucoseChecks") },
+        actions: { items: [{ href: base + "glucose-checks?change=yes", text: "Change", visuallyHiddenText: "how you check your blood glucose" }] }
+      }
+    ), rows) %}
+
+    {{ govukSummaryList({ rows: rows }) }}
+
+    <h2 class="govuk-heading-m">Now send your answers</h2>
+    <p class="govuk-body">By sending these answers you are confirming that, to the best of your knowledge, they are correct.</p>
+    <p class="govuk-body">It is a criminal offence to give false information to DVLA about your health.</p>
+
+    <form method="post" novalidate>
+      {{ govukButton({ text: "Accept and send" }) }}
+    </form>
+
+    {{ designNote("The paper form carries a signed declaration. Online, the declaration is the sentence above the button. Whether that is enough for a driver questionnaire is a policy question this screen makes concrete.") }}
+  </div>
+</div>
+{% endblock %}

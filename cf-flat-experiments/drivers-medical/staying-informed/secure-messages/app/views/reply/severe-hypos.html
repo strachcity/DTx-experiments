@@ -1,0 +1,41 @@
+{% extends "layouts/main.html" %}
+{% from "macros/notes.njk" import designNote with context %}
+
+{% set question = "In the last 12 months, how many times have you needed help from another person because of a hypo while you were awake?" %}
+{% set pageName = ("Error: " if errors.severeHypos) + question %}
+
+{% block backLink %}
+  {{ govukBackLink({ text: "Back", href: backLink }) }}
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    {% if errors.severeHypos %}
+      {{ govukErrorSummary({ titleText: "There is a problem", errorList: [{ text: errors.severeHypos, href: "#severe-hypos" }] }) }}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {{ govukInput({
+        id: "severe-hypos",
+        name: "reply[severeHypos]",
+        label: {
+          text: question,
+          classes: "govuk-label--l",
+          isPageHeading: true
+        },
+        hint: { text: "This is called a severe hypo. Do not count hypos you had while you were asleep. If you have not had any, enter 0." },
+        inputmode: "numeric",
+        spellcheck: false,
+        classes: "govuk-input--width-2",
+        value: data.reply.severeHypos,
+        errorMessage: { text: errors.severeHypos } if errors.severeHypos
+      }) }}
+
+      {{ govukButton({ text: "Continue" }) }}
+    </form>
+
+    {{ designNote("The question carries its own definition. The customer never has to know the term “severe hypo” to answer it, and the hint tells them what to do if the honest answer is none.") }}
+  </div>
+</div>
+{% endblock %}
