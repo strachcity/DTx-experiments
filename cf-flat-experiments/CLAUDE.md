@@ -6,7 +6,7 @@ How the CustomerFirst design team builds prototypes and other design artefacts w
 
 - Each project has its own folder at the root, like `drivers-medical/`. A project can have its own `CLAUDE.md`, `DESIGN.md` and `README.md` for its context. Inside a project folder, they win over this file.
 - Shared things stay at the root: this file, `components.html` and the skills in `.claude/skills/`.
-- Put new work in the project it belongs to. To start a new project, make a folder for it and add it to the projects table in `README.md`.
+- Put new work in the project it belongs to. To start a new project, make a folder for it and add it to the list in `README.md`.
 - A project's `DESIGN.md` holds the design judgement for that one service: who it's for, what it must never do, and its edge cases. Start one from `DESIGN-template.md` once the project has its first screens, and grow it from things that went wrong.
 - Name files for what they show, like `case-status-tracker.html`. Add `-v2` when the earlier version needs to stay viewable; otherwise replace it.
 - Links between files are relative, so files that link to each other move together.
