@@ -1,6 +1,6 @@
 # DESIGN.md
 
-Design judgement for the DVLA Drivers Medical prototypes, and for those only. `CLAUDE.md` covers how to build anything in this repo. This file covers what a screen in this one service should look like and say, and why. Another project needs its own version of this file, not a stretched reading of this one.
+Design judgement for the DVLA Drivers Medical prototypes, and for those only. The root `CLAUDE.md` covers how to build anything in this repo, including the design rules that hold in every service. This file covers what a screen in this one service should look like and say, and why. Another project needs its own version of this file, not a stretched reading of this one.
 
 No token block. The GDS palette, type scale and spacing live as CSS variables in `components.html`, and that is the single source of truth. Read them from there.
 
@@ -19,21 +19,12 @@ This service exists to remove the reason to phone. Prominence goes to whatever a
 - Never a numbered stepper, a percentage complete, or a countdown to a specific date. The case does not move through a fixed number of steps and DVLA does not know the date.
 - Never a status without what happens next and roughly when, attached to it. A status alone is the thing that generates the call.
 - Never internal vocabulary in anything a customer sees: no "Level 3", "EOC", "escalated", "triage", "CALD", "second series", "case owner".
-- Never meaning carried by colour alone. Every tag carries text.
-- Never an empty panel. If there is nothing in a section, say what that absence means in a sentence.
-- Never soften a long wait or a bad outcome into vagueness. Plainly stated bad news is kinder than an ambiguous screen, and it generates fewer calls.
 - Never a status label presented as if it came from the real case management system. Prototype labels are flagged in a comment as needing mapping.
 - Never a status that shows the outcome of a letter serving a legal notice before that notice is served. Until then, the status card, the message title and any notification stay silent about what the letter decides, or they serve the notice ahead of the paper.
 
 ## Content
 
-Plain English. Dates written as "3 March 2026". Waits expressed as a range with a reason ("usually 2 to 4 weeks, because we are waiting for your GP to reply"), never a single date.
-
 Say who holds the case in terms the customer recognises. "A DVLA doctor is reviewing your case", not "escalated to medical adviser".
-
-A design note should state the argument the screen is making, not describe what is on it.
-
-Say each fact once. If a date, a status or an action appears in more than one place on a screen, remove all but one.
 
 ## Edge cases
 

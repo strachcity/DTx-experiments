@@ -51,6 +51,16 @@ These are what separate a passable prototype from a correct one:
 5. **Run and verify.** `npm run dev` serves at http://localhost:3000. Click through the whole
    journey, including a branch and the change-answer links, before calling it done.
 
+## In this repo
+
+The root `CLAUDE.md` applies to Prototype Kit apps too, and wins where it differs from this skill:
+
+- Use the "Prototype: this is not a real service" phase banner, not "Alpha" or "Beta", and add the fictional-prototype warning.
+- Add design notes, off by default, and an "All screens" index page.
+- Use invented personal details only.
+
+`drivers-medical/staying-informed/secure-messages/` does all of this. Copy how it does it: `app/views/layouts/main.html` for the banners, `app/views/macros/notes.njk` for design notes and `app/views/index.html` for the index. It also has a build that publishes the app to GitHub Pages without anyone running it, in `static/` and `.github/workflows/pages.yml`.
+
 ## Reference files
 
 - [reference/setup.md](reference/setup.md) — scaffold a fresh kit, `config.json`, layout,

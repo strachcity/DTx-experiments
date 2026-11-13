@@ -20,7 +20,8 @@ This is where the CustomerFirst design team keeps its prototypes, service maps a
 
 | | |
 |---|---|
-| [`CLAUDE.md`](CLAUDE.md) | How we build: the GOV.UK Design System as the default, the kinds of artefact we make, journey structure and what every prototype needs. Written by the team, and open to change. |
+| [`CLAUDE.md`](CLAUDE.md) | How we build: the GOV.UK Design System as the default, the Service Standard, usability heuristics, accessibility, journey structure and what every prototype needs. Written by the team, and open to change. |
+| [`DESIGN-template.md`](DESIGN-template.md) | A starting point for a project's own design guidance. |
 | [`components.html`](components.html) | The GOV.UK components every single-file prototype is built from, with the markup beside each one. |
 | [`.claude/skills/`](.claude/skills) | Skills Claude picks up when you work in this repo. |
 | Project folders | One per project, each with its own context and artefacts. |
@@ -32,6 +33,9 @@ This is where the CustomerFirst design team keeps its prototypes, service maps a
 | `govuk-html-prototype` | Builds a GOV.UK prototype as one HTML file that opens in any browser, with nothing to install. The default. |
 | `govuk-prototype` | Builds a prototype with the GOV.UK Prototype Kit, for journeys being handed to developers. Needs Node.js. |
 | `govuk-style-writer` | Rewrites text in GOV.UK style for screens, letters, emails and text messages, with optional Welsh. |
+| `design-review` | Checks a prototype against the team's rules, the Service Standard, usability heuristics and accessibility, and lists what to fix. Run it before showing anything. |
+
+When you open this repo in Claude, it also offers to install the [government communication skills](https://github.com/strachcity/gov-communication-skills), for drafting and checking letters, emails, texts and status messages and what they reveal about a person. Say yes.
 
 You don't need to name a skill. Ask for "a prototype of…" or "rewrite this in GOV.UK style" and Claude chooses.
 
@@ -49,7 +53,7 @@ You don't need to name a skill. Ask for "a prototype of…" or "rewrite this in 
 3. Build in your project's folder.
 4. In GitHub Desktop, check your changes, commit them with a short summary of what changed, and push.
 
-To add a project, make a folder for it, add it to the table above, and give it a `README.md` saying what it is. Add a `CLAUDE.md` or `DESIGN.md` when the project has its own rules.
+To add a project, make a folder for it, add it to the table above, and give it a `README.md` saying what it is. Add a `DESIGN.md`, from `DESIGN-template.md`, once the project has its first screens, and a `CLAUDE.md` if it has its own way of organising things.
 
 ## Improving how we work
 

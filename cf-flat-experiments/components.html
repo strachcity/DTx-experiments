@@ -277,7 +277,7 @@ function block(title, body){
 
 function warn(){
   return '<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>'
-    +'This is the component reference for the prototypes in this repo. It is not a real GOV.UK service and it makes no real decisions. The examples use Drivers Medical content because that is the work in hand; every name, reference and licence number is invented.'
+    +'This is the component reference for the prototypes in this repo. It is not a real GOV.UK service and it makes no real decisions. The examples use content from Drivers Medical, the first project here. Every name, reference and licence number is invented.'
     +'</div>';
 }
 
@@ -337,7 +337,7 @@ function renderFurniture(){
     + note('The warning and the phase banner are not decoration',
         '<p>CLAUDE.md requires both on every prototype. They are what stops a screenshot of a workshop artefact being mistaken for the real service once it leaves the room, which is the failure mode that actually costs something.</p>')
     + block('Fictional-prototype warning',
-        demo('<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>This is a fictional prototype. It is not a real DVLA or GOV.UK service and all personal details shown are invented.</div>', {plain:true}))
+        demo('<div class="prototype-warning"><strong>⚠ Fictional prototype</strong>This is a fictional prototype. It is not a real GOV.UK service and all personal details shown are invented.</div>', {plain:true}))
     + block('Phase banner',
         demo('<div class="govuk-phase-banner"><div class="govuk-phase-banner__wrapper">\n  <span class="govuk-phase-banner__tag">Prototype</span>\n  <span>This is not a real service.</span>\n</div></div>', {plain:true}))
     + block('Header',
@@ -473,7 +473,7 @@ function renderErrors(){
         '<p>Each link in the summary moves focus to the field it names, and the wording in the summary matches the wording next to the field. Different wording in the two places reads as two different problems.</p>'
        +'<p>An error message says what to do, not what went wrong. &ldquo;Enter your date of birth&rdquo;, not &ldquo;Date of birth is required&rdquo;.</p>')
     + note('This is where generated screens fail most often',
-        '<p>DESIGN.md lists the edge cases that render as blank space if nobody thought about them: a case with one timeline entry, a third party who has not replied after repeated chasing, a condition name long enough to wrap to three lines, a revoked licence. None of those are error states in the form sense, and all of them need the same discipline &mdash; say what the absence means rather than leaving the space empty.</p>');
+        '<p>A project&rsquo;s DESIGN.md lists the edge cases that render as blank space if nobody thought about them. From Drivers Medical: a case with one timeline entry, a third party who has not replied after repeated chasing, a condition name long enough to wrap to three lines, a revoked licence. None of those are error states in the form sense, and all of them need the same discipline &mdash; say what the absence means rather than leaving the space empty.</p>');
 }
 
 /* ---------------------------------------------------------------- */
