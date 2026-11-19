@@ -43,6 +43,7 @@ The status tracking and secure communications propositions, now combined. See th
 `ivr/`
 
 - `newco-routing-map.html`: the NewCo routing map for phone and web chat, with the requirements, decisions and open questions behind it.
+- `newco-phone-routing.vsdx` and `.pdf`: the phone routing as a Visio flow for the developers, built from the routing map by `visio-export/build.sh`. An overview, the whole flow on one page, and a page per lane.
 - `newco-call-simulator.html`: the phone route from the routing map played as a call. The phone line reads each prompt aloud and you answer on a keypad, so a room can hear how long it takes to reach a person. The route and NewCo scripts are copied from the map; today's steps use stand-in wording marked "TBC script (as-is)" until the real scripts arrive.
 
 Every prototype has an "All screens" index, so any single screen can be opened directly in a workshop, and a design-notes toggle that shows the argument each screen is making.
