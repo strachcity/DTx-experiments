@@ -1,6 +1,6 @@
-# Visio export of the NewCo phone routing
+# Visio export of the NewCo routing
 
-Builds `../newco-phone-routing.vsdx` and `../newco-phone-routing.pdf` from `../newco-routing-map.html`, for the developers who asked for the routing as a Visio flow.
+Builds `../newco-routing.vsdx` and `../newco-routing.pdf` from `../newco-routing-map.html`, for the developers who asked for the routing as a Visio flow. It covers the phone line and web chat.
 
 The routing map is the master copy. After changing the map, run:
 
@@ -12,9 +12,11 @@ It needs Node and Python 3. The PDF also needs LibreOffice and `pdfunite` (poppl
 
 ## What's in the file
 
-- **Overview**: the seven phone lanes and how they connect, with a key.
-- **Whole flow**: every step on one page, with each lane as a grey band and the "Go to lane" links drawn as real arrows. Large (about 42 by 100 inches), for screen use.
-- **Lane 1 to Lane 7**: one page per lane, sized to print.
+For each channel, phone then web chat:
+
+- **Overview**: the lanes and how they connect, with a key. Web chat shows its two designs: version A (reference first, preferred but not agreed) and version B (reason first).
+- **Whole flow**: every step on one page, with each lane as a grey band and the "Go to lane" links drawn as real arrows. Web chat has one per design. The phone one is large (about 42 by 100 inches), for screen use.
+- **One page per lane**, sized to print.
 
 Each step shows its requirement IDs. Notes, scripts and open questions are in its Shape Data.
 

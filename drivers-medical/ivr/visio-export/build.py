@@ -1,6 +1,6 @@
-"""Build a .vsdx flow of the NewCo phone routing from layout.json.
+"""Build a .vsdx flow of the NewCo phone and web chat routing from layout.json.
 
-One page per lane plus an overview. Shapes carry requirement IDs on the
+For each channel: an overview, the whole flow, and one page per lane. Shapes carry requirement IDs on the
 face and notes, scripts and open questions as Shape Data.
 """
 import json, sys, zipfile, math
@@ -156,58 +156,28 @@ KIND = {
 TYPE_WORD = {'step': 'Step', 'q': 'Question', 'end': 'End of route', 'go': 'Go to another lane', 'from': 'Arrives from another lane'}
 KIND_WORD = {'req': 'NewCo (from the requirements)', 'today': 'Today (BAU, unchanged)', 'prop': 'Proposed, not agreed', 'ref': 'Link between lanes'}
 
-lane_names = {ln['n']: f"Lane {ln['n']}" for ln in L['lanes']}
 pages = []  # (name, w, h, shapes_xml, connects_xml)
+SHORT = {'phone': 'Phone', 'chat': 'Web chat'}
+GROUP_SHORT = {'pref': 'A', 'cur': 'B'}
 
-# ---------- overview ----------
-ov = L['overview']
-W = ov['W'] * PT + 2 * MX + 3.6
-H = max(ov['H'] * PT + MTOP + MBOT, 9.0)
-sh, cn = [], []
-sid = 1
-title = shape_xml(sid, 'Title', W / 2, H - 0.55, W - 1.0, 0.8, {'geo': 'text', 'col': 'req', 'sizes': [18, 10], 'align': 0},
-                  [('NewCo phone routing: overview\n', 0),
-                   (f"Built from the NewCo routing map on {L['generated']}. One page per lane. Select a lane to open its page.", 1)])
-sh.append(title); sid += 1
-ids = {}
-for n in ov['nodes']:
-    x = MX + n['x'] * PT; y = H - MTOP - n['y'] * PT
-    ids[n['n']] = sid
-    sh.append(shape_xml(sid, f"Lane {n['n']}", x, y, n['w'] * PT, n['h'] * PT, {'geo': 'rect', 'col': 'req', 'sizes': [10]},
-                        [(f"Lane {n['n']}: {n['t']}", 0)], link=(lane_names[n['n']], f"Open lane {n['n']}")))
-    sid += 1
-for e in ov['edges']:
-    pts = [(MX + p['x'] * PT, H - MTOP - p['y'] * PT) for p in e['pts']]
-    s, c = conn_xml(sid, ids[e['from']], ids[e['to']], pts); sh.append(s); cn.append(c); sid += 1
-# key
-kx = MX + ov['W'] * PT + 0.6; ky = H - MTOP - 0.2
-sh.append(shape_xml(sid, 'Key heading', kx + 1.4, ky, 2.8, 0.3, {'geo': 'text', 'col': 'req', 'sizes': [11], 'align': 0}, [('Key', 0)])); sid += 1
-key = [('rect', 'req', 'NewCo step, from the requirements'), ('rect', 'today', 'Today: BAU, unchanged'),
-       ('diamond', 'req', 'Question. Answers are on the arrows'), ('term', 'req', 'End of the route'),
-       ('pent', 'ref', 'Go to, or arrive from, another lane. Select it to jump')]
-for i, (geo, col, txt) in enumerate(key):
-    y = ky - 0.65 - i * 0.75
-    sh.append(shape_xml(sid, f'Key {i}', kx + 0.45, y, 0.8, 0.5, {'geo': geo, 'col': col, 'heavy': geo == 'term'}, [('', 0)])); sid += 1
-    sh.append(shape_xml(sid, f'Key text {i}', kx + 2.0, y, 2.1, 0.6, {'geo': 'text', 'col': 'req', 'sizes': [9], 'align': 0}, [(txt, 0)], bold_first=False)); sid += 1
-notes = ('Each box shows the step and, underneath, the requirement IDs it implements. '
-         'Notes, scripts and open questions for each step are in its Shape Data '
-         '(right-click a shape, then Data, then Shape Data). '
-         'The routing map web page is the master copy: if they differ, the map is right.')
-sh.append(shape_xml(sid, 'Notes', kx + 1.45, ky - 0.65 - len(key) * 0.75 - 0.5, 2.9, 1.6,
-                    {'geo': 'text', 'col': 'req', 'sizes': [9], 'align': 0}, [(notes, 0)], bold_first=False)); sid += 1
-sh.append(shape_xml(sid, 'Whole flow link', kx + 1.45, ky - 0.65 - len(key) * 0.75 - 1.75, 2.9, 0.5,
-                    {'geo': 'rect', 'col': 'req', 'sizes': [10]}, [('Open the whole flow on one page', 0)],
-                    link=('Whole flow', 'Open the whole flow'))); sid += 1
-pages.append(('Overview', W, H, sh, cn))
 
-def node_shape(sid, n, X, Y):
+def title_shape(sid, W, H, big, small, size=18):
+    return shape_xml(sid, 'Title', W / 2, H - 0.55, W - 1.0, 0.8, {'geo': 'text', 'col': 'req', 'sizes': [size, size * 0.55], 'align': 0},
+                     [(big + '\n', 0), (small, 1)])
+
+
+def text_shape(sid, name, x, y, w, h, text, size=9, bold=False):
+    return shape_xml(sid, name, x, y, w, h, {'geo': 'text', 'col': 'req', 'sizes': [size], 'align': 0}, [(text, 0)], bold_first=bold)
+
+
+def node_shape(sid, n, X, Y, names, lane_t):
     k = n['k'] if n['k'] in COL else 'req'
     kind = KIND[n['type']](k)
     lines = [(n['l'], 0)]
     if n['r']:
         lines = [(n['l'] + '\n', 0), (', '.join(n['r']), 1)]
     props = [('Step ID', n['id']), ('Type', TYPE_WORD[n['type']]), ('Status', KIND_WORD.get(n['k'], ''))]
-    if 'lane' in n: props.append(('Lane', f"Lane {n['lane']}: {LANE_T[n['lane']]}"))
+    if 'lane' in n: props.append(('Lane', f"Lane {n['lane']}: {lane_t[n['lane']]}"))
     if n['r']: props.append(('Requirements', ', '.join(n['r'])))
     if n['d']: props.append(('Notes', n['d']))
     for i, s in enumerate(n.get('scripts', [])):
@@ -217,71 +187,129 @@ def node_shape(sid, n, X, Y):
     if n.get('oi'): props.append(('Open questions', '; '.join(n['oi'])))
     link = None
     if n['type'] == 'go':
-        link = (lane_names[n['toLane']], n['l'])
+        link = (names[n['toLane']], n['l'])
         props.append(('Continues at', f"Lane {n['toLane']}: {n['toNode']}"))
     if n['type'] == 'from':
-        first = int(n['l'].split(':')[0].split()[-1])
-        link = (lane_names[first], f'Open lane {first}')
+        link = (names[n['fromLane']], f"Open lane {n['fromLane']}")
     return shape_xml(sid, n['id'], X(n['x']), Y(n['y']), n['w'] * PT, n['h'] * PT, kind, lines, props, link)
 
-LANE_T = {ln['n']: ln['t'] for ln in L['lanes']}
 
-# ---------- whole flow ----------
-wf = L['whole']
-W = wf['W'] * PT + 2 * MX
-H = wf['H'] * PT + MTOP + MBOT
-X = lambda px: MX + px * PT
-Y = lambda py: H - MTOP - py * PT
-sh, cn = [], []
-sid = 1
-sh.append(shape_xml(sid, 'Title', W / 2, H - 0.55, W - 1.0, 0.8, {'geo': 'text', 'col': 'req', 'sizes': [24, 12], 'align': 0},
-                    [('NewCo phone routing: the whole flow\n', 0),
-                     (f"Every route on one page, built from the NewCo routing map on {L['generated']}. Grey bands are the lanes; each lane also has its own page.", 1)]))
-sid += 1
-for b in wf['bands']:
-    sh.append(shape_xml(sid, f"Lane band {b['n']}", X(b['x']), Y(b['y']), b['w'] * PT, b['h'] * PT,
-                        {'geo': 'rect', 'col': 'band', 'sizes': [14], 'align': 0, 'valign': 0},
-                        [(f"Lane {b['n']}: {b['t']}", 0)], link=(lane_names[b['n']], f"Open lane {b['n']} on its own page")))
-    sid += 1
-ids = {}
-for n in wf['nodes']:
-    ids[n['id']] = sid
-    sh.append(node_shape(sid, n, X, Y)); sid += 1
-for e in wf['edges']:
-    pts = [(X(p['x']), Y(p['y'])) for p in e['pts']]
-    if e['l']:
-        s_, c = conn_xml(sid, ids[e['from']], ids[e['to']], pts, e['l'], (X(e['lx']), Y(e['ly'])), (e['lw'] * PT, e['lh'] * PT))
-    else:
-        s_, c = conn_xml(sid, ids[e['from']], ids[e['to']], pts)
-    sh.append(s_); cn.append(c); sid += 1
-pages.append(('Whole flow', W, H, sh, cn))
+def edges_xml(sid, edges, ids, X, Y, sh, cn):
+    for e in edges:
+        pts = [(X(p['x']), Y(p['y'])) for p in e['pts']]
+        if e['l']:
+            s_, c = conn_xml(sid, ids[e['from']], ids[e['to']], pts, e['l'], (X(e['lx']), Y(e['ly'])), (e['lw'] * PT, e['lh'] * PT))
+        else:
+            s_, c = conn_xml(sid, ids[e['from']], ids[e['to']], pts)
+        sh.append(s_); cn.append(c); sid += 1
+    return sid
 
-# ---------- lanes ----------
-for ln in L['lanes']:
-    ys=[n['y']+n['h']/2 for n in ln['nodes']]+[p['y'] for e in ln['edges'] for p in e['pts']]
-    ln['H']=max(ys)+20
-    W = max(ln['W'] * PT + 2 * MX, 8.27)
-    H = ln['H'] * PT + MTOP + MBOT
-    ox = MX + (W - 2 * MX - ln['W'] * PT) / 2
-    X = lambda px: ox + px * PT
+
+def whole_name(ch, w):
+    return f"{SHORT[ch['key']]} {GROUP_SHORT[w['group']]} whole flow" if w['group'] else f"{SHORT[ch['key']]} whole flow"
+
+
+def channel_pages(ch, other):
+    S = SHORT[ch['key']]
+    names = {ln['n']: f"{S} lane {ln['n']}" for ln in ch['lanes']}
+    lane_t = {ln['n']: ln['t'] for ln in ch['lanes']}
+    has_prop = any(n['k'] == 'prop' for ln in ch['lanes'] for n in ln['nodes'])
+
+    # ---------- overview ----------
+    ov = ch['overview']
+    W = ov['W'] * PT + 2 * MX + 3.6
+    has_prop = any(n['k'] == 'prop' for ln in ch['lanes'] for n in ln['nodes'])
+    key_h = 0.2 + 0.65 + (6 if has_prop else 5) * 0.75 + 0.5 + 1.25 + len(ch['wholes']) * 0.65 + 0.6
+    H = max(ov['H'] * PT + MTOP + MBOT, MTOP + key_h + MBOT)
+    X = lambda px: MX + px * PT
     Y = lambda py: H - MTOP - py * PT
     sh, cn = [], []
     sid = 1
-    sh.append(shape_xml(sid, 'Title', W / 2, H - 0.55, W - 1.0, 0.8, {'geo': 'text', 'col': 'req', 'sizes': [18, 10], 'align': 0},
-                        [(f"Lane {ln['n']}: {ln['t']}\n", 0), ('NewCo phone routing. Requirement IDs are under each step.', 1)]))
-    sid += 1
+    sub = f"Built from the NewCo routing map on {L['generated']}. Select a lane to open its page."
+    if ch['groups']:
+        sub = (f"Built from the NewCo routing map on {L['generated']}. Two designs are shown: version A is preferred but not agreed yet. "
+               "Select a lane to open its page.")
+    sh.append(title_shape(sid, W, H, f"NewCo {S.lower()} routing: overview", sub)); sid += 1
+    for gr in ov['groups']:
+        sh.append(shape_xml(sid, f"Design {gr['id']}", X(gr['x']), Y(gr['y']), gr['w'] * PT, gr['h'] * PT,
+                            {'geo': 'rect', 'col': 'band', 'sizes': [12], 'align': 0, 'valign': 0}, [(gr['t'], 0)])); sid += 1
     ids = {}
-    for n in ln['nodes']:
-        ids[n['id']] = sid
-        sh.append(node_shape(sid, n, X, Y)); sid += 1
-    for e in ln['edges']:
+    for n in ov['nodes']:
+        ids[n['n']] = sid
+        sh.append(shape_xml(sid, f"Lane {n['n']}", X(n['x']), Y(n['y']), n['w'] * PT, n['h'] * PT, {'geo': 'rect', 'col': 'req', 'sizes': [10]},
+                            [(f"Lane {n['n']}: {n['t']}", 0)], link=(names[n['n']], f"Open lane {n['n']}")))
+        sid += 1
+    for e in ov['edges']:
         pts = [(X(p['x']), Y(p['y'])) for p in e['pts']]
-        if e['l']:
-            s, c = conn_xml(sid, ids[e['from']], ids[e['to']], pts, e['l'], (X(e['lx']), Y(e['ly'])), (e['lw'] * PT, e['lh'] * PT))
-        else:
-            s, c = conn_xml(sid, ids[e['from']], ids[e['to']], pts)
-        sh.append(s); cn.append(c); sid += 1
-    pages.append((lane_names[ln['n']], W, H, sh, cn))
+        s_, c = conn_xml(sid, ids[e['from']], ids[e['to']], pts); sh.append(s_); cn.append(c); sid += 1
+    kx = MX + ov['W'] * PT + 0.6; ky = H - MTOP - 0.2
+    sh.append(text_shape(sid, 'Key heading', kx + 1.4, ky, 2.8, 0.3, 'Key', 11, True)); sid += 1
+    key = [('rect', 'req', 'NewCo step, from the requirements'), ('rect', 'today', 'Today: BAU, unchanged')]
+    if has_prop: key.append(('rect', 'prop', 'Proposed, not agreed yet'))
+    key += [('diamond', 'req', 'Question. Answers are on the arrows'), ('term', 'req', 'End of the route'),
+            ('pent', 'ref', 'Go to, or arrive from, another lane. Select it to jump')]
+    for i, (geo, col, txt) in enumerate(key):
+        y = ky - 0.65 - i * 0.75
+        sh.append(shape_xml(sid, f'Key {i}', kx + 0.45, y, 0.8, 0.5, {'geo': geo, 'col': col, 'heavy': geo == 'term'}, [('', 0)])); sid += 1
+        sh.append(text_shape(sid, f'Key text {i}', kx + 2.0, y, 2.1, 0.6, txt)); sid += 1
+    ny = ky - 0.65 - len(key) * 0.75 - 0.5
+    notes = ('Each box shows the step and, underneath, the requirement IDs it implements. '
+             'Notes, scripts and open questions for each step are in its Shape Data '
+             '(right-click a shape, then Data, then Shape Data). '
+             'The routing map web page is the master copy: if they differ, the map is right.')
+    sh.append(text_shape(sid, 'Notes', kx + 1.45, ny, 2.9, 1.6, notes)); sid += 1
+    for i, w in enumerate(ch['wholes']):
+        lab = f"Open the whole flow, version {GROUP_SHORT[w['group']]}" if w['group'] else 'Open the whole flow on one page'
+        sh.append(shape_xml(sid, f'Whole flow link {i}', kx + 1.45, ny - 1.25 - i * 0.65, 2.9, 0.5,
+                            {'geo': 'rect', 'col': 'req', 'sizes': [10]}, [(lab, 0)], link=(whole_name(ch, w), lab))); sid += 1
+    olab = f"Go to the {SHORT[other['key']].lower()} overview"
+    sh.append(shape_xml(sid, 'Other channel link', kx + 1.45, ny - 1.25 - len(ch['wholes']) * 0.65, 2.9, 0.5,
+                        {'geo': 'rect', 'col': 'ref', 'sizes': [10]}, [(olab, 0)], link=(f"{SHORT[other['key']]} overview", olab))); sid += 1
+    pages.append((f'{S} overview', W, H, sh, cn))
+
+    # ---------- whole flows ----------
+    for w in ch['wholes']:
+        W = w['W'] * PT + 2 * MX
+        H = w['H'] * PT + MTOP + MBOT
+        X = lambda px: MX + px * PT
+        Y = lambda py: H - MTOP - py * PT
+        sh, cn = [], []
+        sid = 1
+        t = f"NewCo {S.lower()} routing{', ' + w['t'] if w['t'] else ''}: the whole flow"
+        sh.append(title_shape(sid, W, H, t, f"Every route on one page, built from the NewCo routing map on {L['generated']}. "
+                                            "Grey bands are the lanes; each lane also has its own page.", 24)); sid += 1
+        for b in w['bands']:
+            sh.append(shape_xml(sid, f"Lane band {b['n']}", X(b['x']), Y(b['y']), b['w'] * PT, b['h'] * PT,
+                                {'geo': 'rect', 'col': 'band', 'sizes': [14], 'align': 0, 'valign': 0},
+                                [(f"Lane {b['n']}: {b['t']}", 0)], link=(names[b['n']], f"Open lane {b['n']} on its own page"))); sid += 1
+        ids = {}
+        for n in w['nodes']:
+            ids[n['id']] = sid
+            sh.append(node_shape(sid, n, X, Y, names, lane_t)); sid += 1
+        sid = edges_xml(sid, w['edges'], ids, X, Y, sh, cn)
+        pages.append((whole_name(ch, w), W, H, sh, cn))
+
+    # ---------- lanes ----------
+    for ln in ch['lanes']:
+        W = max(ln['W'] * PT + 2 * MX, 8.27)
+        H = ln['H'] * PT + MTOP + MBOT
+        ox = MX + (W - 2 * MX - ln['W'] * PT) / 2
+        X = lambda px: ox + px * PT
+        Y = lambda py: H - MTOP - py * PT
+        sh, cn = [], []
+        sid = 1
+        sh.append(title_shape(sid, W, H, f"{S}, lane {ln['n']}: {ln['t']}", f"NewCo {S.lower()} routing. Requirement IDs are under each step.")); sid += 1
+        ids = {}
+        for n in ln['nodes']:
+            ids[n['id']] = sid
+            sh.append(node_shape(sid, n, X, Y, names, lane_t)); sid += 1
+        sid = edges_xml(sid, ln['edges'], ids, X, Y, sh, cn)
+        pages.append((names[ln['n']], W, H, sh, cn))
+
+
+phone, chat = L['channels']
+channel_pages(phone, chat)
+channel_pages(chat, phone)
 
 # ---------- package ----------
 def page_xml(shapes, connects):
@@ -348,7 +376,7 @@ def package(OUT, pages):
                 + '</Relationships>')
     core = ('<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
             'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-            '<dc:title>NewCo phone routing</dc:title>'
+            '<dc:title>NewCo routing: phone and web chat</dc:title>'
             f'<dcterms:created xsi:type="dcterms:W3CDTF">{L["generated"]}T00:00:00Z</dcterms:created></cp:coreProperties>')
     app = ('<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">'
            '<Application>Microsoft Visio</Application><Template></Template></Properties>')
