@@ -3,7 +3,7 @@
 For each channel: an overview, the whole flow, and one page per lane. Shapes carry requirement IDs on the
 face and notes, scripts and open questions as Shape Data.
 """
-import json, sys, zipfile, math
+import json, os, sys, zipfile, math
 from xml.sax.saxutils import escape
 
 L = json.load(open(sys.argv[1]))
@@ -90,58 +90,65 @@ def shape_xml(sid, name, x, y, w, h, kind, lines, props=(), link=None, bold_firs
     if props:
         rows = []
         for i, (lab, val) in enumerate(props):
-            rows.append(f'<Row N="P{i}">' + cell('Value', val, u='STR') + cell('Label', lab, u='STR') +
-                        cell('Type', 0) + cell('Prompt', '', u='STR') + cell('SortKey', f'{i:02d}', u='STR') +
+            rows.append(f'<Row N="P{i}">' + cell('Value', val, u='STR') + cell('Label', lab) +
+                        cell('Type', 0) + cell('Prompt', '') + cell('SortKey', f'{i:02d}') +
                         cell('Invisible', 0) + '</Row>')
         prop = '<Section N="Property">' + ''.join(rows) + '</Section>'
     hl = ''
     if link:
-        hl = ('<Section N="Hyperlink"><Row N="Row_1">' + cell('Description', link[1], u='STR') + cell('Address', '', u='STR') +
-              cell('SubAddress', link[0], u='STR') + cell('ExtraInfo', '', u='STR') + cell('Frame', '', u='STR') +
+        hl = ('<Section N="Hyperlink"><Row N="Row_1">' + cell('Description', link[1]) + cell('Address', '') +
+              cell('SubAddress', link[0]) + cell('ExtraInfo', '') + cell('Frame', '') +
               cell('NewWindow', 0) + cell('Default', 1) + cell('Invisible', 0) + '</Row></Section>')
     text = ''.join(f'<cp IX="{r}"/>{escape(t)}' for t, r in lines)
     g = '' if kind['geo'] == 'text' else geom(pts, w, h)
-    return (f'<Shape ID="{sid}" NameU="{a(name)}" Name="{a(name)}" Type="Shape" LineStyle="0" FillStyle="0" TextStyle="0">'
+    return (f'<Shape ID="{sid}" NameU="{a(name)}" Name="{a(name)}" Type="Shape" LineStyle="3" FillStyle="3" TextStyle="3">'
             + ''.join(c) + f'<Section N="Character">{chars}</Section>' + para + prop + hl + g + f'<Text>{text}</Text></Shape>')
 
 
+CONNECTOR_MASTER = 2
+
+
 def conn_xml(sid, src, dst, pts, label=None, lab_xy=None, lab_wh=None):
-    """pts: list of page-inch points, begin..end."""
+    """A dynamic connector glued to two shapes. pts: page-inch points, begin..end."""
     bx, by = pts[0]; ex, ey = pts[-1]
     w, h = ex - bx, ey - by
-    c = [cell('PinX', (bx + ex) / 2, 'GUARD((BeginX+EndX)/2)'), cell('PinY', (by + ey) / 2, 'GUARD((BeginY+EndY)/2)'),
+    if label:
+        tx, ty = lab_xy[0] - bx, lab_xy[1] - by
+    else:
+        tx, ty = w / 2, h / 2
+    c = [cell('PinX', (bx + ex) / 2, 'Inh'), cell('PinY', (by + ey) / 2, 'Inh'),
          cell('Width', w, 'GUARD(EndX-BeginX)'), cell('Height', h, 'GUARD(EndY-BeginY)'),
-         cell('LocPinX', w / 2, 'GUARD(Width*0.5)'), cell('LocPinY', h / 2, 'GUARD(Height*0.5)'),
-         cell('Angle', 0), cell('FlipX', 0), cell('FlipY', 0),
+         cell('LocPinX', w / 2, 'Inh'), cell('LocPinY', h / 2, 'Inh'),
          cell('BeginX', bx, '_WALKGLUE(BegTrigger,EndTrigger,WalkPreference)'),
          cell('BeginY', by, '_WALKGLUE(BegTrigger,EndTrigger,WalkPreference)'),
          cell('EndX', ex, '_WALKGLUE(EndTrigger,BegTrigger,WalkPreference)'),
          cell('EndY', ey, '_WALKGLUE(EndTrigger,BegTrigger,WalkPreference)'),
+         cell('LayerMember', 0),
          cell('BegTrigger', 2, f'_XFTRIGGER(Sheet.{src}!EventXFMod)'),
          cell('EndTrigger', 2, f'_XFTRIGGER(Sheet.{dst}!EventXFMod)'),
-         cell('ObjType', 2), cell('LineWeight', 1 * PT, u='PT'), cell('LineColor', '#0B0C0C'), cell('LinePattern', 1),
-         cell('EndArrow', 4), cell('EndArrowSize', 2), cell('FillPattern', 0), cell('ShapeRouteStyle', 0),
-         cell('ConLineRouteExt', 0)]
-    text = ''
+         cell('LineWeight', 1 * PT, u='PT'), cell('LineColor', '#0B0C0C'), cell('EndArrow', 4), cell('EndArrowSize', 2),
+         cell('TxtPinX', tx, 'Inh'), cell('TxtPinY', ty, 'Inh')]
     if label:
-        lx, ly = lab_xy[0] - bx, lab_xy[1] - by
         tw, th = lab_wh
-        c += [cell('TxtPinX', lx), cell('TxtPinY', ly), cell('TxtWidth', tw), cell('TxtHeight', th),
-              cell('TxtLocPinX', tw / 2, 'TxtWidth*0.5'), cell('TxtLocPinY', th / 2, 'TxtHeight*0.5'), cell('TxtAngle', 0),
-              cell('TextBkgnd', '#FFFFFF'), cell('TextBkgndTrans', 0), cell('VerticalAlign', 1),
-              cell('LeftMargin', 1 * PT, u='PT'), cell('RightMargin', 1 * PT, u='PT'),
-              cell('TopMargin', 1 * PT, u='PT'), cell('BottomMargin', 1 * PT, u='PT')]
-        text = (f'<Section N="Character"><Row IX="0">' + cell('Color', '#1D70B8') + cell('Size', 8 * PT, u='PT') +
-                cell('Style', 1) + '</Row></Section><Section N="Paragraph"><Row IX="0">' + cell('HorzAlign', 1) +
-                f'</Row></Section>')
-    rows = [cell('NoFill', 1), cell('NoLine', 0), cell('NoShow', 0), cell('NoSnap', 0),
-            '<Row T="MoveTo" IX="1">' + cell('X', 0) + cell('Y', 0) + '</Row>']
-    for i, (px, py) in enumerate(pts[1:]):
-        rows.append(f'<Row T="LineTo" IX="{i+2}">' + cell('X', round(px - bx, 5)) + cell('Y', round(py - by, 5)) + '</Row>')
-    g = '<Section N="Geometry" IX="0">' + ''.join(rows) + '</Section>'
+        c += [cell('TxtWidth', tw, 'Inh'), cell('TxtHeight', th, 'Inh'),
+              cell('TxtLocPinX', tw / 2, 'Inh'), cell('TxtLocPinY', th / 2, 'Inh')]
+    if label:
+        c += [cell('TextBkgnd', '#FFFFFF')]
+    sections = ''
+    if label:
+        sections += (f'<Section N="Character"><Row IX="0">' + cell('Color', '#1D70B8') + cell('Size', 8 * PT, u='PT') +
+                     cell('Style', 1) + '</Row></Section>')
+    sections += ('<Section N="Control"><Row N="TextPosition">' + cell('X', tx) + cell('Y', ty) +
+                 cell('XDyn', tx, 'Inh') + cell('YDyn', ty, 'Inh') + cell('XCon', 0 if label else 5, 'Inh') + '</Row></Section>')
+    rows = ['<Row T="MoveTo" IX="1">' + cell('X', 0) + cell('Y', 0) + '</Row>']
+    for k, (px, py) in enumerate(pts[1:]):
+        rows.append(f'<Row T="LineTo" IX="{k+2}">' + cell('X', round(px - bx, 5)) + cell('Y', round(py - by, 5)) + '</Row>')
+    if len(pts) < 3:
+        rows.append('<Row T="LineTo" IX="3" Del="1"/>')
+    sections += '<Section N="Geometry" IX="0">' + ''.join(rows) + '</Section>'
     body = f'<Text>{escape(label)}</Text>' if label else ''
-    return (f'<Shape ID="{sid}" NameU="Dynamic connector.{sid}" Name="Dynamic connector.{sid}" Type="Shape" LineStyle="0" FillStyle="0" TextStyle="0">'
-            + ''.join(c) + text + g + body + '</Shape>',
+    return (f'<Shape ID="{sid}" NameU="Dynamic connector.{sid}" Name="Dynamic connector.{sid}" Type="Shape" Master="{CONNECTOR_MASTER}">'
+            + ''.join(c) + sections + body + '</Shape>',
             f'<Connect FromSheet="{sid}" FromCell="BeginX" FromPart="9" ToSheet="{src}" ToCell="PinX" ToPart="3"/>'
             f'<Connect FromSheet="{sid}" FromCell="EndX" FromPart="12" ToSheet="{dst}" ToCell="PinX" ToPart="3"/>')
 
@@ -316,83 +323,97 @@ def page_xml(shapes, connects):
     return (f'<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<PageContents {NS} xml:space="preserve"><Shapes>'
             + ''.join(shapes) + '</Shapes>' + (f'<Connects>{"".join(connects)}</Connects>' if connects else '') + '</PageContents>')
 
+TEMPLATE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'template.vsdx')
+LAYER = ('<Section N="Layer"><Row IX="0">' + cell('Name', 'Connector') + cell('Color', 255) + cell('Status', 0) + cell('Visible', 1) +
+         cell('Print', 1) + cell('Active', 0) + cell('Lock', 0) + cell('Snap', 1) + cell('Glue', 1) + cell('NameUniv', 'Connector') +
+         cell('ColorTrans', 0) + '</Row></Section>')
+REL = 'http://schemas.openxmlformats.org/package/2006/relationships'
+VREL = 'http://schemas.microsoft.com/visio/2010/relationships'
+HEAD = '<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n'
+
+
 def package(OUT, pages):
-    pages_xml = [f'<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<Pages {NS} xml:space="preserve">']
+    """Write the .vsdx. Styles, the Dynamic connector master and document settings come from
+    template.vsdx (a file saved by Visio); the pages are ours."""
+    t = zipfile.ZipFile(TEMPLATE)
+    n = len(pages)
+    pages_xml = [HEAD + f'<Pages {NS} xml:space="preserve">']
     for i, (name, w, h, _, _) in enumerate(pages):
         pages_xml.append(
-            f'<Page ID="{i}" NameU="{a(name)}" Name="{a(name)}" ViewScale="-1" ViewCenterX="{w/2:.4f}" ViewCenterY="{h/2:.4f}"><PageSheet LineStyle="0" FillStyle="0" TextStyle="0">'
-            + cell('PageWidth', round(w, 4)) + cell('PageHeight', round(h, 4)) + cell('ShdwOffsetX', 0.125) + cell('ShdwOffsetY', -0.125)
-            + cell('PageScale', 1, u='IN_F') + cell('DrawingScale', 1, u='IN_F') + cell('DrawingSizeType', 0) + cell('DrawingScaleType', 0)
-            + cell('InhibitSnap', 0) + cell('PageLockReplace', 0) + cell('PageLockDuplicate', 0) + cell('UIVisibility', 0)
+            f'<Page ID="{i}" NameU="{a(name)}" Name="{a(name)}" ViewScale="-1" ViewCenterX="{w/2:.4f}" ViewCenterY="{h/2:.4f}">'
+            '<PageSheet LineStyle="0" FillStyle="0" TextStyle="0">'
+            + cell('PageWidth', round(w, 4)) + cell('PageHeight', round(h, 4))
+            + cell('ShdwOffsetX', 0.125) + cell('ShdwOffsetY', -0.125)
+            + cell('PageScale', 1, u='IN') + cell('DrawingScale', 1, u='IN') + cell('DrawingSizeType', 0) + cell('DrawingScaleType', 0)
+            + cell('InhibitSnap', 0) + cell('PageLockReplace', 0, u='BOOL') + cell('PageLockDuplicate', 0, u='BOOL') + cell('UIVisibility', 0)
             + cell('ShdwType', 0) + cell('ShdwObliqueAngle', 0) + cell('ShdwScaleFactor', 1) + cell('DrawingResizeType', 1)
-            + cell('PageShapeSplit', 1) + cell('RouteStyle', 5) + cell('PlaceStyle', 1)
-            + cell('PrintPageOrientation', 1 if h >= w else 2)
-            + f'</PageSheet><Rel r:id="rId{i+1}"/></Page>')
+            + cell('PageShapeSplit', 1)
+            + LAYER + f'</PageSheet><Rel r:id="rId{i+1}"/></Page>')
     pages_xml.append('</Pages>')
-
-    doc = (f'<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<VisioDocument {NS} xml:space="preserve">'
-           '<DocumentSettings TopPage="0" DefaultTextStyle="0" DefaultLineStyle="0" DefaultFillStyle="0" DefaultGuideStyle="0">'
-           '<GlueSettings>9</GlueSettings><SnapSettings>65847</SnapSettings><SnapExtensions>34</SnapExtensions><SnapAngles/>'
-           '<DynamicGridEnabled>1</DynamicGridEnabled><ProtectStyles>0</ProtectStyles><ProtectShapes>0</ProtectShapes>'
-           '<ProtectMasters>0</ProtectMasters><ProtectBkgnds>0</ProtectBkgnds></DocumentSettings>'
-           '<Colors><ColorEntry IX="0" RGB="#000000"/><ColorEntry IX="1" RGB="#FFFFFF"/></Colors>'
-           '<FaceNames><FaceName NameU="Calibri" UnicodeRanges="-536859905 -1073732485 9 0" CharSets="536871423 0" Panose="2 15 5 2 2 2 4 3 2 4" Flags="325"/></FaceNames>'
-           '<StyleSheets><StyleSheet ID="0" NameU="No Style" IsCustomNameU="1" Name="No Style" IsCustomName="1">'
-           + cell('EnableLineProps', 1) + cell('EnableFillProps', 1) + cell('EnableTextProps', 1) + cell('HideForApply', 0)
-           + cell('LineWeight', 0.01041666666666667) + cell('LineColor', 0) + cell('LinePattern', 1) + cell('Rounding', 0)
-           + cell('EndArrowSize', 2) + cell('BeginArrow', 0) + cell('EndArrow', 0) + cell('LineCap', 0) + cell('BeginArrowSize', 2)
-           + cell('LineColorTrans', 0) + cell('CompoundType', 0)
-           + cell('FillForegnd', 1) + cell('FillBkgnd', 0) + cell('FillPattern', 1) + cell('ShdwForegnd', 0) + cell('ShdwPattern', 0)
-           + cell('FillForegndTrans', 0) + cell('FillBkgndTrans', 0) + cell('ShdwForegndTrans', 0)
-           + cell('LeftMargin', 0) + cell('RightMargin', 0) + cell('TopMargin', 0) + cell('BottomMargin', 0)
-           + cell('VerticalAlign', 1) + cell('TextBkgnd', 0) + cell('DefaultTabStop', 0.5) + cell('TextDirection', 0)
-           + cell('TextBkgndTrans', 0)
-           + cell('QuickStyleLineColor', 100) + cell('QuickStyleFillColor', 100) + cell('QuickStyleShadowColor', 100)
-           + cell('QuickStyleFontColor', 100) + cell('QuickStyleLineMatrix', 100) + cell('QuickStyleFillMatrix', 100)
-           + cell('QuickStyleEffectsMatrix', 100) + cell('QuickStyleFontMatrix', 100) + cell('QuickStyleType', 0) + cell('QuickStyleVariation', 0)
-           + '<Section N="Character"><Row IX="0">' + cell('Font', 'Calibri') + cell('Color', 0) + cell('Style', 0) + cell('Case', 0)
-           + cell('Pos', 0) + cell('FontScale', 1) + cell('Size', 0.1666666666666667) + cell('DblUnderline', 0) + cell('Overline', 0)
-           + cell('Strikethru', 0) + cell('DoubleStrikethrough', 0) + cell('Letterspace', 0) + cell('ColorTrans', 0) + cell('LangID', 'en-GB')
-           + '</Row></Section><Section N="Paragraph"><Row IX="0">' + cell('IndFirst', 0) + cell('IndLeft', 0) + cell('IndRight', 0)
-           + cell('SpLine', -1.2) + cell('SpBefore', 0) + cell('SpAfter', 0) + cell('HorzAlign', 1) + cell('Bullet', 0)
-           + '</Row></Section></StyleSheet></StyleSheets></VisioDocument>')
-
-    ct = ('<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    ct = (HEAD + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
           '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
           '<Default Extension="xml" ContentType="application/xml"/>'
           '<Override PartName="/visio/document.xml" ContentType="application/vnd.ms-visio.drawing.main+xml"/>'
+          '<Override PartName="/visio/masters/masters.xml" ContentType="application/vnd.ms-visio.masters+xml"/>'
+          '<Override PartName="/visio/masters/master1.xml" ContentType="application/vnd.ms-visio.master+xml"/>'
           '<Override PartName="/visio/pages/pages.xml" ContentType="application/vnd.ms-visio.pages+xml"/>'
-          + ''.join(f'<Override PartName="/visio/pages/page{i+1}.xml" ContentType="application/vnd.ms-visio.page+xml"/>' for i in range(len(pages)))
-          + '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>'
+          + ''.join(f'<Override PartName="/visio/pages/page{i+1}.xml" ContentType="application/vnd.ms-visio.page+xml"/>' for i in range(n))
+          + '<Override PartName="/visio/windows.xml" ContentType="application/vnd.ms-visio.windows+xml"/>'
+          '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>'
           '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>')
-    rels = ('<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-            '<Relationship Id="rId1" Type="http://schemas.microsoft.com/visio/2010/relationships/document" Target="visio/document.xml"/>'
+    rels = (HEAD + f'<Relationships xmlns="{REL}">'
+            f'<Relationship Id="rId1" Type="{VREL}/document" Target="visio/document.xml"/>'
             '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>'
             '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>')
-    docrels = ('<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-               '<Relationship Id="rId1" Type="http://schemas.microsoft.com/visio/2010/relationships/pages" Target="pages/pages.xml"/></Relationships>')
-    pagerels = ('<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-                + ''.join(f'<Relationship Id="rId{i+1}" Type="http://schemas.microsoft.com/visio/2010/relationships/page" Target="page{i+1}.xml"/>' for i in range(len(pages)))
+    docrels = (HEAD + f'<Relationships xmlns="{REL}">'
+               f'<Relationship Id="rId1" Type="{VREL}/masters" Target="masters/masters.xml"/>'
+               f'<Relationship Id="rId2" Type="{VREL}/pages" Target="pages/pages.xml"/>'
+               f'<Relationship Id="rId3" Type="{VREL}/windows" Target="windows.xml"/></Relationships>')
+    pagerels = (HEAD + f'<Relationships xmlns="{REL}">'
+                + ''.join(f'<Relationship Id="rId{i+1}" Type="{VREL}/page" Target="page{i+1}.xml"/>' for i in range(n))
                 + '</Relationships>')
-    core = ('<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
+    one_page_rels = (HEAD + f'<Relationships xmlns="{REL}">'
+                     f'<Relationship Id="rId1" Type="{VREL}/master" Target="../masters/master1.xml"/></Relationships>')
+    w0, h0 = pages[0][1], pages[0][2]
+    windows = (HEAD + f'<Windows ClientWidth="1600" ClientHeight="900" {NS} xml:space="preserve">'
+               f'<Window ID="0" WindowType="Drawing" WindowState="1073741824" WindowLeft="-8" WindowTop="-31" WindowWidth="1616" WindowHeight="939" '
+               f'ContainerType="Page" Page="0" ViewScale="-1" ViewCenterX="{w0/2:.4f}" ViewCenterY="{h0/2:.4f}">'
+               '<ShowRulers>1</ShowRulers><ShowGrid>1</ShowGrid><ShowPageBreaks>0</ShowPageBreaks><ShowGuides>1</ShowGuides>'
+               '<ShowConnectionPoints>1</ShowConnectionPoints><GlueSettings>9</GlueSettings><SnapSettings>65847</SnapSettings>'
+               '<SnapExtensions>34</SnapExtensions><SnapAngles/><DynamicGridEnabled>1</DynamicGridEnabled><TabSplitterPos>0.5</TabSplitterPos>'
+               '</Window></Windows>')
+    core = (HEAD + '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
             'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
             '<dc:title>NewCo routing: phone and web chat</dc:title>'
             f'<dcterms:created xsi:type="dcterms:W3CDTF">{L["generated"]}T00:00:00Z</dcterms:created></cp:coreProperties>')
-    app = ('<?xml version="1.0" encoding="utf-8" standalone="yes"?>\n<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">'
-           '<Application>Microsoft Visio</Application><Template></Template></Properties>')
-
-
+    titles = [p[0] for p in pages] + ['Dynamic connector']
+    app = (HEAD + '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" '
+           'xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">'
+           '<Template></Template><Application>Microsoft Visio</Application><ScaleCrop>false</ScaleCrop>'
+           '<HeadingPairs><vt:vector size="4" baseType="variant"><vt:variant><vt:lpstr>Pages</vt:lpstr></vt:variant>'
+           f'<vt:variant><vt:i4>{n}</vt:i4></vt:variant><vt:variant><vt:lpstr>Masters</vt:lpstr></vt:variant>'
+           '<vt:variant><vt:i4>1</vt:i4></vt:variant></vt:vector></HeadingPairs>'
+           f'<TitlesOfParts><vt:vector size="{len(titles)}" baseType="lpstr">'
+           + ''.join(f'<vt:lpstr>{escape(x)}</vt:lpstr>' for x in titles)
+           + '</vt:vector></TitlesOfParts><LinksUpToDate>false</LinksUpToDate><SharedDoc>false</SharedDoc>'
+           '<HyperlinksChanged>false</HyperlinksChanged><AppVersion>16.0000</AppVersion></Properties>')
     with zipfile.ZipFile(OUT, 'w', zipfile.ZIP_DEFLATED) as z:
         z.writestr('[Content_Types].xml', ct)
         z.writestr('_rels/.rels', rels)
         z.writestr('docProps/core.xml', core)
         z.writestr('docProps/app.xml', app)
-        z.writestr('visio/document.xml', doc)
+        z.writestr('visio/document.xml', t.read('visio/document.xml'))
         z.writestr('visio/_rels/document.xml.rels', docrels)
+        z.writestr('visio/masters/masters.xml', t.read('visio/masters/masters.xml'))
+        z.writestr('visio/masters/_rels/masters.xml.rels', t.read('visio/masters/_rels/masters.xml.rels'))
+        z.writestr('visio/masters/master1.xml', t.read('visio/masters/master1.xml'))
+        z.writestr('visio/windows.xml', windows)
         z.writestr('visio/pages/pages.xml', ''.join(pages_xml))
         z.writestr('visio/pages/_rels/pages.xml.rels', pagerels)
-        for i, (_, _, _, s, c) in enumerate(pages):
-            z.writestr(f'visio/pages/page{i+1}.xml', page_xml(s, c))
+        for i, (_, _, _, sh, cn) in enumerate(pages):
+            z.writestr(f'visio/pages/page{i+1}.xml', page_xml(sh, cn))
+            z.writestr(f'visio/pages/_rels/page{i+1}.xml.rels', one_page_rels)
+
 
 package(OUT, pages)
 if len(sys.argv) > 3:
