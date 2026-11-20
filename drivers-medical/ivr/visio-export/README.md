@@ -24,6 +24,8 @@ Each step shows its requirement IDs. Notes, scripts and open questions are in it
 
 - `extract.cjs` reads the map's data and its copy of dagre straight out of the HTML.
 - `layout.cjs` lays out each lane, the overview and the whole flow with dagre.
-- `build.py` writes the `.vsdx` package directly, with no Visio template or library.
+- `build.py` writes the pages and packages them with the styles and Dynamic connector master from `template.vsdx`, a small file saved by Visio. The arrows have to be instances of that master: Visio reports the file as corrupt if they aren't. `template.vsdx` comes from the [vsdx](https://github.com/dave-howard/vsdx) project, under the BSD licence in `TEMPLATE-LICENSE.txt`.
+
+LibreOffice opens files that Visio rejects, so a clean PDF doesn't prove the Visio file opens. Check any change to `build.py` in Visio itself.
 
 This is tooling for a handover file, not a prototype, so it sits outside the no-build rule for prototypes.
